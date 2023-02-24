@@ -10,9 +10,9 @@ install.packages("readxl")
 library(readxl)
 #import data
 #demographic data
-data_demo <- read_excel("C:/Users/pjvar/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
+data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
 #wealth data
-data_wealth <- read_excel("C:/Users/pjvar/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
+data_wealth <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
 
 ### Merge data ----
 
@@ -71,7 +71,7 @@ merge_1 <- merge(merge_1,data_wealth_06,by=c("UIyearXhsh06"),all.x=T)
 #2010
 merge_1 <- merge(merge_1,data_wealth_10,by=c("UIyearXhsh10"),all.x=T)
 
-### Women who are in the sampled window
+#women who are in the sampled window
 
 #sample size
 #check the number of women who gave birth after the data collection started
@@ -79,7 +79,6 @@ table(merge_1$in_sampled_window)
 #n=335
 #subset sample
 sample <- merge_1[merge_1$in_sampled_window==1,]
-
 
 ### Demographic data ----
 
@@ -520,25 +519,70 @@ plot(density(sample$ttsacks06,na.rm=T),xlim=c(0,80))
 plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,80))
 
 #Riana's plot
+
 #sample from the database
 #set seed
 set.seed(1)
 #sample
-x <- sample[sample(nrow(sample),50),]
+x <- sample[sample(nrow(sample),100),]
 #check the variables
 #check for NAs
+#AFR
 sum(is.na(x$AFB)) #n=0
+#1995
+#matching ID
+sum(is.na(x$UIyearXhsh95)) #n=21
+#cash crops
 sum(is.na(x$ttsacks95)) #n=21
+#1998
+#matching ID
+sum(is.na(x$UIyearXhsh98)) #n=17
+#cash crops
 sum(is.na(x$ttsacks98)) #n=18
+#2000
+#matching ID
+sum(is.na(x$UIyearXhsh00)) #n=15
+#cash crops
 sum(is.na(x$ttsacks00)) #n=15
+#2002
+#matching ID
+sum(is.na(x$UIyearXhsh02)) #n=15
+#cash crops
 sum(is.na(x$ttsacks02)) #n=16
+#2004
+#matching ID
+sum(is.na(x$UIyearXhsh04)) #n=19
+#cash crops
 sum(is.na(x$ttsacks04)) #n=21
+#2006
+#matching ID
+sum(is.na(x$UIyearXhsh06)) #n=20
+#cash crops
 sum(is.na(x$ttsacks06)) #n=20
+#2010
+#matching ID
+sum(is.na(x$UIyearXhsh10)) #n=19
+#cash crops
 sum(is.na(x$ttsacks10)) #n=19
+
 #look at the sample
-x[,c("AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+x[,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 #check how many many women don't have cash crops data
-x[which(sum(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==7)),c("AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+x[rowSums(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])) == 7,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+#n=3
+#subset as TRUE/FALSE
+y <- is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
+#plot it!
+xtick <- seq(0,7,0.5)
+plot(NULL,xlim=c(0,ncol(y)),ylim=c(0,nrow(y)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,xtick,labels=T)
+o <- cbind(c(row(y)), c(col(y))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=as.factor(y)
+     )
 
 ### Farming land ----
 
