@@ -80,6 +80,12 @@ table(merge_1$in_sampled_window)
 #subset sample
 sample <- merge_1[merge_1$in_sampled_window==1,]
 
+#sample from the database for Riana's plot
+#set seed
+set.seed(2690)
+#sample
+x <- sample[sample(nrow(sample),100),]
+
 ### Demographic data ----
 
 #twin status
@@ -520,11 +526,6 @@ plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,80))
 
 #Riana's plot
 
-#sample from the database
-#set seed
-set.seed(1)
-#sample
-x <- sample[sample(nrow(sample),100),]
 #check the variables
 #check for NAs
 #AFR
@@ -569,23 +570,643 @@ sum(is.na(x$ttsacks10)) #n=19
 x[,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 #check how many many women don't have cash crops data
 x[rowSums(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])) == 7,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
-#n=3
+nrow(x[rowSums(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])) == 7,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
+#n=9
 #subset as TRUE/FALSE
-y <- is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
+y_ttsacks <- is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #plot it!
-xtick <- seq(0,7,0.5)
-plot(NULL,xlim=c(0,ncol(y)),ylim=c(0,nrow(y)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
-axis(1,xtick,labels=T)
-o <- cbind(c(row(y)), c(col(y))) - 1
+colors <- c("white","black")
+plot(NULL,xlim=c(0,ncol(y_ttsacks)),ylim=c(0,nrow(y_ttsacks)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_ttsacks)), c(col(y_ttsacks))) - 1
 rect(o[, 2], #xleft
      o[, 1], #ybottom
      o[, 2] + 1, #xright
      o[, 1] + 1, #ytop
-     col=as.factor(y)
+     col=colors[as.factor(y_ttsacks)]
      )
 
 ### Farming land ----
 
+#### Summary statistics per year ----
+
+#1995
+summary(sample$acused95)
+sd(sample$acused95,na.rm=T)
+#min=0
+#median=3
+#mean=3.862
+#max=15
+#sd=2.73
+#check NAs
+sum(is.na(sample$acused95))
+#n=157
+#plot it!
+hist(sample$acused95,breaks=15)
+plot(density(sample$acused95,na.rm=T))
+
+#1998
+summary(sample$acused98)
+sd(sample$acused98,na.rm=T)
+#min=0
+#median=4
+#mean=4.527
+#max=12.5
+#sd=2.409
+#check NAs
+sum(is.na(sample$acused98))
+#n=147
+#plot it!
+hist(sample$acused98,breaks=13)
+plot(density(sample$acused98,na.rm=T))
+
+#2000
+summary(sample$acused00)
+sd(sample$acused00,na.rm=T)
+#min=0
+#median=3
+#mean=3.354
+#max=12
+#sd=2.169
+#check NAs
+sum(is.na(sample$acused00))
+#n=142
+#plot it!
+hist(sample$acused00,breaks=12)
+plot(density(sample$acused00,na.rm=T))
+
+#2002
+summary(sample$acused02)
+sd(sample$acused02,na.rm=T)
+#min=0
+#median=2
+#mean=2.544
+#max=13
+#sd=1.926
+#check NAs
+sum(is.na(sample$acused02))
+#n=148
+#plot it!
+hist(sample$acused02,breaks=13)
+plot(density(sample$acused02,na.rm=T))
+
+#2004
+summary(sample$acused04)
+sd(sample$acused04,na.rm=T)
+#min=0
+#median=2
+#mean=2.377
+#max=8
+#sd=1.697
+#check NAs
+sum(is.na(sample$acused04))
+#n=150
+#plot it!
+hist(sample$acused04,breaks=8)
+plot(density(sample$acused04,na.rm=T))
+
+#2006
+summary(sample$acused06)
+sd(sample$acused06,na.rm=T)
+#min=0
+#median=2
+#mean=2.612
+#max=13
+#sd=2.022
+#check NAs
+sum(is.na(sample$acused06))
+#n=158
+#plot it!
+hist(sample$acused06,breaks=13)
+plot(density(sample$acused06,na.rm=T))
+
+#2010
+summary(sample$acused10)
+sd(sample$acused10,na.rm=T)
+#min=0
+#median=2
+#mean=3.023
+#max=9
+#sd=2.037
+#check NAs
+sum(is.na(sample$acused10))
+#n=140
+#plot it!
+hist(sample$acused10,breaks=9)
+plot(density(sample$acused10,na.rm=T))
+
+#### Plot them together ----
+
+#histograms
+layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
+hist(sample$acused95,breaks=15)
+hist(sample$acused98,breaks=15)
+hist(sample$acused00,breaks=15)
+hist(sample$acused02,breaks=15)
+hist(sample$acused04,breaks=15)
+hist(sample$acused06,breaks=15)
+hist(sample$acused10,breaks=15)
+
+#density plots
+layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
+plot(density(sample$acused95,na.rm=T),xlim=c(0,18))
+plot(density(sample$acused98,na.rm=T),xlim=c(0,18))
+plot(density(sample$acused00,na.rm=T),xlim=c(0,18))
+plot(density(sample$acused02,na.rm=T),xlim=c(0,18))
+plot(density(sample$acused04,na.rm=T),xlim=c(0,18))
+plot(density(sample$acused06,na.rm=T),xlim=c(0,18))
+plot(density(sample$acused10,na.rm=T),xlim=c(0,18))
+
+#Riana's plot
+
+#check the variables
+#check for NAs
+#AFR
+sum(is.na(x$AFB)) #n=0
+#1995
+#matching ID
+sum(is.na(x$UIyearXhsh95)) #n=46
+#cash crops
+sum(is.na(x$acused95)) #n=48
+#1998
+#matching ID
+sum(is.na(x$UIyearXhsh98)) #n=39
+#cash crops
+sum(is.na(x$acused98)) #n=43
+#2000
+#matching ID
+sum(is.na(x$UIyearXhsh00)) #n=38
+#cash crops
+sum(is.na(x$acused00)) #n=41
+#2002
+#matching ID
+sum(is.na(x$UIyearXhsh02)) #n=34
+#cash crops
+sum(is.na(x$acused02)) #n=43
+#2004
+#matching ID
+sum(is.na(x$UIyearXhsh04)) #n=42
+#cash crops
+sum(is.na(x$acused04)) #n=44
+#2006
+#matching ID
+sum(is.na(x$UIyearXhsh06)) #n=40
+#cash crops
+sum(is.na(x$acused06)) #n=44
+#2010
+#matching ID
+sum(is.na(x$UIyearXhsh10)) #n=37
+#cash crops
+sum(is.na(x$acused10)) #n=41
+
+#look at the sample
+x[,c("code","AFB","acused95","acused98","acused00","acused02","acused04","acused06","acused10")]
+#check how many many women don't have cash crops data
+x[rowSums(is.na(x[,c("acused95","acused98","acused00","acused02","acused04","acused06","acused10")])) == 7,c("code","AFB","acused95","acused98","acused00","acused02","acused04","acused06","acused10")]
+nrow(x[rowSums(is.na(x[,c("acused95","acused98","acused00","acused02","acused04","acused06","acused10")])) == 7,c("code","AFB","acused95","acused98","acused00","acused02","acused04","acused06","acused10")])
+#n=9
+#subset as TRUE/FALSE
+y_acused <- is.na(x[,c("acused95","acused98","acused00","acused02","acused04","acused06","acused10")])
+#plot it!
+colors <- c("white","black")
+par(mfrow=c(1,1))
+plot(NULL,xlim=c(0,ncol(y_acused)),ylim=c(0,nrow(y_acused)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_acused)), c(col(y_acused))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_acused)]
+)
+
 ### Months without grain ----
 
+#### Summary statistics per year ----
+
+#1995
+summary(sample$jjunezero95)
+sd(sample$jjunezero95,na.rm=T)
+#min=0
+#median=5
+#mean=4.581
+#max=10
+#sd=2.026
+#check NAs
+sum(is.na(sample$jjunezero95))
+#n=175
+#plot it!
+hist(sample$jjunezero95,breaks=10)
+plot(density(sample$jjunezero95,na.rm=T))
+
+#1998 -- full of 99 and NAs
+#summary(sample$jjunezero98)
+#sd(sample$jjunezero98,na.rm=T)
+#min=
+#median=
+#mean=
+#max=
+#sd=
+#check NAs
+#sum(is.na(sample$jjunezero98))
+#n=
+#plot it!
+#hist(sample$jjunezero98,breaks=13)
+#plot(density(sample$jjunezero98,na.rm=T))
+
+#2000
+summary(sample$jjunezero00)
+sd(sample$jjunezero00,na.rm=T)
+#min=0
+#median=3
+#mean=3.691
+#max=10
+#sd=2.685
+#check NAs
+sum(is.na(sample$jjunezero00))
+#n=157
+#plot it!
+hist(sample$jjunezero00,breaks=10)
+plot(density(sample$jjunezero00,na.rm=T))
+
+#2002
+summary(sample$jjunezero02)
+sd(sample$jjunezero02,na.rm=T)
+#min=0
+#median=6
+#mean=5.929
+#max=12
+#sd=2.719
+#check NAs
+sum(is.na(sample$jjunezero02))
+#n=153
+#plot it!
+hist(sample$jjunezero02,breaks=12)
+plot(density(sample$jjunezero02,na.rm=T))
+
+#2004
+summary(sample$jjunezero04)
+sd(sample$jjunezero04,na.rm=T)
+#min=0
+#median=6
+#mean=6.416
+#max=12
+#sd=2.961
+#check NAs
+sum(is.na(sample$jjunezero04))
+#n=181
+#plot it!
+hist(sample$jjunezero04,breaks=12)
+plot(density(sample$jjunezero04,na.rm=T))
+
+#2006
+summary(sample$jjunezero06)
+sd(sample$jjunezero06,na.rm=T)
+#min=0
+#median=5
+#mean=5.92
+#max=12
+#sd=2.913
+#check NAs
+sum(is.na(sample$jjunezero06))
+#n=173
+#plot it!
+hist(sample$jjunezero06,breaks=12)
+plot(density(sample$jjunezero06,na.rm=T))
+
+#2010
+summary(sample$jjunezero10)
+sd(sample$jjunezero10,na.rm=T)
+#min=0
+#median=4
+#mean=4.163
+#max=12
+#sd=3.182
+#check NAs
+sum(is.na(sample$jjunezero10))
+#n=163
+#plot it!
+hist(sample$jjunezero10,breaks=12)
+plot(density(sample$jjunezero10,na.rm=T))
+
+#### Plot them together ----
+
+#histograms
+par(mfrow=c(2,3))
+hist(sample$jjunezero95,breaks=12)
+#hist(sample$jjunezero98,breaks=15)
+hist(sample$jjunezero00,breaks=12)
+hist(sample$jjunezero02,breaks=12)
+hist(sample$jjunezero04,breaks=12)
+hist(sample$jjunezero06,breaks=12)
+hist(sample$jjunezero10,breaks=12)
+
+#density plots
+par(mfrow=c(2,3))
+plot(density(sample$jjunezero95,na.rm=T),xlim=c(0,15))
+#plot(density(sample$jjunezero98,na.rm=T),xlim=c(0,15))
+plot(density(sample$jjunezero00,na.rm=T),xlim=c(0,15))
+plot(density(sample$jjunezero02,na.rm=T),xlim=c(0,15))
+plot(density(sample$jjunezero04,na.rm=T),xlim=c(0,15))
+plot(density(sample$jjunezero06,na.rm=T),xlim=c(0,15))
+plot(density(sample$jjunezero10,na.rm=T),xlim=c(0,15))
+
+#Riana's plot
+
+#check the variables
+#check for NAs
+#AFR
+sum(is.na(x$AFB)) #n=0
+#1995
+#matching ID
+sum(is.na(x$UIyearXhsh95)) #n=43
+#cash crops
+sum(is.na(x$jjunezero95)) #n=46
+#1998
+#matching ID
+sum(is.na(x$UIyearXhsh98)) #n=37
+#cash crops
+sum(is.na(x$jjunezero98)) #n=39
+#2000
+#matching ID
+sum(is.na(x$UIyearXhsh00)) #n=41
+#cash crops
+sum(is.na(x$jjunezero00)) #n=44
+#2002
+#matching ID
+sum(is.na(x$UIyearXhsh02)) #n=39
+#cash crops
+sum(is.na(x$jjunezero02)) #n=43
+#2004
+#matching ID
+sum(is.na(x$UIyearXhsh04)) #n=42
+#cash crops
+sum(is.na(x$jjunezero04)) #n=57
+#2006
+#matching ID
+sum(is.na(x$UIyearXhsh06)) #n=44
+#cash crops
+sum(is.na(x$jjunezero06)) #n=51
+#2010
+#matching ID
+sum(is.na(x$UIyearXhsh10)) #n=35
+#cash crops
+sum(is.na(x$jjunezero10)) #n=46
+
+#look at the sample
+x[,c("code","AFB","jjunezero95","jjunezero98","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")]
+#check how many many women don't have cash crops data
+x[rowSums(is.na(x[,c("jjunezero95","jjunezero98","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")])) == 7,c("code","AFB","jjunezero95","jjunezero98","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")]
+nrow(x[rowSums(is.na(x[,c("jjunezero95","jjunezero98","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")])) == 7,c("code","AFB","jjunezero95","jjunezero98","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")])
+#n=13
+#subset as TRUE/FALSE
+y_jjunezero <- is.na(x[,c("jjunezero95","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")])
+#plot it!
+colors <- c("white","black")
+par(mfrow=c(1,1))
+plot(NULL,xlim=c(0,ncol(y_jjunezero)),ylim=c(0,nrow(y_jjunezero)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5),labels=c(1995,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_jjunezero)), c(col(y_jjunezero))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_jjunezero)]
+)
+
 ### Holdings, house value, and assets ----
+
+#### Summary statistics per year ----
+
+#1995
+summary(sample$SumValue_rdKts95)
+sd(sample$SumValue_rdKts95,na.rm=T)
+#min=35.1
+#median=58.83
+#mean=130.73
+#max=680.55
+#sd=150.74
+#check NAs
+sum(is.na(sample$SumValue_rdKts95))
+#n=175
+#plot it!
+hist(sample$SumValue_rdKts95,breaks=70)
+plot(density(sample$SumValue_rdKts95,na.rm=T))
+
+#1998
+summary(sample$SumValue_rdKts98)
+sd(sample$SumValue_rdKts98,na.rm=T)
+#min=49.09
+#median=128.46
+#mean=246.33
+#max=1291.12
+#sd=290.213
+#check NAs
+sum(is.na(sample$SumValue_rdKts98))
+#n=141
+#plot it!
+hist(sample$SumValue_rdKts98,breaks=100)
+plot(density(sample$SumValue_rdKts98,na.rm=T))
+
+#2000
+summary(sample$SumValue_rdKts00)
+sd(sample$SumValue_rdKts00,na.rm=T)
+#min=60.44
+#median=171.81
+#mean=291.63
+#max=1622.78
+#sd=345.569
+#check NAs
+sum(is.na(sample$SumValue_rdKts00))
+#n=141
+#plot it!
+hist(sample$SumValue_rdKts00,breaks=100)
+plot(density(sample$SumValue_rdKts00,na.rm=T))
+
+#2002
+summary(sample$SumValue_rdKts02)
+sd(sample$SumValue_rdKts02,na.rm=T)
+#min=70.62
+#median=231.12
+#mean=396.36
+#max=1954.89
+#sd=465.305
+#check NAs
+sum(is.na(sample$SumValue_rdKts02))
+#n=140
+#plot it!
+hist(sample$SumValue_rdKts02,breaks=100)
+plot(density(sample$SumValue_rdKts02,na.rm=T))
+
+#2004
+summary(sample$SumValue_rdKts04)
+sd(sample$SumValue_rdKts04,na.rm=T)
+#min=84.23
+#median=313.4
+#mean=609.31
+#max=3423.55
+#sd=727.3033
+#check NAs
+sum(is.na(sample$SumValue_rdKts04))
+#n=150
+#plot it!
+hist(sample$SumValue_rdKts04,breaks=100)
+plot(density(sample$SumValue_rdKts04,na.rm=T))
+
+#2006
+summary(sample$SumValue_rdKts06)
+sd(sample$SumValue_rdKts06,na.rm=T)
+#min=99.87
+#median=414.91
+#mean=975.58
+#max=4974.61
+#sd=1229.256
+#check NAs
+sum(is.na(sample$SumValue_rdKts06))
+#n=158
+#plot it!
+hist(sample$SumValue_rdKts06,breaks=100)
+plot(density(sample$SumValue_rdKts06,na.rm=T))
+
+#2010
+summary(sample$SumValue_rdKts10)
+sd(sample$SumValue_rdKts10,na.rm=T)
+#min=144.5
+#median=891.8
+#mean=1962.9
+#max=12527.7
+#sd=2506.797
+#check NAs
+sum(is.na(sample$SumValue_rdKts10))
+#n=140
+#plot it!
+hist(sample$SumValue_rdKts10,breaks=100)
+plot(density(sample$SumValue_rdKts10,na.rm=T))
+
+#### Plot them together ----
+
+#histograms
+layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
+hist(sample$SumValue_rdKts95,breaks=100)
+hist(sample$SumValue_rdKts98,breaks=100)
+hist(sample$SumValue_rdKts00,breaks=100)
+hist(sample$SumValue_rdKts02,breaks=100)
+hist(sample$SumValue_rdKts04,breaks=100)
+hist(sample$SumValue_rdKts06,breaks=100)
+hist(sample$SumValue_rdKts10,breaks=100)
+
+#density plots
+layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
+plot(density(sample$SumValue_rdKts95,na.rm=T),xlim=c(0,6000))
+plot(density(sample$SumValue_rdKts98,na.rm=T),xlim=c(0,6000))
+plot(density(sample$SumValue_rdKts00,na.rm=T),xlim=c(0,6000))
+plot(density(sample$SumValue_rdKts02,na.rm=T),xlim=c(0,6000))
+plot(density(sample$SumValue_rdKts04,na.rm=T),xlim=c(0,6000))
+plot(density(sample$SumValue_rdKts06,na.rm=T),xlim=c(0,6000))
+plot(density(sample$SumValue_rdKts10,na.rm=T),xlim=c(0,14000))
+
+#Riana's plot
+
+#check the variables
+#check for NAs
+#AFR
+sum(is.na(x$AFB)) #n=0
+#1995
+#matching ID
+sum(is.na(x$UIyearXhsh95)) #n=48
+#cash crops
+sum(is.na(x$SumValue_rdKts95)) #n=49
+#1998
+#matching ID
+sum(is.na(x$UIyearXhsh98)) #n=44
+#cash crops
+sum(is.na(x$SumValue_rdKts98)) #n=45
+#2000
+#matching ID
+sum(is.na(x$UIyearXhsh00)) #n=45
+#cash crops
+sum(is.na(x$SumValue_rdKts00)) #n=46
+#2002
+#matching ID
+sum(is.na(x$UIyearXhsh02)) #n=51
+#cash crops
+sum(is.na(x$SumValue_rdKts02)) #n=52
+#2004
+#matching ID
+sum(is.na(x$UIyearXhsh04)) #n=50
+#cash crops
+sum(is.na(x$SumValue_rdKts04)) #n=52
+#2006
+#matching ID
+sum(is.na(x$UIyearXhsh06)) #n=48
+#cash crops
+sum(is.na(x$SumValue_rdKts06)) #n=50
+#2010
+#matching ID
+sum(is.na(x$UIyearXhsh10)) #n=37
+#cash crops
+sum(is.na(x$SumValue_rdKts10)) #n=39
+
+#look at the sample
+x[,c("code","AFB","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")]
+#check how many many women don't have cash crops data
+x[rowSums(is.na(x[,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])) == 7,c("code","AFB","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")]
+nrow(x[rowSums(is.na(x[,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])) == 7,c("code","AFB","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])
+#n=13
+#subset as TRUE/FALSE
+y_sumvalue <- is.na(x[,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])
+#plot it!
+colors <- c("white","black")
+par(mfrow=c(1,1))
+plot(NULL,xlim=c(0,ncol(y_sumvalue)),ylim=c(0,nrow(y_sumvalue)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_sumvalue)), c(col(y_sumvalue))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_sumvalue)]
+)
+
+## All together ----
+
+#plot it!
+colors <- c("white","black")
+par(mfrow=c(2,2))
+plot(NULL,xlim=c(0,ncol(y_ttsacks)),ylim=c(0,nrow(y_ttsacks)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_ttsacks)), c(col(y_ttsacks))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_ttsacks)]
+)
+plot(NULL,xlim=c(0,ncol(y_acused)),ylim=c(0,nrow(y_acused)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_acused)), c(col(y_acused))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_acused)]
+)
+plot(NULL,xlim=c(0,ncol(y_jjunezero)),ylim=c(0,nrow(y_jjunezero)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5),labels=c(1995,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_jjunezero)), c(col(y_jjunezero))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_jjunezero)]
+)
+plot(NULL,xlim=c(0,ncol(y_sumvalue)),ylim=c(0,nrow(y_sumvalue)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
+o <- cbind(c(row(y_sumvalue)), c(col(y_sumvalue))) - 1
+rect(o[, 2], #xleft
+     o[, 1], #ybottom
+     o[, 2] + 1, #xright
+     o[, 1] + 1, #ytop
+     col=colors[as.factor(y_sumvalue)]
+)
+
