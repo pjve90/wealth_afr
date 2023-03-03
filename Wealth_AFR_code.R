@@ -2,12 +2,16 @@
 
 # This script is meant to collect all the necessary code to build up the models and explore the data necessary to understand the relationship between wealth and age at first reproduction.
 
-## Data exploration ----
-
-### Import data ----
 #install package to import excel file
 install.packages("readxl")
 library(readxl)
+#install package to manipulate transparency in plots
+install.packages("scales")
+library(scales)
+
+## Data exploration ----
+
+### Import data ----
 #import data
 #demographic data
 data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
@@ -95,28 +99,46 @@ table(sample$twinYN)
 #### Age at first reproduction ----
 #check their age at first reproduction (AFR)
 summary(sample$AFB)
+sd(sample$AFB)
 #min=12.58
 #median=18.43
 #mean=18.98
 #max=32
+#sd=3.109
 #check for NAs
 sum(is.na(sample$AFB))
 #n=0
 #plot it!
-hist(sample$AFB,xlab="AFR",breaks=32)
+hist(sample$AFB,xlab="AFR",breaks=32,main="Age at first reproduction")
+
+#check their year at first reproduction (DBOYR+AFB)
+summary(sample$DOBYR+sample$AFB)
+sd(sample$DOBYR+sample$AFB)
+#min=1994
+#median=2003
+#mean=2003
+#max=2015
+#sd=5.389
+#check for NAs
+sum(is.na(sample$DOBYR+sample$AFB))
+#n=0
+#plot it!
+hist(sample$DOBYR+sample$AFB, xlab="Year of AFR",breaks=100, main="Year of age at first reproduction")
 
 #### Age ----
 #check the year of birth
 summary(sample$DOBYR)
+sd(sample$DOBYR)
 #min=1966
 #median=1984
 #mean=1984
 #max=1999
+#sd=6.306
 #check for NAs
 sum(is.na(sample$DOBYR))
 #n=0
 #plot it!
-hist(sample$DOBYR,xlab="Year of birth",breaks=33)
+hist(sample$DOBYR,xlab="Year of birth",breaks=33, main="Year of birth")
 
 #### Relationship with household head ----
 
@@ -409,8 +431,12 @@ sd(sample$ttsacks95,na.rm=T)
 sum(is.na(sample$ttsacks95))
 #n=157
 #plot it!
-hist(sample$ttsacks95,breaks=75)
-plot(density(sample$ttsacks95,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks95_hist.pdf",9.14,9.15)
+hist(sample$ttsacks95,breaks=75,main="1995",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks95_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,85),main=1995)
+dev.off()
 
 #1998
 summary(sample$ttsacks98)
@@ -424,8 +450,12 @@ sd(sample$ttsacks98,na.rm=T)
 sum(is.na(sample$ttsacks98))
 #n=141
 #plot it!
-hist(sample$ttsacks98,breaks=75)
-plot(density(sample$ttsacks98,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks98_hist.pdf",9.14,9.15)
+hist(sample$ttsacks98,breaks=75,main="1998",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks98_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks98,na.rm=T),xlim=c(0,85),main=1998)
+dev.off()
 
 #2000
 summary(sample$ttsacks00)
@@ -439,8 +469,12 @@ sd(sample$ttsacks00,na.rm=T)
 sum(is.na(sample$ttsacks00))
 #n=141
 #plot it!
-hist(sample$ttsacks00,breaks=75)
-plot(density(sample$ttsacks00,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks00_hist.pdf",9.14,9.15)
+hist(sample$ttsacks00,breaks=75,main="2000",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks00_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks00,na.rm=T),xlim=c(0,85),main=2000)
+dev.off()
 
 #2002
 summary(sample$ttsacks02)
@@ -454,8 +488,12 @@ sd(sample$ttsacks02,na.rm=T)
 sum(is.na(sample$ttsacks02))
 #n=140
 #plot it!
-hist(sample$ttsacks02,breaks=75)
-plot(density(sample$ttsacks02,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks02_hist.pdf",9.14,9.15)
+hist(sample$ttsacks02,breaks=75,main="2002",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks02_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks02,na.rm=T),xlim=c(0,85),main=2002)
+dev.off()
 
 #2004
 summary(sample$ttsacks04)
@@ -469,8 +507,12 @@ sd(sample$ttsacks04,na.rm=T)
 sum(is.na(sample$ttsacks04))
 #n=150
 #plot it!
-hist(sample$ttsacks04,breaks=75)
-plot(density(sample$ttsacks04,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks04_hist.pdf",9.14,9.15)
+hist(sample$ttsacks04,breaks=75,main="2004",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks04_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks04,na.rm=T),xlim=c(0,85),main=2004)
+dev.off()
 
 #2006
 summary(sample$ttsacks06)
@@ -484,8 +526,12 @@ sd(sample$ttsacks06,na.rm=T)
 sum(is.na(sample$ttsacks06))
 #n=158
 #plot it!
-hist(sample$ttsacks06,breaks=75)
-plot(density(sample$ttsacks06,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks06_hist.pdf",9.14,9.15)
+hist(sample$ttsacks06,breaks=75,main="2006",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks06_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks06,na.rm=T),xlim=c(0,75),main=2006)
+dev.off()
 
 #2010
 summary(sample$ttsacks10)
@@ -499,30 +545,38 @@ sd(sample$ttsacks10,na.rm=T)
 sum(is.na(sample$ttsacks10))
 #n=140
 #plot it!
-hist(sample$ttsacks10,breaks=75)
-plot(density(sample$ttsacks10,na.rm=T))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks10_hist.pdf",9.14,9.15)
+hist(sample$ttsacks10,breaks=75,main="2010",xlab="Cash crops")
+dev.off()
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks10_dens.pdf",9.14,9.15)
+plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,85),main=2010)
+dev.off()
 
 #### Plot them together ----
 
 #histograms
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_hists.pdf",15,12)
 layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
-hist(sample$ttsacks95,breaks=75)
-hist(sample$ttsacks98,breaks=75)
-hist(sample$ttsacks00,breaks=75)
-hist(sample$ttsacks02,breaks=75)
-hist(sample$ttsacks04,breaks=75)
-hist(sample$ttsacks06,breaks=75)
-hist(sample$ttsacks10,breaks=75)
+hist(sample$ttsacks95,breaks=50,xlim=c(0,80),ylim=c(0,35),main="1995",xlab="Cash crops")
+hist(sample$ttsacks98,breaks=50,xlim=c(0,80),ylim=c(0,35),main="1998",xlab="Cash crops")
+hist(sample$ttsacks00,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2000",xlab="Cash crops")
+hist(sample$ttsacks02,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2002",xlab="Cash crops")
+hist(sample$ttsacks04,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2004",xlab="Cash crops")
+hist(sample$ttsacks06,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2006",xlab="Cash crops")
+hist(sample$ttsacks10,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2010",xlab="Cash crops")
+dev.off()
 
 #density plots
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_dens.pdf",15,12)
 layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
-plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,80))
-plot(density(sample$ttsacks98,na.rm=T),xlim=c(0,80))
-plot(density(sample$ttsacks00,na.rm=T),xlim=c(0,80))
-plot(density(sample$ttsacks02,na.rm=T),xlim=c(0,80))
-plot(density(sample$ttsacks04,na.rm=T),xlim=c(0,80))
-plot(density(sample$ttsacks06,na.rm=T),xlim=c(0,80))
-plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,80))
+plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,80),main=1995)
+plot(density(sample$ttsacks98,na.rm=T),xlim=c(0,80),main=1998)
+plot(density(sample$ttsacks00,na.rm=T),xlim=c(0,80),main=2000)
+plot(density(sample$ttsacks02,na.rm=T),xlim=c(0,80),main=2002)
+plot(density(sample$ttsacks04,na.rm=T),xlim=c(0,80),main=2004)
+plot(density(sample$ttsacks06,na.rm=T),xlim=c(0,80),main=2006)
+plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,80),main=2010)
+dev.off()
 
 #Riana's plot
 
@@ -575,7 +629,8 @@ nrow(x[rowSums(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsac
 #subset as TRUE/FALSE
 y_ttsacks <- is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #plot it!
-colors <- c("white","black")
+colors <- c("black","white")
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_chess.pdf",15,12)
 plot(NULL,xlim=c(0,ncol(y_ttsacks)),ylim=c(0,nrow(y_ttsacks)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
 o <- cbind(c(row(y_ttsacks)), c(col(y_ttsacks))) - 1
@@ -585,6 +640,7 @@ rect(o[, 2], #xleft
      o[, 1] + 1, #ytop
      col=colors[as.factor(y_ttsacks)]
      )
+dev.off()
 
 ### Farming land ----
 
@@ -768,7 +824,7 @@ nrow(x[rowSums(is.na(x[,c("acused95","acused98","acused00","acused02","acused04"
 #subset as TRUE/FALSE
 y_acused <- is.na(x[,c("acused95","acused98","acused00","acused02","acused04","acused06","acused10")])
 #plot it!
-colors <- c("white","black")
+colors <- c("black","white")
 par(mfrow=c(1,1))
 plot(NULL,xlim=c(0,ncol(y_acused)),ylim=c(0,nrow(y_acused)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
@@ -962,7 +1018,7 @@ nrow(x[rowSums(is.na(x[,c("jjunezero95","jjunezero98","jjunezero00","jjunezero02
 #subset as TRUE/FALSE
 y_jjunezero <- is.na(x[,c("jjunezero95","jjunezero00","jjunezero02","jjunezero04","jjunezero06","jjunezero10")])
 #plot it!
-colors <- c("white","black")
+colors <- c("black","white")
 par(mfrow=c(1,1))
 plot(NULL,xlim=c(0,ncol(y_jjunezero)),ylim=c(0,nrow(y_jjunezero)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5),labels=c(1995,2000,2002,2004,2006,2010))
@@ -1156,7 +1212,7 @@ nrow(x[rowSums(is.na(x[,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts0
 #subset as TRUE/FALSE
 y_sumvalue <- is.na(x[,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])
 #plot it!
-colors <- c("white","black")
+colors <- c("black","white")
 par(mfrow=c(1,1))
 plot(NULL,xlim=c(0,ncol(y_sumvalue)),ylim=c(0,nrow(y_sumvalue)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
@@ -1168,12 +1224,12 @@ rect(o[, 2], #xleft
      col=colors[as.factor(y_sumvalue)]
 )
 
-## All together ----
+### All together ----
 
 #plot it!
-colors <- c("white","black")
+colors <- c("black","white")
 par(mfrow=c(2,2))
-plot(NULL,xlim=c(0,ncol(y_ttsacks)),ylim=c(0,nrow(y_ttsacks)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+plot(NULL,xlim=c(0,ncol(y_ttsacks)),ylim=c(0,nrow(y_ttsacks)),xlab=c("Census year"),ylab=c("ID"),xaxt="n",main="Cash crops")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
 o <- cbind(c(row(y_ttsacks)), c(col(y_ttsacks))) - 1
 rect(o[, 2], #xleft
@@ -1182,7 +1238,7 @@ rect(o[, 2], #xleft
      o[, 1] + 1, #ytop
      col=colors[as.factor(y_ttsacks)]
 )
-plot(NULL,xlim=c(0,ncol(y_acused)),ylim=c(0,nrow(y_acused)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+plot(NULL,xlim=c(0,ncol(y_acused)),ylim=c(0,nrow(y_acused)),xlab=c("Census year"),ylab=c("ID"),xaxt="n",main="Farming land")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
 o <- cbind(c(row(y_acused)), c(col(y_acused))) - 1
 rect(o[, 2], #xleft
@@ -1191,7 +1247,7 @@ rect(o[, 2], #xleft
      o[, 1] + 1, #ytop
      col=colors[as.factor(y_acused)]
 )
-plot(NULL,xlim=c(0,ncol(y_jjunezero)),ylim=c(0,nrow(y_jjunezero)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+plot(NULL,xlim=c(0,ncol(y_jjunezero)),ylim=c(0,nrow(y_jjunezero)),xlab=c("Census year"),ylab=c("ID"),xaxt="n",main="Month without grain")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5),labels=c(1995,2000,2002,2004,2006,2010))
 o <- cbind(c(row(y_jjunezero)), c(col(y_jjunezero))) - 1
 rect(o[, 2], #xleft
@@ -1200,7 +1256,7 @@ rect(o[, 2], #xleft
      o[, 1] + 1, #ytop
      col=colors[as.factor(y_jjunezero)]
 )
-plot(NULL,xlim=c(0,ncol(y_sumvalue)),ylim=c(0,nrow(y_sumvalue)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
+plot(NULL,xlim=c(0,ncol(y_sumvalue)),ylim=c(0,nrow(y_sumvalue)),xlab=c("Census year"),ylab=c("ID"),xaxt="n",main="House assets")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
 o <- cbind(c(row(y_sumvalue)), c(col(y_sumvalue))) - 1
 rect(o[, 2], #xleft
