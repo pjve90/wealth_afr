@@ -14,9 +14,9 @@ library(scales)
 ### Import data ----
 #import data
 #demographic data
-data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
+data_demo <- read_excel("C:/Users/pjvar/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
 #wealth data
-data_wealth <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
+data_wealth <- read_excel("C:/Users/pjvar/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
 
 ### Merge data ----
 
@@ -109,21 +109,7 @@ sd(sample$AFB)
 sum(is.na(sample$AFB))
 #n=0
 #plot it!
-hist(sample$AFB,xlab="AFR",breaks=32,main="Age at first reproduction")
-
-#check their year at first reproduction (DBOYR+AFB)
-summary(sample$DOBYR+sample$AFB)
-sd(sample$DOBYR+sample$AFB)
-#min=1994
-#median=2003
-#mean=2003
-#max=2015
-#sd=5.389
-#check for NAs
-sum(is.na(sample$DOBYR+sample$AFB))
-#n=0
-#plot it!
-hist(sample$DOBYR+sample$AFB, xlab="Year of AFR",breaks=100, main="Year of age at first reproduction")
+hist(sample$AFB,xlab="AFR",breaks=20,main="Age at first reproduction")
 
 #### Age ----
 #check the year of birth
@@ -138,7 +124,15 @@ sd(sample$DOBYR)
 sum(is.na(sample$DOBYR))
 #n=0
 #plot it!
-hist(sample$DOBYR,xlab="Year of birth",breaks=33, main="Year of birth")
+hist(sample$DOBYR,xlab="Year of birth",breaks=20, main="Year of birth")
+
+#### Age at first birth ~ Year of birth of the mother ----
+#whole data versus sample
+colors <- c("lightblue","gold")
+par(mfrow=c(1,2))
+plot(merge_1$AFB~merge_1$DOBYR,col=colors[as.factor(merge_1$in_sampled_window)],pch=16,ylim=c(10,51),xlim=c(1910,2000))
+#only sample
+plot(sample$AFB~sample$DOBYR,col="gold",pch=16,ylim=c(10,51),xlim=c(1910,2000))
 
 #### Relationship with household head ----
 
@@ -343,7 +337,7 @@ sum(is.na(sample$h10a))
 #plot it!
 plot(table(sample$h10a),xlab="Household focal is associated with")
 
-#number of individuals with hxxn in all censuses
+#number of individuals with hxxa in all censuses
 summary(complete.cases(sample[c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")]))
 #n=186
 
