@@ -14,9 +14,9 @@ library(scales)
 ### Import data ----
 #import data
 #demographic data
-data_demo <- read_excel("C:/Users/pjvar/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
+data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
 #wealth data
-data_wealth <- read_excel("C:/Users/pjvar/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
+data_wealth <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
 
 ### Merge data ----
 
@@ -109,8 +109,11 @@ sd(sample$AFB)
 sum(is.na(sample$AFB))
 #n=0
 #plot it!
-hist(sample$AFB,xlab="AFR",breaks=20,main="Age at first reproduction")
-
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/AFR_dist.pdf",15,12)
+par(mfrow=c(1,2))
+hist(sample$AFB,xlab="Age at first reproduction",breaks=20,main="Age at first reproduction")
+plot(density(sample$AFB),main="Age at first reproduction", xlab="Age at first reproduction")
+dev.off()
 #### Age ----
 #check the year of birth
 summary(sample$DOBYR)
@@ -124,15 +127,11 @@ sd(sample$DOBYR)
 sum(is.na(sample$DOBYR))
 #n=0
 #plot it!
-hist(sample$DOBYR,xlab="Year of birth",breaks=20, main="Year of birth")
-
-#### Age at first birth ~ Year of birth of the mother ----
-#whole data versus sample
-colors <- c("lightblue","gold")
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/DOBYR_dist.pdf",15,12)
 par(mfrow=c(1,2))
-plot(merge_1$AFB~merge_1$DOBYR,col=colors[as.factor(merge_1$in_sampled_window)],pch=16,ylim=c(10,51),xlim=c(1910,2000))
-#only sample
-plot(sample$AFB~sample$DOBYR,col="gold",pch=16,ylim=c(10,51),xlim=c(1910,2000))
+hist(sample$DOBYR,xlab="Year of birth",breaks=20, main="Year of birth")
+plot(density(sample$DOBYR),main="Year of birth", xlab="Year of birth")
+dev.off()
 
 #### Relationship with household head ----
 
@@ -426,10 +425,9 @@ sum(is.na(sample$ttsacks95))
 #n=157
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks95_hist.pdf",9.14,9.15)
-hist(sample$ttsacks95,breaks=75,main="1995",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks95_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,85),main=1995)
+par(mfrow=c(2,1))
+hist(sample$ttsacks95,breaks=20,main="1995",xlab="Cash crops")
+plot(density(sample$ttsacks95,na.rm=T),main=1995, xlab="Cash crops")
 dev.off()
 
 #1998
@@ -445,10 +443,9 @@ sum(is.na(sample$ttsacks98))
 #n=141
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks98_hist.pdf",9.14,9.15)
-hist(sample$ttsacks98,breaks=75,main="1998",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks98_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks98,na.rm=T),xlim=c(0,85),main=1998)
+par(mfrow=c(1,2))
+hist(sample$ttsacks98,breaks=20,main="1998",xlab="Cash crops")
+plot(density(sample$ttsacks98,na.rm=T),main=1998,xlab="Cash crops")
 dev.off()
 
 #2000
@@ -464,10 +461,9 @@ sum(is.na(sample$ttsacks00))
 #n=141
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks00_hist.pdf",9.14,9.15)
-hist(sample$ttsacks00,breaks=75,main="2000",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks00_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks00,na.rm=T),xlim=c(0,85),main=2000)
+par(mfrow=c(1,2))
+hist(sample$ttsacks00,breaks=20,main="2000",xlab="Cash crops")
+plot(density(sample$ttsacks00,na.rm=T),main=2000,xlab="Cash crops")
 dev.off()
 
 #2002
@@ -483,10 +479,9 @@ sum(is.na(sample$ttsacks02))
 #n=140
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks02_hist.pdf",9.14,9.15)
-hist(sample$ttsacks02,breaks=75,main="2002",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks02_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks02,na.rm=T),xlim=c(0,85),main=2002)
+par(mfrow=c(1,2))
+hist(sample$ttsacks02,breaks=20,main="2002",xlab="Cash crops")
+plot(density(sample$ttsacks02,na.rm=T),main=2002,xlab="Cash crops")
 dev.off()
 
 #2004
@@ -502,10 +497,9 @@ sum(is.na(sample$ttsacks04))
 #n=150
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks04_hist.pdf",9.14,9.15)
-hist(sample$ttsacks04,breaks=75,main="2004",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks04_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks04,na.rm=T),xlim=c(0,85),main=2004)
+par(mfrow=c(1,2))
+hist(sample$ttsacks04,breaks=20,main="2004",xlab="Cash crops")
+plot(density(sample$ttsacks04,na.rm=T),main=2004,xlab="Cash crops")
 dev.off()
 
 #2006
@@ -521,10 +515,9 @@ sum(is.na(sample$ttsacks06))
 #n=158
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks06_hist.pdf",9.14,9.15)
-hist(sample$ttsacks06,breaks=75,main="2006",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks06_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks06,na.rm=T),xlim=c(0,75),main=2006)
+par(mfrow=c(1,2))
+hist(sample$ttsacks06,breaks=20,main="2006",xlab="Cash crops")
+plot(density(sample$ttsacks06,na.rm=T),main=2006,xlab="Cash crops")
 dev.off()
 
 #2010
@@ -540,36 +533,57 @@ sum(is.na(sample$ttsacks10))
 #n=140
 #plot it!
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks10_hist.pdf",9.14,9.15)
-hist(sample$ttsacks10,breaks=75,main="2010",xlab="Cash crops")
-dev.off()
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks10_dens.pdf",9.14,9.15)
-plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,85),main=2010)
+par(mfrow=c(1,2))
+hist(sample$ttsacks10,breaks=20,main="2010",xlab="Cash crops")
+plot(density(sample$ttsacks10,na.rm=T),main=2010,xlab="Cash crops")
 dev.off()
 
 #### Plot them together ----
 
 #histograms
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_hists.pdf",15,12)
-layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
-hist(sample$ttsacks95,breaks=50,xlim=c(0,80),ylim=c(0,35),main="1995",xlab="Cash crops")
-hist(sample$ttsacks98,breaks=50,xlim=c(0,80),ylim=c(0,35),main="1998",xlab="Cash crops")
-hist(sample$ttsacks00,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2000",xlab="Cash crops")
-hist(sample$ttsacks02,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2002",xlab="Cash crops")
-hist(sample$ttsacks04,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2004",xlab="Cash crops")
-hist(sample$ttsacks06,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2006",xlab="Cash crops")
-hist(sample$ttsacks10,breaks=50,xlim=c(0,80),ylim=c(0,35),main="2010",xlab="Cash crops")
+par(mfrow=c(1,1))
+palette(hcl.colors(7,"Berlin",alpha=0.2))
+plot(hist(sample$ttsacks95,breaks=30,plot=F),col=1,xlim=c(0,80),ylim=c(0,55))
+plot(hist(sample$ttsacks98,breaks=30,plot=F),col=2,add=T)
+plot(hist(sample$ttsacks00,breaks=30,plot=F),col=3,add=T)
+plot(hist(sample$ttsacks02,breaks=30,plot=F),col=4,add=T)
+plot(hist(sample$ttsacks04,breaks=30,plot=F),col=5,add=T)
+plot(hist(sample$ttsacks06,breaks=30,plot=F),col=6,add=T)
+plot(hist(sample$ttsacks10,breaks=30,plot=F),col=7,add=T)
 dev.off()
 
 #density plots
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_dens.pdf",15,12)
 layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
-plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,80),main=1995)
-plot(density(sample$ttsacks98,na.rm=T),xlim=c(0,80),main=1998)
-plot(density(sample$ttsacks00,na.rm=T),xlim=c(0,80),main=2000)
-plot(density(sample$ttsacks02,na.rm=T),xlim=c(0,80),main=2002)
-plot(density(sample$ttsacks04,na.rm=T),xlim=c(0,80),main=2004)
-plot(density(sample$ttsacks06,na.rm=T),xlim=c(0,80),main=2006)
-plot(density(sample$ttsacks10,na.rm=T),xlim=c(0,80),main=2010)
+palette(hcl.colors(7,"Temps"))
+plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,80),ylim=c(0,0.13),main="ttsacks",col=1)
+lines(density(sample$ttsacks98,na.rm=T),col=2)
+lines(density(sample$ttsacks00,na.rm=T),col=3)
+lines(density(sample$ttsacks02,na.rm=T),col=4)
+lines(density(sample$ttsacks04,na.rm=T),col=5)
+lines(density(sample$ttsacks06,na.rm=T),col=6)
+lines(density(sample$ttsacks10,na.rm=T),col=7)
+dev.off()
+
+#ridgeline plot
+#prepare data
+z <- data.frame(ttsacks=sample$ttsacks95,year=rep(1995,nrow(sample)))
+a <- data.frame(ttsacks=sample$ttsacks98,year=rep(1998,nrow(sample)))
+r <- rbind(z,a)
+a <- data.frame(ttsacks=sample$ttsacks00,year=rep(2000,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(ttsacks=sample$ttsacks02,year=rep(2002,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(ttsacks=sample$ttsacks04,year=rep(2004,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(ttsacks=sample$ttsacks06,year=rep(2006,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(ttsacks=sample$ttsacks10,year=rep(2010,nrow(sample)))
+r <- rbind(r,a)
+r <- r[!is.na(r$ttsacks),]
+#plot it!
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_ridge.pdf",15,12)
+ridgeline(r$ttsacks,r$year,palette=hcl.colors(7,"spectral",alpha=0.5),border="black",main="Cash crops")
 dev.off()
 
 #Riana's plot
@@ -580,59 +594,77 @@ dev.off()
 sum(is.na(x$AFB)) #n=0
 #1995
 #matching ID
-sum(is.na(x$UIyearXhsh95)) #n=21
+sum(is.na(x$UIyearXhsh95)) #n=42
+#h95a
+sum(is.na(x$h95a)) #n=39
 #cash crops
-sum(is.na(x$ttsacks95)) #n=21
+sum(is.na(x$ttsacks95)) #n=50
 #1998
 #matching ID
 sum(is.na(x$UIyearXhsh98)) #n=17
+#h98a
+sum(is.na(x$h98a)) #n=31
 #cash crops
 sum(is.na(x$ttsacks98)) #n=18
 #2000
 #matching ID
 sum(is.na(x$UIyearXhsh00)) #n=15
+#h00a
+sum(is.na(x$h00a)) #n=24
 #cash crops
 sum(is.na(x$ttsacks00)) #n=15
 #2002
 #matching ID
 sum(is.na(x$UIyearXhsh02)) #n=15
+#h02a
+sum(is.na(x$h02a)) #n=20
 #cash crops
 sum(is.na(x$ttsacks02)) #n=16
 #2004
 #matching ID
 sum(is.na(x$UIyearXhsh04)) #n=19
+#h04a
+sum(is.na(x$h04a)) #n=15
 #cash crops
 sum(is.na(x$ttsacks04)) #n=21
 #2006
 #matching ID
 sum(is.na(x$UIyearXhsh06)) #n=20
+#h06a
+sum(is.na(x$h06a)) #n=14
 #cash crops
 sum(is.na(x$ttsacks06)) #n=20
 #2010
 #matching ID
 sum(is.na(x$UIyearXhsh10)) #n=19
+#h10a
+sum(is.na(x$h10a)) #n=12
 #cash crops
 sum(is.na(x$ttsacks10)) #n=19
 
 #look at the sample
-x[,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+x[,c("code","AFB","h95a","ttsacks95","h98a","ttsacks98","h00a","ttsacks00","h02a","ttsacks02","h04a","ttsacks04","h06a","ttsacks06","h10a","ttsacks10")]
 #check how many many women don't have cash crops data
 x[rowSums(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])) == 7,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 nrow(x[rowSums(is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])) == 7,c("code","AFB","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #n=9
+#check how many many women don't have household presence data
+x[rowSums(is.na(x[,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])) == 7,c("code","AFB","h95a","h98a","h00a","h02a","h04a","h06a","h10a")]
+nrow(x[rowSums(is.na(x[,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])) == 7,c("code","AFB","h95a","h98a","h00a","h02a","h04a","h06a","h10a")])
+#n=3
 #subset as TRUE/FALSE
 y_ttsacks <- is.na(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #plot it!
-colors <- c("black","white")
+colors <- palette(hcl.colors(4,"viridi"))
 pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_chess.pdf",15,12)
 plot(NULL,xlim=c(0,ncol(y_ttsacks)),ylim=c(0,nrow(y_ttsacks)),xlab=c("Census year"),ylab=c("ID"),xaxt="n")
 axis(1,at=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5),labels=c(1995,1998,2000,2002,2004,2006,2010))
-o <- cbind(c(row(y_ttsacks)), c(col(y_ttsacks))) - 1
+o <- cbind(c(row(y_ttsacks)), c(col(x[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]))) - 1
 rect(o[, 2], #xleft
      o[, 1], #ybottom
      o[, 2] + 1, #xright
      o[, 1] + 1, #ytop
-     col=colors[as.factor(y_ttsacks)]
+     col=colors[as.factor(x[,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])]
      )
 dev.off()
 
@@ -766,6 +798,25 @@ plot(density(sample$acused02,na.rm=T),xlim=c(0,18))
 plot(density(sample$acused04,na.rm=T),xlim=c(0,18))
 plot(density(sample$acused06,na.rm=T),xlim=c(0,18))
 plot(density(sample$acused10,na.rm=T),xlim=c(0,18))
+
+#ridgeline plot
+z <- data.frame(acused=sample$acused95,year=rep(1995,nrow(sample)))
+a <- data.frame(acused=sample$acused98,year=rep(1998,nrow(sample)))
+r <- rbind(z,a)
+a <- data.frame(acused=sample$acused00,year=rep(2000,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(acused=sample$acused02,year=rep(2002,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(acused=sample$acused04,year=rep(2004,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(acused=sample$acused06,year=rep(2006,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(acused=sample$acused10,year=rep(2010,nrow(sample)))
+r <- rbind(r,a)
+r <- r[!is.na(r$acused),]
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/acused_ridge.pdf",15,12)
+ridgeline(r$acused,r$year,palette=hcl.colors(7,"spectral",alpha=0.5),border="black",main="Farming land")
+dev.off()
 
 #Riana's plot
 
@@ -961,6 +1012,25 @@ plot(density(sample$jjunezero04,na.rm=T),xlim=c(0,15))
 plot(density(sample$jjunezero06,na.rm=T),xlim=c(0,15))
 plot(density(sample$jjunezero10,na.rm=T),xlim=c(0,15))
 
+#ridgeline plot
+z <- data.frame(jjunezero=sample$jjunezero95,year=rep(1995,nrow(sample)))
+#a <- data.frame(jjunezero=sample$jjunezero98,year=rep(1998,nrow(sample)))
+#r <- rbind(z,a)
+a <- data.frame(jjunezero=sample$jjunezero00,year=rep(2000,nrow(sample)))
+r <- rbind(z,a)
+a <- data.frame(jjunezero=sample$jjunezero02,year=rep(2002,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(jjunezero=sample$jjunezero04,year=rep(2004,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(jjunezero=sample$jjunezero06,year=rep(2006,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(jjunezero=sample$jjunezero10,year=rep(2010,nrow(sample)))
+r <- rbind(r,a)
+r <- r[!is.na(r$jjunezero),]
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/jjunezero_ridge.pdf",15,12)
+ridgeline(r$jjunezero,r$year,palette=hcl.colors(6,"spectral",alpha=0.5),border="black",main="Months without grain")
+dev.off()
+
 #Riana's plot
 
 #check the variables
@@ -1155,6 +1225,27 @@ plot(density(sample$SumValue_rdKts04,na.rm=T),xlim=c(0,6000))
 plot(density(sample$SumValue_rdKts06,na.rm=T),xlim=c(0,6000))
 plot(density(sample$SumValue_rdKts10,na.rm=T),xlim=c(0,14000))
 
+#ridgeline plot
+#prepare data
+z <- data.frame(SumValue_rdKts=sample$SumValue_rdKts95,year=rep(1995,nrow(sample)))
+a <- data.frame(SumValue_rdKts=sample$SumValue_rdKts98,year=rep(1998,nrow(sample)))
+r <- rbind(z,a)
+a <- data.frame(SumValue_rdKts=sample$SumValue_rdKts00,year=rep(2000,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(SumValue_rdKts=sample$SumValue_rdKts02,year=rep(2002,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(SumValue_rdKts=sample$SumValue_rdKts04,year=rep(2004,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(SumValue_rdKts=sample$SumValue_rdKts06,year=rep(2006,nrow(sample)))
+r <- rbind(r,a)
+a <- data.frame(SumValue_rdKts=sample$SumValue_rdKts10,year=rep(2010,nrow(sample)))
+r <- rbind(r,a)
+r <- r[!is.na(r$SumValue_rdKts),]
+#plot it!
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/sumvalue_ridge.pdf",15,12)
+ridgeline(r$SumValue_rdKts,r$year,palette=hcl.colors(7,"spectral",alpha=0.5),border="black",main="Cash crops")
+dev.off()
+
 #Riana's plot
 
 #check the variables
@@ -1260,3 +1351,15 @@ rect(o[, 2], #xleft
      col=colors[as.factor(y_sumvalue)]
 )
 
+## Age at first birth ~ Year of birth of the mother ----
+
+#whole data versus sample
+palette(hcl.colors(2,"Geyser",alpha=0.5))
+pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/afr_dobyr.pdf",15,12)
+layout( matrix(c(1,1,3,3,3,2,2,3,3,3), nrow=2, byrow=TRUE))
+plot(merge_1$AFB~merge_1$DOBYR,col=as.factor(merge_1$in_sampled_window),pch=16,ylim=c(10,51),xlim=c(1910,2000),xlab="Year of birth",ylab="Age at first reproduction",main="Population",cex=3)
+#only sample
+plot(sample$AFB~sample$DOBYR,col=2,pch=16,ylim=c(10,51),xlim=c(1910,2000),xlab="Year of mother's birth",ylab="Age at first reproduction",main="Sample",cex=3)
+plot(sample$AFB~sample$DOBYR,col=2,pch=16,xlab="Year of birth",ylab="Age at first reproduction",main="Sample",cex=3)
+dev.off()
+palette("default")
