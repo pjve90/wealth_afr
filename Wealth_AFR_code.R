@@ -276,6 +276,9 @@ summary(complete.cases(sample[c("h95n","h98n","h00n","h02n","h04n","h06n","h10n"
 #Household/farm that focal is associated with in 1995 (h95a)
 #check h95a
 table(sample$h95a)
+#a = 9
+#m = 12
+#p = 178
 #check for NAs
 sum(is.na(sample$h95a))
 #n=136
@@ -285,6 +288,9 @@ plot(table(sample$h95a),xlab="Household focal lives in")
 #Household/farm that focal is associated with in 1998 (h98a)
 #check h98a
 table(sample$h98a)
+#a = 31
+#m = 4
+#p = 194
 #check for NAs
 sum(is.na(sample$h98a))
 #n=106
@@ -294,6 +300,8 @@ plot(table(sample$h98a),xlab="Household focal is associated with")
 #Household/farm that focal is associated with in 2000 (h00a)
 #check h00a
 table(sample$h00a)
+#a = 49
+#p = 200
 #check for NAs
 sum(is.na(sample$h00a))
 #n=86
@@ -303,6 +311,10 @@ plot(table(sample$h00a),xlab="Household focal is associated with")
 #Household/farm that focal is associated with in 2002 (h02n)
 #check h02a
 table(sample$h02a)
+#a = 56
+#m = 5
+#p = 200
+#tag = 2
 #check for NAs
 sum(is.na(sample$h02a))
 #n=72
@@ -312,6 +324,10 @@ plot(table(sample$h02a),xlab="Household focal is associated with")
 #Household/farm that focal is associated with in 2004 (h04a)
 #check h04a
 table(sample$h04a)
+#a = 74
+#m = 5
+#p = 189
+#tag = 7
 #check for NAs
 sum(is.na(sample$h04a))
 #n=60
@@ -321,6 +337,11 @@ plot(table(sample$h04a),xlab="Household focal is associated with")
 #Household/farm that focal is associated with in 2006 (h06a)
 #check h06a
 table(sample$h06a)
+#a = 85
+#m = 4
+#p = 183
+#rep = 1
+#tag = 6
 #check for NAs
 sum(is.na(sample$h06a))
 #n=56
@@ -330,6 +351,10 @@ plot(table(sample$h06a),xlab="Household focal is associated with")
 #Household/farm that focal is associated with in 2010 (h10a)
 #check h10a
 table(sample$h10a)
+#a = 80
+#m = 2
+#p = 201
+#tag = 4
 #check for NAs
 sum(is.na(sample$h10a))
 #n=48
@@ -339,6 +364,16 @@ plot(table(sample$h10a),xlab="Household focal is associated with")
 #number of individuals with hxxa in all censuses
 summary(complete.cases(sample[c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")]))
 #n=186
+
+for(i in 1:nrow(sample)){
+  if(sum(is.na(sample[i,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])==T) == 7){
+    sample$sumnahxxa[i] <- sum(is.na(sample[i,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])==T)
+    sample$delete[i] <- "yes"
+  } else{
+    sample$sumnahxxa[i] <- sum(is.na(sample[i,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])==T)
+    sample$delete[i] <- "no"
+  }
+}
 
 ### Matching ID ----
 
@@ -537,6 +572,25 @@ par(mfrow=c(1,2))
 hist(sample$ttsacks10,breaks=20,main="2010",xlab="Cash crops")
 plot(density(sample$ttsacks10,na.rm=T),main=2010,xlab="Cash crops")
 dev.off()
+
+#number of individuals with ttsacksxx in all censuses
+summary(complete.cases(sample[c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]))
+#n=74
+
+for(i in 1:nrow(sample)){
+  if(sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==T) == 7){
+    sample$sumnacrop[i] <- sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==T)
+    sample$deletecrop[i] <- "yes"
+  } else{
+    sample$sumnacrop[i] <- sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==T)
+    sample$deletecrop[i] <- "no"
+  }
+}
+
+sample[which(sample$delete == "yes" & sample$deletecrop == "yes"),c("t15nnn","sumnahxxa","delete","sumnacrop","deletecrop")]
+sample[which(sample$delete == "yes" & sample$deletecrop == "no"),c("t15nnn","sumnahxxa","delete","sumnacrop","deletecrop")]
+sample[which(sample$delete == "no" & sample$deletecrop == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","delete","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","sumnacrop","deletecrop")]
+
 
 #### Plot them together ----
 
