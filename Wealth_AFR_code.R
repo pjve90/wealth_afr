@@ -3,11 +3,11 @@
 # This script is meant to collect all the necessary code to build up the models and explore the data necessary to understand the relationship between wealth and age at first reproduction.
 
 #install package to import excel file
-install.packages("readxl")
+#install.packages("readxl")
 library(readxl)
 #install package to manipulate transparency in plots
-install.packages("scales")
-library(scales)
+#install.packages("scales")
+#library(scales)
 
 ## Data exploration ----
 
@@ -115,6 +115,29 @@ ggplot(sample,aes(x=AFB))+
   xlab("Age at first reproduction")+
   ylab("")+
   theme_classic()
+
+#check how many had babies since each year of data collection
+#1995
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 1995),])
+#n=333
+#1998
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 1998),])
+#n=281
+#2000
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2000),])
+#n=237
+#2002
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2002),])
+#n=196
+#2004
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2004),])
+#n=161
+#2006
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2006),])
+#n=119
+#2010
+nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2010),])
+#n=60
 
 #### Age ----
 #check the year of birth
@@ -864,6 +887,37 @@ rect(o[, 2], #xleft
      col=colors[as.factor(x[,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])]
      )
 dev.off()
+
+#### Cumulative mean ----
+
+#calculate the cumulative mean for everybody from 1995 until 2010
+for (i in 1:nrow(sample)) {
+  sample$cummean95[i] <- mean(as.numeric(sample[i,c("ttsacks95")]),na.rm = T)
+  sample$cummean98[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98")]),na.rm = T)
+  sample$cummean00[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00")]),na.rm = T)
+  sample$cummean02[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")]),na.rm = T)
+  sample$cummean04[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")]),na.rm = T)
+  sample$cummean06[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")]),na.rm = T)
+  sample$cummean10[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]),na.rm = T)
+}
+#check it out
+head(sample[,c("ttsacks95","cummean95","ttsacks98","cummean98","ttsacks00","cummean00","ttsacks02","cummean02","ttsacks04","cummean04","ttsacks06","cummean06","ttsacks10","cummean10")])
+
+#### Cumulative standard deviation ----
+
+#calculate the cumulative mean for everybody from 1995 until 2010
+for (i in 1:nrow(sample)) {
+  sample$cumsd95[i] <- sd(as.numeric(sample[i,c("ttsacks95")]),na.rm = T)
+  sample$cumsd98[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98")]),na.rm = T)
+  sample$cumsd00[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00")]),na.rm = T)
+  sample$cumsd02[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")]),na.rm = T)
+  sample$cumsd04[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")]),na.rm = T)
+  sample$cumsd06[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")]),na.rm = T)
+  sample$cumsd10[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]),na.rm = T)
+}
+#check it out
+head(sample[,c("ttsacks95","cumsd95","ttsacks98","cumsd98","ttsacks00","cumsd00","ttsacks02","cumsd02","ttsacks04","cumsd04","ttsacks06","cumsd06","ttsacks10","cumsd10")])
+
 
 ### Farming land ----
 
