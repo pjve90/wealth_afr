@@ -84,6 +84,74 @@ table(merge_1$in_sampled_window)
 #subset sample
 sample <- merge_1[merge_1$in_sampled_window==1,]
 
-##Let's build the model ----
+##Logistic regression ----
 
-#binomial regression
+### Model with only alpha ----
+
+#define some prior
+set.seed(1990)
+hist(rbinom(350,45,0.5))
+prob <- 0.5
+#create synthetic data
+synth_data <- data.frame(AFR=rbinom(350,45,0.5))
+hist(synth_data$AFR)
+#prepare data for model
+synth_data_list <- list(
+  AFR=synth_data$AFR
+)
+#define model
+mlog1 <- ulam(
+  alist(
+    AFR ~ dbinom(45,prob),
+    logit(prob) <- a,
+    a ~ dnorm(0,0.5)
+  ),data=synth_data_list,chains = 4
+)
+mlog2 <- ulam(
+  alist(
+    AFR ~ dbinom(45,prob),
+    logit(prob) <- a,
+    a ~ dnorm(0,1)
+  ),data=synth_data_list,chains = 4
+)
+mlog3 <- ulam(
+  alist(
+    AFR ~ dbinom(45,prob),
+    logit(prob) <- a,
+    a ~ dnorm(0,1.5)
+  ),data=synth_data_list,chains = 4
+)
+mlog4 <- ulam(
+  alist(
+    AFR ~ dbinom(45,prob),
+    logit(prob) <- a,
+    a ~ dnorm(0,2)
+  ),data=synth_data_list,chains = 4
+)
+#check priors
+set.seed(1960)
+prior1 <- extract.prior(mlog1,n=350)
+p1 <- inv_logit(prior1$a)
+dens(p1,adj=0.1)
+prior2 <- extract.prior(mlog2,n=350)
+p2 <- inv_logit(prior2$a)
+dens(p2,adj=0.1)
+prior3 <- extract.prior(mlog3,n=350)
+p3 <- inv_logit(prior3$a)
+dens(p3,adj=0.1)
+prior4 <- extract.prior(mlog4,n=350)
+p4 <- inv_logit(prior4$a)
+dens(p4,adj=0.1)
+
+#prior for alpha=dnorm(0,2)
+
+
+#
+# 
+# - Define a generative model of the sample.
+# - Define a specific estimand.
+# - Design a statistical way to produce estimate.
+# - Test the statistical model using the generative model.
+# - Analyse the sample (summarise).
+# 
+
