@@ -5,9 +5,9 @@
 #install package to import excel file
 #install.packages("readxl")
 library(readxl)
-#install package to manipulate transparency in plots
-#install.packages("scales")
-#library(scales)
+#install package for bayesian analysis
+#install.packages("rethinking")
+library(rethinking)
 
 ## Data exploration ----
 

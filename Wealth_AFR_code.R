@@ -888,7 +888,18 @@ rect(o[, 2], #xleft
      )
 dev.off()
 
-#### Cumulative mean ----
+#### Mean cash crops ----
+
+##### Mean ----
+
+for(i in 1:nrow(sample)){
+sample$ttsacksmean[i] <- mean(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]),na.rm=TRUE)
+}
+#check it out
+sample[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","ttsacksmean")]
+sample[which(is.na(sample[,c("ttsacksmean")])==TRUE),c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","ttsacksmean")]
+
+##### Cumulative mean ----
 
 #calculate the cumulative mean for everybody from 1995 until 2010
 for (i in 1:nrow(sample)) {
