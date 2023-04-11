@@ -599,6 +599,8 @@ hist(sample$ttsacks10,breaks=20,main="2010",xlab="Cash crops")
 plot(density(sample$ttsacks10,na.rm=T),main=2010,xlab="Cash crops")
 dev.off()
 
+#### Checking NAs ----
+
 #number of individuals with ttsacksxx in all censuses
 summary(complete.cases(sample[c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]))
 #n=74
@@ -888,6 +890,85 @@ rect(o[, 2], #xleft
      )
 dev.off()
 
+#### Absolute cash crops ----
+
+##### Absolute ----
+
+for(i in 1:nrow(sample)){
+  sample$ttsacksabs[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]),na.rm=TRUE)
+}
+#check it out
+sample[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","ttsacksabs")]
+sample[which(is.na(sample[,c("ttsacksabs")])==TRUE),c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","ttsacksabs")]
+
+##### Cumulative abs ----
+
+#calculate the cumulative abs for everybody from 1995 until 2010
+for (i in 1:nrow(sample)) {
+  sample$cumabs95[i] <- sum(as.numeric(sample[i,c("ttsacks95")]),na.rm = T)
+  sample$cumabs98[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98")]),na.rm = T)
+  sample$cumabs00[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00")]),na.rm = T)
+  sample$cumabs02[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")]),na.rm = T)
+  sample$cumabs04[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")]),na.rm = T)
+  sample$cumabs06[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")]),na.rm = T)
+  sample$cumabs10[i] <- sum(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]),na.rm = T)
+}
+#check it out
+head(sample[,c("ttsacks95","cumabs95","ttsacks98","cumabs98","ttsacks00","cumabs00","ttsacks02","cumabs02","ttsacks04","cumabs04","ttsacks06","cumabs06","ttsacks10","cumabs10")])
+
+##### Cumulative abs until AFB ----
+
+#create variables first
+sample$cumabsafb <- rep(NA,nrow(sample))
+#calculate
+for (i in 1:nrow(sample)) {
+  if(sample$AFB[i] + sample$DOBYR[i] < 1998 & is.na(sample$ttsacks95[i])==FALSE){
+    sample$cumabsafb[i] <- sample$cumabs95[i]
+  }else
+    if (sample$AFB[i] + sample$DOBYR[i] < 1998 & is.na(sample$ttsacks95[i])==TRUE){
+      sample$cumabsafb[i] <- NA
+    }else
+      if(sample$AFB[i] + sample$DOBYR[i] < 2000 & sample$AFB[i] + sample$DOBYR[i] >= 1998 & sum(is.na(sample[i,c("ttsacks95","ttsacks98")])==T) < 2){
+        sample$cumabsafb[i] <- sample$cumabs98[i]
+      }else
+        if (sample$AFB[i] + sample$DOBYR[i] < 2000 & sample$AFB[i] + sample$DOBYR[i] >= 1998 & sum(is.na(sample[i,c("ttsacks95","ttsacks98")])==T) == 2){
+          sample$cumabsafb[i] <- NA
+        }else
+          if(sample$AFB[i] + sample$DOBYR[i] < 2002 & sample$AFB[i] + sample$DOBYR[i] >= 2000 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00")])==T) < 3){
+            sample$cumabsafb[i] <- sample$cumabs00[i]
+          }else
+            if (sample$AFB[i] + sample$DOBYR[i] < 2002 & sample$AFB[i] + sample$DOBYR[i] >= 2000 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00")])==T) == 3){
+              sample$cumabsafb[i] <- NA
+            }else
+              if(sample$AFB[i] + sample$DOBYR[i] < 2004 & sample$AFB[i] + sample$DOBYR[i] >= 2002 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")])==T) < 4){
+                sample$cumabsafb[i] <- sample$cumabs02[i]
+              }else
+                if (sample$AFB[i] + sample$DOBYR[i] < 2004 & sample$AFB[i] + sample$DOBYR[i] >= 2002 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")])==T) == 4){
+                  sample$cumabsafb[i] <- NA
+                }else
+                  if(sample$AFB[i] + sample$DOBYR[i] < 2006 & sample$AFB[i] + sample$DOBYR[i] >= 2004 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")])==T) < 5){
+                    sample$cumabsafb[i] <- sample$cumabs04[i]
+                  }else
+                    if (sample$AFB[i] + sample$DOBYR[i] < 2006 & sample$AFB[i] + sample$DOBYR[i] >= 2004 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")])==T) == 5){
+                      sample$cumabsafb[i] <- NA
+                    }else
+                      if(sample$AFB[i] + sample$DOBYR[i] < 2010 & sample$AFB[i] + sample$DOBYR[i] >= 2006 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")])==T) < 6){
+                        sample$cumabsafb[i] <- sample$cumabs06[i]
+                      }else
+                        if (sample$AFB[i] + sample$DOBYR[i] < 2010 & sample$AFB[i] + sample$DOBYR[i] >= 2006 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")])==T) == 6){
+                          sample$cumabsafb[i] <- NA
+                        }else
+                          if(sample$AFB[i] + sample$DOBYR[i] >= 2010 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==T) < 7){
+                            sample$cumabsafb[i] <- sample$cumabs10[i]
+                          }else
+                            if (sample$AFB[i] + sample$DOBYR[i] >= 2010 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==T) == 7){
+                              sample$cumabsafb[i] <- NA
+      }
+}
+#check it out
+sample[which(is.na(sample$cumabsafb)==TRUE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb")]
+nrow(sample[which(is.na(sample$cumabsafb)==TRUE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb")])
+
 #### Mean cash crops ----
 
 ##### Mean ----
@@ -914,9 +995,51 @@ for (i in 1:nrow(sample)) {
 #check it out
 head(sample[,c("ttsacks95","cummean95","ttsacks98","cummean98","ttsacks00","cummean00","ttsacks02","cummean02","ttsacks04","cummean04","ttsacks06","cummean06","ttsacks10","cummean10")])
 
-#### Cumulative standard deviation ----
+##### Cumulative mean until AFB ----
 
-#calculate the cumulative mean for everybody from 1995 until 2010
+#create variables first
+sample$cummeanafb <- rep(NA,nrow(sample))
+#calculate
+for (i in 1:nrow(sample)) {
+  if(sample$AFB[i] + sample$DOBYR[i] < 1998){
+    sample$cummeanafb[i] <- sample$cummean95[i]
+  }else
+    if (sample$AFB[i] + sample$DOBYR[i] < 2000 & sample$AFB[i] + sample$DOBYR[i] >= 1998){
+      sample$cummeanafb[i] <- sample$cummean98[i]
+    }else
+      if (sample$AFB[i] + sample$DOBYR[i] < 2002 & sample$AFB[i] + sample$DOBYR[i] >= 2000){
+        sample$cummeanafb[i] <- sample$cummean00[i]
+      }else
+        if (sample$AFB[i] + sample$DOBYR[i] < 2004 & sample$AFB[i] + sample$DOBYR[i] >= 2002){
+          sample$cummeanafb[i] <- sample$cummean02[i]
+        }else
+          if (sample$AFB[i] + sample$DOBYR[i] < 2006 & sample$AFB[i] + sample$DOBYR[i] >= 2004){
+            sample$cummeanafb[i] <- sample$cummean04[i]
+          }else
+            if (sample$AFB[i] + sample$DOBYR[i] < 2010 & sample$AFB[i] + sample$DOBYR[i] >= 2006){
+              sample$cummeanafb[i] <- sample$cummean06[i]
+            }else{
+              sample$cummeanafb[i] <- sample$cummean10[i]
+            }
+}
+#check it out
+sample[which(is.na(sample$cummeanafb)==TRUE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cummeanafb")]
+nrow(sample[which(is.na(sample$cummeanafb)==TRUE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cummeanafb")])
+
+#### Standard deviation cash crops ----
+
+##### Standard deviation ----
+
+for(i in 1:nrow(sample)){
+  sample$ttsackssd[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]),na.rm=TRUE)
+}
+#check it out
+sample[,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","ttsackssd")]
+sample[which(is.na(sample[,c("ttsackssd")])==TRUE),c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","ttsackssd")]
+
+##### Cumulative sd ----
+
+#calculate the cumulative sd for everybody from 1995 until 2010
 for (i in 1:nrow(sample)) {
   sample$cumsd95[i] <- sd(as.numeric(sample[i,c("ttsacks95")]),na.rm = T)
   sample$cumsd98[i] <- sd(as.numeric(sample[i,c("ttsacks95","ttsacks98")]),na.rm = T)
@@ -929,6 +1052,76 @@ for (i in 1:nrow(sample)) {
 #check it out
 head(sample[,c("ttsacks95","cumsd95","ttsacks98","cumsd98","ttsacks00","cumsd00","ttsacks02","cumsd02","ttsacks04","cumsd04","ttsacks06","cumsd06","ttsacks10","cumsd10")])
 
+##### Cumulative sd until AFB ----
+
+#create variables first
+sample$cumsdafb <- rep(NA,nrow(sample))
+#calculate
+for (i in 1:nrow(sample)) {
+  if(sample$AFB[i] + sample$DOBYR[i] < 1998 & is.na(sample$ttsacks95[i])==FALSE){
+    sample$cumsdafb[i] <- 0
+  }else
+    if (sample$AFB[i] + sample$DOBYR[i] < 1998 & is.na(sample$ttsacks95[i])==TRUE){
+      sample$cumsdafb[i] <- NA
+    }else
+      if(sample$AFB[i] + sample$DOBYR[i] < 2000 & sample$AFB[i] + sample$DOBYR[i] >= 1998 & sum(is.na(sample[i,c("ttsacks95","ttsacks98")])==F) > 1){
+        sample$cumsdafb[i] <- sample$cumsd98[i]
+      }else
+        if(sample$AFB[i] + sample$DOBYR[i] < 2000 & sample$AFB[i] + sample$DOBYR[i] >= 1998 & sum(is.na(sample[i,c("ttsacks95","ttsacks98")])==F) == 1){
+          sample$cumsdafb[i] <- 0
+        }else
+        if (sample$AFB[i] + sample$DOBYR[i] < 2000 & sample$AFB[i] + sample$DOBYR[i] >= 1998 & sum(is.na(sample[i,c("ttsacks95","ttsacks98")])==T) == 2){
+          sample$cumsdafb[i] <- NA
+        }else
+          if(sample$AFB[i] + sample$DOBYR[i] < 2002 & sample$AFB[i] + sample$DOBYR[i] >= 2000 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00")])==F) > 1){
+            sample$cumsdafb[i] <- sample$cumsd00[i]
+          }else
+            if(sample$AFB[i] + sample$DOBYR[i] < 2002 & sample$AFB[i] + sample$DOBYR[i] >= 2000 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00")])==F) == 1){
+              sample$cumsdafb[i] <- 0
+            }else
+              if (sample$AFB[i] + sample$DOBYR[i] < 2002 & sample$AFB[i] + sample$DOBYR[i] >= 2000 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00")])==T) == 3){
+                sample$cumsdafb[i] <- NA
+              }else
+                if(sample$AFB[i] + sample$DOBYR[i] < 2004 & sample$AFB[i] + sample$DOBYR[i] >= 2002 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")])==F) > 1){
+                  sample$cumsdafb[i] <- sample$cumsd02[i]
+                }else
+                  if(sample$AFB[i] + sample$DOBYR[i] < 2004 & sample$AFB[i] + sample$DOBYR[i] >= 2002 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")])==F) == 1){
+                    sample$cumsdafb[i] <- 0
+                  }else
+                    if (sample$AFB[i] + sample$DOBYR[i] < 2004 & sample$AFB[i] + sample$DOBYR[i] >= 2002 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02")])==T) == 4){
+                      sample$cumsdafb[i] <- NA
+                    }else
+                      if(sample$AFB[i] + sample$DOBYR[i] < 2006 & sample$AFB[i] + sample$DOBYR[i] >= 2004 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")])==F) > 1){
+                        sample$cumsdafb[i] <- sample$cumsd04[i]
+                      }else
+                        if(sample$AFB[i] + sample$DOBYR[i] < 2006 & sample$AFB[i] + sample$DOBYR[i] >= 2004 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")])==F) == 1){
+                          sample$cumsdafb[i] <- 0
+                        }else
+                          if (sample$AFB[i] + sample$DOBYR[i] < 2006 & sample$AFB[i] + sample$DOBYR[i] >= 2004 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04")])==T) == 5){
+                            sample$cumsdafb[i] <- NA
+                          }else
+                            if(sample$AFB[i] + sample$DOBYR[i] < 2010 & sample$AFB[i] + sample$DOBYR[i] >= 2006 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")])==F) > 1){
+                              sample$cumsdafb[i] <- sample$cumsd06[i]
+                            }else
+                              if(sample$AFB[i] + sample$DOBYR[i] < 2010 & sample$AFB[i] + sample$DOBYR[i] >= 2006 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")])==F) == 1){
+                                sample$cumsdafb[i] <- 0
+                              }else
+                                if (sample$AFB[i] + sample$DOBYR[i] < 2010 & sample$AFB[i] + sample$DOBYR[i] >= 2006 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06")])==T) == 6){
+                                  sample$cumsdafb[i] <- NA
+                                }else
+                                  if(sample$AFB[i] + sample$DOBYR[i] >= 2010 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==F) > 1){
+                                    sample$cumsdafb[i] <- sample$cumsd10[i]
+                                  }else
+                                    if(sample$AFB[i] + sample$DOBYR[i] >= 2010 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==F) == 1){
+                                      sample$cumsdafb[i] <- 0
+                                    }else
+                                      if (sample$AFB[i] + sample$DOBYR[i] >= 2010 & sum(is.na(sample[i,c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])==T) == 7){
+                                        sample$cumsdafb[i] <- NA
+                                      }
+}
+#check it out
+sample[which(is.na(sample$cumsdafb)==TRUE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumsdafb")]
+nrow(sample[which(is.na(sample$cumsdafb)==TRUE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumsdafb")])
 
 ### Farming land ----
 
@@ -1625,3 +1818,17 @@ plot(sample$AFB~sample$DOBYR,col=2,pch=16,ylim=c(10,51),xlim=c(1910,2000),xlab="
 plot(sample$AFB~sample$DOBYR,col=2,pch=16,xlab="Year of birth",ylab="Age at first reproduction",main="Sample",cex=3)
 dev.off()
 palette("default")
+
+## Complete cases sample ----
+
+sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb","cummeanafb","cumsdafb")]
+nrow(sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb","cummeanafb","cumsdafb")])
+length(is.na(sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),]$cummeanafb))
+is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumabsafb)
+length(is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumabsafb))
+is.na(sample[which(is.na(sample$cummeanafb)==FALSE),]$cummeanafb)
+length(is.na(sample[which(is.na(sample$cummeanafb)==FALSE),]$cummeanafb))
+is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumsdafb)
+length(is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumsdafb))
+
+
