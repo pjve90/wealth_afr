@@ -654,7 +654,7 @@ for(i in 1:nrow(sample)){
                                         if(sample$h04a[i]=="p" & is.na(sample$h04a[i]) == FALSE & is.na(sample$ttsacks04[i]) == TRUE){
                                                 sample$sumnapcrop04[i] <-  1
                                         }else
-                                                if(sample$h06a[i]=="p" & sample$h06a[i]=="m" & is.na(sample$h06a[i]) == FALSE & is.na(sample$ttsacks06[i]) == TRUE){
+                                                if(sample$h06a[i]=="p" & is.na(sample$h06a[i]) == FALSE & is.na(sample$ttsacks06[i]) == TRUE){
                                                         sample$sumnapcrop06[i] <-  1
                                                 }else
                                                         if(sample$h10a[i]=="p" & is.na(sample$h10a[i]) == FALSE & is.na(sample$ttsacks10[i]) == TRUE){
@@ -672,29 +672,29 @@ for(i in 1:nrow(sample)){
 #check who they are
 napttsacks <- sample[which(sample$sumnapcrop95==1 | sample$sumnapcrop98==1 | sample$sumnapcrop00==1 | sample$sumnapcrop02==1 | sample$sumnapcrop04==1 | sample$sumnapcrop06==1 | sample$sumnapcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 nrow(napttsacks)
-#n=18
+#n=23
 
 #those where hhxa="m" and ttsacksxx!=NA
 for(i in 1:nrow(sample)){
-        if(sample$h95a[i]=="m" & is.na(sample$h95a[i]) == FALSE & is.na(sample$ttsacks95[i]) == FALSE){
+        if(sample$h95a[i]=="m" & is.na(sample$h95a[i]) == FALSE & is.na(sample$ttsacks95[i]) == TRUE){
                 sample$sumnamcrop95[i] <-  1
         } else
-                if(sample$h98a[i]=="m" & is.na(sample$h98a[i]) == FALSE & is.na(sample$ttsacks98[i]) == FALSE){
+                if(sample$h98a[i]=="m" & is.na(sample$h98a[i]) == FALSE & is.na(sample$ttsacks98[i]) == TRUE){
                         sample$sumnamcrop98[i] <-  1
                 }else
-                        if(sample$h00a[i]=="m" & is.na(sample$h00a[i]) == FALSE & is.na(sample$ttsacks00[i]) == FALSE){
+                        if(sample$h00a[i]=="m" & is.na(sample$h00a[i]) == FALSE & is.na(sample$ttsacks00[i]) == TRUE){
                                 sample$sumnamcrop00[i] <-  1
                         }else
-                                if(sample$h02a[i]=="m" & is.na(sample$h02a[i]) == FALSE & is.na(sample$ttsacks02[i]) == FALSE){
+                                if(sample$h02a[i]=="m" & is.na(sample$h02a[i]) == FALSE & is.na(sample$ttsacks02[i]) == TRUE){
                                         sample$sumnamcrop02[i] <-  1
                                 }else
-                                        if(sample$h04a[i]=="m" & is.na(sample$h04a[i]) == FALSE & is.na(sample$ttsacks04[i]) == FALSE){
+                                        if(sample$h04a[i]=="m" & is.na(sample$h04a[i]) == FALSE & is.na(sample$ttsacks04[i]) == TRUE){
                                                 sample$sumnamcrop04[i] <-  1
                                         }else
-                                                if(sample$h06a[i]=="m" & sample$h06a[i]=="m" & is.na(sample$h06a[i]) == FALSE & is.na(sample$ttsacks06[i]) == FALSE){
+                                                if(sample$h06a[i]=="m" & is.na(sample$h06a[i]) == FALSE & is.na(sample$ttsacks06[i]) == TRUE){
                                                         sample$sumnamcrop06[i] <-  1
                                                 }else
-                                                        if(sample$h10a[i]=="m" & is.na(sample$h10a[i]) == FALSE & is.na(sample$ttsacks10[i]) == FALSE){
+                                                        if(sample$h10a[i]=="m" & is.na(sample$h10a[i]) == FALSE & is.na(sample$ttsacks10[i]) == TRUE){
                                                                 sample$sumnamcrop10[i] <-  1
                                                         }else {
                                                                 sample$sumnamcrop95[i] <- 0
@@ -709,7 +709,7 @@ for(i in 1:nrow(sample)){
 #check who they are
 namttsacks <- sample[which(sample$sumnamcrop95==1 | sample$sumnamcrop98==1 | sample$sumnamcrop00==1 | sample$sumnamcrop02==1 | sample$sumnamcrop04==1 | sample$sumnamcrop06==1 | sample$sumnamcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 nrow(namttsacks)
-#n=3
+#n=24
 
 #those where hhxa="a" and ttsacksxx!=NA
 for(i in 1:nrow(sample)){
@@ -752,7 +752,7 @@ nrow(sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumna
 nasample <- Reduce(function(x,y)merge(x,y,all=TRUE),list(nahxxattsacks,nattsacks,napttsacks,namttsacks))
 nasample
 nrow(nasample)
-#n=46
+#n=65
 
 write.csv(nasample,"C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/na_sample.csv",na="NA",row.names = FALSE)
 
@@ -1821,14 +1821,64 @@ palette("default")
 
 ## Complete cases sample ----
 
+#Based on having cumulative absolute, mean, and standard deviation
+#check all together
 sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb","cummeanafb","cumsdafb")]
 nrow(sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),c("t15nnn","AFB","DOBYR","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb","cummeanafb","cumsdafb")])
 length(is.na(sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),]$cummeanafb))
+#check absolute
 is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumabsafb)
 length(is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumabsafb))
+#check mean
 is.na(sample[which(is.na(sample$cummeanafb)==FALSE),]$cummeanafb)
 length(is.na(sample[which(is.na(sample$cummeanafb)==FALSE),]$cummeanafb))
+#check standard deviation
 is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumsdafb)
 length(is.na(sample[which(is.na(sample$cumabsafb)==FALSE),]$cumsdafb))
 
+sample_1 <- sample[which(is.na(sample$cummeanafb)==FALSE | is.na(sample$cumsdafb)==FALSE | is.na(sample$cumabsafb)==FALSE),]
+#n=238
 
+#Based on presence in the household ("hxxa"="p" or "m")
+
+#check those with NA in households and cash crops
+sample_1[which(sample_1$t15nnn %in% nasample$t15nnn),c("t15nnn","AFB","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb","cummeanafb","cumsdafb")]
+nrow(sample_1[which(sample_1$t15nnn %in% nasample$t15nnn),c("t15nnn","AFB","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","cumabsafb","cummeanafb","cumsdafb")])
+#subset
+sub_sample_1a <- sample_1[which(sample_1$t15nnn %in% nasample$t15nnn),]
+#subset those who don't have IDs=2958, 2997, 3518, 386
+sub_sample_1b <- sub_sample_1a[which(sub_sample_1a$t15nnn != 301 & sub_sample_1a$t15nnn != 2958 & sub_sample_1a$t15nnn != 2997 & sub_sample_1a$t15nnn != 3518 & sub_sample_1a$t15nnn != 4034 & sub_sample_1a$t15nnn != 4397 & sub_sample_1a$t15nnn != 4473 & sub_sample_1a$t15nnn != 89 & sub_sample_1a$t15nnn != 386),]
+#delete those in sub_sample_1b from sample_1
+sample_2 <- sample_1[-which(sample_1$t15nnn %in% sub_sample_1b$t15nnn),]
+
+#check for NAs
+#AFB
+sum(is.na(sample_2$AFB))
+#DOBYR
+sum(is.na(sample_2$DOBYR))
+#cumabsafb
+sum(is.na(sample_2$cumabsafb))
+#cummeanafb
+sum(is.na(sample_2$cummeanafb))
+#cumsdafb
+sum(is.na(sample_2$cumsdafb))
+#no NAs
+
+#summary statistics
+#AFB
+summary(sample_2$AFB)
+sd(sample_2$AFB)
+#mean=18.81
+#sd=2.63
+#median=18.47
+#min=13.56
+#max=30.42
+
+#DOBYR
+summary(sample_2$DOBYR)
+sd(sample_2$DOBYR)
+#mean=1985
+#sd=6.122
+#median=1985
+#min=1969
+#max=1998
