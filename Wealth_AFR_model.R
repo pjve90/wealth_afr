@@ -11,142 +11,261 @@ library(rethinking)
 
 ## Data exploration ----
 
-### Import data ----
-#import data
-#demographic data
-data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
-#wealth data
-data_wealth <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
+sample_2
 
-### Merge data ----
-
-#subset wealth data by year
-#1995
-data_wealth_95 <- data_wealth[which(data_wealth$UIyearXhsh > 1995000 & data_wealth$UIyearXhsh < 1996000),]
-#1998
-data_wealth_98 <- data_wealth[which(data_wealth$UIyearXhsh > 1998000 & data_wealth$UIyearXhsh < 1999000),]
-#2000
-data_wealth_00 <- data_wealth[which(data_wealth$UIyearXhsh > 2000000 & data_wealth$UIyearXhsh < 2001000),]
-#2002
-data_wealth_02 <- data_wealth[which(data_wealth$UIyearXhsh > 2002000 & data_wealth$UIyearXhsh < 2003000),]
-#2004
-data_wealth_04 <- data_wealth[which(data_wealth$UIyearXhsh > 2004000 & data_wealth$UIyearXhsh < 2005000),]
-#2006
-data_wealth_06 <- data_wealth[which(data_wealth$UIyearXhsh > 2006000 & data_wealth$UIyearXhsh < 2007000),]
-#2010
-data_wealth_10 <- data_wealth[which(data_wealth$UIyearXhsh > 2010000 & data_wealth$UIyearXhsh < 2011000),]
-
-#change UIyearXhsh name by year
-#1995
-names(data_wealth_95)[names(data_wealth_95) == "UIyearXhsh"] <- "UIyearXhsh95"
-colnames(data_wealth_95) <- c("UIyearXhsh95","acused95","ttsacks95","jjunezero95","LstockValField_rdKts95","HsVal_rdKts95","HsTotAsset_rdKts95","SumValue_rdKts95","IWC95","Loiske_rev95")
-#1998
-names(data_wealth_98)[names(data_wealth_98) == "UIyearXhsh"] <- "UIyearXhsh98"
-colnames(data_wealth_98) <- c("UIyearXhsh98","acused98","ttsacks98","jjunezero98","LstockValField_rdKts98","HsVal_rdKts98","HsTotAsset_rdKts98","SumValue_rdKts98","IWC98","Loiske_rev98")
-#2000
-names(data_wealth_00)[names(data_wealth_00) == "UIyearXhsh"] <- "UIyearXhsh00"
-colnames(data_wealth_00) <- c("UIyearXhsh00","acused00","ttsacks00","jjunezero00","LstockValField_rdKts00","HsVal_rdKts00","HsTotAsset_rdKts00","SumValue_rdKts00","IWC00","Loiske_rev00")
-#2002
-names(data_wealth_02)[names(data_wealth_02) == "UIyearXhsh"] <- "UIyearXhsh02"
-colnames(data_wealth_02) <- c("UIyearXhsh02","acused02","ttsacks02","jjunezero02","LstockValField_rdKts02","HsVal_rdKts02","HsTotAsset_rdKts02","SumValue_rdKts02","IWC02","Loiske_rev02")
-#2004
-names(data_wealth_04)[names(data_wealth_04) == "UIyearXhsh"] <- "UIyearXhsh04"
-colnames(data_wealth_04) <- c("UIyearXhsh04","acused04","ttsacks04","jjunezero04","LstockValField_rdKts04","HsVal_rdKts04","HsTotAsset_rdKts04","SumValue_rdKts04","IWC04","Loiske_rev04")
-#2006
-names(data_wealth_06)[names(data_wealth_06) == "UIyearXhsh"] <- "UIyearXhsh06"
-colnames(data_wealth_06) <- c("UIyearXhsh06","acused06","ttsacks06","jjunezero06","LstockValField_rdKts06","HsVal_rdKts06","HsTotAsset_rdKts06","SumValue_rdKts06","IWC06","Loiske_rev06")
-#2010
-names(data_wealth_10)[names(data_wealth_10) == "UIyearXhsh"] <- "UIyearXhsh10"
-colnames(data_wealth_10) <- c("UIyearXhsh10","acused10","ttsacks10","jjunezero10","LstockValField_rdKts10","HsVal_rdKts10","HsTotAsset_rdKts10","SumValue_rdKts10","IWC10","Loiske_rev10")
-
-#merge with demographic data
-#1995
-merge_1 <- merge(data_demo,data_wealth_95,by=c("UIyearXhsh95"),all.x=T)
-#1998
-merge_1 <- merge(merge_1,data_wealth_98,by=c("UIyearXhsh98"),all.x=T)
-#2000
-merge_1 <- merge(merge_1,data_wealth_00,by=c("UIyearXhsh00"),all.x=T)
-#2002
-merge_1 <- merge(merge_1,data_wealth_02,by=c("UIyearXhsh02"),all.x=T)
-#2004
-merge_1 <- merge(merge_1,data_wealth_04,by=c("UIyearXhsh04"),all.x=T)
-#2006
-merge_1 <- merge(merge_1,data_wealth_06,by=c("UIyearXhsh06"),all.x=T)
-#2010
-merge_1 <- merge(merge_1,data_wealth_10,by=c("UIyearXhsh10"),all.x=T)
-
-#women who are in the sampled window
-
-#sample size
-#check the number of women who gave birth after the data collection started
-table(merge_1$in_sampled_window)
-#n=335
-#subset sample
-sample <- merge_1[merge_1$in_sampled_window==1,]
-
-##Logistic regression ----
+## Multiple linear regression ----
 
 ### Model with only alpha ----
 
-#define some prior
+#afr_i ~ normal(mu,sigma)
+#mu ~ normal(?,?) 
+#sigma ~ uniform(?,?)
+
+#prior predictive simulation
 set.seed(1990)
-hist(rbinom(350,45,0.5))
-prob <- 0.5
+#values for mu
+hist(rnorm(1e4,20,5))
+sample_mu <- rnorm(1e4,20,5)
+curve(dnorm(x,20,5),from=0,to=45)
+#values for sigma
+hist(runif(1e4,0,5))
+sample_sigma <- runif(1e4,0,5)
+curve(dunif(x,0,5),from=-1,to=6)
+#prior for afr
+prior_afr <- rnorm(1e4,sample_mu,sample_sigma)
+hist(prior_afr)
+plot(density(prior_afr))
+
+#afr_i ~ normal(mu,sigma)
+#mu ~ normal(20,5) 
+#sigma ~ uniform(0,5)
+
 #create synthetic data
-synth_data <- data.frame(AFR=rbinom(350,45,0.5))
+synth_data <- data.frame(AFR=rnorm(1e4,sample_mu,sample_sigma))
 hist(synth_data$AFR)
 #prepare data for model
 synth_data_list <- list(
-  AFR=synth_data$AFR
+  AFR=standardize(synth_data$AFR)
 )
+
 #define model
-mlog1 <- ulam(
+#mu~normal(20,5) and sigma~uniform(0,5)
+mprior1 <- ulam(
   alist(
-    AFR ~ dbinom(45,prob),
-    logit(prob) <- a,
-    a ~ dnorm(0,0.5)
+    AFR ~ dnorm(mu,sigma),
+    mu ~ dnorm(20,5),
+    sigma ~ dunif(0,5)
   ),data=synth_data_list,chains = 4
 )
-mlog2 <- ulam(
+#mu~normal(20,5) and sigma~uniform(0,10)
+mprior2 <- ulam(
   alist(
-    AFR ~ dbinom(45,prob),
-    logit(prob) <- a,
-    a ~ dnorm(0,1)
+    AFR ~ dnorm(mu,sigma),
+    mu ~ dnorm(20,5),
+    sigma ~ dunif(0,10)
   ),data=synth_data_list,chains = 4
 )
-mlog3 <- ulam(
+#mu~normal(20,5) and sigma~uniform(0,1)
+mprior3 <- ulam(
   alist(
-    AFR ~ dbinom(45,prob),
-    logit(prob) <- a,
-    a ~ dnorm(0,1.5)
+    AFR ~ dnorm(mu,sigma),
+    mu ~ dnorm(20,5),
+    sigma ~ dunif(0,1)
   ),data=synth_data_list,chains = 4
 )
-mlog4 <- ulam(
+#mu~normal(18,8) and sigma~uniform(0,15)
+mprior4 <- ulam(
   alist(
-    AFR ~ dbinom(45,prob),
-    logit(prob) <- a,
-    a ~ dnorm(0,2)
+    AFR ~ dnorm(mu,sigma),
+    mu ~ dnorm(18,8),
+    sigma ~ dunif(0,15)
   ),data=synth_data_list,chains = 4
 )
+
 #check priors
 set.seed(1960)
-prior1 <- extract.prior(mlog1,n=350)
-p1 <- inv_logit(prior1$a)
-dens(p1,adj=0.1)
-prior2 <- extract.prior(mlog2,n=350)
-p2 <- inv_logit(prior2$a)
-dens(p2,adj=0.1)
-prior3 <- extract.prior(mlog3,n=350)
-p3 <- inv_logit(prior3$a)
-dens(p3,adj=0.1)
-prior4 <- extract.prior(mlog4,n=350)
-p4 <- inv_logit(prior4$a)
-dens(p4,adj=0.1)
+#mu~normal(20,5) and sigma~uniform(0,5)
+prior1 <- extract.prior(mprior1,n=350)
+mu1 <- prior1$mu
+sigma1 <- prior1$sigma
+#check model
+precis(mprior1)
+#plot prior for mu
+plot(density(mu1))
+#plot prior for sigma
+plot(density(sigma1))
+#plot prior for afr
+plot(density(rnorm(1e4,rnorm(1e4,20,5),runif(1e4,0,5))))
 
-#prior for alpha=dnorm(0,2)
+#mu~normal(20,5) and sigma~uniform(0,10)
+prior2 <- extract.prior(mprior2,n=350)
+mu2 <- prior2$mu
+sigma2 <- prior2$sigma
+#check model
+precis(mprior2)
+#plot prior for mu
+plot(density(mu2))
+#plot prior for sigma
+plot(density(sigma2))
+#plot prior for afr
+plot(density(rnorm(1e4,rnorm(1e4,20,5),runif(1e4,0,10))))
+
+#mu~normal(20,5) and sigma~uniform(0,1)
+prior3 <- extract.prior(mprior3,n=350)
+mu3 <- prior3$mu
+sigma3 <- prior3$sigma
+#check model
+precis(mprior3)
+#plot prior for mu
+plot(density(mu3))
+#plot prior for sigma
+plot(density(sigma3))
+#plot prior for afr
+plot(density(rnorm(1e4,rnorm(1e4,20,5),runif(1e4,0,1))))
+
+#mu~normal(18,8) and sigma~uniform(0,15)
+prior4 <- extract.prior(mprior4,n=350)
+mu4 <- prior4$mu
+sigma4 <- prior4$sigma
+#check model
+precis(mprior4)
+#plot prior for mu
+plot(density(mu4))
+#plot prior for sigma
+plot(density(sigma4))
+#plot prior for afr
+plot(density(rnorm(1e4,rnorm(1e4,20,5),runif(1e4,0,15))))
+
+#priors
+#AFR~dnorm(mu,sigma)
+#mu~dnorm(20,5) -> alpha
+#sigma~dunif(0,5)
+
+### Model with one predictor  ----
+
+#afr_i ~ normal(mu,sigma)
+#mu = alpha + beta*x_i 
+#alpha ~ normal(20,5)
+#beta ~ normal(0,1)
+#sigma ~ uniform(0,5)
+
+#prior predictive simulation
+set.seed(1990)
+#values for alpha
+hist(rnorm(1e4,20,5))
+sample_alpha <- rnorm(1e4,20,5)
+curve(dnorm(x,20,5),from=0,to=45)
+#values for beta
+hist(rnorm(1e4,0,1))
+sample_beta <- rnorm(1e4,0,1)
+curve(dnorm(x,0,1),from=-5,to=5)
+#values for sigma
+hist(runif(1e4,0,5))
+sample_sigma <- runif(1e4,0,5)
+curve(dunif(x,0,5),from=-1,to=6)
+
+#prior for afr
+set.seed(2791)
+N <- 100
+a <- rnorm(N,20,8)
+b <- rnorm(N,0,0.03)
+
+plot( NULL , xlim=c(0,200) , ylim=c(-10,60) ,
+      xlab="absolute wealth" , ylab="AFR" )
+abline( h=0 , lty=2 )
+abline( h=45 , lty=1 , lwd=0.5 )
+for ( i in 1:N ) curve( a[i] + b[i]*x ,
+                        from=0 , to=200 , add=TRUE ,
+                        col=col.alpha("black",0.2) )
+
+#afr_i ~ normal(mu,sigma)
+#mu = alpha + beta*x_i 
+#alpha ~ normal(20,8)
+#beta ~ normal(0,0.03)
+#sigma ~ uniform(0,5)
+
+#create synthetic data
+sample_alpha <- rnorm(1e4,20,8)
+sample_beta <- rnorm(1e4,0,0.03)
+sample_mu <- sample_alpha+sample_beta
+sample_sigma <- runif(1e4,0,5)
+sample_AFR <- rnorm(1e4,sample_mu,sample_sigma)
+for(i in 1:length(sample_AFR)){
+  if(sample_AFR[i] < 0){
+    sample_AFR[i] <- 0
+  }
+}
+sample_cumabs <- rnorm(1e4,50,30)
+for(i in 1:length(sample_cumabs)){
+  if(sample_cumabs[i] < 0){
+    sample_cumabs[i] <- 0
+  }
+}
+
+synth_data <- data.frame(AFR=sample_AFR,wabs=sample_cumabs)
+hist(synth_data$AFR)
+hist(synth_data$wabs)
+#prepare data for model
+synth_data_list <- list(
+  AFR=standardize(synth_data$AFR),
+  wabs=standardize(synth_data$wabs)
+)
+
+#define model
+#alpha~normal(20,8), beta~normal(0,0.03) and sigma~uniform(0,5)
+mprior1 <- ulam(
+  alist(
+    AFR ~ dnorm(mu,sigma),
+    mu <- a + b*wabs,
+    a ~ dnorm(20,8),
+    b ~ dnorm(0,0.03),
+    sigma ~ dunif(0,5)
+  ),data=synth_data_list,chains = 4
+)
+
+#check priors
+set.seed(2986)
+#alpha~normal(20,8), beta~normal(0,0.03) and sigma~uniform(0,5)
+prior1 <- extract.prior(mprior1,n=350)
+a1 <- prior1$a
+b1 <- prior1$b
+sigma1 <- prior1$sigma
+#check model
+precis(mprior1)
+#plot prior for alpha
+plot(density(a1))
+#plot prior for beta
+plot(density(b1))
+#plot prior for sigma
+plot(density(sigma1))
+#plot prior for afr
+plot(density(rnorm(1e4,rnorm(1e4,20,5),runif(1e4,0,5))))
+
+#prior for afr
+set.seed(4450)
+N <- 100
+a <- sample(a1,N)
+b <- sample(b1,N)
+
+plot( NULL , xlim=c(0,200) , ylim=c(-10,60) ,
+      xlab="absolute wealth" , ylab="AFR" )
+abline( h=0 , lty=2 )
+abline( h=45 , lty=1 , lwd=0.5 )
+for ( i in 1:N ) curve( a[i] + b[i]*x ,
+                        from=0 , to=200 , add=TRUE ,
+                        col=col.alpha("black",0.2) )
 
 
-#
+prior <- extract.prior( mprior1 )
+mu <- link( mprior1 , post=prior , data=list( wabs=c(0,200) ) )
+plot( NULL , xlim=c(0,200) , ylim=c(-5,50) )
+abline( h=0 , lty=2 )
+abline( h=45 , lty=1 , lwd=0.5 )
+for ( i in 1:100 ) lines( c(0,200) , mu[i,] , col=col.alpha("black",0.4) )
+
+
+#FOLLOW PAGE 111 IN RETHINKING
+
 # 
 # - Define a generative model of the sample.
 # - Define a specific estimand.
