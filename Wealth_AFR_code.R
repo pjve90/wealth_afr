@@ -5,9 +5,6 @@
 #install package to import excel file
 #install.packages("readxl")
 library(readxl)
-#install package to manipulate transparency in plots
-#install.packages("scales")
-#library(scales)
 
 ## Data exploration ----
 
@@ -83,12 +80,6 @@ table(merge_1$in_sampled_window)
 #n=335
 #subset sample
 sample <- merge_1[merge_1$in_sampled_window==1,]
-
-#sample from the database for Riana's plot
-#set seed
-set.seed(2690)
-#sample
-x <- sample[sample(nrow(sample),100),]
 
 ### Demographic data ----
 
@@ -1914,3 +1905,6 @@ sd(sample_2$cumsdafb)
 #min=0
 #max=27.02
 hist(sample_2$cumsdafb)
+
+write.csv(sample_2,"C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/sample2.csv",na="NA",row.names = FALSE)
+
