@@ -11,27 +11,27 @@ library(readxl)
 ### Import data ----
 #import data
 #demographic data
-data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_dec 23 2022.xlsx",sheet = "cases with AFB & UI sent")
+data_demo <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/pablo_demog_ui_may 29 2023.xlsx",sheet = "all selected cases with UI sent")
 #wealth data
-data_wealth <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_dec 23 2022.xls", sheet = "hshold data (n=1695)")
+data_wealth <- read_excel("C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/data/hsh wealth for pablo_May 29 2023.xls", sheet = "hshold data (n=1705)")
 
 ### Merge data ----
 
 #subset wealth data by year
 #1995
-data_wealth_95 <- data_wealth[which(data_wealth$UIyearXhsh > 1995000 & data_wealth$UIyearXhsh < 1996000),]
+data_wealth_95 <- data_wealth[which(data_wealth$UIyearXhsh > 1995000 & data_wealth$UIyearXhsh < 1998000),]
 #1998
-data_wealth_98 <- data_wealth[which(data_wealth$UIyearXhsh > 1998000 & data_wealth$UIyearXhsh < 1999000),]
+data_wealth_98 <- data_wealth[which(data_wealth$UIyearXhsh > 1998000 & data_wealth$UIyearXhsh < 2000000),]
 #2000
-data_wealth_00 <- data_wealth[which(data_wealth$UIyearXhsh > 2000000 & data_wealth$UIyearXhsh < 2001000),]
+data_wealth_00 <- data_wealth[which(data_wealth$UIyearXhsh > 2000000 & data_wealth$UIyearXhsh < 2002000),]
 #2002
-data_wealth_02 <- data_wealth[which(data_wealth$UIyearXhsh > 2002000 & data_wealth$UIyearXhsh < 2003000),]
+data_wealth_02 <- data_wealth[which(data_wealth$UIyearXhsh > 2002000 & data_wealth$UIyearXhsh < 2004000),]
 #2004
-data_wealth_04 <- data_wealth[which(data_wealth$UIyearXhsh > 2004000 & data_wealth$UIyearXhsh < 2005000),]
+data_wealth_04 <- data_wealth[which(data_wealth$UIyearXhsh > 2004000 & data_wealth$UIyearXhsh < 2006000),]
 #2006
-data_wealth_06 <- data_wealth[which(data_wealth$UIyearXhsh > 2006000 & data_wealth$UIyearXhsh < 2007000),]
+data_wealth_06 <- data_wealth[which(data_wealth$UIyearXhsh > 2006000 & data_wealth$UIyearXhsh < 2010000),]
 #2010
-data_wealth_10 <- data_wealth[which(data_wealth$UIyearXhsh > 2010000 & data_wealth$UIyearXhsh < 2011000),]
+data_wealth_10 <- data_wealth[which(data_wealth$UIyearXhsh > 2010000),]
 
 #change UIyearXhsh name by year
 #1995
@@ -73,35 +73,44 @@ merge_1 <- merge(merge_1,data_wealth_06,by=c("UIyearXhsh06"),all.x=T)
 merge_1 <- merge(merge_1,data_wealth_10,by=c("UIyearXhsh10"),all.x=T)
 
 #women who are in the sampled window
-
 #sample size
-#check the number of women who gave birth after the data collection started
-table(merge_1$in_sampled_window)
-#n=335
+#check the number of individuals with known age at first reproduction
+table(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999])
+length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999])
+#n=1805
+#check the number of individuals with known age at first reproduction, kids listed and wealth data associated
+table(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$C2.2 == 2.1])
+length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$C2.2 == 2.1])
+#n=1581
+#check the number of women with known age at first reproduction, kids listed and wealth data associated
+table(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1])
+length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1])
+#n=837
+
 #subset sample
-sample <- merge_1[merge_1$in_sampled_window==1,]
+sample <- merge_1[merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1,]
 
 ### Demographic data ----
 
 #twin status
-table(sample$twinYN)
-#n=14 twin status
+table(sample$`twinY/N`)
+#n=34 twin status
 
 #### Age at first reproduction ----
 #check their age at first reproduction (AFR)
-summary(sample$AFB)
-sd(sample$AFB)
-#min=12.58
-#median=18.43
-#mean=18.98
+summary(sample$`AFB for pablo`[sample$`AFB for pablo` < 100])
+sd(sample$`AFB for pablo`[sample$`AFB for pablo` < 100])
+#min=13
+#median=18.33
+#mean=18.72
 #max=32
-#sd=3.109
+#sd=2.786
 #check for NAs
-sum(is.na(sample$AFB))
+length(sample$`AFB for pablo`[sample$`AFB for pablo` == 999])
 #n=0
 #plot it!
-ggplot(sample,aes(x=AFB))+
-  geom_histogram(aes(y=..density..),colour="black",fill="white")+
+ggplot(sample,aes(x=`AFB for pablo`))+
+  geom_histogram(aes(y=..density..),colour="black",fill="white",binwidth = 3)+
   geom_density(lwd=0.75,colour="black",fill="red",alpha=0.1)+
   xlab("Age at first reproduction")+
   ylab("")+
