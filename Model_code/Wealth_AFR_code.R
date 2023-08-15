@@ -109,35 +109,40 @@ sd(sample$`AFB for pablo`[sample$`AFB for pablo` < 100])
 length(sample$`AFB for pablo`[sample$`AFB for pablo` == 999])
 #n=0
 #plot it!
-ggplot(sample,aes(x=`AFB for pablo`))+
-  geom_histogram(aes(y=..density..),colour="black",fill="white",binwidth = 3)+
-  geom_density(lwd=0.75,colour="black",fill="red",alpha=0.1)+
-  xlab("Age at first reproduction")+
-  ylab("")+
-  theme_classic()
+#with women who hasn't reproduced yet
+hist(sample$`AFB for pablo`, prob=T,breaks=20, main="Histogram of AFR, with all women",xlab="AFR")
+lines(density(sample$`AFB for pablo`),col="red",lwd=2)
+#only women that have had their first child
+hist(sample$`AFB for pablo`[sample$`AFB for pablo` < 100], prob=T,breaks=20, main="Histogram of AFR, with women who have had a child",xlab="AFR")
+lines(density(sample$`AFB for pablo`[sample$`AFB for pablo` < 100]),col="red",lwd=2)
 
-#check how many had babies since each year of data collection
+#check how many had babies until each year of data collection
 #1995
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 1995),])
-#n=333
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR < 1996),])
+#n=301
 #1998
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 1998),])
-#n=281
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 1996 & sample$`AFB for pablo`+sample$DOBYR < 1999),])
+#n=54
 #2000
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2000),])
-#n=237
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 1999 & sample$`AFB for pablo`+sample$DOBYR < 2001),])
+#n=39
 #2002
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2002),])
-#n=196
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2001 & sample$`AFB for pablo`+sample$DOBYR < 2003),])
+#n=39
 #2004
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2004),])
-#n=161
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2003 & sample$`AFB for pablo`+sample$DOBYR < 2005),])
+#n=44
 #2006
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2006),])
-#n=119
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2005 & sample$`AFB for pablo`+sample$DOBYR < 2007),])
+#n=30
 #2010
-nrow(sample[which(round(sample$AFB+sample$DOBYR) >= 2010),])
-#n=60
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2007 & sample$`AFB for pablo`+sample$DOBYR < 2011),])
+#n=58
+#after 2010
+nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2011),])
+#n=272
+
+
 
 #### Age ----
 #check the year of birth
