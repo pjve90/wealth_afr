@@ -111,10 +111,10 @@ length(sample$`AFB for pablo`[sample$`AFB for pablo` == 999])
 #plot it!
 #with women who hasn't reproduced yet
 hist(sample$`AFB for pablo`, prob=T,breaks=20, main="Histogram of AFR, with all women",xlab="AFR")
-lines(density(sample$`AFB for pablo`),col="red",lwd=2)
+lines(density(sample$`AFB for pablo`),lwd=2)
 #only women that have had their first child
 hist(sample$`AFB for pablo`[sample$`AFB for pablo` < 100], prob=T,breaks=20, main="Histogram of AFR, with women who have had a child",xlab="AFR")
-lines(density(sample$`AFB for pablo`[sample$`AFB for pablo` < 100]),col="red",lwd=2)
+lines(density(sample$`AFB for pablo`[sample$`AFB for pablo` < 100]),lwd=2)
 
 #check how many had babies until each year of data collection
 #1995
@@ -142,96 +142,90 @@ nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2007 & sample$`AFB for 
 nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2011),])
 #n=272
 
-
-
 #### Age ----
 #check the year of birth
 summary(sample$DOBYR)
 sd(sample$DOBYR)
-#min=1966
-#median=1984
-#mean=1984
-#max=1999
-#sd=6.306
+#min=1918
+#median=1982
+#mean=1979
+#max=2002
+#sd=18.17
 #check for NAs
 sum(is.na(sample$DOBYR))
 #n=0
 #plot it!
-ggplot(sample,aes(x=DOBYR))+
-  geom_histogram(aes(y=..density..),colour="black",fill="white")+
-  geom_density(lwd=0.75,colour="black",fill="red",alpha=0.1)+
-  xlab("Year of Birth")+
-  ylab("")+
-  theme_classic()
+hist(sample$DOBYR, prob=T,breaks=20, main="Histogram of year of birth",xlab="Year of birth")
+lines(density(sample$DOBYR),lwd=2)
 
 #### Relationship with household head ----
 
 #Relationship with household head in 1995 (britstatus95)
 #check britstatus95
-table(sample$BritStatus95)
+table(sample$`Brit Status95`)
 #check for NAs
-sum(is.na(sample$BritStatus95))
-#n=136
+sum(is.na(sample$`Brit Status95`))
+#n=347
 #plot it!
-plot(table(sample$BritStatus95),xlab="Relationship with household")
+plot(table(sample$`Brit Status95`),xlab="Relationship with household")
 
 #Relationship with household head in 1998 (britstatus98)
 #check britstatus98
-table(sample$britstatus98)
+table(sample$`brit status98`)
 #check for NAs
-sum(is.na(sample$britstatus98))
+sum(is.na(sample$`brit status98`))
 #n=106
 #plot it!
-plot(table(sample$britstatus98),xlab="Relationship with household")
+plot(table(sample$`brit status98`),xlab="Relationship with household")
 
 #Relationship with household head in 2000 (britstatus00)
 #check britstatus00
-table(sample$britstatus00)
+table(sample$`brit status00`)
 #check for NAs
-sum(is.na(sample$britstatus00))
+sum(is.na(sample$`brit status00`))
 #n=86
 #plot it!
-plot(table(sample$britstatus00),xlab="Relationship with household")
+plot(table(sample$`brit status00`),xlab="Relationship with household")
 
 #Relationship with household head in 2002 (britstatus02)
 #check britstatus02
-table(sample$britstatus02)
+table(sample$`brit status02`)
 #check for NAs
-sum(is.na(sample$britstatus02))
+sum(is.na(sample$`brit status02`))
 #n=74
 #plot it!
-plot(table(sample$britstatus02),xlab="Relationship with household")
+plot(table(sample$`brit status02`),xlab="Relationship with household")
 
 #Relationship with household head in 2004 (britstatus04)
 #check britstatus04
-table(sample$britstatus04)
+table(sample$`brit status04`)
 #check for NAs
-sum(is.na(sample$britstatus04))
+sum(is.na(sample$`brit status04`))
 #n=67
 #plot it!
-plot(table(sample$britstatus04),xlab="Relationship with household")
+plot(table(sample$`brit status04`),xlab="Relationship with household")
 
 #Relationship with household head in 2006 (britstatus06)
 #check britstatus06
-table(sample$britstatus06)
+table(sample$`brit status06`)
 #check for NAs
-sum(is.na(sample$britstatus06))
+sum(is.na(sample$`brit status06`))
 #n=63
 #plot it!
-plot(table(sample$britstatus06),xlab="Relationship with household")
+plot(table(sample$`brit status06`),xlab="Relationship with household")
 
 #Relationship with household head in 2010 (britstatus10)
 #check britstatus10
-table(sample$britstatus10)
+table(sample$`brit status10`)
 #check for NAs
-sum(is.na(sample$britstatus10))
+sum(is.na(sample$`brit status10`))
 #n=52
 #plot it!
-plot(table(sample$britstatus10),xlab="Relationship with household")
+plot(table(sample$`brit status10`),xlab="Relationship with household")
 
 #number of individuals with britstatus in all censuses
-summary(complete.cases(sample[c("BritStatus95","britstatus98","britstatus00","britstatus02","britstatus04","britstatus06","britstatus10")]))
-#n=179
+summary(complete.cases(sample[,c("Brit Status95","brit status98","brit status00","brit status02","brit status04","brit status06","brit status10")]))
+#n=373
 
 #### Household/farm that focal is associated with ----
 
@@ -240,7 +234,7 @@ summary(complete.cases(sample[c("BritStatus95","britstatus98","britstatus00","br
 table(sample$h95n)
 #check for NAs
 sum(is.na(sample$h95n))
-#n=136
+#n=347
 #plot it!
 plot(table(sample$h95n),xlab="Household focal is associated with")
 
@@ -249,7 +243,7 @@ plot(table(sample$h95n),xlab="Household focal is associated with")
 table(sample$h98n)
 #check for NAs
 sum(is.na(sample$h98n))
-#n=136
+#n=252
 #plot it!
 plot(table(sample$h98n),xlab="Household focal is associated with")
 
@@ -258,7 +252,7 @@ plot(table(sample$h98n),xlab="Household focal is associated with")
 table(sample$h00n)
 #check for NAs
 sum(is.na(sample$h00n))
-#n=136
+#n=190
 #plot it!
 plot(table(sample$h00n),xlab="Household focal is associated with")
 
@@ -267,7 +261,7 @@ plot(table(sample$h00n),xlab="Household focal is associated with")
 table(sample$h02n)
 #check for NAs
 sum(is.na(sample$h02n))
-#n=136
+#n=147
 #plot it!
 plot(table(sample$h02n),xlab="Household focal is associated with")
 
@@ -276,7 +270,7 @@ plot(table(sample$h02n),xlab="Household focal is associated with")
 table(sample$h04n)
 #check for NAs
 sum(is.na(sample$h04n))
-#n=136
+#n=129
 #plot it!
 plot(table(sample$h04n),xlab="Household focal is associated with")
 
@@ -285,7 +279,7 @@ plot(table(sample$h04n),xlab="Household focal is associated with")
 table(sample$h06n)
 #check for NAs
 sum(is.na(sample$h06n))
-#n=136
+#n=132
 #plot it!
 plot(table(sample$h06n),xlab="Household focal is associated with")
 
@@ -294,107 +288,110 @@ plot(table(sample$h06n),xlab="Household focal is associated with")
 table(sample$h10n)
 #check for NAs
 sum(is.na(sample$h10n))
-#n=136
+#n=145
 #plot it!
 plot(table(sample$h10n),xlab="Household focal is associated with")
 
 #number of individuals with hxxn in all censuses
 summary(complete.cases(sample[c("h95n","h98n","h00n","h02n","h04n","h06n","h10n")]))
-#n=186
+#n=405
 
 #### Household/farm that focal is living in ----
 
 #Household/farm that focal is associated with in 1995 (h95a)
 #check h95a
 table(sample$h95a)
-#a = 9
-#m = 12
-#p = 178
+#a = 41
+#m = 36
+#p = 413
 #check for NAs
 sum(is.na(sample$h95a))
-#n=136
+#n=347
 #plot it!
 plot(table(sample$h95a),xlab="Household focal lives in")
 
 #Household/farm that focal is associated with in 1998 (h98a)
 #check h98a
 table(sample$h98a)
-#a = 31
-#m = 4
-#p = 194
+#a = 83
+#m = 8
+#p = 485
+#tag = 9
 #check for NAs
 sum(is.na(sample$h98a))
-#n=106
+#n=252
 #plot it!
 plot(table(sample$h98a),xlab="Household focal is associated with")
 
 #Household/farm that focal is associated with in 2000 (h00a)
 #check h00a
 table(sample$h00a)
-#a = 49
-#p = 200
+#a = 115
+#m = 2
+#p = 519
+#tag = 519
 #check for NAs
 sum(is.na(sample$h00a))
-#n=86
+#n=190
 #plot it!
 plot(table(sample$h00a),xlab="Household focal is associated with")
 
 #Household/farm that focal is associated with in 2002 (h02n)
 #check h02a
 table(sample$h02a)
-#a = 56
-#m = 5
-#p = 200
-#tag = 2
+#a = 132
+#m = 13
+#p = 525
+#tag = 20
 #check for NAs
 sum(is.na(sample$h02a))
-#n=72
+#n=147
 #plot it!
 plot(table(sample$h02a),xlab="Household focal is associated with")
 
 #Household/farm that focal is associated with in 2004 (h04a)
 #check h04a
 table(sample$h04a)
-#a = 74
-#m = 5
-#p = 189
-#tag = 7
+#a = 148
+#m = 21
+#p = 499
+#tag = 40
 #check for NAs
 sum(is.na(sample$h04a))
-#n=60
+#n=129
 #plot it!
 plot(table(sample$h04a),xlab="Household focal is associated with")
 
 #Household/farm that focal is associated with in 2006 (h06a)
 #check h06a
 table(sample$h06a)
-#a = 85
-#m = 4
-#p = 183
+#a = 162
+#m = 13
+#p = 494
 #rep = 1
-#tag = 6
+#tag = 35
 #check for NAs
 sum(is.na(sample$h06a))
-#n=56
+#n=132
 #plot it!
 plot(table(sample$h06a),xlab="Household focal is associated with")
 
 #Household/farm that focal is associated with in 2010 (h10a)
 #check h10a
 table(sample$h10a)
-#a = 80
-#m = 2
-#p = 201
-#tag = 4
+#a = 147
+#m = 11
+#p = 505
+#tag = 29
 #check for NAs
 sum(is.na(sample$h10a))
-#n=48
+#n=145
 #plot it!
 plot(table(sample$h10a),xlab="Household focal is associated with")
 
 #number of individuals with hxxa in all censuses
 summary(complete.cases(sample[c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")]))
-#n=186
+#n=405
 
 for(i in 1:nrow(sample)){
   if(sum(is.na(sample[i,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])==T) == 7){
@@ -414,7 +411,7 @@ sample$UIyearXhsh95
 table(sample$UIyearXhsh95)
 #check NAs
 sum(is.na(sample$UIyearXhsh95))
-#n=145
+#n=388
 
 #1998 
 #summary
@@ -422,7 +419,7 @@ sample$UIyearXhsh98
 table(sample$UIyearXhsh98)
 #check NAs
 sum(is.na(sample$UIyearXhsh98))
-#n=137
+#n=344
 
 #2000 
 #summary
@@ -430,7 +427,7 @@ sample$UIyearXhsh00
 table(sample$UIyearXhsh00)
 #check NAs
 sum(is.na(sample$UIyearXhsh00))
-#n=135
+#n=316
 
 #2002 
 #summary
@@ -438,7 +435,7 @@ sample$UIyearXhsh02
 table(sample$UIyearXhsh02)
 #check NAs
 sum(is.na(sample$UIyearXhsh02))
-#n=130
+#n=299
 
 #2004 
 #summary
@@ -446,7 +443,7 @@ sample$UIyearXhsh04
 table(sample$UIyearXhsh04)
 #check NAs
 sum(is.na(sample$UIyearXhsh04))
-#n=141
+#n=317
 
 #2006 
 #summary
@@ -454,7 +451,7 @@ sample$UIyearXhsh06
 table(sample$UIyearXhsh06)
 #check NAs
 sum(is.na(sample$UIyearXhsh06))
-#n=147
+#n=330
 
 #2010 
 #summary
@@ -462,15 +459,15 @@ sample$UIyearXhsh10
 table(sample$UIyearXhsh10)
 #check NAs
 sum(is.na(sample$UIyearXhsh10))
-#n=132
+#n=321
 
 #number of individuals with matching wealth data in all censuses
 summary(complete.cases(sample[c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10")]))
-#n=89
+#n=218
 
 #number of individuals with wealth data and household information in all censuses
-summary(complete.cases(sample[c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10","BritStatus95","britstatus98","britstatus00","britstatus02","britstatus04","britstatus06","britstatus10","h95n","h98n","h00n","h02n","h04n","h06n","h10n")]))
-#n=89
+summary(complete.cases(sample[c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10","h95n","h98n","h00n","h02n","h04n","h06n","h10n")]))
+#n=218
 
 ## Material wealth data ----
 
