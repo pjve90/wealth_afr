@@ -89,6 +89,8 @@ length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0
 
 #subset sample
 sample <- merge_1[merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1,]
+nrow(sample)
+#n=557
 
 ### Demographic data ----
 
@@ -391,6 +393,7 @@ plot(table(sample$h10a),xlab="Household focal is associated with")
 summary(complete.cases(sample[c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")]))
 #n=226
 
+#identify which individuals have NA in hxxa
 for(i in 1:nrow(sample)){
   if(sum(is.na(sample[i,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])==T) == 7){
     sample$sumnahxxa[i] <- sum(is.na(sample[i,c("h95a","h98a","h00a","h02a","h04a","h06a","h10a")])==T)
@@ -400,6 +403,9 @@ for(i in 1:nrow(sample)){
     sample$delete[i] <- "no"
   }
 }
+table(sample$delete)
+#no=544
+#yes=13
 
 ### Matching ID ----
 
@@ -467,6 +473,21 @@ summary(complete.cases(sample[c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UI
 summary(complete.cases(sample[c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10","h95n","h98n","h00n","h02n","h04n","h06n","h10n")]))
 #n=107
 
+#number of individuals with no matching wealth data
+for(i in 1:nrow(sample)){
+  if(sum(is.na(sample[i,c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10")])==T) == 7){
+    sample$sumnaUI[i] <- sum(is.na(sample[i,c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10")])==T)
+    sample$deleteUI[i] <- "yes"
+  } else{
+    sample$sumnaUIa[i] <- sum(is.na(sample[i,c("UIyearXhsh95","UIyearXhsh98","UIyearXhsh00","UIyearXhsh02","UIyearXhsh04","UIyearXhsh06","UIyearXhsh10")])==T)
+    sample$deleteUI2[i] <- "no"
+  }
+}
+table(sample$delete2)
+#no=540
+#yes=17
+
+
 ## Material wealth data ----
 
 ### Cash crops ----
@@ -485,125 +506,104 @@ sd(sample$ttsacks95,na.rm=T)
 sum(is.na(sample$ttsacks95))
 #n=329
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks95_hist.pdf",9.14,9.15)
-par(mfrow=c(2,1))
-hist(sample$ttsacks95,breaks=20,main="1995",xlab="Cash crops")
-plot(density(sample$ttsacks95,na.rm=T),main=1995, xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks95, prob=T,breaks=20, main="Cash crops in 1995",xlab="Cash crops")
+lines(density(sample$ttsacks95,na.rm = T),lwd=2)
 
 #1998
 summary(sample$ttsacks98)
 sd(sample$ttsacks98,na.rm=T)
 #min=0
-#median=3
-#mean=4.45
-#max=24
-#sd=4.343
+#median=3.13
+#mean=4.7456
+#max=31.250
+#sd=4.694
 #check NAs
 sum(is.na(sample$ttsacks98))
-#n=141
+#n=262
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks98_hist.pdf",9.14,9.15)
-par(mfrow=c(1,2))
-hist(sample$ttsacks98,breaks=20,main="1998",xlab="Cash crops")
-plot(density(sample$ttsacks98,na.rm=T),main=1998,xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks98, prob=T,breaks=20, main="Cash crops in 1998",xlab="Cash crops")
+lines(density(sample$ttsacks98,na.rm = T),lwd=2)
 
 #2000
 summary(sample$ttsacks00)
 sd(sample$ttsacks00,na.rm=T)
 #min=0
 #median=5
-#mean=7.3
+#mean=7.135
 #max=48
-#sd=7.968
+#sd=8.006
 #check NAs
 sum(is.na(sample$ttsacks00))
-#n=141
+#n=236
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks00_hist.pdf",9.14,9.15)
-par(mfrow=c(1,2))
-hist(sample$ttsacks00,breaks=20,main="2000",xlab="Cash crops")
-plot(density(sample$ttsacks00,na.rm=T),main=2000,xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks00, prob=T,breaks=20, main="Cash crops in 2000",xlab="Cash crops")
+lines(density(sample$ttsacks00,na.rm = T),lwd=2)
 
 #2002
 summary(sample$ttsacks02)
 sd(sample$ttsacks02,na.rm=T)
 #min=0
-#median=6.5
-#mean=8.161
+#median=7
+#mean=8.821
 #max=49
-#sd=7.859
+#sd=8.85
 #check NAs
 sum(is.na(sample$ttsacks02))
-#n=140
+#n=220
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks02_hist.pdf",9.14,9.15)
-par(mfrow=c(1,2))
-hist(sample$ttsacks02,breaks=20,main="2002",xlab="Cash crops")
-plot(density(sample$ttsacks02,na.rm=T),main=2002,xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks02, prob=T,breaks=20, main="Cash crops in 2002",xlab="Cash crops")
+lines(density(sample$ttsacks02,na.rm = T),lwd=2)
 
 #2004
 summary(sample$ttsacks04)
 sd(sample$ttsacks04,na.rm=T)
 #min=0
-#median=6.33
-#mean=10.67
-#max=58.5
-#sd=11.424
+#median=7
+#mean=12.48
+#max=95
+#sd=14.016
 #check NAs
 sum(is.na(sample$ttsacks04))
-#n=150
+#n=233
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks04_hist.pdf",9.14,9.15)
-par(mfrow=c(1,2))
-hist(sample$ttsacks04,breaks=20,main="2004",xlab="Cash crops")
-plot(density(sample$ttsacks04,na.rm=T),main=2004,xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks04, prob=T,breaks=20, main="Cash crops in 2004",xlab="Cash crops")
+lines(density(sample$ttsacks04,na.rm = T),lwd=2)
 
 #2006
 summary(sample$ttsacks06)
 sd(sample$ttsacks06,na.rm=T)
 #min=0
-#median=10.5
-#mean=13.19
+#median=11.2
+#mean=14.72
 #max=66
-#sd=12.671
+#sd=13.513
 #check NAs
 sum(is.na(sample$ttsacks06))
-#n=158
+#n=234
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks06_hist.pdf",9.14,9.15)
-par(mfrow=c(1,2))
-hist(sample$ttsacks06,breaks=20,main="2006",xlab="Cash crops")
-plot(density(sample$ttsacks06,na.rm=T),main=2006,xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks06, prob=T,breaks=20, main="Cash crops in 2006",xlab="Cash crops")
+lines(density(sample$ttsacks06,na.rm = T),lwd=2)
 
 #2010
 summary(sample$ttsacks10)
 sd(sample$ttsacks10,na.rm=T)
 #min=0
 #median=7.5
-#mean=12.68
-#max=74
-#sd=14.5
+#mean=15.26
+#max=132
+#sd=21.778
 #check NAs
 sum(is.na(sample$ttsacks10))
-#n=140
+#n=222
 #plot it!
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks10_hist.pdf",9.14,9.15)
-par(mfrow=c(1,2))
-hist(sample$ttsacks10,breaks=20,main="2010",xlab="Cash crops")
-plot(density(sample$ttsacks10,na.rm=T),main=2010,xlab="Cash crops")
-dev.off()
+hist(sample$ttsacks10, prob=T,breaks=20, main="Cash crops in 2010",xlab="Cash crops")
+lines(density(sample$ttsacks10,na.rm = T),lwd=2)
 
 #### Checking NAs ----
 
 #number of individuals with ttsacksxx in all censuses
 summary(complete.cases(sample[c("ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]))
-#n=74
+#n=89
 
 #individuals without any cash crop data (7 NAs in total)
 for(i in 1:nrow(sample)){
@@ -615,18 +615,24 @@ for(i in 1:nrow(sample)){
     sample$deletecrop[i] <- "no"
   }
 }
+table(sample$deletecrop)
+#no=529
+#yes=28
+
 #check who they are
 #those without information in hxxa and cash crops
-nahxxattsacks <- sample[which(sample$delete == "yes" & sample$deletecrop == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+nahxxattsacks <- sample[which(sample$delete == "yes" & sample$deletecrop == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 nrow(nahxxattsacks)
-#n=17
+nahxxattsacks
+#n=13
 #those without information in hxxa but have information in cash crops
-sample[which(sample$delete == "yes" & sample$deletecrop == "no"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+sample[which(sample$delete == "yes" & sample$deletecrop == "no"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 #n=0
 #those with information in hxxa but not in cash crops
-nattsacks <- sample[which(sample$delete == "no" & sample$deletecrop == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+nattsacks <- sample[which(sample$delete == "no" & sample$deletecrop == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 nrow(nattsacks)
-#n=12
+nattsacks
+#n=15
 
 #those where hhxa="p" and ttsacksxx=NA
 #create variables first
@@ -670,7 +676,7 @@ for(i in 1:nrow(sample)){
           }
 }
 #check who they are
-napttsacks <- sample[which(sample$sumnapcrop95==1 | sample$sumnapcrop98==1 | sample$sumnapcrop00==1 | sample$sumnapcrop02==1 | sample$sumnapcrop04==1 | sample$sumnapcrop06==1 | sample$sumnapcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+napttsacks <- sample[which(sample$sumnapcrop95==1 | sample$sumnapcrop98==1 | sample$sumnapcrop00==1 | sample$sumnapcrop02==1 | sample$sumnapcrop04==1 | sample$sumnapcrop06==1 | sample$sumnapcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 nrow(napttsacks)
 #n=23
 
@@ -707,31 +713,31 @@ for(i in 1:nrow(sample)){
                                                         }
 }
 #check who they are
-namttsacks <- sample[which(sample$sumnamcrop95==1 | sample$sumnamcrop98==1 | sample$sumnamcrop00==1 | sample$sumnamcrop02==1 | sample$sumnamcrop04==1 | sample$sumnamcrop06==1 | sample$sumnamcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+namttsacks <- sample[which(sample$sumnamcrop95==1 | sample$sumnamcrop98==1 | sample$sumnamcrop00==1 | sample$sumnamcrop02==1 | sample$sumnamcrop04==1 | sample$sumnamcrop06==1 | sample$sumnamcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 nrow(namttsacks)
 #n=24
 
 #those where hhxa="a" and ttsacksxx!=NA
 for(i in 1:nrow(sample)){
-        if(sample$h95a[i]=="a" & is.na(sample$h95a[i]) == FALSE & is.na(sample$ttsacks95[i]) == TRUE){
+        if(sample$h95a[i]=="a" & is.na(sample$h95a[i]) == FALSE & is.na(sample$ttsacks95[i]) == FALSE){
                 sample$sumnaacrop95[i] <-  1
         } else
-                if(sample$h98a[i]=="a" & is.na(sample$h98a[i]) == FALSE & is.na(sample$ttsacks98[i]) == TRUE){
+                if(sample$h98a[i]=="a" & is.na(sample$h98a[i]) == FALSE & is.na(sample$ttsacks98[i]) == FALSE){
                         sample$sumnaacrop98[i] <-  1
                 }else
-                        if(sample$h00a[i]=="a" & is.na(sample$h00a[i]) == FALSE & is.na(sample$ttsacks00[i]) == TRUE){
+                        if(sample$h00a[i]=="a" & is.na(sample$h00a[i]) == FALSE & is.na(sample$ttsacks00[i]) == FALSE){
                                 sample$sumnaacrop00[i] <-  1
                         }else
-                                if(sample$h02a[i]=="a" & is.na(sample$h02a[i]) == FALSE & is.na(sample$ttsacks02[i]) == TRUE){
+                                if(sample$h02a[i]=="a" & is.na(sample$h02a[i]) == FALSE & is.na(sample$ttsacks02[i]) == FALSE){
                                         sample$sumnaacrop02[i] <-  1
                                 }else
-                                        if(sample$h04a[i]=="a" & is.na(sample$h04a[i]) == FALSE & is.na(sample$ttsacks04[i]) == TRUE){
+                                        if(sample$h04a[i]=="a" & is.na(sample$h04a[i]) == FALSE & is.na(sample$ttsacks04[i]) == FALSE){
                                                 sample$sumnaacrop04[i] <-  1
                                         }else
-                                                if(sample$h06a[i]=="a" & is.na(sample$h06a[i]) == FALSE & is.na(sample$ttsacks06[i]) == TRUE){
+                                                if(sample$h06a[i]=="a" & is.na(sample$h06a[i]) == FALSE & is.na(sample$ttsacks06[i]) == FALSE){
                                                         sample$sumnaacrop06[i] <-  1
                                                 }else
-                                                        if(sample$h10a[i]=="a" & is.na(sample$h10a[i]) == FALSE & is.na(sample$ttsacks10[i]) == TRUE){
+                                                        if(sample$h10a[i]=="a" & is.na(sample$h10a[i]) == FALSE & is.na(sample$ttsacks10[i]) == FALSE){
                                                                 sample$sumnaacrop10[i] <-  1
                                                         }else {
                                                                 sample$sumnaacrop95[i] <- 0
@@ -746,15 +752,40 @@ for(i in 1:nrow(sample)){
 #check who they are
 sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop00==1 | sample$sumnaacrop02==1 | sample$sumnaacrop04==1 | sample$sumnaacrop06==1 | sample$sumnaacrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 nrow(sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop00==1 | sample$sumnaacrop02==1 | sample$sumnaacrop04==1 | sample$sumnaacrop06==1 | sample$sumnaacrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
-#n=161
+#n=0
+
+## Cleaning sample  ----
 
 #make one sample
 nasample <- Reduce(function(x,y)merge(x,y,all=TRUE),list(nahxxattsacks,nattsacks,napttsacks,namttsacks))
 nasample
 nrow(nasample)
-#n=65
+#n=91
 
-write.csv(nasample,"C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/na_sample.csv",na="NA",row.names = FALSE)
+#get rid of NAs in UI
+nasample2 <- nasample[which(nasample$deleteUI=="no"),]
+nasample2
+nrow(nasample2)
+#n=74
+
+#check those where woman is absent of household and wealth data is missing
+nasample2[which(nasample2$h95a=="a" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="a" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="a" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="a" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="a" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="a" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="a" & is.na(nasample2$ttsacks10) == T ),]
+nrow(nasample2[which(nasample2$h95a=="a" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="a" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="a" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="a" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="a" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="a" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="a" & is.na(nasample2$ttsacks10) == T ),])
+#n=38
+
+#check those where woman is present of household and wealth data was not collected
+nasample2[which(nasample2$h95a=="m" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="m" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="m" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="m" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="m" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="m" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="m" & is.na(nasample2$ttsacks10) == T ),]
+nrow(nasample2[which(nasample2$h95a=="m" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="m" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="m" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="m" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="m" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="m" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="m" & is.na(nasample2$ttsacks10) == T ),])
+#n=40
+
+#check those where woman is present of household and wealth data is missing
+nasample2[which(nasample2$h95a=="p" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="p" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="p" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="p" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="p" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="p" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="p" & is.na(nasample2$ttsacks10) == T ),]
+nrow(nasample2[which(nasample2$h95a=="p" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="p" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="p" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="p" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="p" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="p" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="p" & is.na(nasample2$ttsacks10) == T ),])
+#n=43
+
+#clean sample based on UI then
+sample2 <- sample[which(sample$deleteUI=="no"),]
+sample2[,c("t15nnn","AFB for pablo","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 
 #### Plot them together ----
 
