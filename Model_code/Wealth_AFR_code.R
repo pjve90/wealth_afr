@@ -786,54 +786,37 @@ nrow(nasample2[which(nasample2$h95a=="p" & is.na(nasample2$ttsacks95) == T | nas
 #clean sample based on UI then
 sample2 <- sample[which(sample$deleteUI=="no"),]
 sample2[,c("t15nnn","AFB for pablo","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
+nrow(sample2)
 
 #### Plot them together ----
 
-#histograms
-pdf(file="C:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/ttsacks_hists.pdf",15,12)
-par(mfrow=c(1,1))
-palette(hcl.colors(7,"Berlin",alpha=0.2))
-plot(hist(sample$ttsacks95,breaks=30,plot=F),col=1,xlim=c(0,80),ylim=c(0,55))
-plot(hist(sample$ttsacks98,breaks=30,plot=F),col=2,add=T)
-plot(hist(sample$ttsacks00,breaks=30,plot=F),col=3,add=T)
-plot(hist(sample$ttsacks02,breaks=30,plot=F),col=4,add=T)
-plot(hist(sample$ttsacks04,breaks=30,plot=F),col=5,add=T)
-plot(hist(sample$ttsacks06,breaks=30,plot=F),col=6,add=T)
-plot(hist(sample$ttsacks10,breaks=30,plot=F),col=7,add=T)
-dev.off()
-
-#density plots
-layout( matrix(c(1,1,2,2,3,3,4,4,0,5,5,6,6,7,7,0), nrow=2, byrow=TRUE) )
-palette(hcl.colors(7,"Temps"))
-plot(density(sample$ttsacks95,na.rm=T),xlim=c(0,80),ylim=c(0,0.13),main="ttsacks",col=1)
-lines(density(sample$ttsacks98,na.rm=T),col=2)
-lines(density(sample$ttsacks00,na.rm=T),col=3)
-lines(density(sample$ttsacks02,na.rm=T),col=4)
-lines(density(sample$ttsacks04,na.rm=T),col=5)
-lines(density(sample$ttsacks06,na.rm=T),col=6)
-lines(density(sample$ttsacks10,na.rm=T),col=7)
-dev.off()
-
 #ridgeline plot
 #prepare data
-z <- data.frame(ttsacks=sample$ttsacks95,year=rep(1995,nrow(sample)))
-a <- data.frame(ttsacks=sample$ttsacks98,year=rep(1998,nrow(sample)))
+z <- data.frame(ttsacks=sample2$ttsacks95,year=rep(1995,nrow(sample2)))
+a <- data.frame(ttsacks=sample2$ttsacks98,year=rep(1998,nrow(sample2)))
 r <- rbind(z,a)
-a <- data.frame(ttsacks=sample$ttsacks00,year=rep(2000,nrow(sample)))
+a <- data.frame(ttsacks=sample2$ttsacks00,year=rep(2000,nrow(sample2)))
 r <- rbind(r,a)
-a <- data.frame(ttsacks=sample$ttsacks02,year=rep(2002,nrow(sample)))
+a <- data.frame(ttsacks=sample2$ttsacks02,year=rep(2002,nrow(sample2)))
 r <- rbind(r,a)
-a <- data.frame(ttsacks=sample$ttsacks04,year=rep(2004,nrow(sample)))
+a <- data.frame(ttsacks=sample2$ttsacks04,year=rep(2004,nrow(sample2)))
 r <- rbind(r,a)
-a <- data.frame(ttsacks=sample$ttsacks06,year=rep(2006,nrow(sample)))
+a <- data.frame(ttsacks=sample2$ttsacks06,year=rep(2006,nrow(sample2)))
 r <- rbind(r,a)
-a <- data.frame(ttsacks=sample$ttsacks10,year=rep(2010,nrow(sample)))
+a <- data.frame(ttsacks=sample2$ttsacks10,year=rep(2010,nrow(sample2)))
 r <- rbind(r,a)
 r <- r[!is.na(r$ttsacks),]
 #plot it!
 ggplot(r,aes(x=ttsacks,y=as.factor(year),fill=as.factor(year)))+
-  geom_density_ridges(alpha=0.7)+
-  scale_fill_brewer(palette="Spectral")+
+  stat_density_ridges(quantiles=0.5
+                      , quantile_lines = T
+                      , geom = "density_ridges_gradient"
+                      , position="raincloud"
+                      , scale=0.95)+
+  scale_fill_viridis(discrete=T
+                     ,name="Quantile"
+                     ,alpha=0.5
+                     ,option="magma")+
   theme_classic()+
   xlab("Cash crop sacks")+
   ylab("Year")+
