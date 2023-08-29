@@ -2,9 +2,20 @@
 
 # This script is meant to collect all the necessary code to build up the models and explore the data necessary to understand the relationship between wealth and age at first reproduction.
 
+## Install packages ----
+
 #install package to import excel file
 #install.packages("readxl")
 library(readxl)
+
+#install package for plotting
+#install.packages("tidyverse")
+library(tidyverse)
+#install.packages("ggridges")
+library(ggridges)
+#install.packages("viridis")
+library(viridis)
+
 
 ## Data exploration ----
 
@@ -99,6 +110,7 @@ table(sample$`twinY/N`)
 #n=23 twin status
 
 #### Age at first reproduction ----
+
 #check their age at first reproduction (AFR)
 summary(sample$`AFB for pablo`[sample$`AFB for pablo` < 100])
 sd(sample$`AFB for pablo`[sample$`AFB for pablo` < 100])
@@ -144,7 +156,8 @@ nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2007 & sample$`AFB for 
 nrow(sample[which(sample$`AFB for pablo`+sample$DOBYR >= 2011),])
 #n=272
 
-#### Age ----
+#### Year of birth ----
+
 #check the year of birth
 summary(sample$DOBYR)
 sd(sample$DOBYR)
@@ -678,7 +691,7 @@ for(i in 1:nrow(sample)){
 #check who they are
 napttsacks <- sample[which(sample$sumnapcrop95==1 | sample$sumnapcrop98==1 | sample$sumnapcrop00==1 | sample$sumnapcrop02==1 | sample$sumnapcrop04==1 | sample$sumnapcrop06==1 | sample$sumnapcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 nrow(napttsacks)
-#n=23
+#n=43
 
 #those where hhxa="m" and ttsacksxx!=NA
 for(i in 1:nrow(sample)){
@@ -715,7 +728,7 @@ for(i in 1:nrow(sample)){
 #check who they are
 namttsacks <- sample[which(sample$sumnamcrop95==1 | sample$sumnamcrop98==1 | sample$sumnamcrop00==1 | sample$sumnamcrop02==1 | sample$sumnamcrop04==1 | sample$sumnamcrop06==1 | sample$sumnamcrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10","deleteUI")]
 nrow(namttsacks)
-#n=24
+#n=40
 
 #those where hhxa="a" and ttsacksxx!=NA
 for(i in 1:nrow(sample)){
@@ -787,8 +800,82 @@ nrow(nasample2[which(nasample2$h95a=="p" & is.na(nasample2$ttsacks95) == T | nas
 sample2 <- sample[which(sample$deleteUI=="no"),]
 sample2[,c("t15nnn","AFB for pablo","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 nrow(sample2)
+#n=540
 
-#### Plot them together ----
+## Exploratory visualisation ----
+
+### Demographic data ----
+
+#### Age at first reproduction ----
+
+#with women who hasn't reproduced yet
+hist(sample2$`AFB for pablo`, prob=T,breaks=20, main="Histogram of AFR, with all women",xlab="AFR")
+lines(density(sample2$`AFB for pablo`),lwd=2)
+#only women that have had their first child
+hist(sample2$`AFB for pablo`[sample2$`AFB for pablo` < 100], prob=T,breaks=20, main="Histogram of AFR, with women who have had a child",xlab="AFR")
+lines(density(sample2$`AFB for pablo`[sample2$`AFB for pablo` < 100]),lwd=2)
+
+#### Birth Year ----
+
+#plot it!
+hist(sample2$DOBYR, prob=T,breaks=20, main="Histogram of year of birth",xlab="Year of birth")
+lines(density(sample2$DOBYR),lwd=2)
+
+#### Age at first reproduction ~ Birth year ----
+
+#the whole population
+colours <- c("Population"=viridis(2)[1],"Sample"=viridis(2)[2])
+
+ggplot(merge_1[merge_1$`AFB for pablo` < 999,],aes(x=DOBYR,y=`AFB for pablo`))+ 
+  geom_point(aes(colour="Population"),
+             alpha=0.5,
+             size=3)+
+  geom_point(data=sample2,
+             aes(x=DOBYR,y=`AFB for pablo`,colour="Sample"),
+             alpha=0.5,
+             size=3)+
+  labs(y="Age at First Reproduction",
+       x="birth year")+
+  scale_colour_manual(name="Data origin",
+                      values=colours)+
+  theme_classic()
+
+#Only with AFR
+ggplot(merge_1[merge_1$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+ 
+  geom_point(aes(colour="Population"),
+             alpha=0.5,
+             size=3)+
+  geom_point(data=sample2[sample2$`AFB for pablo` < 100,],
+             aes(x=DOBYR,y=`AFB for pablo`,colour="Sample"),
+             alpha=0.5,
+             size=3)+
+  labs(y="Age at First Reproduction",
+       x="birth year")+
+  scale_colour_manual(name="Data origin",
+                      values=colours)+
+  theme_classic()
+
+#Only sample
+ggplot(sample2,aes(x=DOBYR,y=`AFB for pablo`))+ 
+  geom_point(colour=viridis(3)[2],
+             alpha=0.5,
+             size=3)+
+  labs(y="Age at First Reproduction",
+       x="birth year")+
+  theme_classic()
+
+#Only sample that had their first child
+ggplot(sample2[sample2$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+ 
+  geom_point(colour=viridis(3)[2],
+             alpha=0.5,
+             size=3)+
+  labs(y="Age at First Reproduction",
+       x="birth year")+
+  theme_classic()
+
+### Wealth data ----
+
+#### Cash crops ----
 
 #ridgeline plot
 #prepare data
@@ -811,12 +898,12 @@ ggplot(r,aes(x=ttsacks,y=as.factor(year),fill=as.factor(year)))+
   stat_density_ridges(quantiles=0.5
                       , quantile_lines = T
                       , geom = "density_ridges_gradient"
-                      , position="raincloud"
                       , scale=0.95)+
   scale_fill_viridis(discrete=T
                      ,name="Quantile"
                      ,alpha=0.5
                      ,option="magma")+
+  scale_y_discrete(limits=rev)+
   theme_classic()+
   xlab("Cash crop sacks")+
   ylab("Year")+
