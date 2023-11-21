@@ -767,7 +767,9 @@ sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop
 nrow(sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop00==1 | sample$sumnaacrop02==1 | sample$sumnaacrop04==1 | sample$sumnaacrop06==1 | sample$sumnaacrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #n=0
 
-## Cleaning sample  ----
+## Data preparation  ----
+
+### Data cleaning ----
 
 #make one sample
 nasample <- Reduce(function(x,y)merge(x,y,all=TRUE),list(nahxxattsacks,nattsacks,napttsacks,namttsacks))
@@ -798,9 +800,168 @@ nrow(nasample2[which(nasample2$h95a=="p" & is.na(nasample2$ttsacks95) == T | nas
 
 #clean sample based on UI then
 sample2 <- sample[which(sample$deleteUI=="no"),]
-sample2[,c("t15nnn","AFB for pablo","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")]
 nrow(sample2)
 #n=540
+
+### New census-specific variables ----
+
+#### Age ----
+
+#1995
+#calculate age
+sample2$age95 <- 1995-sample2$DOBYR
+#plot it!
+hist(sample2$age95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$age95),lwd=2)
+
+#1998
+#calculate age
+sample2$age98 <- 1998-sample2$DOBYR
+#plot it!
+hist(sample2$age98, prob=T,breaks=20, main="Histogram of age in 1998",xlab="Age")
+lines(density(sample2$age98),lwd=2)
+
+#2000
+#calculate age
+sample2$age00 <- 2000-sample2$DOBYR
+#plot it!
+hist(sample2$age00, prob=T,breaks=20, main="Histogram of age in 2000",xlab="Age")
+lines(density(sample2$age00),lwd=2)
+
+#2002
+#calculate age
+sample2$age02 <- 2002-sample2$DOBYR
+#plot it!
+hist(sample2$age02, prob=T,breaks=20, main="Histogram of age in 2002",xlab="Age")
+lines(density(sample2$age02),lwd=2)
+
+#2004
+#calculate age
+sample2$age04 <- 2004-sample2$DOBYR
+#plot it!
+hist(sample2$age04, prob=T,breaks=20, main="Histogram of age in 2004",xlab="Age")
+lines(density(sample2$age04),lwd=2)
+
+#2006
+#calculate age
+sample2$age06 <- 2006-sample2$DOBYR
+#plot it!
+hist(sample2$age06, prob=T,breaks=20, main="Histogram of age in 2006",xlab="Age")
+lines(density(sample2$age06),lwd=2)
+
+#2010
+#calculate age
+sample2$age2010 <- 2010-sample2$DOBYR
+#plot it!
+hist(sample2$age10, prob=T,breaks=20, main="Histogram of age in 2010",xlab="Age")
+lines(density(sample2$age10),lwd=2)
+
+#### Having first reproduction or not ----
+
+#1995
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] <= sample2$age95[i]){
+    sample2$AFB95[i] <- 1
+  }else{
+    sample2$AFB95[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age95","AFB95")]
+#plot it!
+hist(sample2$AFB95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB95),lwd=2)
+
+#1998
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] > sample2$age95[i] & sample2$`AFB for pablo`[i] <= sample2$age98[i]){
+    sample2$AFB98[i] <- 1
+  } else{
+    sample2$AFB98[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age98","AFB98")]
+#plot it!
+hist(sample2$AFB98, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB98),lwd=2)
+
+#2000
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] > sample2$age98[i] & sample2$`AFB for pablo`[i] <= sample2$age00[i]){
+    sample2$AFB00[i] <- 1
+  } else{
+    sample2$AFB00[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age00","AFB00")]
+#plot it!
+hist(sample2$AFB00, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB00),lwd=2)
+
+#2002
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] > sample2$age00[i] & sample2$`AFB for pablo`[i] <= sample2$age02[i]){
+    sample2$AFB02[i] <- 1
+  } else{
+    sample2$AFB02[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age02","AFB02")]
+#plot it!
+hist(sample2$AFB02, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB02),lwd=2)
+
+#2004
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] > sample2$age02[i] & sample2$`AFB for pablo`[i] <= sample2$age04[i]){
+    sample2$AFB04[i] <- 1
+  } else{
+    sample2$AFB04[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age04","AFB04")]
+#plot it!
+hist(sample2$AFB04, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB04),lwd=2)
+
+#2006
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] > sample2$age04[i] & sample2$`AFB for pablo`[i] <= sample2$age06[i]){
+    sample2$AFB06[i] <- 1
+  } else{
+    sample2$AFB06[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age06","AFB06")]
+#plot it!
+hist(sample2$AFB06, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB06),lwd=2)
+
+#2010
+#calculate it
+for(i in 1:nrow(sample2)){
+  if(sample2$`AFB for pablo`[i] > sample2$age06[i] & sample2$`AFB for pablo`[i] <= sample2$age10[i]){
+    sample2$AFB10[i] <- 1
+  } else{
+    sample2$AFB10[i] <- 0
+  }
+}
+#check it
+sample2[,c("AFB for pablo","age10","AFB10")]
+#plot it!
+hist(sample2$AFB10, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$AFB10),lwd=2)
 
 ## Exploratory visualisation ----
 
@@ -818,15 +979,15 @@ lines(density(sample2$`AFB for pablo`[sample2$`AFB for pablo` < 100]),lwd=2)
 #### Birth Year ----
 
 #plot it!
-hist(sample2$DOBYR, prob=T,breaks=20, main="Histogram of year of birth",xlab="Year of birth")
+hist(sample2$DOBYR, prob=T,breaks=20, main="Histogram of year of birth",xlab="Birth year")
 lines(density(sample2$DOBYR),lwd=2)
 
 #### Age at first reproduction ~ Birth year ----
 
 #the whole population
 colours <- c("Population"=viridis(2)[1],"Sample"=viridis(2)[2])
-
-ggplot(merge_1[merge_1$`AFB for pablo` < 999,],aes(x=DOBYR,y=`AFB for pablo`))+ 
+#create an element
+allpop <- ggplot(merge_1[merge_1$`AFB for pablo` < 999,],aes(x=DOBYR,y=`AFB for pablo`))+ 
   geom_point(aes(colour="Population"),
              alpha=0.5,
              size=3)+
@@ -835,13 +996,16 @@ ggplot(merge_1[merge_1$`AFB for pablo` < 999,],aes(x=DOBYR,y=`AFB for pablo`))+
              alpha=0.5,
              size=3)+
   labs(y="Age at First Reproduction",
-       x="birth year")+
+       x="Birth year")+
   scale_colour_manual(name="Data origin",
                       values=colours)+
   theme_classic()
+#see plot
+allpop
 
 #Only with AFR
-ggplot(merge_1[merge_1$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+ 
+#create an element
+afrpop <- ggplot(merge_1[merge_1$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+ 
   geom_point(aes(colour="Population"),
              alpha=0.5,
              size=3)+
@@ -850,28 +1014,41 @@ ggplot(merge_1[merge_1$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+
              alpha=0.5,
              size=3)+
   labs(y="Age at First Reproduction",
-       x="birth year")+
+       x="Birth year")+
   scale_colour_manual(name="Data origin",
                       values=colours)+
   theme_classic()
+#see plot
+afrpop
 
 #Only sample
-ggplot(sample2,aes(x=DOBYR,y=`AFB for pablo`))+ 
+#create an element
+allsamp <- ggplot(sample2,aes(x=DOBYR,y=`AFB for pablo`))+ 
   geom_point(colour=viridis(3)[2],
              alpha=0.5,
              size=3)+
   labs(y="Age at First Reproduction",
-       x="birth year")+
+       x="Birth year")+
   theme_classic()
+#see plot
+allsamp
 
 #Only sample that had their first child
-ggplot(sample2[sample2$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+ 
+#create an element
+afrsamp <- ggplot(sample2[sample2$`AFB for pablo` < 100,],aes(x=DOBYR,y=`AFB for pablo`))+ 
   geom_point(colour=viridis(3)[2],
              alpha=0.5,
              size=3)+
   labs(y="Age at First Reproduction",
-       x="birth year")+
+       x="Birth year")+
   theme_classic()
+#see plot
+afrsamp
+
+ggarrange(allpop,afrpop,allsamp,afrsamp,
+          labels=c("A","B","C","D"),
+          ncol=2,
+          nrow=2)
 
 ### Wealth data ----
 
