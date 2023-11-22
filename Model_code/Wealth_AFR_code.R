@@ -851,7 +851,7 @@ lines(density(sample2$age06),lwd=2)
 
 #2010
 #calculate age
-sample2$age2010 <- 2010-sample2$DOBYR
+sample2$age10 <- 2010-sample2$DOBYR
 #plot it!
 hist(sample2$age10, prob=T,breaks=20, main="Histogram of age in 2010",xlab="Age")
 lines(density(sample2$age10),lwd=2)
@@ -962,6 +962,71 @@ sample2[,c("AFB for pablo","age10","AFB10")]
 #plot it!
 hist(sample2$AFB10, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$AFB10),lwd=2)
+
+#### Change in wealth ----
+
+#1995
+#calculate change
+sample2$diff95 <- sample2$ttsacks95-sample2$ttsacks95
+#check it
+sample2[,c("ttsacks95","diff95")]
+#plot it!
+hist(sample2$diff95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff95,na.rm = T),lwd=2)
+
+#1998
+#calculate change
+sample2$diff98 <- sample2$ttsacks98-sample2$ttsacks95
+#check it
+sample2[,c("ttsacks95","ttsacks98","diff98")]
+#plot it!
+hist(sample2$diff98, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff98,na.rm=T),lwd=2)
+
+#2000
+#calculate change
+sample2$diff00 <- sample2$ttsacks00-sample2$ttsacks98
+#check it
+sample2[,c("ttsacks98","ttsacks00","diff00")]
+#plot it!
+hist(sample2$diff00, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff00,na.rm=T),lwd=2)
+
+#2002
+#calculate change
+sample2$diff02 <- sample2$ttsacks02-sample2$ttsacks00
+#check it
+sample2[,c("ttsacks00","ttsacks02","diff02")]
+#plot it!
+hist(sample2$diff02, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff02,na.rm=T),lwd=2)
+
+#2004
+#calculate change
+sample2$diff04 <- sample2$ttsacks04-sample2$ttsacks02
+#check it
+sample2[,c("ttsacks02","ttsacks04","diff04")]
+#plot it!
+hist(sample2$diff04, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff04,na.rm=T),lwd=2)
+
+#2006
+#calculate change
+sample2$diff06 <- sample2$ttsacks06-sample2$ttsacks04
+#check it
+sample2[,c("ttsacks04","ttsacks06","diff06")]
+#plot it!
+hist(sample2$diff06, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff06,na.rm=T),lwd=2)
+
+#2010
+#calculate change
+sample2$diff10 <- sample2$ttsacks10-sample2$ttsacks06
+#check it
+sample2[,c("ttsacks06","ttsacks10","diff10")]
+#plot it!
+hist(sample2$diff10, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
+lines(density(sample2$diff10,na.rm=T),lwd=2)
 
 ## Exploratory visualisation ----
 
