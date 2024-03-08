@@ -239,7 +239,7 @@ hist(wealth[,1])
 # Simulate changes in wealth over time. Small changes from one year to the next from the initial value
 for(i in 1:nrow(wealth)){
   for(j in 2:ncol(wealth)){
-    wealth[i,j] <- wealth[i,j-1] + round(rnorm(1,mean=0,sd=0.5),0)
+    wealth[i,j] <- wealth[i,j-1] + round(rnorm(1,mean=0,sd=0.25),0)
     if(wealth[i,j]<0){wealth[i,j]<-0}
   }
 }
@@ -249,7 +249,7 @@ for(i in 1:nrow(wealth)){
 # vector with assumed influence of wealth on probability to reproduce. This example assumes that individuals with more wealth are more likely to reproduce later.
 
 # In this example there are 91 ages (0-90). We assume that individuals start reproducing at age 13, so the first 13 entries for ages 0-12 are zero, next we start with a negative influence that shifts at age 23 to positive values, and we assume that the maximum age of first reproduction is 33, after which the influence shifts to zero again
-beta_wealth<-c(rep(0,13),seq(from=-0.01, to=0.01,length=20),rep(0,58))
+beta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,58))
 
 
 #Age at first reproduction (AFR)
@@ -267,7 +267,9 @@ beta_age<-c(rep(0,13),0.01,0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.10,0.10,0.10,0.1
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
     if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afrs[i,j] <- rbinom(1,1,beta_age[j]+beta_wealth[j])
+      currentprobability<-beta_age[j]+beta_wealth[j]*(wealth[i,j]/15)
+      if(currentprobability<0){currentprobability<-0}
+      afrs[i,j] <- rbinom(1,1,currentprobability)
     } else{
       afrs[i,j] <- 0
     }  
@@ -280,6 +282,17 @@ colnames(afrs_distribution)<-c(0:90)
 plot(as.numeric(afrs_distribution[1,])~c(0:90))
 plot(as.numeric(afrs_distribution[1,])~beta_wealth)
 plot(as.numeric(afrs_distribution[1,])~beta_age)
+
+afr_age<-as.data.frame(which(afrs==1,arr.ind=TRUE))
+colnames(afr_age)<-c("id","afr")
+afr_age<-afr_age[order(afr_age$id),]
+ind_information<-as.data.frame(matrix(ncol=2,nrow=N))
+colnames(ind_information)<-c("id","wealth")
+ind_information$id<-c(1:N)
+ind_information<-left_join(ind_information,afr_age,by="id")
+ind_information$wealth<-rowMeans(wealth[,1:32])
+plot(ind_information$afr~ind_information$wealth)
+
 
 
 data <- list(N = N, #population size
