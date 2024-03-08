@@ -3,12 +3,42 @@
 # This script is meant to collect all the necessary code to build up the models and explore the data necessary to understand the relationship between wealth and age at first reproduction.
 
 #install package for bayesian analysis
-#install.packages("rethinking")
-library(rethinking)
+#install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+#remotes::install_github("stan-dev/cmdstanr")
+library(cmdstanr)
 
 ## Data exploration ----
 
 sample_2 <- read.csv(".~/sample2.csv",header=TRUE)
+
+## Building the model ----
+
+### Listing all the variables ----
+
+#Outcome: 
+## Age-specific probability of having your first child
+#Predictor(s):
+## Age
+## Residence
+## Absolute values of wealth at time t
+## Change of wealth from time t-1 to time t
+
+## Building model with gaussian process for age ----
+
+#model description in mathematical form
+## Prob(AFR_i) ~ Binomial(1,p_i)
+## logit(p_i) = alpha_age[i]
+## alpha_age ~ Normal(0,w)
+
+#create synthetic data
+data <- list(N = 1e3, 
+             A = 90,
+             baby = 1)
+
+
+
+
+
 
 ## Multiple linear regression ----
 

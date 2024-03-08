@@ -16,7 +16,6 @@ library(ggridges)
 #install.packages("viridis")
 library(viridis)
 
-
 ## Data exploration ----
 
 ### Import data ----
@@ -97,6 +96,10 @@ length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$C2.2 == 1
 table(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1])
 length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1])
 #n=837
+#check the number of women with age at first reproduction after the first census (1995), kids listed, and wealth data associated
+table(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1])
+length(merge_1$`AFB for pablo`[merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1])
+#557
 
 #subset sample
 sample <- merge_1[merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 1.1 | merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_1$DOBYR >= 1995 & merge_1$SexN == 0 & merge_1$C2.2 == 2.1,]
@@ -496,10 +499,9 @@ for(i in 1:nrow(sample)){
     sample$deleteUI2[i] <- "no"
   }
 }
-table(sample$delete2)
+table(sample$deleteUI)
 #no=540
 #yes=17
-
 
 ## Material wealth data ----
 
@@ -767,6 +769,135 @@ sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop
 nrow(sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop00==1 | sample$sumnaacrop02==1 | sample$sumnaacrop04==1 | sample$sumnaacrop06==1 | sample$sumnaacrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #n=0
 
+#### Simple data imputation ----
+
+#Replace NAs with the average for each year
+#95
+#check the data
+sample$ttsacks95
+#check number of NAs
+sum(is.na(sample$ttsacks95))
+#n=329
+#get the average number cash crops of the year
+mean(sample$ttsacks95,na.rm=T)
+#7.052
+#create new variable with data imputation
+sample$cashcrop95 <- sample$ttsacks95
+#replace the NAs with average of the year
+sample$cashcrop95[is.na(sample$cashcrop95)] <- mean(sample$ttsacks95,na.rm=T)
+#check it out
+sample$cashcrop95
+#check for NAs
+sum(is.na(sample$cashcrop95))
+
+#98
+#check the data
+sample$ttsacks98
+#check number of NAs
+sum(is.na(sample$ttsacks98))
+#n=262
+#get the average number cash crops of the year
+mean(sample$ttsacks98,na.rm=T)
+#4.745
+#create new variable with data imputation
+sample$cashcrop98 <- sample$ttsacks98
+#replace the NAs with average of the year
+sample$cashcrop98[is.na(sample$cashcrop98)] <- mean(sample$ttsacks98,na.rm=T)
+#check it out
+sample$cashcrop98
+#check for NAs
+sum(is.na(sample$cashcrop98))
+
+#00
+#check the data
+sample$ttsacks00
+#check number of NAs
+sum(is.na(sample$ttsacks00))
+#n=236
+#get the average number cash crops of the year
+mean(sample$ttsacks00,na.rm=T)
+#7.135
+#create new variable with data imputation
+sample$cashcrop00 <- sample$ttsacks00
+#replace the NAs with average of the year
+sample$cashcrop00[is.na(sample$cashcrop00)] <- mean(sample$ttsacks00,na.rm=T)
+#check it out
+sample$cashcrop00
+#check for NAs
+sum(is.na(sample$cashcrop00))
+
+#02
+#check the data
+sample$ttsacks02
+#check number of NAs
+sum(is.na(sample$ttsacks02))
+#n=220
+#get the average number cash crops of the year
+mean(sample$ttsacks02,na.rm=T)
+#8.821
+#create new variable with data imputation
+sample$cashcrop02 <- sample$ttsacks02
+#replace the NAs with average of the year
+sample$cashcrop02[is.na(sample$cashcrop02)] <- mean(sample$ttsacks02,na.rm=T)
+#check it out
+sample$cashcrop02
+#check for NAs
+sum(is.na(sample$cashcrop02))
+
+#04
+#check the data
+sample$ttsacks04
+#check number of NAs
+sum(is.na(sample$ttsacks04))
+#n=233
+#get the average number cash crops of the year
+mean(sample$ttsacks04,na.rm=T)
+#12.478
+#create new variable with data imputation
+sample$cashcrop04 <- sample$ttsacks04
+#replace the NAs with average of the year
+sample$cashcrop04[is.na(sample$cashcrop04)] <- mean(sample$ttsacks04,na.rm=T)
+#check it out
+sample$cashcrop04
+#check for NAs
+sum(is.na(sample$cashcrop04))
+
+#06
+#check the data
+sample$ttsacks06
+#check number of NAs
+sum(is.na(sample$ttsacks06))
+#n=234
+#get the average number cash crops of the year
+mean(sample$ttsacks06,na.rm=T)
+#14.722
+#create new variable with data imputation
+sample$cashcrop06 <- sample$ttsacks06
+#replace the NAs with average of the year
+sample$cashcrop06[is.na(sample$cashcrop06)] <- mean(sample$ttsacks06,na.rm=T)
+#check it out
+sample$cashcrop06
+#check for NAs
+sum(is.na(sample$cashcrop06))
+
+#10
+#check the data
+sample$ttsacks10
+#check number of NAs
+sum(is.na(sample$ttsacks10))
+#n=222
+#get the average number cash crops of the year
+mean(sample$ttsacks10,na.rm=T)
+#15.262
+#create new variable with data imputation
+sample$cashcrop10 <- sample$ttsacks10
+#replace the NAs with average of the year
+sample$cashcrop10[is.na(sample$cashcrop10)] <- mean(sample$ttsacks10,na.rm=T)
+#check it out
+sample$cashcrop10
+#check for NAs
+sum(is.na(sample$cashcrop10))
+
 ## Data preparation  ----
 
 ### Data cleaning ----
@@ -785,6 +916,7 @@ nrow(nasample2)
 
 #check those where woman is absent of household and wealth data is missing
 nasample2[which(nasample2$h95a=="a" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="a" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="a" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="a" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="a" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="a" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="a" & is.na(nasample2$ttsacks10) == T ),]
+
 nrow(nasample2[which(nasample2$h95a=="a" & is.na(nasample2$ttsacks95) == T | nasample2$h98a=="a" & is.na(nasample2$ttsacks98) == T | nasample2$h00a=="a" & is.na(nasample2$ttsacks00) == T | nasample2$h02a=="a" & is.na(nasample2$ttsacks02) == T | nasample2$h04a=="a" & is.na(nasample2$ttsacks04) == T | nasample2$h06a=="a" & is.na(nasample2$ttsacks06) == T | nasample2$h10a=="a" & is.na(nasample2$ttsacks10) == T ),])
 #n=38
 
@@ -967,63 +1099,63 @@ lines(density(sample2$AFB10),lwd=2)
 
 #1995
 #calculate change
-sample2$diff95 <- sample2$ttsacks95-sample2$ttsacks95
+sample2$diff95 <- sample2$cashcrop95-sample2$cashcrop95
 #check it
-sample2[,c("ttsacks95","diff95")]
+sample2[,c("cashcrop95","diff95")]
 #plot it!
 hist(sample2$diff95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff95,na.rm = T),lwd=2)
 
 #1998
 #calculate change
-sample2$diff98 <- sample2$ttsacks98-sample2$ttsacks95
+sample2$diff98 <- sample2$cashcrop98-sample2$cashcrop95
 #check it
-sample2[,c("ttsacks95","ttsacks98","diff98")]
+sample2[,c("cashcrop95","cashcrop98","diff98")]
 #plot it!
 hist(sample2$diff98, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff98,na.rm=T),lwd=2)
 
 #2000
 #calculate change
-sample2$diff00 <- sample2$ttsacks00-sample2$ttsacks98
+sample2$diff00 <- sample2$cashcrop00-sample2$cashcrop98
 #check it
-sample2[,c("ttsacks98","ttsacks00","diff00")]
+sample2[,c("cashcrop98","cashcrop00","diff00")]
 #plot it!
 hist(sample2$diff00, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff00,na.rm=T),lwd=2)
 
 #2002
 #calculate change
-sample2$diff02 <- sample2$ttsacks02-sample2$ttsacks00
+sample2$diff02 <- sample2$cashcrop02-sample2$cashcrop00
 #check it
-sample2[,c("ttsacks00","ttsacks02","diff02")]
+sample2[,c("cashcrop00","cashcrop02","diff02")]
 #plot it!
 hist(sample2$diff02, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff02,na.rm=T),lwd=2)
 
 #2004
 #calculate change
-sample2$diff04 <- sample2$ttsacks04-sample2$ttsacks02
+sample2$diff04 <- sample2$cashcrop04-sample2$cashcrop02
 #check it
-sample2[,c("ttsacks02","ttsacks04","diff04")]
+sample2[,c("cashcrop02","cashcrop04","diff04")]
 #plot it!
 hist(sample2$diff04, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff04,na.rm=T),lwd=2)
 
 #2006
 #calculate change
-sample2$diff06 <- sample2$ttsacks06-sample2$ttsacks04
+sample2$diff06 <- sample2$cashcrop06-sample2$cashcrop04
 #check it
-sample2[,c("ttsacks04","ttsacks06","diff06")]
+sample2[,c("cashcrop04","cashcrop06","diff06")]
 #plot it!
 hist(sample2$diff06, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff06,na.rm=T),lwd=2)
 
 #2010
 #calculate change
-sample2$diff10 <- sample2$ttsacks10-sample2$ttsacks06
+sample2$diff10 <- sample2$cashcrop10-sample2$cashcrop06
 #check it
-sample2[,c("ttsacks06","ttsacks10","diff10")]
+sample2[,c("cashcrop06","cashcrop10","diff10")]
 #plot it!
 hist(sample2$diff10, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
 lines(density(sample2$diff10,na.rm=T),lwd=2)
