@@ -42,7 +42,7 @@ parameters {
   real <lower = 0> age_tau;
   real <lower = 0> age_delta;
 // wealth
-  real wealth_beta;
+  vector [A] wealth_beta;
 
 }
 
@@ -73,7 +73,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         age[a] + // age
-        wealth_beta*wealth[n,a] // absolute wealth
+        wealth_beta[a]*wealth[n,a] // absolute wealth
         );
     }
     }

@@ -1,5 +1,11 @@
 #Code to build the models for the Pimbwe project ----
 
+#Load packages
+#install.packages("cmdstanr")
+library(cmdstanr)
+#install.packages("rethinking")
+library(rethinking)
+
 ## Model with Gaussian process of age ----
 
 #Create synthetic data
@@ -19,32 +25,33 @@ A <- 90
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
 afrs <- matrix(nrow=N,ncol=A+1)
 #make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
-afrs[,c(1:13,34:91)] <- 0
+afrs[,1:10] <- 0
 #randomly assign a positive output of AFR for individuals between ages 13 and 32
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
     if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afrs[i,j] <- rbinom(1,1,0.5)
+      afrs[i,j] <- rbinom(1,1,0.15)
     } else{
       afrs[i,j] <- 0
     }  
   }
 }
-
-library(dplyr)
-afrs_distribution<-as.data.frame(summarise_each(as.data.frame(afrs), sum))
-colnames(afrs_distribution)<-c(0:90)
-plot(as.numeric(afrs_distribution[1,])~c(0:90))
+#check the data
+#see the data
+head(afrs)
+#check the age-specific frequency of FR
+colSums(as.data.frame(afrs))
+#plot it
+plot(colSums(as.data.frame(afrs)),xlab="Age",ylab="Frequency")
 
 #put all the data together
-#create data
+#create dataset
 data <- list(N = N, #population size
 A = A+1, #age
 baby = afrs) #AFR
 
 # compile model
-library(cmdstanr)
-m1 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/firstbaby.stan")
+m1 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Model_code/firstbaby.stan")
 
 # fit model
 
@@ -60,6 +67,12 @@ fit1 <- m1$sample(data = data,
 fit_1 <- rstan::read_stan_csv(fit1$output_files())
 saveRDS(fit, "firstbaby.rds")
 
+#check the model
+#summary of the model
+fit1_estimates<-precis(fit1,depth=2)
+fit1_estimates
+plot(inv_logit(fit1_estimates[c(96:186),1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction")
+
 ## Model with Gaussian process of age and absolute levels of material wealth ----
 
 #Create synthetic data
@@ -72,35 +85,61 @@ N <- 100
 #maximum age of 90 years old
 A <- 90
 
+#Absolute wealth
+#simulate absolute wealth for each age
+#create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
+wealth <- matrix(nrow=N,ncol=A+1)
+#randomly assign an amount of wealth for each individual at age 0
+wealth[,1] <- rnorm(100,15,5)
+#change wealth of individuals through time
+for(j in 2:ncol(wealth)){
+  for(i in 1:nrow(wealth)){
+    wealth[i,j] <- wealth[i,j-1]+rnorm(1,0,0.25)
+  }
+}
+#check the data
+#see the data
+head(wealth)
+#check the age-specific absolute wealth
+colMeans(as.data.frame(wealth))
+#plot it
+plot(colMeans(as.data.frame(wealth)),xlab="Age",ylab="Average absolute wealth")
+
+#simulate an age-specific parameter for wealth
+beta_wealth<-c(rep(0,10),seq(from=-0.01,to=0.01,length=32),rep(0,49))
+
 #Age at first reproduction (AFR)
+
+#simulate an age-specific parameter for AFR
+beta_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
+
 #simulate binary ouput of AFR for each age
 #0=no first birth
 #1=yes first birth
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
 afrs <- matrix(nrow=N,ncol=A+1)
 #make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
-afrs[,c(1:13,34:91)] <- 0
-#randomly assign a positive output of AFR for individuals between ages 13 and 32
+afrs[,1:10] <- 0
+#randomly assign a positive output of AFR for individuals
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
     if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afrs[i,j] <- rbinom(1,1,0.5)
+      afr_prob <- beta_age[j]+beta_wealth[j]*(wealth[i,j]/15)
+      if(afr_prob<0){afr_prob<-0}
+      afrs[i,j] <- rbinom(1,1,afr_prob)
     } else{
       afrs[i,j] <- 0
     }  
   }
 }
 
-#Absolute wealth
-#simulate absolute wealth for each age
-#create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
-wealth <- matrix(nrow=N,ncol=A+1)
-#randomly assign an amount of wealth for each individual and age
-for(j in 1:ncol(wealth)){
-  for(i in 1:nrow(wealth)){
-    wealth[i,j] <- rnorm(1,15,5)
-  }
-}
+#check the data
+#see the data
+head(afrs)
+#check the age-specific frequency of FR
+colSums(as.data.frame(afrs))
+#plot it
+plot(colSums(as.data.frame(afrs)),xlab="Age",ylab="Frequency")
 
 #put all the data together
 #create data
@@ -113,7 +152,7 @@ data
 
 # compile model
 
-m2 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/firstbaby_abswealth.stan")
+m2 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Model_code/firstbaby_abswealth.stan")
 
 # fit model
 
@@ -129,6 +168,19 @@ fit2 <- m2$sample(data = data,
 fit_2 <- rstan::read_stan_csv(fit2$output_files())
 saveRDS(fit, "firstbaby.rds")
 
+#check the model
+#summary of the model
+fit2_estimates<-precis(fit2,depth=2)
+fit2_estimates
+#age
+fit2_estimates_age <- precis(fit2,depth=2,pars="age")
+fit2_estimates_age
+plot(inv_logit(fit2_estimates_age[,1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction")
+#wealth
+fit2_estimates_wealth <- precis(fit2,depth=2,pars="wealth_beta")
+fit2_estimates_wealth
+plot(inv_logit(fit2_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of wealth")
+
 ## Model with Gaussian process of age, absolute and difference of material wealth ----
 
 #Create synthetic data
@@ -141,35 +193,28 @@ N <- 100
 #maximum age of 90 years old
 A <- 90
 
-#Age at first reproduction (AFR)
-#simulate binary ouput of AFR for each age
-#0=no first birth
-#1=yes first birth
-#create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
-afrs <- matrix(nrow=N,ncol=A+1)
-#make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
-afrs[,c(1:13,34:91)] <- 0
-#randomly assign a positive output of AFR for individuals between ages 13 and 32
-for(j in 1:ncol(afrs)){
-  for(i in 1:nrow(afrs)){
-    if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afrs[i,j] <- rbinom(1,1,0.5)
-    } else{
-      afrs[i,j] <- 0
-    }  
-  }
-}
-
 #Absolute wealth
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
-wealth <- matrix(nrow=N,ncol=A+1)
-#randomly assign an amount of wealth for each individual and age
-for(j in 1:ncol(wealth)){
-  for(i in 1:nrow(wealth)){
-    wealth[i,j] <- rnorm(1,15,5)
+abswealth <- matrix(nrow=N,ncol=A+1)
+#randomly assign an amount of wealth for each individual at age 0
+abswealth[,1] <- rnorm(100,15,5)
+#change wealth of individuals through time
+for(j in 2:ncol(abswealth)){
+  for(i in 1:nrow(abswealth)){
+    abswealth[i,j] <- abswealth[i,j-1]+rnorm(1,0,0.25)
   }
 }
+#check the data
+#see the data
+head(abswealth)
+#check the age-specific absolute wealth
+colMeans(as.data.frame(abswealth))
+#plot it
+plot(colMeans(as.data.frame(abswealth)),xlab="Age",ylab="Average absolute wealth")
+
+#simulate an age-specific parameter for wealth
+beta_abswealth<-c(rep(0,10),seq(from=-0.01,to=0.01,length=32),rep(0,49))
 
 #Difference of wealth
 #simulate absolute wealth for each age
@@ -180,9 +225,52 @@ diffwealth[,1] <- 0
 #randomly assign an amount of wealth for each individual and age
 for(j in 2:ncol(diffwealth)){
   for(i in 1:nrow(diffwealth)){
-    diffwealth[i,j] <- wealth[i,j] - wealth[i,j-1]
+    diffwealth[i,j] <- abswealth[i,j] - abswealth[i,j-1]
   }
 }
+#check the data
+#see the data
+head(diffwealth)
+#check the age-specific absolute wealth
+colMeans(as.data.frame(diffwealth))
+#plot it
+plot(colMeans(as.data.frame(diffwealth)),xlab="Age",ylab="Average wealth variability")
+
+#simulate an age-specific parameter for wealth variability
+beta_diffwealth<-c(rep(0,10),seq(from=0.01,to=-0.01,length=32),rep(0,49))
+
+#Age at first reproduction (AFR)
+
+#simulate an age-specific parameter for AFR
+beta_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
+
+#simulate binary ouput of AFR for each age
+#0=no first birth
+#1=yes first birth
+#create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
+afrs <- matrix(nrow=N,ncol=A+1)
+#make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
+afrs[,1:10] <- 0
+#randomly assign a positive output of AFR for individuals
+for(j in 1:ncol(afrs)){
+  for(i in 1:nrow(afrs)){
+    if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
+      afr_prob <- beta_age[j]+beta_abswealth[j]*(abswealth[i,j]/15)+beta_diffwealth[j]*(diffwealth[i,j]/15)
+      if(afr_prob<0){afr_prob<-0}
+      afrs[i,j] <- rbinom(1,1,afr_prob)
+    } else{
+      afrs[i,j] <- 0
+    }  
+  }
+}
+
+#check the data
+#see the data
+head(afrs)
+#check the age-specific frequency of FR
+colSums(as.data.frame(afrs))
+#plot it
+plot(colSums(as.data.frame(afrs)),xlab="Age",ylab="Frequency")
 
 #put all the data together
 #create data
@@ -196,11 +284,11 @@ data
 
 # compile model
 
-m3 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/firstbaby_diffwealth.stan")
+m3 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Model_code/firstbaby_diffwealth.stan")
 
 # fit model
 
-fit3 <- m$sample(data = data, 
+fit3 <- m3$sample(data = data, 
                 chains = 4, 
                 parallel_chains = 4, 
                 adapt_delta = 0.95,
@@ -209,13 +297,29 @@ fit3 <- m$sample(data = data,
 
 # save fit 
 
-fit <- rstan::read_stan_csv(fit$output_files())
+fit_3 <- rstan::read_stan_csv(fit$output_files())
 saveRDS(fit, "firstbaby.rds")
 
+#check the model
+#summary of the model
+fit3_estimates<-precis(fit3,depth=2)
+fit3_estimates
+#age
+fit3_estimates_age <- precis(fit3,depth=2,pars="age")
+fit3_estimates_age
+plot(inv_logit(fit3_estimates_age[,1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction")
+#absolute wealth
+fit3_estimates_wealth <- precis(fit3,depth=2,pars="wealth_beta")
+fit3_estimates_wealth
+plot(inv_logit(fit3_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of absolute wealth")
+#Wealth variability
+fit3_estimates_wealth <- precis(fit3,depth=2,pars="wealth_gamma")
+fit3_estimates_wealth
+plot(inv_logit(fit3_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of wealth variability")
 
 
 
-##### Dieter's approach
+##### Dieter's approach -----
 
 
 #Create synthetic data
@@ -261,7 +365,7 @@ afrs <- matrix(nrow=N,ncol=A+1)
 # With this setup, we also need age-specific probabilities of having the first baby
 #make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
 # there are 91 values, the total sums to 1 (attributing the relative proportions across ages), probability peaks at ages 21-24
-beta_age<-c(rep(0,13),0.01,0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.10,0.10,0.10,0.10,0.08,0.06,0.05,0.04,0.03,0.02,0.01,0.01,rep(0,58) )
+beta_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
 
 # assign a positive output of AFR for individuals between ages 13 and 32
 for(j in 1:ncol(afrs)){

@@ -44,7 +44,7 @@ parameters {
 
 transformed parameters {
 
-  vector [A] mu; // each mu it's the effect of wealth at a given age...shouldn't this Gaussian process be only about age?
+  vector [A] mu; // each mu it's the effect of a given age
 
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
 
