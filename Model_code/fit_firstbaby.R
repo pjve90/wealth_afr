@@ -19,6 +19,10 @@ N <- 100
 A <- 90
 
 #Age at first reproduction (AFR)
+
+#simulate an age-specific parameter for AFR
+beta_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
+
 #simulate binary ouput of AFR for each age
 #0=no first birth
 #1=yes first birth
@@ -30,7 +34,9 @@ afrs[,1:10] <- 0
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
     if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afrs[i,j] <- rbinom(1,1,0.15)
+      afr_prob <- beta_age[j]
+      if(afr_prob<0){afr_prob<-0}
+      afrs[i,j] <- rbinom(1,1,afr_prob)
     } else{
       afrs[i,j] <- 0
     }  
@@ -65,13 +71,49 @@ fit1 <- m1$sample(data = data,
 # save fit 
 
 fit_1 <- rstan::read_stan_csv(fit1$output_files())
-saveRDS(fit, "firstbaby.rds")
+saveRDS(fit_1, "firstbaby1.rds")
 
 #check the model
 #summary of the model
 fit1_estimates<-precis(fit1,depth=2)
 fit1_estimates
-plot(inv_logit(fit1_estimates[c(96:186),1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction")
+plot(inv_logit(fit1_estimates[c(96:186),1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction",ylim=c(0,1))
+
+#load RDS file
+rds1 <- readRDS("firstbaby1.rds")
+#extract samples
+post1 <- extract.samples(rds1)
+
+#check trace of all main parameters
+#alpha
+traceplot(rds1,pars="alpha")
+#mu
+traceplot(rds1,pars="mu")
+#mu_raw, mu_tau, mu_delta
+traceplot(rds1,pars="mu_raw")
+#mu_tau
+traceplot(rds1,pars="mu_tau")
+#mu_kappa
+traceplot(rds1,pars="mu_kappa")
+#mu_delta
+traceplot(rds1,pars="mu_delta")
+
+#summary of the model
+#create summary table
+tab1 <- precis(rds1,depth=3,pars=c("alpha",
+                           "mu",
+                           "mu_raw",
+                           "mu_tau",
+                           "mu_delta"))
+#check table
+tab1
+
+#plot age random effect
+plot(c(1:91)~inv_logit(tab1[2:92,1]),
+     ylab="Age coeff.",
+     xlab="Age",
+     main="Model with Gaussian process of age")
+points(c(1:91)~beta_age,col="red")
 
 ## Model with Gaussian process of age and absolute levels of material wealth ----
 
@@ -145,7 +187,7 @@ plot(colSums(as.data.frame(afrs)),xlab="Age",ylab="Frequency")
 #create data
 data <- list(N = N, #population size
              A = A+1, #age
-             wealth = wealth, #absolute wealth
+             wealth = scale(wealth), #absolute wealth
              baby = afrs) #AFR
 #check data
 data
@@ -166,7 +208,7 @@ fit2 <- m2$sample(data = data,
 # save fit 
 
 fit_2 <- rstan::read_stan_csv(fit2$output_files())
-saveRDS(fit, "firstbaby.rds")
+saveRDS(fit_2, "firstbaby2.rds")
 
 #check the model
 #summary of the model
@@ -175,11 +217,58 @@ fit2_estimates
 #age
 fit2_estimates_age <- precis(fit2,depth=2,pars="age")
 fit2_estimates_age
-plot(inv_logit(fit2_estimates_age[,1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction")
+plot(inv_logit(fit2_estimates_age[,1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction",ylim=c(0,1))
 #wealth
 fit2_estimates_wealth <- precis(fit2,depth=2,pars="wealth_beta")
 fit2_estimates_wealth
-plot(inv_logit(fit2_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of wealth")
+plot(inv_logit(fit2_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of wealth",ylim=c(0,1))
+
+#load RDS file
+rds2 <- readRDS("firstbaby2.rds")
+#extract samples
+post2 <- extract.samples(rds2)
+
+#check trace of all main parameters
+#alpha
+traceplot(rds2,pars="alpha")
+#age
+traceplot(rds2,pars="age")
+#age_raw
+traceplot(rds2,pars="age_raw")
+#age_kappa
+traceplot(rds2,pars="age_kappa")
+#age_tau
+traceplot(rds2,pars="age_tau")
+#age_delta
+traceplot(rds2,pars="age_delta")
+#wealth_beta
+traceplot(rds2,pars="wealth_beta")
+
+#summary of the model
+#create summary table
+tab2 <- precis(rds2,depth=3,pars=c("alpha",
+                                   "age",
+                                   "age_raw",
+                                   "age_tau",
+                                   "age_kappa",
+                                   "age_delta",
+                                   "wealth_beta"))
+#check table
+tab2
+
+#plot age random effect
+plot(c(1:91)~inv_logit(tab2[2:92,1]),
+     xlab="Age coeff.",
+     ylab="Age",
+     main="Model with Gaussian process of age and absolute wealth")
+points(c(1:91)~beta_age,col="red")
+
+#plot wealth
+plot(c(1:91)~tab2[187:nrow(tab2),1],
+     xlab="Wealth coeff.",
+     ylab="Age",
+     main="Model with Gaussian process of age and absolute wealth")
+points(c(1:91)~beta_wealth,col="red")
 
 ## Model with Gaussian process of age, absolute and difference of material wealth ----
 
@@ -212,6 +301,8 @@ head(abswealth)
 colMeans(as.data.frame(abswealth))
 #plot it
 plot(colMeans(as.data.frame(abswealth)),xlab="Age",ylab="Average absolute wealth")
+#standardise wealth data
+abswealth <- scale(abswealth)
 
 #simulate an age-specific parameter for wealth
 beta_abswealth<-c(rep(0,10),seq(from=-0.01,to=0.01,length=32),rep(0,49))
@@ -235,6 +326,10 @@ head(diffwealth)
 colMeans(as.data.frame(diffwealth))
 #plot it
 plot(colMeans(as.data.frame(diffwealth)),xlab="Age",ylab="Average wealth variability")
+#standardise wealth variability data
+diffwealth <- scale(diffwealth)
+#change first row back to zero
+diffwealth[,1] <- 0
 
 #simulate an age-specific parameter for wealth variability
 beta_diffwealth<-c(rep(0,10),seq(from=0.01,to=-0.01,length=32),rep(0,49))
@@ -255,7 +350,7 @@ afrs[,1:10] <- 0
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
     if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afr_prob <- beta_age[j]+beta_abswealth[j]*(abswealth[i,j]/15)+beta_diffwealth[j]*(diffwealth[i,j]/15)
+      afr_prob <- beta_age[j]+beta_abswealth[j]*abswealth[i,j]+beta_diffwealth[j]*diffwealth[i,j]
       if(afr_prob<0){afr_prob<-0}
       afrs[i,j] <- rbinom(1,1,afr_prob)
     } else{
@@ -276,8 +371,8 @@ plot(colSums(as.data.frame(afrs)),xlab="Age",ylab="Frequency")
 #create data
 data <- list(N = N, #population size
              A = A+1, #age
-             abswealth = wealth, #absolute wealth
-             diffwealth = diffwealth, #difference in wealth
+             abswealth = abswealth, #standardised absolute wealth
+             diffwealth = diffwealth, #standardised difference in wealth
              baby = afrs) #AFR
 #check data
 data
@@ -297,8 +392,8 @@ fit3 <- m3$sample(data = data,
 
 # save fit 
 
-fit_3 <- rstan::read_stan_csv(fit$output_files())
-saveRDS(fit, "firstbaby.rds")
+fit_3 <- rstan::read_stan_csv(fit3$output_files())
+saveRDS(fit_3, "firstbaby3.rds")
 
 #check the model
 #summary of the model
@@ -307,17 +402,72 @@ fit3_estimates
 #age
 fit3_estimates_age <- precis(fit3,depth=2,pars="age")
 fit3_estimates_age
-plot(inv_logit(fit3_estimates_age[,1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction")
+plot(inv_logit(fit3_estimates_age[,1])~c(1:91),xlab="Age",ylab="Prob. of First Reproduction",ylim=c(0,1))
 #absolute wealth
 fit3_estimates_wealth <- precis(fit3,depth=2,pars="wealth_beta")
 fit3_estimates_wealth
-plot(inv_logit(fit3_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of absolute wealth")
+plot(inv_logit(fit3_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of absolute wealth",ylim=c(0,1))
 #Wealth variability
 fit3_estimates_wealth <- precis(fit3,depth=2,pars="wealth_gamma")
 fit3_estimates_wealth
-plot(inv_logit(fit3_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of wealth variability")
+plot(inv_logit(fit3_estimates_wealth[,1])~c(1:91),xlab="Age",ylab="Coeff. of wealth variability",ylim=c(0,1))
 
+#load RDS file
+rds3 <- readRDS("firstbaby3.rds")
+#extract samples
+post3 <- extract.samples(rds3)
 
+#check trace of all main parameters
+#alpha
+traceplot(rds3,pars="alpha")
+#age
+traceplot(rds3,pars="age")
+#age_raw
+traceplot(rds3,pars="age_raw")
+#age_kappa
+traceplot(rds3,pars="age_kappa")
+#age_tau
+traceplot(rds3,pars="age_tau")
+#age_delta
+traceplot(rds3,pars="age_delta")
+#wealth_beta
+traceplot(rds3,pars="wealth_beta")
+#wealth_gamma
+traceplot(rds3,pars="wealth_gamma")
+
+#summary of the model
+#create summary table
+tab3 <- precis(rds3,depth=3,pars=c("alpha",
+                                   "age",
+                                   "age_raw",
+                                   "age_tau",
+                                   "age_kappa",
+                                   "age_delta",
+                                   "wealth_beta",
+                                   "wealth_gamma"))
+#check table
+tab3
+
+#plot age random effect
+plot(c(1:91)~inv_logit(tab3[2:92,1]),
+     ylab="Age",
+     xlab="Age coeff.",
+     main="Model with Gaussian process of age, absolute and variability of wealth")
+points(c(1:91)~beta_age,col="red")
+
+#plot absolute wealth
+plot(c(1:91)~tab3[187:277,1],
+     ylab="Age",
+     xlab="Absolute wealth coeff.",
+     main="Model with Gaussian process of age, absolute and variability of wealth")
+points(c(1:91)~beta_abswealth,col="red")
+
+#plot wealth variability
+plot(c(1:91)~tab3[278:nrow(tab3),1],
+     ylab="Age",
+     xlab="Wealth variability coeff.",
+     main="Model with Gaussian process of age, absolute and variability of wealth")
+points(c(1:91)~beta_diffwealth,col="red")
 
 ##### Dieter's approach -----
 
