@@ -16,7 +16,9 @@ library(ggridges)
 #install.packages("viridis")
 library(viridis)
 
-## Data exploration ----
+## Data management ----
+
+#Here is the code to import the demographic and wealth datasets, merge them, and create a first sample based on age at first reproduction
 
 ### Import data ----
 #import data
@@ -82,6 +84,8 @@ merge_1 <- merge(merge_1,data_wealth_06,by=c("UIyearXhsh06"),all.x=T)
 #2010
 merge_1 <- merge(merge_1,data_wealth_10,by=c("UIyearXhsh10"),all.x=T)
 
+### Subset sample ----
+
 #women who are in the sampled window
 #sample size
 #check the number of individuals with known age at first reproduction
@@ -106,7 +110,14 @@ sample <- merge_1[merge_1$`AFB for pablo` < 999 & merge_1$`AFB for pablo`+merge_
 nrow(sample)
 #n=557
 
+
+## Data exploration ----
+
+#Here, the code is used to explore the distribution of the different variables used for the analyses.
+
 ### Demographic data ----
+
+#The demographic data is the age at first reproduction, year of birth, age, 
 
 #twin status
 table(sample$`twinY/N`)
@@ -124,6 +135,7 @@ sd(sample$`AFB for pablo`[sample$`AFB for pablo` < 100])
 #sd=2.924
 #check for NAs
 length(sample$`AFB for pablo`[sample$`AFB for pablo` == 999])
+sum(is.na(sample$`AFB for pablo`))
 #n=0
 #plot it!
 #with women who hasn't reproduced yet
@@ -934,6 +946,92 @@ nrow(nasample2[which(nasample2$h95a=="p" & is.na(nasample2$ttsacks95) == T | nas
 sample2 <- sample[which(sample$deleteUI=="no"),]
 nrow(sample2)
 #n=540
+
+### Data wrangling ----
+
+#create a data frame to collect all the data
+dataf <- data.frame(id=rep(NA,nrow(sample)))
+
+#### ID ----
+
+#get the ID variable
+#ID
+dataf$id <- sample$code
+#order
+dataf$order <- sample$t15nnn
+#check the data
+head(dataf)
+
+#### Age at first reproduction ----
+
+#get the variable for age at first reproduction
+dataf$afr <- sample$`AFB for pablo`
+dataf[which(dataf$afr==100),"afr"] <- NA
+#check data
+head(dataf)
+
+#### Year of birth ----
+
+#get the age
+#year of birth
+#get the year of birth
+dataf$dob <- sample$DOBYR
+#check data
+head(dataf)
+
+#### Age of censor ----
+
+#create age of censor variable
+dataf$aoc <- rep(NA,nrow(dataf))
+#calculate the age of censor for those women who did not reproduce during the data collection
+for (i in 1:nrow(dataf)){
+  if (is.na(dataf$afr[i]) == T) {
+    dataf$aoc[i] <- 2010 - dataf$dob[i]
+  } else{
+    dataf$aoc[i] <- NA
+  }
+}
+#check data
+head(dataf)
+
+#year of censor
+#calculate by adding the age of first reproduction to the year of birth, unless they have not reproduced during the time of data collection
+for (i in 1:nrow(dataf)){
+  if(dataf$afr[i] < 100){
+    dataf$doc[i] <- dataf$dob[i] + dataf$afr[i]
+  }else{
+    dataf$doc[i] <- 2010
+  }
+}
+#age of censor
+#calculate by substracting the year of censor with the year of birth
+dataf$aoc <- dataf$doc - dataf$dob
+#check data
+head(dataf)
+
+#### Age-specific age of first reproduction ----
+
+#age-specific age of first reproduction
+#create a matrix to store the age-specific age of censor
+afr_matrix <- matrix(nrow=nrow(dataf),ncol=91)
+#calculate for each age when the woman is censored (1) or not (0)
+for(i in 1:nrow(afr_matrix)){
+  afr <- dataf$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
+  aoc <- dataf$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
+  if(!is.na(afr)){
+    afr_matrix[i,1:(afr-1)] <- rep(0,length(afr_matrix[i,1:(afr-1)]))
+    afr_matrix[i,afr] <- 1
+  } else{
+    afr_matrix[i,1:(aoc-1)] <- rep(0,length(afr_matrix[i,1:(aoc-1)]))
+    afr_matrix[i,aoc] <- 1
+  }
+}
+#check the data
+afr_matrix
+#check the age-specific frequency of FR
+colSums(as.data.frame(afr_matrix),na.rm=T)
+#plot it
+barplot(colSums(as.data.frame(afr_matrix),na.rm = T),xlab="Age",ylab="Frequency")
 
 ### New census-specific variables ----
 
