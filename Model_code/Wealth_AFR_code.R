@@ -910,6 +910,399 @@ sample$cashcrop10
 #check for NAs
 sum(is.na(sample$cashcrop10))
 
+### Holdings, house value, and assets ----
+
+#### Summary statistics per year ----
+
+#1995
+summary(sample$SumValue_rdKts95)
+sd(sample$SumValue_rdKts95,na.rm=T)
+#min=35.10
+#median=60.12
+#mean=134.26
+#max=902.20
+#sd=158.898
+#check NAs
+sum(is.na(sample$SumValue_rdKts95))
+#n=329
+#plot it!
+hist(sample$SumValue_rdKts95, prob=T,breaks=20, main="Household wealth in 1995",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts95,na.rm = T),lwd=2)
+
+#1998
+summary(sample$SumValue_rdKts98)
+sd(sample$SumValue_rdKts98,na.rm=T)
+#min=49.09
+#median=122.02
+#mean=240.16
+#max=1291.12
+#sd=281.112
+#check NAs
+sum(is.na(sample$SumValue_rdKts98))
+#n=262
+#plot it!
+hist(sample$SumValue_rdKts98, prob=T,breaks=20, main="Household wealth in 1998",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts98,na.rm = T),lwd=2)
+
+#2000
+summary(sample$SumValue_rdKts00)
+sd(sample$SumValue_rdKts00,na.rm=T)
+#min=60.44
+#median=132.98
+#mean=287.04
+#max=1622.78
+#sd=357.4787
+#check NAs
+sum(is.na(sample$SumValue_rdKts00))
+#n=236
+#plot it!
+hist(sample$SumValue_rdKts00, prob=T,breaks=20, main="Household wealth in 2000",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts00,na.rm = T),lwd=2)
+
+#2002
+summary(sample$SumValue_rdKts02)
+sd(sample$SumValue_rdKts02,na.rm=T)
+#min=70.62
+#median=237.54
+#mean=414.08
+#max=1954.89
+#sd=472.024
+#check NAs
+sum(is.na(sample$SumValue_rdKts02))
+#n=220
+#plot it!
+hist(sample$SumValue_rdKts02, prob=T,breaks=20, main="Household wealth in 2002",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts02,na.rm = T),lwd=2)
+
+#2004
+summary(sample$SumValue_rdKts04)
+sd(sample$SumValue_rdKts04,na.rm=T)
+#min=84.23
+#median=324.56
+#mean=648.61
+#max=3423.55
+#sd=729.899
+#check NAs
+sum(is.na(sample$SumValue_rdKts04))
+#n=233
+#plot it!
+hist(sample$SumValue_rdKts04, prob=T,breaks=20, main="Household wealth in 2004",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts04,na.rm = T),lwd=2)
+
+#2006
+summary(sample$SumValue_rdKts06)
+sd(sample$SumValue_rdKts06,na.rm=T)
+#min=99.87
+#median=526.11
+#mean=1181.66
+#max=11306.74
+#sd=1648.761
+#check NAs
+sum(is.na(sample$SumValue_rdKts06))
+#n=234
+#plot it!
+hist(sample$SumValue_rdKts06, prob=T,breaks=20, main="Household wealth in 2006",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts06,na.rm = T),lwd=2)
+
+#2010
+summary(sample$SumValue_rdKts10)
+sd(sample$SumValue_rdKts10,na.rm=T)
+#min=144.5
+#median=1100.6
+#mean=2773.4
+#max=33886.8
+#sd=4940.559
+#check NAs
+sum(is.na(sample$SumValue_rdKts10))
+#n=222
+#plot it!
+hist(sample$SumValue_rdKts10, prob=T,breaks=20, main="Household wealth in 2010",xlab="Household wealth")
+lines(density(sample$SumValue_rdKts10,na.rm = T),lwd=2)
+
+#### Checking NAs ----
+
+#number of individuals with SumValue_rdKtsxx in all censuses
+summary(complete.cases(sample[c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")]))
+#n=89
+
+#individuals without any household wealth data (7 NAs in total)
+for(i in 1:nrow(sample)){
+  if(sum(is.na(sample[i,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])==T) == 7){
+    sample$sumnahhw[i] <- sum(is.na(sample[i,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])==T)
+    sample$deletehhw[i] <- "yes"
+  } else{
+    sample$sumnahhw[i] <- sum(is.na(sample[i,c("SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])==T)
+    sample$deletehhw[i] <- "no"
+  }
+}
+table(sample$deletehhw)
+#no=529
+#yes=28
+
+#check who they are
+#those without information in hxxa and household wealth
+nahxxaSumValue_rdKts <- sample[which(sample$delete == "yes" & sample$deletehhw == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10","deleteUI")]
+nrow(nahxxaSumValue_rdKts)
+nahxxaSumValue_rdKts
+#n=13
+#those without information in hxxa but have information in household wealth
+sample[which(sample$delete == "yes" & sample$deletehhw == "no"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10","deleteUI")]
+#n=0
+#those with information in hxxa but not in household wealth
+naSumValue_rdKts <- sample[which(sample$delete == "no" & sample$deletehhw == "yes"),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10","deleteUI")]
+nrow(naSumValue_rdKts)
+naSumValue_rdKts
+#n=15
+
+#those where hhxa="p" and SumValue_rdKtsxx=NA
+#create variables first
+sample$sumnaphhw95 <- rep(NA,nrow(sample))
+sample$sumnaphhw98 <- rep(NA,nrow(sample))
+sample$sumnaphhw00 <- rep(NA,nrow(sample))
+sample$sumnaphhw02 <- rep(NA,nrow(sample))
+sample$sumnaphhw04 <- rep(NA,nrow(sample))
+sample$sumnaphhw06 <- rep(NA,nrow(sample))
+sample$sumnaphhw10 <- rep(NA,nrow(sample))
+#run loop
+for(i in 1:nrow(sample)){
+  if(sample$h95a[i]=="p" & is.na(sample$h95a[i]) == FALSE & is.na(sample$SumValue_rdKts95[i]) == TRUE){
+    sample$sumnaphhw95[i] <-  1
+  } else
+    if(sample$h98a[i]=="p" & is.na(sample$h98a[i]) == FALSE & is.na(sample$SumValue_rdKts98[i]) == TRUE){
+      sample$sumnaphhw98[i] <-  1
+    }else
+      if(sample$h00a[i]=="p" & is.na(sample$h00a[i]) == FALSE & is.na(sample$SumValue_rdKts00[i]) == TRUE){
+        sample$sumnaphhw00[i] <-  1
+      }else
+        if(sample$h02a[i]=="p" & is.na(sample$h02a[i]) == FALSE & is.na(sample$SumValue_rdKts02[i]) == TRUE){
+          sample$sumnaphhw02[i] <-  1
+        }else
+          if(sample$h04a[i]=="p" & is.na(sample$h04a[i]) == FALSE & is.na(sample$SumValue_rdKts04[i]) == TRUE){
+            sample$sumnaphhw04[i] <-  1
+          }else
+            if(sample$h06a[i]=="p" & is.na(sample$h06a[i]) == FALSE & is.na(sample$SumValue_rdKts06[i]) == TRUE){
+              sample$sumnaphhw06[i] <-  1
+            }else
+              if(sample$h10a[i]=="p" & is.na(sample$h10a[i]) == FALSE & is.na(sample$SumValue_rdKts10[i]) == TRUE){
+                sample$sumnaphhw10[i] <-  1
+              }else {
+                sample$sumnaphhw95[i] <- 0
+                sample$sumnaphhw98[i] <- 0
+                sample$sumnaphhw00[i] <- 0
+                sample$sumnaphhw02[i] <- 0
+                sample$sumnaphhw04[i] <- 0
+                sample$sumnaphhw06[i] <- 0
+                sample$sumnaphhw10[i] <- 0
+              }
+}
+#check who they are
+napSumValue_rdKts <- sample[which(sample$sumnaphhw95==1 | sample$sumnaphhw98==1 | sample$sumnaphhw00==1 | sample$sumnaphhw02==1 | sample$sumnaphhw04==1 | sample$sumnaphhw06==1 | sample$sumnaphhw10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10","deleteUI")]
+nrow(napSumValue_rdKts)
+#n=43
+
+#those where hhxa="m" and SumValue_rdKtsxx!=NA
+for(i in 1:nrow(sample)){
+  if(sample$h95a[i]=="m" & is.na(sample$h95a[i]) == FALSE & is.na(sample$SumValue_rdKts95[i]) == TRUE){
+    sample$sumnamhhw95[i] <-  1
+  } else
+    if(sample$h98a[i]=="m" & is.na(sample$h98a[i]) == FALSE & is.na(sample$SumValue_rdKts98[i]) == TRUE){
+      sample$sumnamhhw98[i] <-  1
+    }else
+      if(sample$h00a[i]=="m" & is.na(sample$h00a[i]) == FALSE & is.na(sample$SumValue_rdKts00[i]) == TRUE){
+        sample$sumnamhhw00[i] <-  1
+      }else
+        if(sample$h02a[i]=="m" & is.na(sample$h02a[i]) == FALSE & is.na(sample$SumValue_rdKts02[i]) == TRUE){
+          sample$sumnamhhw02[i] <-  1
+        }else
+          if(sample$h04a[i]=="m" & is.na(sample$h04a[i]) == FALSE & is.na(sample$SumValue_rdKts04[i]) == TRUE){
+            sample$sumnamhhw04[i] <-  1
+          }else
+            if(sample$h06a[i]=="m" & is.na(sample$h06a[i]) == FALSE & is.na(sample$SumValue_rdKts06[i]) == TRUE){
+              sample$sumnamhhw06[i] <-  1
+            }else
+              if(sample$h10a[i]=="m" & is.na(sample$h10a[i]) == FALSE & is.na(sample$SumValue_rdKts10[i]) == TRUE){
+                sample$sumnamhhw10[i] <-  1
+              }else {
+                sample$sumnamhhw95[i] <- 0
+                sample$sumnamhhw98[i] <- 0
+                sample$sumnamhhw00[i] <- 0
+                sample$sumnamhhw02[i] <- 0
+                sample$sumnamhhw04[i] <- 0
+                sample$sumnamhhw06[i] <- 0
+                sample$sumnamhhw10[i] <- 0
+              }
+}
+#check who they are
+namSumValue_rdKts <- sample[which(sample$sumnamhhw95==1 | sample$sumnamhhw98==1 | sample$sumnamhhw00==1 | sample$sumnamhhw02==1 | sample$sumnamhhw04==1 | sample$sumnamhhw06==1 | sample$sumnamhhw10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10","deleteUI")]
+nrow(namSumValue_rdKts)
+#n=40
+
+#those where hhxa="a" and SumValue_rdKtsxx!=NA
+for(i in 1:nrow(sample)){
+  if(sample$h95a[i]=="a" & is.na(sample$h95a[i]) == FALSE & is.na(sample$SumValue_rdKts95[i]) == FALSE){
+    sample$sumnaahhw95[i] <-  1
+  } else
+    if(sample$h98a[i]=="a" & is.na(sample$h98a[i]) == FALSE & is.na(sample$SumValue_rdKts98[i]) == FALSE){
+      sample$sumnaahhw98[i] <-  1
+    }else
+      if(sample$h00a[i]=="a" & is.na(sample$h00a[i]) == FALSE & is.na(sample$SumValue_rdKts00[i]) == FALSE){
+        sample$sumnaahhw00[i] <-  1
+      }else
+        if(sample$h02a[i]=="a" & is.na(sample$h02a[i]) == FALSE & is.na(sample$SumValue_rdKts02[i]) == FALSE){
+          sample$sumnaahhw02[i] <-  1
+        }else
+          if(sample$h04a[i]=="a" & is.na(sample$h04a[i]) == FALSE & is.na(sample$SumValue_rdKts04[i]) == FALSE){
+            sample$sumnaahhw04[i] <-  1
+          }else
+            if(sample$h06a[i]=="a" & is.na(sample$h06a[i]) == FALSE & is.na(sample$SumValue_rdKts06[i]) == FALSE){
+              sample$sumnaahhw06[i] <-  1
+            }else
+              if(sample$h10a[i]=="a" & is.na(sample$h10a[i]) == FALSE & is.na(sample$SumValue_rdKts10[i]) == FALSE){
+                sample$sumnaahhw10[i] <-  1
+              }else {
+                sample$sumnaahhw95[i] <- 0
+                sample$sumnaahhw98[i] <- 0
+                sample$sumnaahhw00[i] <- 0
+                sample$sumnaahhw02[i] <- 0
+                sample$sumnaahhw04[i] <- 0
+                sample$sumnaahhw06[i] <- 0
+                sample$sumnaahhw10[i] <- 0
+              }
+}
+#check who they are
+sample[which(sample$sumnaahhw95==1 | sample$sumnaahhw98==1 | sample$sumnaahhw00==1 | sample$sumnaahhw02==1 | sample$sumnaahhw04==1 | sample$sumnaahhw06==1 | sample$sumnaahhw10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")]
+nrow(sample[which(sample$sumnaahhw95==1 | sample$sumnaahhw98==1 | sample$sumnaahhw00==1 | sample$sumnaahhw02==1 | sample$sumnaahhw04==1 | sample$sumnaahhw06==1 | sample$sumnaahhw10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])
+#n=0
+
+#### Simple data imputation ----
+
+#Replace NAs with the average for each year
+#95
+#check the data
+sample$SumValue_rdKts95
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts95))
+#n=329
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts95,na.rm=T)
+#134.265
+#create new variable with data imputation
+sample$hhw95 <- sample$SumValue_rdKts95
+#replace the NAs with average of the year
+sample$hhw95[is.na(sample$hhw95)] <- mean(sample$SumValue_rdKts95,na.rm=T)
+#check it out
+sample$hhw95
+#check for NAs
+sum(is.na(sample$hhw95))
+
+#98
+#check the data
+sample$SumValue_rdKts98
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts98))
+#n=262
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts98,na.rm=T)
+#240.156
+#create new variable with data imputation
+sample$hhw98 <- sample$SumValue_rdKts98
+#replace the NAs with average of the year
+sample$hhw98[is.na(sample$hhw98)] <- mean(sample$SumValue_rdKts98,na.rm=T)
+#check it out
+sample$hhw98
+#check for NAs
+sum(is.na(sample$hhw98))
+
+#00
+#check the data
+sample$SumValue_rdKts00
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts00))
+#n=236
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts00,na.rm=T)
+#287.0352
+#create new variable with data imputation
+sample$hhw00 <- sample$SumValue_rdKts00
+#replace the NAs with average of the year
+sample$hhw00[is.na(sample$hhw00)] <- mean(sample$SumValue_rdKts00,na.rm=T)
+#check it out
+sample$hhw00
+#check for NAs
+sum(is.na(sample$hhw00))
+
+#02
+#check the data
+sample$SumValue_rdKts02
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts02))
+#n=220
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts02,na.rm=T)
+#414.081
+#create new variable with data imputation
+sample$hhw02 <- sample$SumValue_rdKts02
+#replace the NAs with average of the year
+sample$hhw02[is.na(sample$hhw02)] <- mean(sample$SumValue_rdKts02,na.rm=T)
+#check it out
+sample$hhw02
+#check for NAs
+sum(is.na(sample$hhw02))
+
+#04
+#check the data
+sample$SumValue_rdKts04
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts04))
+#n=233
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts04,na.rm=T)
+#648.611
+#create new variable with data imputation
+sample$hhw04 <- sample$SumValue_rdKts04
+#replace the NAs with average of the year
+sample$hhw04[is.na(sample$hhw04)] <- mean(sample$SumValue_rdKts04,na.rm=T)
+#check it out
+sample$hhw04
+#check for NAs
+sum(is.na(sample$hhw04))
+
+#06
+#check the data
+sample$SumValue_rdKts06
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts06))
+#n=234
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts06,na.rm=T)
+#1181.657
+#create new variable with data imputation
+sample$hhw06 <- sample$SumValue_rdKts06
+#replace the NAs with average of the year
+sample$hhw06[is.na(sample$hhw06)] <- mean(sample$SumValue_rdKts06,na.rm=T)
+#check it out
+sample$hhw06
+#check for NAs
+sum(is.na(sample$hhw06))
+
+#10
+#check the data
+sample$SumValue_rdKts10
+#check number of NAs
+sum(is.na(sample$SumValue_rdKts10))
+#n=222
+#get the average number cash crops of the year
+mean(sample$SumValue_rdKts10,na.rm=T)
+#2773.432
+#create new variable with data imputation
+sample$hhw10 <- sample$SumValue_rdKts10
+#replace the NAs with average of the year
+sample$hhw10[is.na(sample$hhw10)] <- mean(sample$SumValue_rdKts10,na.rm=T)
+#check it out
+sample$hhw10
+#check for NAs
+sum(is.na(sample$hhw10))
+
 ## Data preparation  ----
 
 ### Data cleaning ----
@@ -950,32 +1343,30 @@ nrow(sample2)
 ### Data wrangling ----
 
 #create a data frame to collect all the data
-dataf <- data.frame(id=rep(NA,nrow(sample)))
+dataf <- data.frame(id=rep(NA,nrow(sample2)))
 
 #### ID ----
 
 #get the ID variable
 #ID
-dataf$id <- sample$code
+dataf$id <- sample2$code
 #order
-dataf$order <- sample$t15nnn
+dataf$order <- sample2$t15nnn
 #check the data
 head(dataf)
 
 #### Age at first reproduction ----
 
 #get the variable for age at first reproduction
-dataf$afr <- sample$`AFB for pablo`
+dataf$afr <- sample2$`AFB for pablo`
 dataf[which(dataf$afr==100),"afr"] <- NA
 #check data
 head(dataf)
 
 #### Year of birth ----
 
-#get the age
-#year of birth
 #get the year of birth
-dataf$dob <- sample$DOBYR
+dataf$dob <- sample2$DOBYR
 #check data
 head(dataf)
 
@@ -986,26 +1377,11 @@ dataf$aoc <- rep(NA,nrow(dataf))
 #calculate the age of censor for those women who did not reproduce during the data collection
 for (i in 1:nrow(dataf)){
   if (is.na(dataf$afr[i]) == T) {
-    dataf$aoc[i] <- 2010 - dataf$dob[i]
+    dataf$aoc[i] <- 2010 - dataf$dob[i] #2010 is the last census
   } else{
     dataf$aoc[i] <- NA
   }
 }
-#check data
-head(dataf)
-
-#year of censor
-#calculate by adding the age of first reproduction to the year of birth, unless they have not reproduced during the time of data collection
-for (i in 1:nrow(dataf)){
-  if(dataf$afr[i] < 100){
-    dataf$doc[i] <- dataf$dob[i] + dataf$afr[i]
-  }else{
-    dataf$doc[i] <- 2010
-  }
-}
-#age of censor
-#calculate by substracting the year of censor with the year of birth
-dataf$aoc <- dataf$doc - dataf$dob
 #check data
 head(dataf)
 
@@ -1031,232 +1407,257 @@ afr_matrix
 #check the age-specific frequency of FR
 colSums(as.data.frame(afr_matrix),na.rm=T)
 #plot it
-barplot(colSums(as.data.frame(afr_matrix),na.rm = T),xlab="Age",ylab="Frequency")
+plot(c(1:91)~colSums(as.data.frame(afr_matrix),na.rm = T),xlab="Age",ylab="Frequency")
 
-### New census-specific variables ----
+#weird values is because afr and aoc are both 1, so how to differentiate between afr and censor?
 
-#### Age ----
+#### Absolute wealth ----
 
-#1995
-#calculate age
-sample2$age95 <- 1995-sample2$DOBYR
-#plot it!
-hist(sample2$age95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$age95),lwd=2)
+#get the absolute wealth per census
+#95
+dataf$absw95 <- sample2$hhw95 
+#98
+dataf$absw98 <- sample2$hhw98 
+#00
+dataf$absw00 <- sample2$hhw00 
+#02
+dataf$absw02 <- sample2$hhw02 
+#04
+dataf$absw04 <- sample2$hhw04 
+#06
+dataf$absw06 <- sample2$hhw06 
+#10
+dataf$absw10 <- sample2$hhw10 
+#check the data
+head(dataf)
 
-#1998
-#calculate age
-sample2$age98 <- 1998-sample2$DOBYR
-#plot it!
-hist(sample2$age98, prob=T,breaks=20, main="Histogram of age in 1998",xlab="Age")
-lines(density(sample2$age98),lwd=2)
+#### Age-specific wealth ----
 
-#2000
-#calculate age
-sample2$age00 <- 2000-sample2$DOBYR
-#plot it!
-hist(sample2$age00, prob=T,breaks=20, main="Histogram of age in 2000",xlab="Age")
-lines(density(sample2$age00),lwd=2)
-
-#2002
-#calculate age
-sample2$age02 <- 2002-sample2$DOBYR
-#plot it!
-hist(sample2$age02, prob=T,breaks=20, main="Histogram of age in 2002",xlab="Age")
-lines(density(sample2$age02),lwd=2)
-
-#2004
-#calculate age
-sample2$age04 <- 2004-sample2$DOBYR
-#plot it!
-hist(sample2$age04, prob=T,breaks=20, main="Histogram of age in 2004",xlab="Age")
-lines(density(sample2$age04),lwd=2)
-
-#2006
-#calculate age
-sample2$age06 <- 2006-sample2$DOBYR
-#plot it!
-hist(sample2$age06, prob=T,breaks=20, main="Histogram of age in 2006",xlab="Age")
-lines(density(sample2$age06),lwd=2)
-
-#2010
-#calculate age
-sample2$age10 <- 2010-sample2$DOBYR
-#plot it!
-hist(sample2$age10, prob=T,breaks=20, main="Histogram of age in 2010",xlab="Age")
-lines(density(sample2$age10),lwd=2)
-
-#### Having first reproduction or not ----
-
-#1995
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] <= sample2$age95[i]){
-    sample2$AFB95[i] <- 1
+#calculate the age at each wealth measure
+#95
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 1995){
+    dataf$age_absw95[i] <- 1995 - dataf$dob[i]
   }else{
-    sample2$AFB95[i] <- 0
+    dataf$age_absw95[i] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age95","AFB95")]
-#plot it!
-hist(sample2$AFB95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB95),lwd=2)
+#check the data
+dataf$age_absw95
+#98
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 1998){
+    dataf$age_absw98[i] <- 1998 - dataf$dob[i]
+  }else{
+    dataf$age_absw98[i] <- NA
+  }
+}
+#check the data
+dataf$age_absw98
+#00
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 2000){
+    dataf$age_absw00[i] <- 2000 - dataf$dob[i]
+  }else{
+    dataf$age_absw00[i] <- NA
+  }
+}
+#check the data
+dataf$age_absw00
+#02
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 2002){
+    dataf$age_absw02[i] <- 2002 - dataf$dob[i]
+  }else{
+    dataf$age_absw02[i] <- NA
+  }
+}
+#check the data
+dataf$age_absw02
+#04
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 2004){
+    dataf$age_absw04[i] <- 2004 - dataf$dob[i]
+  }else{
+    dataf$age_absw04[i] <- NA
+  }
+}
+#check the data
+dataf$age_absw04
+#06
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 2006){
+    dataf$age_absw06[i] <- 2006 - dataf$dob[i]
+  }else{
+    dataf$age_absw06[i] <- NA
+  }
+}
+#check the data
+dataf$age_absw06
+#10
+#calculate age for those who were born by the time of the census
+for (i in 1:nrow(dataf)){
+  if(dataf$dob[i] <= 2010){
+    dataf$age_absw10[i] <- 2010 - dataf$dob[i]
+  }else{
+    dataf$age_absw10[i] <- NA
+  }
+}
+#check the data
+dataf$age_absw10
+#check the data
+head(dataf)
 
-#1998
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] > sample2$age95[i] & sample2$`AFB for pablo`[i] <= sample2$age98[i]){
-    sample2$AFB98[i] <- 1
+#### Age-specific absolute wealth ----
+
+#age-specific absolute wealth
+#create matrix to store the age-specific amount of wealth
+absw_matrix <- matrix(nrow = nrow(dataf),ncol=91)
+#calculate for each age the amount of wealth the household of a woman has, based on each census
+#95
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw95[i]
+  age_absw <- dataf$age_absw95[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
   } else{
-    sample2$AFB98[i] <- 0
+    absw_matrix[i,age_absw] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age98","AFB98")]
-#plot it!
-hist(sample2$AFB98, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB98),lwd=2)
-
-#2000
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] > sample2$age98[i] & sample2$`AFB for pablo`[i] <= sample2$age00[i]){
-    sample2$AFB00[i] <- 1
+#check data
+absw_matrix
+#98
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw98[i]
+  age_absw <- dataf$age_absw98[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
   } else{
-    sample2$AFB00[i] <- 0
+    absw_matrix[i,age_absw] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age00","AFB00")]
-#plot it!
-hist(sample2$AFB00, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB00),lwd=2)
-
-#2002
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] > sample2$age00[i] & sample2$`AFB for pablo`[i] <= sample2$age02[i]){
-    sample2$AFB02[i] <- 1
+#check data
+absw_matrix
+#00
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw00[i]
+  age_absw <- dataf$age_absw00[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
   } else{
-    sample2$AFB02[i] <- 0
+    absw_matrix[i,age_absw] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age02","AFB02")]
-#plot it!
-hist(sample2$AFB02, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB02),lwd=2)
-
-#2004
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] > sample2$age02[i] & sample2$`AFB for pablo`[i] <= sample2$age04[i]){
-    sample2$AFB04[i] <- 1
+#check data
+absw_matrix
+#02
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw02[i]
+  age_absw <- dataf$age_absw02[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
   } else{
-    sample2$AFB04[i] <- 0
+    absw_matrix[i,age_absw] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age04","AFB04")]
-#plot it!
-hist(sample2$AFB04, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB04),lwd=2)
-
-#2006
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] > sample2$age04[i] & sample2$`AFB for pablo`[i] <= sample2$age06[i]){
-    sample2$AFB06[i] <- 1
+#check data
+absw_matrix
+#04
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw04[i]
+  age_absw <- dataf$age_absw04[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
   } else{
-    sample2$AFB06[i] <- 0
+    absw_matrix[i,age_absw] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age06","AFB06")]
-#plot it!
-hist(sample2$AFB06, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB06),lwd=2)
-
-#2010
-#calculate it
-for(i in 1:nrow(sample2)){
-  if(sample2$`AFB for pablo`[i] > sample2$age06[i] & sample2$`AFB for pablo`[i] <= sample2$age10[i]){
-    sample2$AFB10[i] <- 1
+#check data
+absw_matrix
+#06
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw06[i]
+  age_absw <- dataf$age_absw06[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
   } else{
-    sample2$AFB10[i] <- 0
+    absw_matrix[i,age_absw] <- NA
   }
 }
-#check it
-sample2[,c("AFB for pablo","age10","AFB10")]
-#plot it!
-hist(sample2$AFB10, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$AFB10),lwd=2)
+#check data
+absw_matrix
+#10
+for(i in 1:nrow(absw_matrix)){
+  absw <- dataf$absw10[i]
+  age_absw <- dataf$age_absw10[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
+  if(!is.na(age_absw)){
+    absw_matrix[i,age_absw] <- absw
+  } else{
+    absw_matrix[i,age_absw] <- NA
+  }
+}
+#check data
+absw_matrix
+#check the age-specific frequency of absolute wealth
+colMeans(as.data.frame(absw_matrix),na.rm=T)
+#plot it
+plot(colMeans(as.data.frame(absw_matrix),na.rm = T)~c(1:91),xlab="Age",ylab="Average absolute wealth")
 
-#### Change in wealth ----
+#NaN in columns where there are no values of wealth
 
-#1995
-#calculate change
-sample2$diff95 <- sample2$cashcrop95-sample2$cashcrop95
-#check it
-sample2[,c("cashcrop95","diff95")]
-#plot it!
-hist(sample2$diff95, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff95,na.rm = T),lwd=2)
+#simple data imputation
+#replace the women with NAs (row) with the average wealth per age (column)
+for(j in 1:ncol(absw_matrix)){
+  for(i in 1:nrow(absw_matrix)){
+    if(is.na(absw_matrix[i,j])){
+      absw_matrix[i,j] <- colMeans(as.data.frame(absw_matrix),na.rm=T)[j]
+    } else{
+      absw_matrix[i,j] <- absw_matrix[i,j]
+    }
+}
+}
+#check the data
+absw_matrix
+#replace the ages with NAs (column) with the average wealth per woman (row)
+for(j in 1:ncol(absw_matrix)){
+  for(i in 1:nrow(absw_matrix)){
+    if(is.na(absw_matrix[i,j])){
+      absw_matrix[i,j] <- rowMeans(as.data.frame(absw_matrix),na.rm=T)[i]
+    } else{
+      absw_matrix[i,j] <- absw_matrix[i,j]
+    }
+  }
+}
+#check the data
+absw_matrix
 
-#1998
-#calculate change
-sample2$diff98 <- sample2$cashcrop98-sample2$cashcrop95
-#check it
-sample2[,c("cashcrop95","cashcrop98","diff98")]
-#plot it!
-hist(sample2$diff98, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff98,na.rm=T),lwd=2)
+#### Age-specific change in wealth ----
 
-#2000
-#calculate change
-sample2$diff00 <- sample2$cashcrop00-sample2$cashcrop98
-#check it
-sample2[,c("cashcrop98","cashcrop00","diff00")]
-#plot it!
-hist(sample2$diff00, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff00,na.rm=T),lwd=2)
-
-#2002
-#calculate change
-sample2$diff02 <- sample2$cashcrop02-sample2$cashcrop00
-#check it
-sample2[,c("cashcrop00","cashcrop02","diff02")]
-#plot it!
-hist(sample2$diff02, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff02,na.rm=T),lwd=2)
-
-#2004
-#calculate change
-sample2$diff04 <- sample2$cashcrop04-sample2$cashcrop02
-#check it
-sample2[,c("cashcrop02","cashcrop04","diff04")]
-#plot it!
-hist(sample2$diff04, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff04,na.rm=T),lwd=2)
-
-#2006
-#calculate change
-sample2$diff06 <- sample2$cashcrop06-sample2$cashcrop04
-#check it
-sample2[,c("cashcrop04","cashcrop06","diff06")]
-#plot it!
-hist(sample2$diff06, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff06,na.rm=T),lwd=2)
-
-#2010
-#calculate change
-sample2$diff10 <- sample2$cashcrop10-sample2$cashcrop06
-#check it
-sample2[,c("cashcrop06","cashcrop10","diff10")]
-#plot it!
-hist(sample2$diff10, prob=T,breaks=20, main="Histogram of age in 1995 census",xlab="Age")
-lines(density(sample2$diff10,na.rm=T),lwd=2)
+#age-specific change in wealth
+#create matrix to store the age-specific wealth variation
+diffw_matrix <- matrix(nrow = nrow(dataf),ncol=91)
+#calculate the age-specific wealth variation
+for(j in 1:ncol(diffw_matrix)){
+  for(i in 1:nrow(diffw_matrix)){
+    if(j ==1){
+      diffw_matrix[i,j] <- absw_matrix[i,j] - absw_matrix[i,j]
+    } else{
+      diffw_matrix[i,j] <- absw_matrix[i,j] - absw_matrix[i,j-1]
+    }
+  }
+}
+#check data
+diffw_matrix
+#check the age-specific frequency of wealth variability
+colMeans(as.data.frame(diffw_matrix),na.rm=T)
+#plot it
+plot(colMeans(as.data.frame(diffw_matrix),na.rm = T)~c(1:91),xlab="Age",ylab="Wealth variability")
 
 ## Exploratory visualisation ----
 

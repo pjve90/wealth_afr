@@ -302,7 +302,7 @@ colMeans(as.data.frame(abswealth))
 #plot it
 plot(colMeans(as.data.frame(abswealth)),xlab="Age",ylab="Average absolute wealth")
 #standardise wealth data
-abswealth <- scale(abswealth)
+abswealth <- standardize(abswealth)
 
 #simulate an age-specific parameter for wealth
 beta_abswealth<-c(rep(0,10),seq(from=-0.01,to=0.01,length=32),rep(0,49))
@@ -468,6 +468,28 @@ plot(c(1:91)~tab3[278:nrow(tab3),1],
      xlab="Wealth variability coeff.",
      main="Model with Gaussian process of age, absolute and variability of wealth")
 points(c(1:91)~beta_diffwealth,col="red")
+
+# Standardize data ----
+
+#absolute wealth
+#create a matrix
+std_absw_matrix <- matrix(nrow=nrow(absw_matrix),ncol=ncol(absw_matrix))
+#standardize wealth data per column
+for(j in 1:ncol(std_absw_matrix)){
+  std_absw_matrix[,j] <- standardize(absw_matrix[,j])
+}
+#check data
+std_absw_matrix
+
+#wealth variability
+#create a matrix
+std_diffw_matrix <- matrix(nrow=nrow(diffw_matrix),ncol=ncol(diffw_matrix))
+#standardize wealth data per column
+for(j in 1:ncol(std_diffw_matrix)){
+  std_diffw_matrix[,j] <- standardize(diffw_matrix[,j])
+}
+#check data
+std_diffw_matrix
 
 ##### Dieter's approach -----
 
