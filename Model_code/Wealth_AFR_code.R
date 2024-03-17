@@ -1398,8 +1398,7 @@ for(i in 1:nrow(afr_matrix)){
     afr_matrix[i,1:(afr-1)] <- rep(0,length(afr_matrix[i,1:(afr-1)]))
     afr_matrix[i,afr] <- 1
   } else{
-    afr_matrix[i,1:(aoc-1)] <- rep(0,length(afr_matrix[i,1:(aoc-1)]))
-    afr_matrix[i,aoc] <- 1
+    afr_matrix[i,1:aoc] <- rep(0,length(afr_matrix[i,1:aoc]))
   }
 }
 #check the data
@@ -1409,7 +1408,22 @@ colSums(as.data.frame(afr_matrix),na.rm=T)
 #plot it
 plot(c(1:91)~colSums(as.data.frame(afr_matrix),na.rm = T),xlab="Age",ylab="Frequency")
 
-#weird values is because afr and aoc are both 1, so how to differentiate between afr and censor?
+#weird values is because afr and aoc are both 0, so how to differentiate between afr and censor?
+
+#replace NAs with zeros
+#replace NaN with zero...not sure is right, though
+for(j in 1:ncol(afr_matrix)){
+  for(i in 1:nrow(afr_matrix)){
+    if(is.na(afr_matrix[i,j])){
+      afr_matrix[i,j] <- 0
+    } else{
+      afr_matrix[i,j] <- afr_matrix[i,j]
+    }
+  }
+}
+#check the data
+afr_matrix
+
 
 #### Absolute wealth ----
 

@@ -32,8 +32,9 @@ data {
 
 parameters {
 
+//global intercept
   real alpha;
-
+//Gaussian process of age
   vector [A] mu_raw;
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
@@ -44,7 +45,8 @@ parameters {
 
 transformed parameters {
 
-  vector [A] mu; // each mu it's the effect of a given age
+//Time-varying Gaussian proceess of age
+  vector [A] mu; 
 
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
 
@@ -55,7 +57,7 @@ model {
     alpha ~ normal(0,1);
     
     mu_raw ~ normal(0, 1);
-    mu_kappa ~ beta(12, 2);
+    mu_kappa ~ beta(12,2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
 
@@ -63,9 +65,9 @@ model {
   for (n in 1:N) {
   for (a in 1:A) {
 
-      baby[n, a] ~ bernoulli_logit(
-        alpha +
-        mu[a]);
+      baby[n, a] ~ bernoulli_logit( //probability of having your first child
+        alpha + // global intercept
+        mu[a]); // age
 
     }
     }

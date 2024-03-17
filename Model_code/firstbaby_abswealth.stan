@@ -37,12 +37,12 @@ parameters {
 // global intercept
   real alpha;
 // Gaussian process of age
-  vector [A] age_raw;
-  real <lower = 0, upper = 1> age_kappa;
-  real <lower = 0> age_tau;
-  real <lower = 0> age_delta;
-// wealth
-  vector [A] wealth_beta;
+  vector [A] mu_raw;
+  real <lower = 0, upper = 1> mu_kappa;
+  real <lower = 0> mu_tau;
+  real <lower = 0> mu_delta;
+// absolute wealth
+  vector [A] beta_wealth;
 
 }
 
@@ -50,21 +50,21 @@ parameters {
 transformed parameters {
 
 //Time-varying Gaussian process of age
-  vector [A] age;
+  vector [A] mu;
   
-    age = GP(A, age_kappa, age_tau, age_delta) * age_raw;
+    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
   }
 
 model {
 
     alpha ~ normal(0,1);
     
-    age_raw ~ normal(0, 1);
-    age_kappa ~ beta(12, 2);
-    age_tau ~ exponential(1);
-    age_delta ~ exponential(1);
+    mu_raw ~ normal(0, 1);
+    mu_kappa ~ beta(12, 2);
+    mu_tau ~ exponential(1);
+    mu_delta ~ exponential(1);
     
-    wealth_beta ~ normal(0,1);
+    beta_wealth ~ normal(0,1);
 
     
   for (n in 1:N) {
@@ -72,8 +72,8 @@ model {
 
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
-        age[a] + // age
-        wealth_beta[a]*wealth[n,a] // absolute wealth
+        mu[a] + // age
+        beta_wealth[a]*wealth[n,a] // absolute wealth
         );
     }
     }
