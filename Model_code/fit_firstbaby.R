@@ -57,7 +57,7 @@ A = A+1, #age
 baby = afrs) #AFR
 
 # compile model
-m1 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Model_code/firstbaby.stan")
+m1 <- cmdstan_model("Model_code/firstbaby.stan")
 
 # fit model
 fit1 <- m1$sample(data = data1, 
