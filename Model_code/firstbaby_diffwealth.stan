@@ -72,6 +72,8 @@ model {
     
   for (n in 1:N) {
   for (a in 1:A) {
+    
+    if(baby[n,a] != -99){
 
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
@@ -79,6 +81,7 @@ model {
         beta_wealth[a]*abswealth[n,a] + // absolute wealth
         gamma_wealth[a]*diffwealth[n,a] // wealth variability
         );
+    }
     }
     }
 

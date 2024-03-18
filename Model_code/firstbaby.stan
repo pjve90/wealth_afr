@@ -64,11 +64,13 @@ model {
 
   for (n in 1:N) {
   for (a in 1:A) {
+    
+    if(baby[n,a] != -99){
 
       baby[n, a] ~ bernoulli_logit( //probability of having your first child
         alpha + // global intercept
         mu[a]); // age
-
+    }
     }
     }
 

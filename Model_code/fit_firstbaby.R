@@ -52,7 +52,7 @@ plot(colSums(as.data.frame(afrs))/100,xlab="Age",ylab="Probability of first repr
 
 #put all the data together
 #create dataset
-data <- list(N = N, #population size
+data1 <- list(N = N, #population size
 A = A+1, #age
 baby = afrs) #AFR
 
@@ -60,7 +60,7 @@ baby = afrs) #AFR
 m1 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Model_code/firstbaby.stan")
 
 # fit model
-fit1 <- m1$sample(data = data, 
+fit1 <- m1$sample(data = data1, 
                 chains = 4, 
                 parallel_chains = 4, 
                 adapt_delta = 0.95,
@@ -281,7 +281,7 @@ tab2_beta
 #compute probability of FR at each age
 #simulate wealth values
 range(post2$beta_wealth)
-simwealth <- seq(from=-2.5,to=2.5,by=0.1) #specify according to range
+simwealth <- seq(from=round(min(range(post2$beta_wealth)),1),to=round(max(range(post2$beta_wealth)),1),length.out=nrow(std_wealth)) #specify according to range and length related to sample size
 simwealth
 #create matrix to store the data
 p2 <- matrix(nrow=nrow(post2$mu),ncol=length(simwealth))
@@ -289,7 +289,7 @@ p2
 #fill it in with values for age 25
 for(j in 1:length(simwealth)){
   for(i in 1:nrow(post2$mu)){
-    p[i,j] <- inv_logit(post2$alpha[i] + #inv logit because originally is logit
+    p2[i,j] <- inv_logit(post2$alpha[i] + #inv logit because originally is logit
                           post2$mu[i,25] +
                           post2$beta_wealth[i,25]*simwealth[j]) 
   }
@@ -299,19 +299,20 @@ p2
 #plot it!
 #prepare model prediction data
 plot_data2 <- data.frame(wealth = simwealth,
-                        mean = apply(p, 2, mean), 
-                        upp = apply(p, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                        low = apply(p, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                        mean = apply(p2, 2, mean), 
+                        upp = apply(p2, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                        low = apply(p2, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #plot wealth and probability of first reproduction
 plot(plot_data2$mean~plot_data2$wealth,
+     ylim=c(0,0.5),
      ylab="Prob. FR",
      xlab="Wealth",
      main="Model with absolute wealth",
      type="l")
 lines(plot_data2$upp~plot_data2$wealth,col="red")
 lines(plot_data2$low~plot_data2$wealth,col="blue")
-points(colSums(as.data.frame(afrs))/100~plot_data2$wealth,col="gold",pch=16)
+points(afrs[,25]/100~plot_data2$wealth,col="gold",pch=16)
 #plot the simulated betas with the ones from the model
 plot(apply(post2$wealth_beta,2,mean)~beta_wealth)
 
@@ -493,7 +494,7 @@ tab3_gamma
 #compute probability of FR at each age
 #simulate wealth values
 range(post3$gamma_wealth)
-simwealth_g <- seq(from=-2.5,to=2.5,by=0.1) #specify according to range
+simwealth_g <- seq(from=-2.5,to=2.5,length.out=nrow(std_wealth)) #specify according to range and length according to sample size
 simwealth_g
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))

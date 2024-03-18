@@ -1403,19 +1403,16 @@ for(i in 1:nrow(afr_matrix)){
 }
 #check the data
 afr_matrix
-#check the age-specific frequency of FR
-colSums(as.data.frame(afr_matrix),na.rm=T)
+#check the age-specific probability of FR
+colSums(as.data.frame(afr_matrix),na.rm=T)/100
 #plot it
-plot(c(1:91)~colSums(as.data.frame(afr_matrix),na.rm = T),xlab="Age",ylab="Frequency")
+plot(colSums(as.data.frame(afr_matrix),na.rm = T)/100~c(1:91),xlab="Age",ylab="Probability of first reproduction")
 
-#weird values is because afr and aoc are both 0, so how to differentiate between afr and censor?
-
-#replace NAs with zeros
-#replace NaN with zero...not sure is right, though
+#replace NAs with -99
 for(j in 1:ncol(afr_matrix)){
   for(i in 1:nrow(afr_matrix)){
     if(is.na(afr_matrix[i,j])){
-      afr_matrix[i,j] <- 0
+      afr_matrix[i,j] <- -99
     } else{
       afr_matrix[i,j] <- afr_matrix[i,j]
     }
@@ -1423,7 +1420,6 @@ for(j in 1:ncol(afr_matrix)){
 }
 #check the data
 afr_matrix
-
 
 #### Absolute wealth ----
 
@@ -1617,7 +1613,7 @@ for(i in 1:nrow(absw_matrix)){
   }
 }
 #check data
-absw_matrix
+absw_matrix[1:10,]
 #check the age-specific frequency of absolute wealth
 colMeans(as.data.frame(absw_matrix),na.rm=T)
 #plot it
@@ -1626,30 +1622,66 @@ plot(colMeans(as.data.frame(absw_matrix),na.rm = T)~c(1:91),xlab="Age",ylab="Ave
 #NaN in columns where there are no values of wealth
 
 #simple data imputation
-#replace the women with NAs (row) with the average wealth per age (column)
-for(j in 1:ncol(absw_matrix)){
-  for(i in 1:nrow(absw_matrix)){
-    if(is.na(absw_matrix[i,j])){
-      absw_matrix[i,j] <- colMeans(as.data.frame(absw_matrix),na.rm=T)[j]
-    } else{
-      absw_matrix[i,j] <- absw_matrix[i,j]
-    }
-}
+#replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
+for(i in 1:length(absw_matrix[,1])){
+  if(is.na(absw_matrix[i,1]) & is.na(absw_matrix[i,2])){
+    absw_matrix[i,1] <- mean(absw_matrix[,1],na.rm = T)
+  }else if(is.na(absw_matrix[i,1]) & !is.na(absw_matrix[i,2])){
+    absw_matrix[i,1] <- absw_matrix[i,2]
+  }
 }
 #check the data
-absw_matrix
-#replace the ages with NAs (column) with the average wealth per woman (row)
-for(j in 1:ncol(absw_matrix)){
+absw_matrix[1:10,]
+sum(is.na(absw_matrix[,1]))
+#n=0
+#replace the missing wealth data by putting the mean between the two ages it is
+for(j in 2:(ncol(absw_matrix)-1)){
   for(i in 1:nrow(absw_matrix)){
-    if(is.na(absw_matrix[i,j])){
-      absw_matrix[i,j] <- rowMeans(as.data.frame(absw_matrix),na.rm=T)[i]
-    } else{
-      absw_matrix[i,j] <- absw_matrix[i,j]
+    if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&!is.na(absw_matrix[i,j+1])){
+      absw_matrix[i,j] <- mean(c(absw_matrix[i,j-1],absw_matrix[i,j+1]))
+    } else if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&is.na(absw_matrix[i,j+1])){
+      absw_matrix[i,j] <- mean(absw_matrix[,j],na.rm=T)
+    } 
+  }
+}
+#check the data
+absw_matrix[1:10,]
+sum(is.na(absw_matrix))
+#n=21824
+#replace the missing wealth data by putting the mean between the two ages it is
+for(j in 2:(ncol(absw_matrix)-1)){
+  for(i in 1:nrow(absw_matrix)){
+    if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&!is.na(absw_matrix[i,j+1])){
+      absw_matrix[i,j] <- mean(c(absw_matrix[i,j-1],absw_matrix[i,j+1]))
+    } else if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&is.na(absw_matrix[i,j+1])){
+      absw_matrix[i,j] <- mean(absw_matrix[,j],na.rm=T)
+    } 
+  }
+}
+#check the data
+absw_matrix[1:10,]
+sum(is.na(absw_matrix))
+#n=9179
+#replace the missing wealth data by putting either the mean between the two ages it is or by repeating the value from previous year
+for(j in 2:(ncol(absw_matrix)-1)){
+  for(i in 1:nrow(absw_matrix)){
+    if(is.na(absw_matrix[i,j])&length(is.na(absw_matrix[i,j:91]))!=sum(is.na(absw_matrix[i,j:91]))){
+      absw_matrix[i,j] <- mean(c(absw_matrix[i,j-1],absw_matrix[i,max(which(!is.na(absw_matrix[i,])==T))]))
+    } else if(is.na(absw_matrix[i,j])&length(is.na(absw_matrix[i,j:91]))==sum(is.na(absw_matrix[i,j:91]))){
+      absw_matrix[i,j] <- absw_matrix[i,j-1]
     }
   }
 }
 #check the data
+absw_matrix[1:10,]
+sum(is.na(absw_matrix))
+#n=540
+#replace last column with the values from last year
+absw_matrix[,max(ncol(absw_matrix))] <- absw_matrix[,max(ncol(absw_matrix))-1]
+#check the data
 absw_matrix
+sum(is.na(absw_matrix))
+#n=0
 
 #### Age-specific change in wealth ----
 
