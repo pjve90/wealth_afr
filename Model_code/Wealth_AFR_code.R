@@ -1441,7 +1441,7 @@ dataf$absw10 <- sample2$hhw10
 #check the data
 head(dataf)
 
-#### Age-specific wealth ----
+#### Age-specific absolute wealth ----
 
 #calculate the age at each wealth measure
 #95
@@ -1631,7 +1631,7 @@ for(i in 1:length(absw_matrix[,1])){
   }
 }
 #check the data
-absw_matrix[1:10,]
+absw_matrix
 sum(is.na(absw_matrix[,1]))
 #n=0
 #replace the missing wealth data by putting the mean between the two ages it is
@@ -1645,7 +1645,7 @@ for(j in 2:(ncol(absw_matrix)-1)){
   }
 }
 #check the data
-absw_matrix[1:10,]
+absw_matrix
 sum(is.na(absw_matrix))
 #n=21824
 #replace the missing wealth data by putting the mean between the two ages it is
@@ -1659,7 +1659,7 @@ for(j in 2:(ncol(absw_matrix)-1)){
   }
 }
 #check the data
-absw_matrix[1:10,]
+absw_matrix
 sum(is.na(absw_matrix))
 #n=9179
 #replace the missing wealth data by putting either the mean between the two ages it is or by repeating the value from previous year
@@ -1673,7 +1673,7 @@ for(j in 2:(ncol(absw_matrix)-1)){
   }
 }
 #check the data
-absw_matrix[1:10,]
+absw_matrix
 sum(is.na(absw_matrix))
 #n=540
 #replace last column with the values from last year
@@ -1682,6 +1682,28 @@ absw_matrix[,max(ncol(absw_matrix))] <- absw_matrix[,max(ncol(absw_matrix))-1]
 absw_matrix
 sum(is.na(absw_matrix))
 #n=0
+
+#standardise absolute wealth per column
+#create a matrix
+std_absw_matrix <- matrix(nrow=nrow(absw_matrix),ncol=ncol(absw_matrix))
+#standardize wealth data per column
+for(j in 1:ncol(std_absw_matrix)){
+  std_absw_matrix[,j] <- standardize(absw_matrix[,j])
+}
+#check data
+std_absw_matrix
+#replace NaN with zero...not sure is right, though...probably will change with bayesian imputation
+for(j in 1:ncol(std_absw_matrix)){
+  for(i in 1:nrow(std_absw_matrix)){
+    if(is.na(std_absw_matrix[i,j])){
+      std_absw_matrix[i,j] <- 0
+    } else{
+      std_absw_matrix[i,j] <- std_absw_matrix[i,j]
+    }
+  }
+}
+#check the data
+std_absw_matrix
 
 #### Age-specific change in wealth ----
 
@@ -1692,18 +1714,20 @@ diffw_matrix <- matrix(nrow = nrow(dataf),ncol=91)
 for(j in 1:ncol(diffw_matrix)){
   for(i in 1:nrow(diffw_matrix)){
     if(j ==1){
-      diffw_matrix[i,j] <- absw_matrix[i,j] - absw_matrix[i,j]
+      diffw_matrix[i,j] <- std_absw_matrix[i,j] - std_absw_matrix[i,j]
     } else{
-      diffw_matrix[i,j] <- absw_matrix[i,j] - absw_matrix[i,j-1]
+      diffw_matrix[i,j] <- std_absw_matrix[i,j] - std_absw_matrix[i,j-1]
     }
   }
 }
 #check data
 diffw_matrix
+sum(is.na(diffw_matrix))
+#n=0
 #check the age-specific frequency of wealth variability
-colMeans(as.data.frame(diffw_matrix),na.rm=T)
+colMeans(as.data.frame(diffw_matrix))
 #plot it
-plot(colMeans(as.data.frame(diffw_matrix),na.rm = T)~c(1:91),xlab="Age",ylab="Wealth variability")
+plot(colMeans(as.data.frame(diffw_matrix))~c(1:91),xlab="Age",ylab="Wealth variability")
 
 ## Exploratory visualisation ----
 

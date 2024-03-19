@@ -531,54 +531,6 @@ points(colSums(as.data.frame(afrs))/100~plot_data3$wealth,col="gold",pch=16)
 #plot the simulated gammas with the ones from the model
 plot(apply(post3$gamma_wealth,2,mean)~gamma_wealth)
 
-# Standardize data ----
-
-#absolute wealth
-#create a matrix
-std_absw_matrix <- matrix(nrow=nrow(absw_matrix),ncol=ncol(absw_matrix))
-#standardize wealth data per column
-for(j in 1:ncol(std_absw_matrix)){
-  std_absw_matrix[,j] <- standardize(absw_matrix[,j])
-}
-#check data
-std_absw_matrix
-#replace NaN with zero...not sure is right, though
-for(j in 1:ncol(std_absw_matrix)){
-  for(i in 1:nrow(std_absw_matrix)){
-    if(is.na(std_absw_matrix[i,j])){
-      std_absw_matrix[i,j] <- 0
-    } else{
-      std_absw_matrix[i,j] <- std_absw_matrix[i,j]
-    }
-  }
-}
-#check the data
-std_absw_matrix
-#check the age-specific frequency of absolute wealth
-colMeans(as.data.frame(std_absw_matrix))
-#plot it
-plot(colMeans(as.data.frame(std_absw_matrix))~c(1:91),xlab="Age",ylab="Average std. absolute wealth")
-
-#wealth variability
-#create a matrix
-std_diffw_matrix <- matrix(nrow=nrow(diffw_matrix),ncol=ncol(diffw_matrix))
-#calculate the age-specific wealth variation with standardized values
-for(j in 1:ncol(std_diffw_matrix)){
-  for(i in 1:nrow(std_diffw_matrix)){
-    if(j ==1){
-      std_diffw_matrix[i,j] <- std_absw_matrix[i,j] - std_absw_matrix[i,j]
-    } else{
-      std_diffw_matrix[i,j] <- std_absw_matrix[i,j] - std_absw_matrix[i,j-1]
-    }
-  }
-}
-#check data
-std_diffw_matrix
-#check the age-specific frequency of absolute wealth
-colMeans(as.data.frame(std_diffw_matrix))
-#plot it
-plot(colMeans(as.data.frame(std_diffw_matrix))~c(1:91),xlab="Age",ylab="Average std. absolute wealth")
-
 #Fit model with real data ----
 
 #put all the data together
