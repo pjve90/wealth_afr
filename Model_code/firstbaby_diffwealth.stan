@@ -26,10 +26,10 @@ data {
   int N; // sample size of women
   int A; // maximum age of women
   
-  int abswealth[N,A]; // age-specific absolute wealth
-  int diffwealth[N,A]; // age-specific absolute wealth
+  array[N,A] int abswealth; // age-specific absolute wealth
+  array[N,A] int diffwealth; // age-specific absolute wealth
   
-  int baby[N, A]; // probability of FR
+  array[N,A] int baby; // probability of FR
 
 }
 
