@@ -185,7 +185,7 @@ plot(apply(post2$wealth_beta,2,mean)~beta_wealth)
 
 #Load data
 
-real_data2 <- read.csv("real_data2.csv")[,-1]
+real_data2 <- read.csv("~/wealth_afr/dataf.csv")[,-1]
 head(real_data2)
 
 #### Age at first reproduction ----
@@ -208,7 +208,7 @@ afr_matrix2
 #check the age-specific probability of FR
 colSums(as.data.frame(afr_matrix2),na.rm=T)/100
 #plot it
-plot(colSums(as.data.frame(afr_matrix2),na.rm = T)/100~c(1:91),xlab="Age",ylab="Probability of first reproduction")
+plot(colSums(as.data.frame(afr_matrix2),na.rm = T)/100~c(1:91),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -387,7 +387,6 @@ apply(absw_matrix2,2,mean)
 #plot it
 plot(apply(absw_matrix2,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
 
-
 #standardise absolute wealth per column
 #create a matrix
 std_absw_matrix2 <- matrix(nrow=nrow(absw_matrix2),ncol=ncol(absw_matrix2))
@@ -413,3 +412,101 @@ std_absw_matrix2
 apply(std_absw_matrix2,2,mean)
 #plot it
 plot(apply(std_absw_matrix2,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
+
+#prepare data for the model
+
+#put all the data together
+#create dataset
+real_list2 <- list(N = nrow(real_data2), #population size
+                   A = ncol(afr_matrix2), #age
+                   wealth = std_absw_matrix2, #absolute wealth
+                   baby = afr_matrix2) #AFR
+
+# fit model
+fit2_real <- m2$sample(data = real_list2, 
+                       chains = 4, 
+                       parallel_chains = 4, 
+                       adapt_delta = 0.95,
+                       max_treedepth = 13,
+                       init = 0)
+
+# save fit 
+fit_2_real <- rstan::read_stan_csv(fit2_real$output_files())
+saveRDS(fit_2_real, "firstbaby2_real.rds")
+#load RDS file
+rds2_real <- readRDS("firstbaby2_real.rds")
+#extract samples
+post2_real <- extract.samples(rds2_real)
+
+#check the model
+#check trace of all main parameters
+#alpha
+traceplot(rds2_real,pars="alpha")
+#mu
+#traceplot(rds2_real,pars="mu") #only run if needed, because they are 92 plots
+#mu_raw
+#traceplot(rds2_real,pars="mu_raw") #only run if needed, because they are 92 plots
+#mu_tau
+traceplot(rds2_real,pars="mu_tau")
+#mu_kappa
+traceplot(rds2_real,pars="mu_kappa")
+#mu_delta
+traceplot(rds2_real,pars="mu_delta")
+#beta_wealth
+#traceplot(rds2_real,pars="beta_wealth") #only run if needed, because they are 91 plots
+
+#summary of the model
+#create summary table
+#create summary table for alpha and hiper priors of Gaussian process
+tab2_real <- precis(rds2,depth=3,pars=c("alpha",
+                                   "mu_raw",
+                                   "mu_tau",
+                                   "mu_delta"))
+#check table
+tab2_real
+#create summary table for mu
+tab2_mu_real <- precis(rds2,depth=3,pars="mu")
+#check table
+tab2_mu_real
+#create summary table for beta
+tab2_beta_real <- precis(rds2,depth=3,pars="beta_wealth")
+#check table
+tab2_beta_real
+
+#compute probability of FR at each age
+#simulate wealth values
+range(post2_real$beta_wealth)
+simwealth_real <- seq(from=round(min(range(post2_real$beta_wealth)),1),to=round(max(range(post2_real$beta_wealth)),1),length.out=nrow(std_wealth_real)) #specify according to range and length related to sample size
+simwealth_real
+#create matrix to store the data
+p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+p2_real
+#fill it in with values for age 2_real5
+for(j in 1:length(simwealth)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                           post2_real$mu[i,25] +
+                           post2_real$beta_wealth[i,25]*simwealth[j]) 
+  }
+}
+#check data
+p2_real
+#plot it!
+#prepare model prediction data
+plot_data2_real <- data.frame(wealth = simwealth,
+                         mean = apply(p2_real, 2, mean), 
+                         upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                         low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#plot wealth and probability of first reproduction
+plot(plot_data2_real$mean~plot_data2_real$wealth,
+     ylim=c(0,1),
+     ylab="Prob. FR",
+     xlab="Wealth",
+     main="Model with absolute wealth",
+     type="l")
+lines(plot_data2_real$upp~plot_data2_real$wealth,col="red")
+lines(plot_data2_real$low~plot_data2_real$wealth,col="blue")
+points(afr_matrix2[,25]/100~plot_data2_real$wealth,col="gold",pch=16)
+#plot the simulated betas with the ones from the model
+plot(apply(post2_real$wealth_beta,2,mean)~beta_wealth)

@@ -217,10 +217,10 @@ plot(apply(post3$gamma_wealth,2,mean)~gamma_wealth)
 
 #Load data
 
-real_data3 <- read.csv("real_data3.csv")[,-1]
+real_data3 <- read.csv("~/wealth_afr/dataf.csv")[,-1]
 head(real_data3)
 
-#Calculate age-specific age at first reproduction ----
+### Calculate age-specific age at first reproduction ----
 
 #create a matrix to store the age-specific age of censor
 afr_matrix3 <- matrix(nrow=nrow(real_data3),ncol=91)
@@ -469,3 +469,114 @@ sum(is.na(diffw_matrix3))
 apply(diffw_matrix3,2,mean)
 #plot it
 plot(apply(diffw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Wealth variability")
+
+
+#### fit model ----
+
+#put all the data together
+#create data
+real_list3 <- list(N = nrow(real_data3), #population size
+              A = ncol(afr_matrix3), #age
+              abswealth = std_absw_matrix3, #standardised absolute wealth
+              diffwealth = diffw_matrix3, #wealth variability
+              baby = afr_matrix3) #AFR
+#check data
+real_list3
+
+fit3_real <- m3$sample(data = real_list3, 
+                  chains = 4, 
+                  parallel_chains = 4, 
+                  adapt_delta = 0.95,
+                  max_treedepth = 13,
+                  init = 0)
+
+
+# save fit 
+fit_3_real <- rstan::read_stan_csv(fit3_real$output_files())
+saveRDS(fit_3_real, "firstbaby3_real.rds")
+#load RDS file
+rds3_real <- readRDS("firstbaby3_real.rds")
+#extract samples
+post3_real <- extract.samples(rds3_real)
+
+#check the model
+#check trace of all main parameters
+#alpha
+traceplot(rds3_real,pars="alpha")
+#mu
+#traceplot(rds3_real,pars="mu") #only run if needed, because they are 91 plots
+#mu_raw
+#traceplot(rds3_real,pars="mu_raw") #only run if needed, because they are 91 plots
+#mu_tau
+traceplot(rds3_real,pars="mu_tau")
+#mu_kappa
+traceplot(rds3_real,pars="mu_kappa")
+#mu_delta
+traceplot(rds3_real,pars="mu_delta")
+#beta_wealth
+#traceplot(rds3_real,pars="beta_wealth") #only run if needed, because they are 91 plots
+#gamma_wealth
+#traceplot(rds3_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
+
+#summary of the model
+#create summary table
+#create summary table for alpha and hiper priors of Gaussian process
+tab3_real <- precis(rds3_real,depth=3,pars=c("alpha",
+                                   "mu_raw",
+                                   "mu_tau",
+                                   "mu_delta"))
+#check table
+tab3_real
+#create summary table for mu
+tab3_real_mu <- precis(rds3_real,depth=3,pars="mu")
+#check table
+tab3_real_mu
+#create summary table for beta
+tab3_real_beta <- precis(rds3_real,depth=3,pars="beta_wealth")
+#check table
+tab3_real_beta
+#create summary table for gamma
+tab3_real_gamma <- precis(rds3_real,depth=3,pars="gamma_wealth")
+#check table
+tab3_real_gamma
+
+#compute probability of FR at each age
+#simulate wealth values
+range(post3_real$gamma_wealth)
+simwealth_g <- seq(from=-2.5,to=2.5,length.out=nrow(std_wealth_real)) #specify according to range and length according to sample size
+simwealth_g
+#create matrix to store the data
+p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g))
+p3_real
+#fill it in with values for age 25
+for(j in 1:length(simwealth_g)){
+  for(i in 1:nrow(post3_real$mu)){
+    p[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                          post3_real$mu[i,25] +
+                          post3_real$beta_wealth[i,25]*0 + #zero because that is the average from the standardization
+                          post3_real$beta_wealth[i,25]*simwealth_g[j] 
+    ) 
+  }
+}
+#check data
+p3_real
+
+#plot it!
+#prepare model prediction data
+plot_data3_real <- data.frame(wealth = simwealth_g,
+                         mean = apply(p3_real, 2, mean), 
+                         upp = apply(p3_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                         low = apply(p3_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#plot wealth and probability of first reproduction
+plot(plot_data3_real$mean~plot_data2$wealth,
+     ylim=c(0,1),
+     ylab="Prob. FR",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
+     type="l")
+lines(plot_data3_real$upp~plot_data2$wealth,col="red")
+lines(plot_data3_real$low~plot_data2$wealth,col="blue")
+points(afr_matrix3[,25]/100~plot_data3_real$wealth,col="gold",pch=16)
+#plot the simulated gammas with the ones from the model
+plot(apply(post3_real$gamma_wealth,2,mean)~gamma_wealth)
