@@ -781,135 +781,6 @@ sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop
 nrow(sample[which(sample$sumnaacrop95==1 | sample$sumnaacrop98==1 | sample$sumnaacrop00==1 | sample$sumnaacrop02==1 | sample$sumnaacrop04==1 | sample$sumnaacrop06==1 | sample$sumnaacrop10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","ttsacks95","ttsacks98","ttsacks00","ttsacks02","ttsacks04","ttsacks06","ttsacks10")])
 #n=0
 
-#### Simple data imputation ----
-
-#Replace NAs with the average for each year
-#95
-#check the data
-sample$ttsacks95
-#check number of NAs
-sum(is.na(sample$ttsacks95))
-#n=329
-#get the average number cash crops of the year
-mean(sample$ttsacks95,na.rm=T)
-#7.052
-#create new variable with data imputation
-sample$cashcrop95 <- sample$ttsacks95
-#replace the NAs with average of the year
-sample$cashcrop95[is.na(sample$cashcrop95)] <- mean(sample$ttsacks95,na.rm=T)
-#check it out
-sample$cashcrop95
-#check for NAs
-sum(is.na(sample$cashcrop95))
-
-#98
-#check the data
-sample$ttsacks98
-#check number of NAs
-sum(is.na(sample$ttsacks98))
-#n=262
-#get the average number cash crops of the year
-mean(sample$ttsacks98,na.rm=T)
-#4.745
-#create new variable with data imputation
-sample$cashcrop98 <- sample$ttsacks98
-#replace the NAs with average of the year
-sample$cashcrop98[is.na(sample$cashcrop98)] <- mean(sample$ttsacks98,na.rm=T)
-#check it out
-sample$cashcrop98
-#check for NAs
-sum(is.na(sample$cashcrop98))
-
-#00
-#check the data
-sample$ttsacks00
-#check number of NAs
-sum(is.na(sample$ttsacks00))
-#n=236
-#get the average number cash crops of the year
-mean(sample$ttsacks00,na.rm=T)
-#7.135
-#create new variable with data imputation
-sample$cashcrop00 <- sample$ttsacks00
-#replace the NAs with average of the year
-sample$cashcrop00[is.na(sample$cashcrop00)] <- mean(sample$ttsacks00,na.rm=T)
-#check it out
-sample$cashcrop00
-#check for NAs
-sum(is.na(sample$cashcrop00))
-
-#02
-#check the data
-sample$ttsacks02
-#check number of NAs
-sum(is.na(sample$ttsacks02))
-#n=220
-#get the average number cash crops of the year
-mean(sample$ttsacks02,na.rm=T)
-#8.821
-#create new variable with data imputation
-sample$cashcrop02 <- sample$ttsacks02
-#replace the NAs with average of the year
-sample$cashcrop02[is.na(sample$cashcrop02)] <- mean(sample$ttsacks02,na.rm=T)
-#check it out
-sample$cashcrop02
-#check for NAs
-sum(is.na(sample$cashcrop02))
-
-#04
-#check the data
-sample$ttsacks04
-#check number of NAs
-sum(is.na(sample$ttsacks04))
-#n=233
-#get the average number cash crops of the year
-mean(sample$ttsacks04,na.rm=T)
-#12.478
-#create new variable with data imputation
-sample$cashcrop04 <- sample$ttsacks04
-#replace the NAs with average of the year
-sample$cashcrop04[is.na(sample$cashcrop04)] <- mean(sample$ttsacks04,na.rm=T)
-#check it out
-sample$cashcrop04
-#check for NAs
-sum(is.na(sample$cashcrop04))
-
-#06
-#check the data
-sample$ttsacks06
-#check number of NAs
-sum(is.na(sample$ttsacks06))
-#n=234
-#get the average number cash crops of the year
-mean(sample$ttsacks06,na.rm=T)
-#14.722
-#create new variable with data imputation
-sample$cashcrop06 <- sample$ttsacks06
-#replace the NAs with average of the year
-sample$cashcrop06[is.na(sample$cashcrop06)] <- mean(sample$ttsacks06,na.rm=T)
-#check it out
-sample$cashcrop06
-#check for NAs
-sum(is.na(sample$cashcrop06))
-
-#10
-#check the data
-sample$ttsacks10
-#check number of NAs
-sum(is.na(sample$ttsacks10))
-#n=222
-#get the average number cash crops of the year
-mean(sample$ttsacks10,na.rm=T)
-#15.262
-#create new variable with data imputation
-sample$cashcrop10 <- sample$ttsacks10
-#replace the NAs with average of the year
-sample$cashcrop10[is.na(sample$cashcrop10)] <- mean(sample$ttsacks10,na.rm=T)
-#check it out
-sample$cashcrop10
-#check for NAs
-sum(is.na(sample$cashcrop10))
-
 ### Holdings, house value, and assets ----
 
 #### Summary statistics per year ----
@@ -1174,135 +1045,6 @@ sample[which(sample$sumnaahhw95==1 | sample$sumnaahhw98==1 | sample$sumnaahhw00=
 nrow(sample[which(sample$sumnaahhw95==1 | sample$sumnaahhw98==1 | sample$sumnaahhw00==1 | sample$sumnaahhw02==1 | sample$sumnaahhw04==1 | sample$sumnaahhw06==1 | sample$sumnaahhw10==1),c("t15nnn","h95a","h98a","h00a","h02a","h04a","h06a","h10a","SumValue_rdKts95","SumValue_rdKts98","SumValue_rdKts00","SumValue_rdKts02","SumValue_rdKts04","SumValue_rdKts06","SumValue_rdKts10")])
 #n=0
 
-#### Simple data imputation ----
-
-#Replace NAs with the average for each year
-#95
-#check the data
-sample$SumValue_rdKts95
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts95))
-#n=329
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts95,na.rm=T)
-#134.265
-#create new variable with data imputation
-sample$hhw95 <- sample$SumValue_rdKts95
-#replace the NAs with average of the year
-sample$hhw95[is.na(sample$hhw95)] <- mean(sample$SumValue_rdKts95,na.rm=T)
-#check it out
-sample$hhw95
-#check for NAs
-sum(is.na(sample$hhw95))
-
-#98
-#check the data
-sample$SumValue_rdKts98
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts98))
-#n=262
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts98,na.rm=T)
-#240.156
-#create new variable with data imputation
-sample$hhw98 <- sample$SumValue_rdKts98
-#replace the NAs with average of the year
-sample$hhw98[is.na(sample$hhw98)] <- mean(sample$SumValue_rdKts98,na.rm=T)
-#check it out
-sample$hhw98
-#check for NAs
-sum(is.na(sample$hhw98))
-
-#00
-#check the data
-sample$SumValue_rdKts00
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts00))
-#n=236
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts00,na.rm=T)
-#287.0352
-#create new variable with data imputation
-sample$hhw00 <- sample$SumValue_rdKts00
-#replace the NAs with average of the year
-sample$hhw00[is.na(sample$hhw00)] <- mean(sample$SumValue_rdKts00,na.rm=T)
-#check it out
-sample$hhw00
-#check for NAs
-sum(is.na(sample$hhw00))
-
-#02
-#check the data
-sample$SumValue_rdKts02
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts02))
-#n=220
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts02,na.rm=T)
-#414.081
-#create new variable with data imputation
-sample$hhw02 <- sample$SumValue_rdKts02
-#replace the NAs with average of the year
-sample$hhw02[is.na(sample$hhw02)] <- mean(sample$SumValue_rdKts02,na.rm=T)
-#check it out
-sample$hhw02
-#check for NAs
-sum(is.na(sample$hhw02))
-
-#04
-#check the data
-sample$SumValue_rdKts04
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts04))
-#n=233
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts04,na.rm=T)
-#648.611
-#create new variable with data imputation
-sample$hhw04 <- sample$SumValue_rdKts04
-#replace the NAs with average of the year
-sample$hhw04[is.na(sample$hhw04)] <- mean(sample$SumValue_rdKts04,na.rm=T)
-#check it out
-sample$hhw04
-#check for NAs
-sum(is.na(sample$hhw04))
-
-#06
-#check the data
-sample$SumValue_rdKts06
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts06))
-#n=234
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts06,na.rm=T)
-#1181.657
-#create new variable with data imputation
-sample$hhw06 <- sample$SumValue_rdKts06
-#replace the NAs with average of the year
-sample$hhw06[is.na(sample$hhw06)] <- mean(sample$SumValue_rdKts06,na.rm=T)
-#check it out
-sample$hhw06
-#check for NAs
-sum(is.na(sample$hhw06))
-
-#10
-#check the data
-sample$SumValue_rdKts10
-#check number of NAs
-sum(is.na(sample$SumValue_rdKts10))
-#n=222
-#get the average number cash crops of the year
-mean(sample$SumValue_rdKts10,na.rm=T)
-#2773.432
-#create new variable with data imputation
-sample$hhw10 <- sample$SumValue_rdKts10
-#replace the NAs with average of the year
-sample$hhw10[is.na(sample$hhw10)] <- mean(sample$SumValue_rdKts10,na.rm=T)
-#check it out
-sample$hhw10
-#check for NAs
-sum(is.na(sample$hhw10))
-
 ## Data preparation  ----
 
 ### Data cleaning ----
@@ -1385,63 +1127,27 @@ for (i in 1:nrow(dataf)){
 #check data
 head(dataf)
 
-#### Age-specific age of first reproduction ----
-
-#age-specific age of first reproduction
-#create a matrix to store the age-specific age of censor
-afr_matrix <- matrix(nrow=nrow(dataf),ncol=91)
-#calculate for each age when the woman is censored (1) or not (0)
-for(i in 1:nrow(afr_matrix)){
-  afr <- dataf$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
-  aoc <- dataf$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
-  if(!is.na(afr)){
-    afr_matrix[i,1:(afr-1)] <- rep(0,length(afr_matrix[i,1:(afr-1)]))
-    afr_matrix[i,afr] <- 1
-  } else{
-    afr_matrix[i,1:aoc] <- rep(0,length(afr_matrix[i,1:aoc]))
-  }
-}
-#check the data
-afr_matrix
-#check the age-specific probability of FR
-colSums(as.data.frame(afr_matrix),na.rm=T)/100
-#plot it
-plot(colSums(as.data.frame(afr_matrix),na.rm = T)/100~c(1:91),xlab="Age",ylab="Probability of first reproduction")
-
-#replace NAs with -99
-for(j in 1:ncol(afr_matrix)){
-  for(i in 1:nrow(afr_matrix)){
-    if(is.na(afr_matrix[i,j])){
-      afr_matrix[i,j] <- -99
-    } else{
-      afr_matrix[i,j] <- afr_matrix[i,j]
-    }
-  }
-}
-#check the data
-afr_matrix
-
 #### Absolute wealth ----
 
 #get the absolute wealth per census
 #95
-dataf$absw95 <- sample2$hhw95 
+dataf$absw95 <- sample2$SumValue_rdKts95
 #98
-dataf$absw98 <- sample2$hhw98 
+dataf$absw98 <- sample2$SumValue_rdKts98
 #00
-dataf$absw00 <- sample2$hhw00 
+dataf$absw00 <- sample2$SumValue_rdKts00
 #02
-dataf$absw02 <- sample2$hhw02 
+dataf$absw02 <- sample2$SumValue_rdKts02
 #04
-dataf$absw04 <- sample2$hhw04 
+dataf$absw04 <- sample2$SumValue_rdKts04
 #06
-dataf$absw06 <- sample2$hhw06 
+dataf$absw06 <- sample2$SumValue_rdKts06
 #10
-dataf$absw10 <- sample2$hhw10 
+dataf$absw10 <- sample2$SumValue_rdKts10
 #check the data
 head(dataf)
 
-#### Age-specific absolute wealth ----
+#### Age of absolute wealth ----
 
 #calculate the age at each wealth measure
 #95
@@ -1454,6 +1160,7 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw95
 #98
 #calculate age for those who were born by the time of the census
@@ -1465,6 +1172,7 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw98
 #00
 #calculate age for those who were born by the time of the census
@@ -1476,6 +1184,7 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw00
 #02
 #calculate age for those who were born by the time of the census
@@ -1487,6 +1196,7 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw02
 #04
 #calculate age for those who were born by the time of the census
@@ -1498,6 +1208,7 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw04
 #06
 #calculate age for those who were born by the time of the census
@@ -1509,6 +1220,7 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw06
 #10
 #calculate age for those who were born by the time of the census
@@ -1520,214 +1232,13 @@ for (i in 1:nrow(dataf)){
   }
 }
 #check the data
+head(dataf)
 dataf$age_absw10
 #check the data
 head(dataf)
 
-#### Age-specific absolute wealth ----
-
-#age-specific absolute wealth
-#create matrix to store the age-specific amount of wealth
-absw_matrix <- matrix(nrow = nrow(dataf),ncol=91)
-#calculate for each age the amount of wealth the household of a woman has, based on each census
-#95
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw95[i]
-  age_absw <- dataf$age_absw95[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix
-#98
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw98[i]
-  age_absw <- dataf$age_absw98[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix
-#00
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw00[i]
-  age_absw <- dataf$age_absw00[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix
-#02
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw02[i]
-  age_absw <- dataf$age_absw02[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix
-#04
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw04[i]
-  age_absw <- dataf$age_absw04[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix
-#06
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw06[i]
-  age_absw <- dataf$age_absw06[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix
-#10
-for(i in 1:nrow(absw_matrix)){
-  absw <- dataf$absw10[i]
-  age_absw <- dataf$age_absw10[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
-    absw_matrix[i,age_absw] <- absw
-  } else{
-    absw_matrix[i,age_absw] <- NA
-  }
-}
-#check data
-absw_matrix[1:10,]
-#check the age-specific frequency of absolute wealth
-colMeans(as.data.frame(absw_matrix),na.rm=T)
-#plot it
-plot(colMeans(as.data.frame(absw_matrix),na.rm = T)~c(1:91),xlab="Age",ylab="Average absolute wealth")
-
-#NaN in columns where there are no values of wealth
-
-#simple data imputation
-#replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
-for(i in 1:length(absw_matrix[,1])){
-  if(is.na(absw_matrix[i,1]) & is.na(absw_matrix[i,2])){
-    absw_matrix[i,1] <- mean(absw_matrix[,1],na.rm = T)
-  }else if(is.na(absw_matrix[i,1]) & !is.na(absw_matrix[i,2])){
-    absw_matrix[i,1] <- absw_matrix[i,2]
-  }
-}
-#check the data
-absw_matrix
-sum(is.na(absw_matrix[,1]))
-#n=0
-#replace the missing wealth data by putting the mean between the two ages it is
-for(j in 2:(ncol(absw_matrix)-1)){
-  for(i in 1:nrow(absw_matrix)){
-    if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&!is.na(absw_matrix[i,j+1])){
-      absw_matrix[i,j] <- mean(c(absw_matrix[i,j-1],absw_matrix[i,j+1]))
-    } else if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&is.na(absw_matrix[i,j+1])){
-      absw_matrix[i,j] <- mean(absw_matrix[,j],na.rm=T)
-    } 
-  }
-}
-#check the data
-absw_matrix
-sum(is.na(absw_matrix))
-#n=21824
-#replace the missing wealth data by putting the mean between the two ages it is
-for(j in 2:(ncol(absw_matrix)-1)){
-  for(i in 1:nrow(absw_matrix)){
-    if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&!is.na(absw_matrix[i,j+1])){
-      absw_matrix[i,j] <- mean(c(absw_matrix[i,j-1],absw_matrix[i,j+1]))
-    } else if(is.na(absw_matrix[i,j])&!is.na(absw_matrix[i,j-1])&is.na(absw_matrix[i,j+1])){
-      absw_matrix[i,j] <- mean(absw_matrix[,j],na.rm=T)
-    } 
-  }
-}
-#check the data
-absw_matrix
-sum(is.na(absw_matrix))
-#n=9179
-#replace the missing wealth data by putting either the mean between the two ages it is or by repeating the value from previous year
-for(j in 2:(ncol(absw_matrix)-1)){
-  for(i in 1:nrow(absw_matrix)){
-    if(is.na(absw_matrix[i,j])&length(is.na(absw_matrix[i,j:91]))!=sum(is.na(absw_matrix[i,j:91]))){
-      absw_matrix[i,j] <- mean(c(absw_matrix[i,j-1],absw_matrix[i,max(which(!is.na(absw_matrix[i,])==T))]))
-    } else if(is.na(absw_matrix[i,j])&length(is.na(absw_matrix[i,j:91]))==sum(is.na(absw_matrix[i,j:91]))){
-      absw_matrix[i,j] <- absw_matrix[i,j-1]
-    }
-  }
-}
-#check the data
-absw_matrix
-sum(is.na(absw_matrix))
-#n=540
-#replace last column with the values from last year
-absw_matrix[,max(ncol(absw_matrix))] <- absw_matrix[,max(ncol(absw_matrix))-1]
-#check the data
-absw_matrix
-sum(is.na(absw_matrix))
-#n=0
-
-#standardise absolute wealth per column
-#create a matrix
-std_absw_matrix <- matrix(nrow=nrow(absw_matrix),ncol=ncol(absw_matrix))
-#standardize wealth data per column
-for(j in 1:ncol(std_absw_matrix)){
-  std_absw_matrix[,j] <- standardize(absw_matrix[,j])
-}
-#check data
-std_absw_matrix
-#replace NaN with zero...not sure is right, though...probably will change with bayesian imputation
-for(j in 1:ncol(std_absw_matrix)){
-  for(i in 1:nrow(std_absw_matrix)){
-    if(is.na(std_absw_matrix[i,j])){
-      std_absw_matrix[i,j] <- 0
-    } else{
-      std_absw_matrix[i,j] <- std_absw_matrix[i,j]
-    }
-  }
-}
-#check the data
-std_absw_matrix
-
-#### Age-specific change in wealth ----
-
-#age-specific change in wealth
-#create matrix to store the age-specific wealth variation
-diffw_matrix <- matrix(nrow = nrow(dataf),ncol=91)
-#calculate the age-specific wealth variation
-for(j in 1:ncol(diffw_matrix)){
-  for(i in 1:nrow(diffw_matrix)){
-    if(j ==1){
-      diffw_matrix[i,j] <- std_absw_matrix[i,j] - std_absw_matrix[i,j]
-    } else{
-      diffw_matrix[i,j] <- std_absw_matrix[i,j] - std_absw_matrix[i,j-1]
-    }
-  }
-}
-#check data
-diffw_matrix
-sum(is.na(diffw_matrix))
-#n=0
-#check the age-specific frequency of wealth variability
-colMeans(as.data.frame(diffw_matrix))
-#plot it
-plot(colMeans(as.data.frame(diffw_matrix))~c(1:91),xlab="Age",ylab="Wealth variability")
+#export data frame with data for models
+write.csv(dataf,"dataf.csv")
 
 ## Exploratory visualisation ----
 
