@@ -187,7 +187,7 @@ real_list1 <- list(N = nrow(real_data1), #population size
 # fit model
 fit1_real <- m1$sample(data = real_list1, 
                   chains = 4, 
-                  parallel_chains = 4, 
+                  parallel_chains = 10, 
                   adapt_delta = 0.95,
                   max_treedepth = 13,
                   init = 0)
