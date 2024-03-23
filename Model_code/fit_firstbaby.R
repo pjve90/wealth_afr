@@ -1,4 +1,10 @@
-#Code to build the model with  for the Pimbwe project ----
+# Model with Gaussian process of age ----
+
+#The code in this script is meant to fit a Bayesian model with a Gaussian process of age, in order to see the relationship between age and the probability of first reproduction of women.
+#First, there is data simulation that follows the expectations from the literature.
+#Second, the simulated data is fitted to the Bayesian model.
+#Third, we use the real data to see how the model fits. 
+#Finally, there is plotting code
 
 #Load packages
 #install.packages("cmdstanr")
@@ -6,9 +12,9 @@ library(cmdstanr)
 #install.packages("rethinking")
 library(rethinking)
 
-## Model with Gaussian process of age ----
+## Data simulation ----
 
-#Create synthetic data
+#The script in this section is to create synthetic data that follows the causal relationship between age and the probability of first reproduction.
 
 #Population size
 #100 individuals
@@ -20,9 +26,8 @@ A <- 90
 
 #Age at first reproduction (AFR)
 
-#simulate an age-specific parameter for AFR
+#simulate an age-specific parameter for AFR (mu)
 mu_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
-
 #simulate binary ouput of AFR for each age
 #0=no first birth
 #1=yes first birth
@@ -43,12 +48,13 @@ for(j in 1:ncol(afrs)){
   }
 }
 #check the data
-#see the data
 head(afrs)
 #check the age-specific frequency of FR
-colSums(as.data.frame(afrs))/100
+apply(afrs,2,sum)/100
 #plot it
-plot(colSums(as.data.frame(afrs))/100,xlab="Age",ylab="Probability of first reproduction",type="l")
+plot(apply(afrs,2,sum),xlab="Age",ylab="Probability of first reproduction")
+
+## Fit simulated data ----
 
 #put all the data together
 #create dataset
@@ -104,7 +110,9 @@ tab1_mu <- precis(rds1,depth=3,pars="mu")
 #check table
 tab1_mu
 
-#plot the predictions from the model with the data
+## Plot the fit of the simulated data ----
+
+#plot the predictions from the model with the simulated data
 #compute probability of FR at each age
 p1 <- matrix(nrow=nrow(post1$mu),ncol=ncol(post1$mu))
 p1
@@ -134,15 +142,13 @@ lines(plot_data1$mu_upp~plot_data1$age,col="red")
 lines(plot_data1$mu_low~plot_data1$age,col="blue")
 points(colSums(as.data.frame(afrs))/100~plot_data1$age,col="gold",pch=16)
 
-### With real data ----
+## Data wrangling of real data ----
 
 #Load data
-
 real_data1 <- read.csv("~/wealth_afr/dataf.csv")[,-1]
 head(real_data1)
 
 #Calculate age-specific age at first reproduction
-
 #create a matrix to store the age-specific age of censor
 afr_matrix1 <- matrix(nrow=nrow(real_data1),ncol=91)
 #calculate for each age when the woman is censored (1) or not (0)
@@ -176,7 +182,7 @@ for(j in 1:ncol(afr_matrix1)){
 #check the data
 afr_matrix1
 
-#prepare data for the model
+## Fit real data ----
 
 #put all the data together
 #create dataset
@@ -228,6 +234,8 @@ tab1_real
 tab1_mu_real <- precis(rds1_real,depth=3,pars="mu")
 #check table
 tab1_mu_real
+
+## Plot the fit of the real data ----
 
 #plot the predictions from the model with the data
 #compute probability of FR at each age
