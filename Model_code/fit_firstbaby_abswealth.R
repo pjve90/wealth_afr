@@ -514,6 +514,7 @@ plot_afr2
 #plot wealth and probability of first reproduction ----
 #colour palette
 palette <- c(rep(NA,14),hcl.colors(11,"Spectral"))
+palette[20] <- "black"
 #plot empty plot
 plot(c(0,1)~c(-5,5),
      ylim=c(0,1),
@@ -560,51 +561,7 @@ for(k in seq(15,25,by=1)){
   lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[k])
 }
 
-#plot wealth and probability of first reproduction at age 10 ----
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
-     ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 10",
-     type="n")
-  #create matrix to store the data
-  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
-  p2_real
-  #fill it in with values for age 10
-  for(j in 1:length(simwealth_real)){
-    for(i in 1:nrow(post2_real$mu)){
-      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                  post2_real$mu[i,10] +
-                                  post2_real$beta_wealth[i,10]*simwealth_real[j]) 
-    }
-  }
-  #chec10 data
-  p2_real
-  #plot it!
-  #prepare model prediction data
-  plot_data2_real <- data.frame(wealth = simwealth_real,
-                                mean = apply(p2_real, 2, mean), 
-                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr2 <- afr_matrix2
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr2)){
-    for(i in 1:nrow(plot_afr2)){
-      if(plot_afr2[i,j]==-99){
-        plot_afr2[i,j] <- NA
-      }
-    }
-  }
-  #chec10 the data
-  plot_afr2
-  
-  lines(plot_data2_real$mean~plot_data2_real$wealth,col=hcl.colors(35,"Zissou 1")[10])
-  lines(plot_data2_real$upp~plot_data2_real$wealth,col=rainbow(35)[10],lty=2)
-  lines(plot_data2_real$low~plot_data2_real$wealth,col=rainbow(35)[10],lty=2)
-  points(plot_afr2[,10]~plot_data2_real$wealth,col=alpha(hcl.colors(35,"Zissou 1")[10],0.2),pch=16)
+layout(matrix(c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,0,10,10,11,11,0),nrow=4,ncol=6,byrow=T))
 
 #plot wealth and probability of first reproduction at age 15 ----
   plot(c(0,1)~c(-5,5),
@@ -647,10 +604,194 @@ plot(c(0,1)~c(-5,5),
   #chec15 the data
   plot_afr2
   
-  lines(plot_data2_real$mean~plot_data2_real$wealth,col=hcl.colors(35,"Zissou 1")[15])
-  lines(plot_data2_real$upp~plot_data2_real$wealth,col=rainbow(35)[15],lty=2)
-  lines(plot_data2_real$low~plot_data2_real$wealth,col=rainbow(35)[15],lty=2)
-  points(plot_afr2[,15]~plot_data2_real$wealth,col=alpha(hcl.colors(35,"Zissou 1")[15],0.2),pch=16)
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[15])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette,lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette,lty=2)
+  points(plot_afr2[,15]~plot_data2_real$wealth,col=alpha(palette[15],0.5),pch=16)
+
+#plot wealth and probability of first reproduction at age 16 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 16",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 16
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,16] +
+                                  post2_real$beta_wealth[i,16]*simwealth_real[j]) 
+    }
+  }
+  #chec16 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec16 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[16])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[16],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[16],lty=2)
+  points(plot_afr2[,16]~plot_data2_real$wealth,col=alpha(palette[16],0.5),pch=16)
+
+#plot wealth and probability of first reproduction at age 17 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 17",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 17
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,17] +
+                                  post2_real$beta_wealth[i,17]*simwealth_real[j]) 
+    }
+  }
+  #chec17 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec17 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[17])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[17],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[17],lty=2)
+  points(plot_afr2[,17]~plot_data2_real$wealth,col=alpha(palette[17],0.5),pch=16)
+
+#plot wealth and probability of first reproduction at age 18 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 18",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 18
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,18] +
+                                  post2_real$beta_wealth[i,18]*simwealth_real[j]) 
+    }
+  }
+  #chec18 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec18 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[18])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[18],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[18],lty=2)
+  points(plot_afr2[,18]~plot_data2_real$wealth,col=alpha(palette[18],0.5),pch=16)
+
+#plot wealth and probability of first reproduction at age 19 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 19",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 19
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,19] +
+                                  post2_real$beta_wealth[i,19]*simwealth_real[j]) 
+    }
+  }
+  #chec19 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec19 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[19])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[19],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[19],lty=2)
+  points(plot_afr2[,19]~plot_data2_real$wealth,col=alpha(palette[19],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 20 ----
   plot(c(0,1)~c(-5,5),
@@ -693,12 +834,197 @@ plot(c(0,1)~c(-5,5),
   #chec20 the data
   plot_afr2
   
-  lines(plot_data2_real$mean~plot_data2_real$wealth,col=hcl.colors(35,"Zissou 1")[20])
-  lines(plot_data2_real$upp~plot_data2_real$wealth,col=rainbow(35)[20],lty=2)
-  lines(plot_data2_real$low~plot_data2_real$wealth,col=rainbow(35)[20],lty=2)
-  points(plot_afr2[,20]~plot_data2_real$wealth,col=alpha(hcl.colors(35,"Zissou 1")[20],0.2),pch=16)
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[20])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[20],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[20],lty=2)
+  points(plot_afr2[,20]~plot_data2_real$wealth,col=alpha(palette[20],0.5),pch=16)
 
-#plot wealth and probability of first reproduction at age 25 ----
+  #plot wealth and probability of first reproduction at age 21 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 21",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 21
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,21] +
+                                  post2_real$beta_wealth[i,21]*simwealth_real[j]) 
+    }
+  }
+  #chec21 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec21 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[21])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[21],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[21],lty=2)
+  points(plot_afr2[,21]~plot_data2_real$wealth,col=alpha(palette[21],0.5),pch=16)
+  
+#plot wealth and probability of first reproduction at age 22 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 22",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 22
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,22] +
+                                  post2_real$beta_wealth[i,22]*simwealth_real[j]) 
+    }
+  }
+  #chec22 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec22 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[22])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[22],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[22],lty=2)
+  points(plot_afr2[,22]~plot_data2_real$wealth,col=alpha(palette[22],0.5),pch=16)
+
+  
+  #plot wealth and probability of first reproduction at age 23 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 23",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 23
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,23] +
+                                  post2_real$beta_wealth[i,23]*simwealth_real[j]) 
+    }
+  }
+  #chec23 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec23 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[23])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[23],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[23],lty=2)
+  points(plot_afr2[,23]~plot_data2_real$wealth,col=alpha(palette[23],0.5),pch=16)
+  
+#plot wealth and probability of first reproduction at age 24 ----
+  plot(c(0,1)~c(-5,5),
+       ylim=c(0,1),
+       ylab="Prob. FR",
+       xlab="Wealth",
+       main="Model with absolute wealth at age 24",
+       type="n")
+  #create matrix to store the data
+  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
+  p2_real
+  #fill it in with values for age 24
+  for(j in 1:length(simwealth_real)){
+    for(i in 1:nrow(post2_real$mu)){
+      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                  post2_real$mu[i,24] +
+                                  post2_real$beta_wealth[i,24]*simwealth_real[j]) 
+    }
+  }
+  #chec24 data
+  p2_real
+  #plot it!
+  #prepare model prediction data
+  plot_data2_real <- data.frame(wealth = simwealth_real,
+                                mean = apply(p2_real, 2, mean), 
+                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #chec24 the data
+  plot_afr2
+  
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[24])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[24],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[24],lty=2)
+  points(plot_afr2[,24]~plot_data2_real$wealth,col=alpha(palette[24],0.5),pch=16)
+  
+  #plot wealth and probability of first reproduction at age 25 ----
   plot(c(0,1)~c(-5,5),
        ylim=c(0,1),
        ylab="Prob. FR",
@@ -739,100 +1065,9 @@ plot(c(0,1)~c(-5,5),
   #chec25 the data
   plot_afr2
   
-  lines(plot_data2_real$mean~plot_data2_real$wealth,col=hcl.colors(35,"Zissou 1")[25])
-  lines(plot_data2_real$upp~plot_data2_real$wealth,col=rainbow(35)[25],lty=2)
-  lines(plot_data2_real$low~plot_data2_real$wealth,col=rainbow(35)[25],lty=2)
-  points(plot_afr2[,25]~plot_data2_real$wealth,col=alpha(hcl.colors(35,"Zissou 1")[25],0.2),pch=16)
-
-#plot wealth and probability of first reproduction at age 30 ----
-  plot(c(0,1)~c(-5,5),
-       ylim=c(0,1),
-       ylab="Prob. FR",
-       xlab="Wealth",
-       main="Model with absolute wealth at age 30",
-       type="n")
-  #create matrix to store the data
-  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
-  p2_real
-  #fill it in with values for age 30
-  for(j in 1:length(simwealth_real)){
-    for(i in 1:nrow(post2_real$mu)){
-      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                  post2_real$mu[i,30] +
-                                  post2_real$beta_wealth[i,30]*simwealth_real[j]) 
-    }
-  }
-  #chec30 data
-  p2_real
-  #plot it!
-  #prepare model prediction data
-  plot_data2_real <- data.frame(wealth = simwealth_real,
-                                mean = apply(p2_real, 2, mean), 
-                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr2 <- afr_matrix2
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr2)){
-    for(i in 1:nrow(plot_afr2)){
-      if(plot_afr2[i,j]==-99){
-        plot_afr2[i,j] <- NA
-      }
-    }
-  }
-  #chec30 the data
-  plot_afr2
+  lines(plot_data2_real$mean~plot_data2_real$wealth,col=palette[25])
+  lines(plot_data2_real$upp~plot_data2_real$wealth,col=palette[25],lty=2)
+  lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[25],lty=2)
+  points(plot_afr2[,25]~plot_data2_real$wealth,col=alpha(palette[25],0.5),pch=16)
   
-  lines(plot_data2_real$mean~plot_data2_real$wealth,col=hcl.colors(35,"Zissou 1")[30])
-  lines(plot_data2_real$upp~plot_data2_real$wealth,col=rainbow(35)[30],lty=2)
-  lines(plot_data2_real$low~plot_data2_real$wealth,col=rainbow(35)[30],lty=2)
-  points(plot_afr2[,30]~plot_data2_real$wealth,col=alpha(hcl.colors(35,"Zissou 1")[30],0.2),pch=16)
-
-#plot wealth and probability of first reproduction at age 35 ----
-  plot(c(0,1)~c(-5,5),
-       ylim=c(0,1),
-       ylab="Prob. FR",
-       xlab="Wealth",
-       main="Model with absolute wealth at age 35",
-       type="n")
-  #create matrix to store the data
-  p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
-  p2_real
-  #fill it in with values for age 35
-  for(j in 1:length(simwealth_real)){
-    for(i in 1:nrow(post2_real$mu)){
-      p2_real[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                  post2_real$mu[i,35] +
-                                  post2_real$beta_wealth[i,35]*simwealth_real[j]) 
-    }
-  }
-  #chec35 data
-  p2_real
-  #plot it!
-  #prepare model prediction data
-  plot_data2_real <- data.frame(wealth = simwealth_real,
-                                mean = apply(p2_real, 2, mean), 
-                                upp = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                low = apply(p2_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr2 <- afr_matrix2
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr2)){
-    for(i in 1:nrow(plot_afr2)){
-      if(plot_afr2[i,j]==-99){
-        plot_afr2[i,j] <- NA
-      }
-    }
-  }
-  #chec35 the data
-  plot_afr2
-  
-  lines(plot_data2_real$mean~plot_data2_real$wealth,col=hcl.colors(35,"Zissou 1")[35])
-  lines(plot_data2_real$upp~plot_data2_real$wealth,col=rainbow(35)[35],lty=2)
-  lines(plot_data2_real$low~plot_data2_real$wealth,col=rainbow(35)[35],lty=2)
-  points(plot_afr2[,35]~plot_data2_real$wealth,col=alpha(hcl.colors(35,"Zissou 1")[35],0.2),pch=16)
   
