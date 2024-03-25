@@ -24,3 +24,4 @@ The folder "Model_code" contains the files related to the data cleaning, wrangli
 - firstbaby_diffwealth.R = contains the code for data wrangling, simulation, and analysis of the model with age, absolute and wealth variability as predictors.
 - firstbaby_diffwealth.stan = contains the code for the Stan model with age, absolute and wealth variability.
 
+The folder "Misc" contains files from previous attempts of analyses, and unfinished work. Mainly to keep the files there, until a final clean later on.
