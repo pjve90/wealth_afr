@@ -6,7 +6,9 @@
 #install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
 #remotes::install_github("stan-dev/cmdstanr")
 library(cmdstanr)
+library(rethinking)
 
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ## Data exploration ----
 
 sample_2 <- read.csv(".~/sample2.csv",header=TRUE)
