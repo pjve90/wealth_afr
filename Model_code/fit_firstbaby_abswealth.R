@@ -22,12 +22,12 @@ N <- 100
 
 #Age
 #maximum age of 90 years old
-A <- 90
+A <- 35
 
 #Absolute wealth
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
-wealth <- matrix(nrow=N,ncol=A+1)
+wealth <- matrix(nrow=N,ncol=A)
 #randomly assign an amount of wealth for each individual at age 0
 wealth[,1] <- rnorm(100,15,5)
 #simulate wealth of individuals through time, based on previous absolute wealth
@@ -54,19 +54,19 @@ for(j in 1:ncol(std_wealth)){
 #check the data
 std_wealth
 
-#simulate an age-specific parameter for wealth
-beta_wealth<-c(rep(0,10),seq(from=-0.1,to=0.1,length=32),rep(0,49))
+#simulate an age-specific parameter for wealth / if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
+beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=16),rep(0,61))
 
 #Age at first reproduction (AFR)
 
-#simulate an age-specific parameter for AFR
-mu_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
+#simulate an age-specific parameter for AFR (mu) / should sum to 1 / match with Pimbwe data
+mu_age<-c(rep(0,13),seq(from=0.001,to=0.2,length=6),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=5),rep(0,61))
 
 #simulate binary ouput of AFR for each age
 #0=no first birth
 #1=yes first birth
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
-afrs <- matrix(nrow=N,ncol=A+1)
+afrs <- matrix(nrow=N,ncol=A)
 #make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
 afrs[,1:10] <- 0
 #randomly assign a positive output of AFR for individuals
@@ -86,16 +86,34 @@ for(j in 1:ncol(afrs)){
 #see the data
 head(afrs)
 #check the age-specific probability of FR
-apply(afrs,2,sum)/100
+apply(afrs,2,sum)/N
 #plot it
-plot(apply(afrs,2,sum)/100,xlab="Age",ylab="Frequency")
+plot(apply(afrs,2,sum)/N,xlab="Age",ylab="Frequency")
+points(mu_age,col="grey",pch=4)
+
+#plot relationship between wealth and AFR
+individualvalues<-as.data.frame(matrix(ncol=2,nrow=N))
+colnames(individualvalues)<-c("afr","wealth")
+for(i in 1:N){
+  if(sum(afrs[i,])==0){
+  individualvalues[i,]$afr<-NA
+  }else{
+    individualvalues[i,]$afr<-which(afrs[i,]==1)
+  }
+}
+for(i in 1:N){
+  individualvalues[i,]$wealth<-median(std_wealth[i,])
+}
+# Individuals with more wealth have their first child later
+plot(individualvalues$afr~individualvalues$wealth)
+
 
 ## Fit simulated data ----
 
 #put all the data together
 #create data
 data <- list(N = N, #population size
-             A = A+1, #age
+             A = A, #age
              wealth = std_wealth, #absolute wealth
              baby = afrs) #AFR
 #check data
@@ -152,26 +170,30 @@ tab2
 tab2_mu <- precis(rds2,depth=3,pars="mu")
 #check table
 tab2_mu
+plot(inv_logit(tab2_mu[,1]))
 #create summary table for beta
 tab2_beta <- precis(rds2,depth=3,pars="beta_wealth")
 #check table
 tab2_beta
+plot((tab2_beta[,1]))
+
 
 ## Plot the fit of the simulated data ----
 
 #compute probability of FR at each age
 #simulate wealth values
 range(post2$beta_wealth)
-simwealth <- seq(from=round(min(range(post2$beta_wealth)),1),to=round(max(range(post2$beta_wealth)),1),length.out=nrow(std_wealth)) #specify according to range and length related to sample size
+simwealth <- seq(from=round(min(std_wealth),1),to=round( max(std_wealth),1),length.out=nrow(std_wealth)) #specify according to range and length related to sample size
 simwealth
 
 #colour palette
-palette <- c(rep(NA,14),hcl.colors(11,"Spectral"))
-palette[20] <- "black"
+#palette <- c(rep(NA,14),hcl.colors(11,"Spectral"))
+#palette[20] <- "black"
+palette<-c(rep("NA",14),palette(gray(seq(0,.9,length.out = 11)))) #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(-2.5,2.5),
+     ylim=c(0,0.4),
      ylab="Prob. FR",
      xlab="Wealth",
      main="Model with absolute wealth",
@@ -1622,4 +1644,39 @@ layout(matrix(c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,0,10,10,11,11,0),nrow=4,ncol
   lines(plot_data2_real$low~plot_data2_real$wealth,col=palette[25],lty=2)
   points(plot_afr2[,25]~plot_data2_real$wealth,col=alpha(palette[25],0.5),pch=16)
   
+  
+  
+  
+  
+  
+  
+# Wealth imputation with a Gaussion process  
+  
+  wealth<-absw_matrix2
+
+  for(j in 1:ncol(wealth)){
+    for(i in 1:nrow(wealth)){
+      if(is.na(wealth[i,j])==TRUE){
+        wealth[i,j] <- -99
+      }
+    }
+  }
+  data <- list(N = 540, #population size
+               A = 91, #age
+               wealth = wealth) 
+  
+  w1 <- cmdstan_model("wealthimputation.stan")
+  
+  # fit model
+  
+  fitw2 <- w1$sample(data = data, 
+                    chains = 4, 
+                    parallel_chains = 4, 
+                    adapt_delta = 0.95,
+                    max_treedepth = 13,
+                    init = 0)
+  
+  fit_w2 <- rstan::read_stan_csv(fitw2$output_files())
+  
+  precis(fit_w2,depth=3,pars="alpha")
   
