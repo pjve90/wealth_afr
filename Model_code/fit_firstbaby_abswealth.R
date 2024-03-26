@@ -775,9 +775,9 @@ for(i in 1:nrow(afr_matrix2)){
 #check the data
 afr_matrix2
 #check the age-specific probability of FR
-colSums(as.data.frame(afr_matrix2),na.rm=T)/100
+colSums(as.data.frame(afr_matrix2),na.rm=T)/sum(is.na(real_data2$aoc))
 #plot it
-plot(colSums(as.data.frame(afr_matrix2),na.rm = T)/100~c(1:91),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,1))
+plot(colSums(as.data.frame(afr_matrix2),na.rm = T)/sum(is.na(real_data2$aoc))~c(1:91),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.3))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
