@@ -40,50 +40,69 @@ for(j in 2:ncol(abswealth)){
 #see the data
 head(abswealth)
 #check the age-specific absolute wealth
-colMeans(as.data.frame(abswealth))
+apply(abswealth,2,mean)
 #plot it
-plot(colMeans(as.data.frame(abswealth)),xlab="Age",ylab="Average absolute wealth")
+plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
 #standardise wealth data
 #create a matrix to store the standardised data
 std_abswealth <- matrix(nrow=nrow(abswealth),ncol=ncol(abswealth))
 #standardize wealth data per column
-for(j in 1:ncol(std_abswealth)){
+for(j in 1:ncol(std_wealth)){
   std_abswealth[,j] <- standardize(abswealth[,j])
 }
 #check the data
-std_wealth
+std_abswealth
 
-#simulate an age-specific parameter for wealth
-beta_abswealth<-c(rep(0,10),seq(from=-0.1,to=0.1,length=22),rep(0,49))
+#simulate an age-specific parameter for wealth (beta)
+#if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
+beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=16),rep(0,62))
+beta_wealth
+#check that they sum to 1
+sum(beta_wealth)
+#plot it!
+plot(beta_wealth~c(1:length(beta_wealth)))
 
 #Difference of wealth
 #simulate absolute wealth for each age
-#create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
+#create a matrix with individuals as rows and ages as columns (A+1) so the first column is birth)
 diffwealth <- matrix(nrow=N,ncol=A+1)
-#assign zero change of wealth at birth
-diffwealth[,1] <- 0
-#randomly assign an amount of wealth for each individual and age
-for(j in 2:ncol(diffwealth)){
-  for(i in 1:nrow(diffwealth)){
-    diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-1]
+#calculate the difference of wealth from one year to the next
+for(j in 1:ncol(diffw_matrix3)){
+  for(i in 1:nrow(diffw_matrix3)){
+    if(j ==1){
+      diffw_matrix3[i,j] <- std_abswealth[i,j] - std_abswealth[i,j]
+    } else{
+      diffw_matrix3[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-1]
+    }
   }
 }
 #check the data
 #see the data
 head(diffwealth)
-#check the age-specific absolute wealth
-colMeans(as.data.frame(diffwealth))
+#check the age-specific wealth variability
+apply(diffwealth,2,mean)
 #plot it
-plot(colMeans(as.data.frame(diffwealth)),xlab="Age",ylab="Average wealth variability")
+plot(apply(diffwealth,2,mean),xlab="Age",ylab="Average wealth variability")
 
 #simulate an age-specific parameter for wealth variability
-gamma_diffwealth<-c(rep(0,10),seq(from=0.1,to=-0.1,length=22),rep(0,49))
+#if seq starts from a positive value and goes to a negative value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
+gamma_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=16),rep(0,62))
+gamma_wealth
+#check that they sum to 1
+sum(gamma_wealth)
+#plot it!
+plot(gamma_wealth~c(1:length(gamma_wealth)))
 
 #Age at first reproduction (AFR)
 
-#simulate an age-specific parameter for AFR
-mu_age<-c(rep(0,10),seq(from=0.01,to=0.1,length=11),rep(0.1,4),seq(from=0.1,to=0.01,length=17),rep(0,49))
+#simulate an age-specific parameter for AFR (mu)
+mu_age<-c(rep(0,13),seq(from=0.001,to=0.2,length=6),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,52))
+mu_age
+#check that they sum to 1
+sum(mu_age)
+#plot it!
+plot(mu_age~c(1:length(mu_age)))
 
 #simulate binary ouput of AFR for each age
 #0=no first birth
@@ -96,9 +115,9 @@ afrs[,1:10] <- 0
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
     if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afr_prob <- mu_age[j]+
-        beta_abswealth[j]*abswealth[i,j]+
-        gamma_diffwealth[j]*diffwealth[i,j]
+      afr_prob <- mu_age[j]+ #age
+        beta_wealth[j]*std_abswealth[i,j]+ #absolute wealth
+        gamma_wealth[j]*diffwealth[i,j] #wealth variability
       if(afr_prob<0){afr_prob<-0}
       afrs[i,j] <- rbinom(1,1,afr_prob)
     } else{
@@ -110,10 +129,37 @@ for(j in 1:ncol(afrs)){
 #check the data
 #see the data
 head(afrs)
-#check the age-specific frequency of FR
-colSums(as.data.frame(afrs))/100
+#check the age-specific probability of AFR
+apply(afrs,2,sum)/N
 #plot it
-plot(colSums(as.data.frame(afrs))/100,xlab="Age",ylab="Prob FR")
+plot(apply(afrs,2,sum)/N,xlab="Age",ylab="Prob FR")
+points(mu_age,col="grey",pch=4)
+
+#plot age-specific relationship between absolute wealth and AFR
+#prepare data
+plot_ind3 <- as.data.frame(matrix(ncol=3,nrow=N))
+colnames(plot_ind3)<-c("afr","abs_wealth","wealth_diff")
+#calculate the AFR for each individual
+for(i in 1:nrow(plot_ind3)){
+  if(sum(afrs[i,])==0){
+    plot_ind3[i,]$afr<-NA
+  }else{
+    plot_ind3[i,]$afr<-which(afrs[i,]==1)
+  }
+}
+#add the age-specific absolute wealth
+for(i in 1:nrow(plot_ind3)){
+  plot_ind3[i,]$abs_wealth<-std_abswealth[i,which(afrs[i,]==1)]
+}
+#add the age-specific wealth variability
+for(i in 1:nrow(plot_ind3)){
+  plot_ind3[i,]$wealth_diff<-diffwealth[i,which(afrs[i,]==1)]
+}
+#plot the relationship between absolute wealth and AFR
+plot(plot_ind3$afr~plot_ind3$abs_wealth)
+#plot the relationship between wealth variability and AFR
+plot(plot_ind3$afr~plot_ind3$wealth_diff)
+
 
 ## Fit simulated data ----
 
@@ -135,7 +181,7 @@ m3 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Mod
 
 fit3 <- m3$sample(data = data3, 
                   chains = 4, 
-                  parallel_chains = 4, 
+                  parallel_chains = 10, 
                   adapt_delta = 0.95,
                   max_treedepth = 13,
                   init = 0)
@@ -180,33 +226,32 @@ tab3
 tab3_mu <- precis(rds3,depth=2,pars="mu")
 #check table
 tab3_mu
+plot(inv_logit(tab3_mu[,1]))
 #create summary table for beta
 tab3_beta <- precis(rds3,depth=2,pars="beta_wealth")
 #check table
 tab3_beta
+plot((tab3_beta[,1]))
 #create summary table for gamma
 tab3_gamma <- precis(rds3,depth=2,pars="gamma_wealth")
 #check table
 tab3_gamma
+plot((tab3_gamma[,1]))
 
 ## Plot the fit of the simulated data ----
 
-#compute probability of FR at each age
-#simulate wealth values
-range(post3$beta_wealth)
-simwealth_g <- seq(from=round(min(range(post3$beta_wealth)),1),to=round(max(range(post3$beta_wealth)),1),length.out=nrow(diffwealth)) #specify according to range and length related to sample size
+#simulate wealth variability values
+simwealth_g <- seq(from=round(min(diffwealth),1),to=round(max(diffwealth),1),length.out=nrow(diffwealth)) #specify according to range and length related to sample size
 simwealth_g
 
 #colour palette
-palette <- c(rep(NA,14),hcl.colors(11,"Spectral"))
-palette[20] <- "black"
+palette<-c(rep("NA",14),palette(gray(seq(0,.9,length.out = 11)))) #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 
 #add lines
@@ -217,9 +262,10 @@ for(k in seq(15,25,by=1)){
   #fill it in with values for age 25
   for(j in 1:length(simwealth_g)){
     for(i in 1:nrow(post3$mu)){
-      p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                             post3$mu[i,k] +
-                             post3$beta_wealth[i,k]*simwealth_g[j]) 
+      p3_real[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                                  post3_real$mu[i,k] + #age
+                                  post3_real$beta_wealth[i,k]*0 + # absolute wealth / zero because that is the average from the standardisation
+                                  post3_real$gamma_wealth[i,k]*simwealth_g[j]) #wealth variability
     }
   }
   #check data
@@ -254,11 +300,10 @@ for(k in seq(15,25,by=1)){
 layout(matrix(c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,0,10,10,11,11,0),nrow=4,ncol=6,byrow=T))
 
 #plot wealth and probability of first reproduction at age 15
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 15",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -266,9 +311,10 @@ p3
 #fill it in with values for age 15
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
-    p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,15] +
-                           post3$beta_wealth[i,15]*simwealth_g[j]) 
+    p3_real[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                                post3_real$mu[i,15] + #age
+                                post3_real$beta_wealth[i,15]*0 + # absolute wealth / zero because that is the average from the standardisation
+                                post3_real$gamma_wealth[i,15]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -300,11 +346,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette,lty=2)
 points(plot_afr3[,15]~plot_data3$wealth,col=alpha(palette[15],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 16 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 16",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -313,8 +358,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,16] +
-                           post3$beta_wealth[i,16]*simwealth_g[j]) 
+                           post3$mu[i,16] + #age
+                           post3_real$beta_wealth[i,16]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,16]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -346,11 +392,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[16],lty=2)
 points(plot_afr3[,16]~plot_data3$wealth,col=alpha(palette[16],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 17 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 17",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -359,8 +404,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,17] +
-                           post3$beta_wealth[i,17]*simwealth_g[j]) 
+                           post3$mu[i,17] + #age
+                           post3_real$beta_wealth[i,15]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,17]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -392,11 +438,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[17],lty=2)
 points(plot_afr3[,17]~plot_data3$wealth,col=alpha(palette[17],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 18 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 18",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -405,8 +450,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,18] +
-                           post3$beta_wealth[i,18]*simwealth_g[j]) 
+                           post3$mu[i,18] + #age
+                           post3_real$beta_wealth[i,18]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,18]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -438,11 +484,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[18],lty=2)
 points(plot_afr3[,18]~plot_data3$wealth,col=alpha(palette[18],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 19 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 19",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -451,8 +496,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,19] +
-                           post3$beta_wealth[i,19]*simwealth_g[j]) 
+                           post3$mu[i,19] + #age
+                           post3_real$beta_wealth[i,19]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,19]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -484,11 +530,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[19],lty=2)
 points(plot_afr3[,19]~plot_data3$wealth,col=alpha(palette[19],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 20 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 20",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -497,8 +542,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,20] +
-                           post3$beta_wealth[i,20]*simwealth_g[j]) 
+                           post3$mu[i,20] + #age
+                           post3_real$beta_wealth[i,20]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,20]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -530,11 +576,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[20],lty=2)
 points(plot_afr3[,20]~plot_data3$wealth,col=alpha(palette[20],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 21 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 21",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -543,8 +588,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,21] +
-                           post3$beta_wealth[i,21]*simwealth_g[j]) 
+                           post3$mu[i,21] + #age
+                           post3_real$beta_wealth[i,21]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,21]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -576,11 +622,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[21],lty=2)
 points(plot_afr3[,21]~plot_data3$wealth,col=alpha(palette[21],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 22 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 22",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -589,8 +634,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,22] +
-                           post3$beta_wealth[i,22]*simwealth_g[j]) 
+                           post3$mu[i,22] + #age
+                           post3_real$beta_wealth[i,22]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,22]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -623,11 +669,10 @@ points(plot_afr3[,22]~plot_data3$wealth,col=alpha(palette[22],0.5),pch=16)
 
 
 #plot wealth and probability of first reproduction at age 23 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 23",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -636,8 +681,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,23] +
-                           post3$beta_wealth[i,23]*simwealth_g[j]) 
+                           post3$mu[i,23] + #age
+                           post3_real$beta_wealth[i,23]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,23]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -669,11 +715,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[23],lty=2)
 points(plot_afr3[,23]~plot_data3$wealth,col=alpha(palette[23],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 24 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 24",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -682,8 +727,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,24] +
-                           post3$beta_wealth[i,24]*simwealth_g[j]) 
+                           post3$mu[i,24] + #age
+                           post3_real$beta_wealth[i,24]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,24]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -715,11 +761,10 @@ lines(plot_data3$low~plot_data3$wealth,col=palette[24],lty=2)
 points(plot_afr3[,24]~plot_data3$wealth,col=alpha(palette[24],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 25 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(diffwealth),max(diffwealth)),
      ylab="Prob. FR",
-     xlab="Wealth",
-     main="Model with absolute wealth at age 25",
+     xlab="Wealth variability",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3 <- matrix(nrow=nrow(post3$mu),ncol=length(simwealth_g))
@@ -728,8 +773,9 @@ p3
 for(j in 1:length(simwealth_g)){
   for(i in 1:nrow(post3$mu)){
     p3[i,j] <- inv_logit(post3$alpha[i] + #inv logit because originally is logit
-                           post3$mu[i,25] +
-                           post3$beta_wealth[i,25]*simwealth_g[j]) 
+                           post3$mu[i,25] + #age
+                           post3_real$beta_wealth[i,25]*0 + # absolute wealth / zero because that is the average from the standardisation
+                           post3$beta_wealth[i,25]*simwealth_g[j]) #wealth variability
   }
 }
 #check data
@@ -741,7 +787,7 @@ plot_data3 <- data.frame(wealth = simwealth_g,
                          upp = apply(p3, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                          low = apply(p3, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
-#prepare afr probabilities from real data
+#prepare afr probabilities from simulated data
 #create a matrix
 plot_afr3 <- afrs
 #change -99 to NAs
@@ -775,7 +821,7 @@ for(i in 1:nrow(afr_matrix3)){
   afr <- real_data3$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
   aoc <- real_data3$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
   if(!is.na(afr)){
-    afr_matrix3[i,1:(afr-1)] <- rep(0,length(afr_matrix3[i,1:(afr-1)]))
+    afr_matrix3[i,] <- 0
     afr_matrix3[i,afr] <- 1
   } else{
     afr_matrix3[i,1:aoc] <- rep(0,length(afr_matrix3[i,1:aoc]))
@@ -784,9 +830,9 @@ for(i in 1:nrow(afr_matrix3)){
 #check the data
 afr_matrix3
 #check the age-specific probability of FR
-colSums(as.data.frame(afr_matrix3),na.rm=T)/100
+apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))
 #plot it
-plot(colSums(as.data.frame(afr_matrix3),na.rm = T)/100~c(1:91),xlab="Age",ylab="Probability of first reproduction")
+plot(apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))~c(1:ncol(afr_matrix2)1),xlab="Age",ylab="Probability of first reproduction")
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix3)){
@@ -805,7 +851,7 @@ afr_matrix3
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
-absw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=91)
+absw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=A)
 #calculate for each age the amount of wealth the household of a woman has, based on each census
 #95
 for(i in 1:nrow(absw_matrix3)){
@@ -963,8 +1009,7 @@ sum(is.na(absw_matrix3))
 #check the age-specific frequency of absolute wealth
 apply(absw_matrix3,2,mean)
 #plot it
-plot(apply(absw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
-
+plot(apply(absw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
 
 #standardise absolute wealth per column
 #create a matrix
@@ -990,7 +1035,7 @@ std_absw_matrix3
 #check the age-specific frequency of absolute wealth
 apply(std_absw_matrix3,2,mean)
 #plot it
-plot(apply(std_absw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
+plot(apply(std_absw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
 
 # Wealth variability
 
@@ -1014,7 +1059,7 @@ sum(is.na(diffw_matrix3))
 #check the age-specific frequency of wealth variability
 apply(diffw_matrix3,2,mean)
 #plot it
-plot(apply(diffw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Wealth variability")
+plot(apply(diffw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Wealth variability")
 
 ## Fit real data ----
 
@@ -1030,7 +1075,7 @@ real_list3
 
 fit3_real <- m3$sample(data = real_list3, 
                   chains = 4, 
-                  parallel_chains = 4, 
+                  parallel_chains = 10, 
                   adapt_delta = 0.95,
                   max_treedepth = 13,
                   init = 0)
@@ -1085,20 +1130,32 @@ tab3_real_gamma <- precis(rds3_real,depth=2,pars="gamma_wealth")
 #check table
 tab3_real_gamma
 
+# To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
+#mu
+tab3_mu_real[,1]<-round(inv_logit(tab3_mu_real[,1]),3)
+tab3_mu_real[,3]<-round(inv_logit(tab3_mu_real[,3]),3)
+tab3_mu_real[,4]<-round(inv_logit(tab3_mu_real[,4]),3)
+#beta_wealth
+tab3_beta_real[,1]<-round(inv_logit(tab3_beta_real[,1]),3)
+tab3_beta_real[,3]<-round(inv_logit(tab3_beta_real[,3]),3)
+tab3_beta_real[,4]<-round(inv_logit(tab3_beta_real[,4]),3)
+#gamma_wealth
+tab3_beta_real[,1]<-round(inv_logit(tab3_beta_real[,1]),3)
+tab3_beta_real[,3]<-round(inv_logit(tab3_beta_real[,3]),3)
+tab3_beta_real[,4]<-round(inv_logit(tab3_beta_real[,4]),3)
+
 ## Plot the fit of the real data ----
 
-#compute probability of FR at each age
-#simulate wealth values
-range(post3_real$gamma_wealth)
-simwealth_g_real <- seq(from=round(min(range(post3_real$gamma_wealth)),1),to=round(max(range(post3_real$gamma_wealth)),1),length.out=nrow(diffw_matrix3)) #specify according to range and length according to sample size
+#simulate wealth variability values
+range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
+simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(diffw_matrix3)) #specify according to range and length according to sample size
 simwealth_g_real
 
 #colour palette
-palette <- c(rep(NA,14),hcl.colors(11,"Spectral"))
-palette[20] <- "black"
+palette<-c(rep("NA",14),palette(gray(seq(0,.9,length.out = 11)))) #darker lines = younger ages, lighter lines = older ages
+
 #plot empty plot
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
      main="Model with wealth variability",
@@ -1149,11 +1206,10 @@ for(k in seq(15,25,by=1)){
 layout(matrix(c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,0,10,10,11,11,0),nrow=4,ncol=6,byrow=T))
 
 #plot wealth and probability of first reproduction at age 15 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 15",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1195,11 +1251,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette,lty=2)
 points(plot_afr3[,15]~plot_data3_real$wealth,col=alpha(palette[15],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 16 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 16",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1232,7 +1287,7 @@ for(j in 1:ncol(plot_afr3)){
     }
   }
 }
-#chec16 the data
+#check the data
 plot_afr3
 
 lines(plot_data3_real$mean~plot_data3_real$wealth,col=palette[16])
@@ -1241,11 +1296,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[16],lty=2)
 points(plot_afr3[,16]~plot_data3_real$wealth,col=alpha(palette[16],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 17 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 17",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1333,11 +1387,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[18],lty=2)
 points(plot_afr3[,18]~plot_data3_real$wealth,col=alpha(palette[18],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 19 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 19",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1379,11 +1432,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[19],lty=2)
 points(plot_afr3[,19]~plot_data3_real$wealth,col=alpha(palette[19],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 20 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 20",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1425,11 +1477,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[20],lty=2)
 points(plot_afr3[,20]~plot_data3_real$wealth,col=alpha(palette[20],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 21 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 21",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1471,11 +1522,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[21],lty=2)
 points(plot_afr3[,21]~plot_data3_real$wealth,col=alpha(palette[21],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 22 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 22",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1518,11 +1568,10 @@ points(plot_afr3[,22]~plot_data3_real$wealth,col=alpha(palette[22],0.5),pch=16)
 
 
 #plot wealth and probability of first reproduction at age 23 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 23",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
@@ -1610,11 +1659,10 @@ lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[24],lty=2)
 points(plot_afr3[,24]~plot_data3_real$wealth,col=alpha(palette[24],0.5),pch=16)
 
 #plot wealth and probability of first reproduction at age 25 
-plot(c(0,1)~c(-5,5),
-     ylim=c(0,1),
+plot(c(0,0.4)~c(min(simwealth_g_real),max(simwealth_g_real)),
      ylab="Prob. FR",
      xlab="Wealth variability",
-     main="Model with wealth variability at age 25",
+     main="Model with wealth variability",
      type="n")
 #create matrix to store the data
 p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
