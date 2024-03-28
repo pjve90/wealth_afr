@@ -815,14 +815,15 @@ head(real_data3)
 # Age at first reproduction 
 
 #create a matrix to store the age-specific age of censor
-afr_matrix3 <- matrix(nrow=nrow(real_data3),ncol=91)
+afr_matrix3 <- matrix(nrow=nrow(real_data3),ncol=A+1)
 #calculate for each age when the woman is censored (1) or not (0)
 for(i in 1:nrow(afr_matrix3)){
   afr <- real_data3$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
   aoc <- real_data3$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
   if(!is.na(afr)){
-    afr_matrix3[i,] <- 0
+    afr_matrix3[i,1:(afr-1)] <- 0
     afr_matrix3[i,afr] <- 1
+    afr_matrix3[i,(afr+1):aoc] <- 0
   } else{
     afr_matrix3[i,1:aoc] <- rep(0,length(afr_matrix3[i,1:aoc]))
   }
@@ -832,7 +833,7 @@ afr_matrix3
 #check the age-specific probability of FR
 apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))
 #plot it
-plot(apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))~c(1:ncol(afr_matrix2)1),xlab="Age",ylab="Probability of first reproduction")
+plot(apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))~c(1:ncol(afr_matrix3)),xlab="Age",ylab="Probability of first reproduction")
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix3)){
@@ -851,7 +852,7 @@ afr_matrix3
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
-absw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=A)
+absw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=A+1)
 #calculate for each age the amount of wealth the household of a woman has, based on each census
 #95
 for(i in 1:nrow(absw_matrix3)){
@@ -937,10 +938,10 @@ for(i in 1:nrow(absw_matrix3)){
 }
 #check data
 absw_matrix3
-#check the age-specific frequency of absolute wealth
-colMeans(as.data.frame(absw_matrix3),na.rm=T)
+#check the age-specific average of absolute wealth
+apply(absw_matrix3,2,mean,na.rm=T)
 #plot it
-plot(colMeans(as.data.frame(absw_matrix3),na.rm = T)~c(1:91),xlab="Age",ylab="Average absolute wealth")
+plot(apply(absw_matrix3,2,mean,na.rm=T)~c(1:ncol(absw_matrix3)),xlab="Age",ylab="Average absolute wealth")
 
 #NaN in columns where there are no values of wealth
 
@@ -1041,7 +1042,7 @@ plot(apply(std_absw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Average absolute
 
 #age-specific change in wealth
 #create matrix to store the age-specific wealth variation
-diffw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=91)
+diffw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=A+1)
 #calculate the age-specific wealth variation
 for(j in 1:ncol(diffw_matrix3)){
   for(i in 1:nrow(diffw_matrix3)){
@@ -1075,7 +1076,7 @@ real_list3
 
 fit3_real <- m3$sample(data = real_list3, 
                   chains = 4, 
-                  parallel_chains = 10, 
+                  parallel_chains = 15, 
                   adapt_delta = 0.95,
                   max_treedepth = 13,
                   init = 0)

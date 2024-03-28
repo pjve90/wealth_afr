@@ -72,7 +72,7 @@ plot(mu_age~c(1:length(mu_age)))
 #0=no first birth
 #1=yes first birth
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
-afrs <- matrix(nrow=N,ncol=A)
+afrs <- matrix(nrow=N,ncol=A+1)
 #make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
 afrs[,1:10] <- 0
 #randomly assign a positive output of AFR for individuals
@@ -87,6 +87,7 @@ for(j in 1:ncol(afrs)){
     }  
   }
 }
+
 #check the data
 #see the data
 head(afrs)
@@ -744,20 +745,21 @@ points(plot_afr2[,25]~plot_data2$wealth,col=alpha(palette[25],0.5),pch=16)
 ## Data wrangling of real data ----
 
 #Load data
-real_data2 <- read.csv("~/dataf.csv")[,-1]
+real_data2 <- read.csv("dataf.csv")[,-1]
 head(real_data2)
 
 # Age at first reproduction 
 
 #create a matrix to store the age-specific age of censor
-afr_matrix2 <- matrix(nrow=nrow(real_data2),ncol=A)
+afr_matrix2 <- matrix(nrow=nrow(real_data2),ncol=A+1)
 #calculate for each age when the woman is censored (1) or not (0)
 for(i in 1:nrow(afr_matrix2)){
   afr <- real_data2$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
   aoc <- real_data2$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
   if(!is.na(afr)){
-    afr_matrix2[i,] <- 0
+    afr_matrix2[i,1:(afr-1)] <- 0
     afr_matrix2[i,afr] <- 1
+    afr_matrix2[i,(afr+1):aoc] <- 0
   } else{
     afr_matrix2[i,1:aoc] <- rep(0,length(afr_matrix2[i,1:aoc]))
   }
@@ -765,15 +767,9 @@ for(i in 1:nrow(afr_matrix2)){
 #check the data
 afr_matrix2
 #check the age-specific probability of FR
-<<<<<<< HEAD
 apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))
 #plot it
 plot(apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))~c(1:ncol(afr_matrix2)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
-=======
-colSums(as.data.frame(afr_matrix2),na.rm=T)/sum(is.na(real_data2$aoc))
-#plot it
-plot(colSums(as.data.frame(afr_matrix2),na.rm = T)/sum(is.na(real_data2$aoc))~c(1:91),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.3))
->>>>>>> 6296074cbaadae07e39067880d5e1d4b69dee49f
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -792,7 +788,7 @@ afr_matrix2
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
-absw_matrix2 <- matrix(nrow = nrow(real_data2),ncol=A)
+absw_matrix2 <- matrix(nrow = nrow(real_data2),ncol=A+1)
 #calculate for each age the amount of wealth the household of a woman has, based on each census
 #95
 for(i in 1:nrow(absw_matrix2)){
@@ -990,7 +986,7 @@ real_list2 <- list(N = nrow(real_data2), #population size
 # fit model
 fit2_real <- m2$sample(data = real_list2, 
                        chains = 4, 
-                       parallel_chains = 10, 
+                       parallel_chains = 15, 
                        adapt_delta = 0.95,
                        max_treedepth = 13,
                        init = 0)
@@ -1059,7 +1055,7 @@ simwealth_real
 palette<-c(rep("NA",14),palette(gray(seq(0,.9,length.out = 11)))) #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-plot(c(0,0.2)~c(min(range(real_list2$wealth)),max(range(real_list2$wealth))),
+plot(c(0,1)~c(min(range(real_list2$wealth)),max(range(real_list2$wealth))),
      ylab="Prob. FR",
      xlab="Wealth",
      main="Model with absolute wealth",
