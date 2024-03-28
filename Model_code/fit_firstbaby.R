@@ -154,19 +154,20 @@ points(apply(afrs,2,sum)/N~plot_data1$age,col="grey",pch=16)
 ## Data wrangling of real data ----
 
 #Load data
-real_data1 <- read.csv("~/dataf.csv")[,-1]
+real_data1 <- read.csv("dataf.csv")[,-1]
 head(real_data1)
 
 #Calculate age-specific age at first reproduction
 #create a matrix to store the age-specific age of censor
-afr_matrix1 <- matrix(nrow=nrow(real_data1),ncol=91)
+afr_matrix1 <- matrix(nrow=nrow(real_data1),ncol=A+1)
 #calculate for each age when the woman is censored (1) or not (0)
 for(i in 1:nrow(afr_matrix1)){
   afr <- real_data1$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
   aoc <- real_data1$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
   if(!is.na(afr)){
-    afr_matrix1[i,] <- 0
+    afr_matrix1[i,1:(afr-1)] <- 0
     afr_matrix1[i,afr] <- 1
+    afr_matrix1[i,(afr+1):aoc] <- 0
   } else{
     afr_matrix1[i,1:aoc] <- rep(0,length(afr_matrix1[i,1:aoc]))
   }

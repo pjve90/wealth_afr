@@ -1117,15 +1117,38 @@ head(dataf)
 #create age of censor variable
 dataf$aoc <- rep(NA,nrow(dataf))
 #calculate the age of censor for those women who did not reproduce during the data collection
+#criteria is if woman is censored in the last census (NA)
 for (i in 1:nrow(dataf)){
-  if (is.na(dataf$afr[i]) == T) {
-    dataf$aoc[i] <- 2010 - dataf$dob[i] #2010 is the last census
+  if (sum(is.na(sample2[i,"h10a"]))==1) { #last census is 2006
+    dataf$aoc[i] <- 2006 - dataf$dob[i] 
+  } else if (sum(is.na(sample2[i,c("h06a","h10a")]))==2){ #last census is 2004
+    dataf$aoc[i] <- 2004 - dataf$dob[i]
+  } else if (sum(is.na(sample2[i,c("h04a","h06a","h10a")]))==4){ #last census is 2002
+    dataf$aoc[i] <- 2002 - dataf$dob[i]
+  } else if (sum(is.na(sample2[i,c("h02a","h04a","h06a","h10a")]))==4){ #last census is 2000
+    dataf$aoc[i] <- 2000 - dataf$dob[i]
+  } else if (sum(is.na(sample2[i,c("h00a","h02a","h04a","h06a","h10a")]))==5){ #last census is 1998
+    dataf$aoc[i] <- 1998 - dataf$dob[i]
+  } else if (sum(is.na(sample2[i,c("h98a","h00a","h02a","h04a","h06a","h10a")]))==6){ #last census is 1995
+    dataf$aoc[i] <- 1995 - dataf$dob[i]
   } else{
-    dataf$aoc[i] <- NA
+    dataf$aoc[i] <- 2010 - dataf$dob[i] #last census was in 2010
   }
 }
 #check data
 head(dataf)
+
+#check if there are women with AFR higher than their AOC
+dataf[which(dataf$afr > dataf$aoc),]
+nrow(dataf[which(dataf$afr > dataf$aoc),])
+#check in the original sample, regarding their presence in the household
+sample2[which(dataf$afr > dataf$aoc),c("AFB","AFB for pablo","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a")]
+nrow(sample2[which(dataf$afr > dataf$aoc),c("AFB","AFB for pablo","DOBYR","h95a","h98a","h00a","h02a","h04a","h06a","h10a")])
+#delete those who have the mismatch
+#sample
+sample2 <- sample2[-which(dataf$afr > dataf$aoc),]
+#data wrangling dataframe
+dataf <- dataf[-which(dataf$afr > dataf$aoc),]
 
 #### Absolute wealth ----
 
