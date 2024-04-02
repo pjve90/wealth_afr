@@ -765,15 +765,9 @@ for(i in 1:nrow(afr_matrix2)){
 #check the data
 afr_matrix2
 #check the age-specific probability of FR
-<<<<<<< HEAD
 apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))
 #plot it
 plot(apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))~c(1:ncol(afr_matrix2)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
-=======
-colSums(as.data.frame(afr_matrix2),na.rm=T)/sum(is.na(real_data2$aoc))
-#plot it
-plot(colSums(as.data.frame(afr_matrix2),na.rm = T)/sum(is.na(real_data2$aoc))~c(1:91),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.3))
->>>>>>> 6296074cbaadae07e39067880d5e1d4b69dee49f
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -792,7 +786,7 @@ afr_matrix2
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
-absw_matrix2 <- matrix(nrow = nrow(real_data2),ncol=A)
+absw_matrix2 <- matrix(nrow = nrow(real_data2),ncol=A+1)
 #calculate for each age the amount of wealth the household of a woman has, based on each census
 #95
 for(i in 1:nrow(absw_matrix2)){
@@ -983,6 +977,7 @@ plot(apply(std_absw_matrix2,2,mean)~c(1:(A+1)),xlab="Age",ylab="Average absolute
 #put all the data together
 #create dataset
 real_list2 <- list(N = nrow(real_data2), #population size
+                   N_wm = 
                    A = ncol(afr_matrix2), #age
                    wealth = std_absw_matrix2, #absolute wealth
                    baby = afr_matrix2) #AFR

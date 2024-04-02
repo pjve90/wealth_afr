@@ -18,7 +18,16 @@ functions {
 
     return S * cholesky_decompose(Rho);
   }
-
+  
+  vector merge_missing( int[] miss_indexes , vector x_obs , vector x_miss ) { // imputation function
+    int N = dims(x_obs)[1];
+    int N_miss = dims(x_miss)[1];
+    vector[N] merged;
+    merged = x_obs;
+    for ( i in 1:N_miss )
+    merged[ miss_indexes[i] ] = x_miss[i];
+    return merged;
+}
 }
 
 data {
@@ -27,6 +36,8 @@ data {
   int A; // maximum age of women
   
   array[N,A] int wealth; // age-specific absolute wealth
+  
+  array[N_wm,A] int wealth_m; // missing wealth data
   
   array[N,A] int baby; // probability of FR
 
@@ -43,7 +54,10 @@ parameters {
   real <lower = 0> mu_delta;
 // absolute wealth
   vector [A] beta_wealth;
-
+// missing wealth data
+  vector [A] nu;
+  vector [A] sigma_wealth_m;
+  vector [N_wm,A] wealth_impute;
 }
 
 
@@ -56,16 +70,22 @@ transformed parameters {
   }
 
 model {
-
+// global intercept
     alpha ~ normal(0,1);
-    
+// Gaussian process of age    
     mu_raw ~ normal(0, 1);
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
-    
+// absolute wealth
     beta_wealth ~ normal(0,1);
-
+// missing wealth data
+    vector[N,A] beta_merge;
+    beta_merge = merge_missing(wealth_m,to_vector(wealth),wealth_impute);
+    beta_merge ~ normal(nu,sigma_wealth_m);
+    nu ~ normal(0,1);
+    sigma_wealth_m ~ exponential(1);
+    
     
   for (n in 1:N) {
   for (a in 1:A) {
@@ -75,7 +95,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        beta_wealth[a]*wealth[n,a] // absolute wealth
+        beta_wealth[a]*beta_merge[n,a] // absolute wealth
         );
           
     }
