@@ -27,7 +27,7 @@ A <- 90
 #Absolute wealth
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
-wealth <- matrix(nrow=N,ncol=A)
+wealth <- matrix(nrow=N,ncol=A+1)
 #randomly assign an amount of wealth for each individual at age 0
 wealth[,1] <- rnorm(100,15,5)
 #simulate wealth of individuals through time, based on previous absolute wealth
@@ -53,6 +53,15 @@ for(j in 1:ncol(std_wealth)){
 }
 #check the data
 std_wealth
+
+#add random NAs per column
+for(j in 1:A+1){
+  sample_na <- sample(nrow(std_wealth),25)
+  std_wealth[sample_na,j] <- NA
+}
+#check data
+std_wealth
+sum(is.na(std_wealth))
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
@@ -123,8 +132,9 @@ plot(plot_ind2$afr~plot_ind2$wealth)
 #put all the data together
 #create data
 data <- list(N = N, #population size
-             A = A, #age
+             A = A+1, #age
              wealth = std_wealth, #absolute wealth
+             N_wm = sum(is.na(std_wealth)), #number of missing data
              baby = afrs) #AFR
 #check data
 data

@@ -19,10 +19,10 @@ functions {
     return S * cholesky_decompose(Rho);
   }
   
-  vector merge_missing( int[] miss_indexes , vector x_obs , vector x_miss ) { // imputation function
+  vector merge_missing( array[] int miss_indexes , array[] int x_obs , vector x_miss ) { // imputation function
     int N = dims(x_obs)[1];
     int N_miss = dims(x_miss)[1];
-    vector[N] merged;
+    array[N,A] int merged;
     merged = x_obs;
     for ( i in 1:N_miss )
     merged[ miss_indexes[i] ] = x_miss[i];
@@ -34,10 +34,11 @@ data {
 
   int N; // sample size of women
   int A; // maximum age of women
+  int N_wm; // number of missing data
   
   array[N,A] int wealth; // age-specific absolute wealth
   
-  array[N_wm,A] int wealth_m; // missing wealth data
+  array[N_wm] int wealth_m; // missing wealth data
   
   array[N,A] int baby; // probability of FR
 
@@ -57,7 +58,7 @@ parameters {
 // missing wealth data
   vector [A] nu;
   vector [A] sigma_wealth_m;
-  vector [N_wm,A] wealth_impute;
+  vector[N_wm] wealth_impute;
 }
 
 
@@ -80,8 +81,8 @@ model {
 // absolute wealth
     beta_wealth ~ normal(0,1);
 // missing wealth data
-    vector[N,A] beta_merge;
-    beta_merge = merge_missing(wealth_m,to_vector(wealth),wealth_impute);
+    array[N,A] int beta_merge;
+    beta_merge = merge_missing(wealth_m,to_array_2d(wealth),wealth_impute);
     beta_merge ~ normal(nu,sigma_wealth_m);
     nu ~ normal(0,1);
     sigma_wealth_m ~ exponential(1);
