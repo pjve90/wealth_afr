@@ -809,7 +809,7 @@ points(plot_afr3[,25]~plot_data3$wealth,col=alpha(palette[25],0.5),pch=16)
 ## Data wrangling of real data ----
 
 #Load data
-real_data3 <- read.csv("~/wealth_afr/dataf.csv")[,-1]
+real_data3 <- read.csv("dataf.csv")[,-1]
 head(real_data3)
 
 # Age at first reproduction 
@@ -1484,4 +1484,233 @@ lines(plot_data3_real$mean~plot_data3_real$wealth,col=palette[25])
 lines(plot_data3_real$upp~plot_data3_real$wealth,col=palette[25],lty=2)
 lines(plot_data3_real$low~plot_data3_real$wealth,col=palette[25],lty=2)
 points(plot_afr3[,25]~plot_data3_real$wealth,col=alpha(palette[25],0.5),pch=16)
+
+### Wealth ----
+
+#### All wealth classes ----
+
+#simulate wealth values
+range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
+simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
+simwealth_g_real
+#get the quantiles
+quantiles <- as.numeric(quantile(simwealth_g_real,seq(0,1,0.25)))
+#0= -21.1  25%= -11.725  50%=-2.35 75%=7.025 100%=16.4
+
+#colour palette
+palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
+
+#plot empty plot
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,35),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with wealth variability",
+     type="n")
+
+#add lines
+for(k in 2:(length(quantiles)-1)){
+  #create matrix to store the data
+  p3_real_b <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+  p3_real_b
+  #fill it in with values for age 25
+  for(j in 1:ncol(post2_real$mu)){
+    for(i in 1:nrow(post2_real$mu)){
+      p3_real_b[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                    post2_real$mu[i,j] + #age
+                                    post2_real$beta_wealth[i,j]*quantiles[k]) #wealth
+    }
+  }
+  #check data
+  p3_real_b
+  #plot it!
+  #prepare model prediction data
+  plot_data3_real_b <- data.frame(age = 1:ncol(p3_real_b),
+                                  mean = apply(p3_real_b, 2, mean), 
+                                  upp = apply(p3_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p3_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from real data
+  #create a matrix
+  plot_afr3 <- afr_matrix3
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr3)){
+    for(i in 1:nrow(plot_afr3)){
+      if(plot_afr3[i,j]==-99){
+        plot_afr3[i,j] <- NA
+      }
+    }
+  }
+  #check the data
+  plot_afr3
+  
+  lines(plot_data3_real_b$mean~plot_data3_real_b$age,col=palette_b[k])
+}
+
+#plot one plot per wealth quantile
+
+#define the layout
+par(mfrow=c(1,3))
+
+#### Quantile 25% ----
+
+#simulate wealth values
+range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
+simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
+simwealth_g_real
+
+#colour palette
+palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
+
+plot(c(0,1)~c(0,35),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with wealth variability: Quantile 25%",
+     type="n")
+#create matrix to store the data
+p3_real_25 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p3_real_25
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p3_real_25[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*quantiles[2]) #wealth
+  }
+}
+#check data
+p3_real_25
+#plot it!
+#prepare model prediction data
+plot_data3_poor <- data.frame(age = 1:ncol(p3_real_25),
+                              mean = apply(p3_real_25, 2, mean), 
+                              upp = apply(p3_real_25, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                              low = apply(p3_real_25, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr3 <- afr_matrix3[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr3)){
+  for(i in 1:nrow(plot_afr3)){
+    if(plot_afr3[i,j]==-99){
+      plot_afr3[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr3
+
+lines(plot_data3_poor$mean~plot_data3_poor$age,col=palette_b[2])
+lines(plot_data3_poor$upp~plot_data3_poor$age,col=palette_b[2],lty=2)
+lines(plot_data3_poor$low~plot_data3_poor$age,col=palette_b[2],lty=2)
+#points(apply(plot_afr3,2,sum,na.rm=T)/sum(is.na(real_data3$afr)==F)~plot_data3_poor$age,col="gold",pch=16)
+
+#### Quantile 50% ----
+
+#simulate wealth values
+range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
+simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
+simwealth_g_real
+
+#colour palette
+palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
+
+plot(c(0,1)~c(0,35),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with wealth variability: Quantile 50%",
+     type="n")
+#create matrix to store the data
+p3_real_50 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p3_real_50
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p3_real_50[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*quantiles[3]) #wealth
+  }
+}
+#check data
+p3_real_50
+#plot it!
+#prepare model prediction data
+plot_data3_medium <- data.frame(age = 1:ncol(p3_real_50),
+                                mean = apply(p3_real_50, 2, mean), 
+                                upp = apply(p3_real_50, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p3_real_50, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr3 <- afr_matrix3[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr3)){
+  for(i in 1:nrow(plot_afr3)){
+    if(plot_afr3[i,j]==-99){
+      plot_afr3[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr3
+
+lines(plot_data3_medium$mean~plot_data3_medium$age,col=palette_b[3])
+lines(plot_data3_medium$upp~plot_data3_medium$age,col=palette_b[3],lty=2)
+lines(plot_data3_medium$low~plot_data3_medium$age,col=palette_b[3],lty=2)
+#  points(apply(plot_afr3,2,sum,na.rm=T)/sum(is.na(real_data3$afr)==F)~plot_data3_medium$age,col="gold",pch=16)
+
+#### Quantile 75% ----
+
+#simulate wealth values
+range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
+simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
+simwealth_g_real
+
+#colour palette
+palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
+
+plot(c(0,1)~c(0,35),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with wealth variability: Quantile 50%",
+     type="n")
+#create matrix to store the data
+p3_real_75 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p3_real_75
+#fill it in with values for quantile 75%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p3_real_75[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*quantiles[4]) #wealth
+  }
+}
+#check data
+p3_real_75
+#plot it!
+#prepare model prediction data
+plot_data3_high <- data.frame(age = 1:ncol(p3_real_75),
+                              mean = apply(p3_real_75, 2, mean), 
+                              upp = apply(p3_real_75, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                              low = apply(p3_real_75, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr3 <- afr_matrix3[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr3)){
+  for(i in 1:nrow(plot_afr3)){
+    if(plot_afr3[i,j]==-99){
+      plot_afr3[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr3
+
+lines(plot_data3_high$mean~plot_data3_high$age,col=palette_b[3])
+lines(plot_data3_high$upp~plot_data3_high$age,col=palette_b[3],lty=2)
+lines(plot_data3_high$low~plot_data3_high$age,col=palette_b[3],lty=2)
+#  points(apply(plot_afr3,2,sum,na.rm=T)/sum(is.na(real_data3$afr)==F)~plot_data3_high$age,col="gold",pch=16)
 
