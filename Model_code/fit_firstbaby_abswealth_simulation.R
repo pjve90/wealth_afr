@@ -145,8 +145,8 @@ afrs_restricted<-afrs[,12:31]
 
 #put all the data together
 #create data
-data <- list(N = N, #population size
-             A = A, #age
+data <- list(N = nrow(afrs_restricted), #population size
+             A = ncol(afrs_restricted), #age
              wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
              baby = afrs_restricted, #AFR
              miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
@@ -182,9 +182,9 @@ post2_simv <- extract.samples(rds2_simv)
 
 #put all the data together
 #create data
-data <- list(N = N, #population size
-             A = A, #age
-             wealth = std_wealth_restricted, #absolute wealth
+data <- list(N = nrow(afrs_restricted), #population size
+             A = ncol(afrs_restricted), #age
+             wealth = as.matrix(std_wealth_restricted), #absolute wealth
              baby = afrs_restricted) #AFR
 data
 
