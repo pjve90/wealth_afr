@@ -208,3 +208,29 @@ saveRDS(fit2_simif, "firstbaby2_simif.rds")
 rds2_simif <- readRDS("firstbaby2_simif.rds")
 #extract samples
 post2_simif <- extract.samples(rds2_simif)
+
+tab2_mu_simif <- precis(rds2_simif,depth=3,pars="mu")
+#check table
+tab2_mu_simif
+#create summary table for beta
+tab2_beta_simif <- precis(rds2_simif,depth=3,pars="beta_wealth")
+#check table
+tab2_beta_simif
+
+# To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
+#mu
+tab2_mu_simif[,1]<-round(inv_logit(tab2_mu_simif[,1]),3)
+tab2_mu_simif[,3]<-round(inv_logit(tab2_mu_simif[,3]),3)
+tab2_mu_simif[,4]<-round(inv_logit(tab2_mu_simif[,4]),3)
+#beta_wealth
+tab2_beta_simif[,1]<-round(inv_logit(tab2_beta_simif[,1]),3)
+tab2_beta_simif[,3]<-round(inv_logit(tab2_beta_simif[,3]),3)
+tab2_beta_simif[,4]<-round(inv_logit(tab2_beta_simif[,4]),3)
+
+# Plot estimated age-specific fertility by age and in relation to the simulated values
+plot(tab2_mu_simif[,1]~c(12:31))
+plot(tab2_mu_simif[,1]~mu_age[12:31])
+
+# Plot estimated wealth effects by age and in relation to the simulated values
+plot(tab2_beta_simif[,1]~c(12:31))
+plot(tab2_beta_simif[,1]~beta_wealth[12:31])
