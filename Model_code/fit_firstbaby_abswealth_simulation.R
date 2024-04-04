@@ -50,17 +50,17 @@ plot(apply(wealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 #standardise wealth data
 #create a matrix to store the standardised data
 std_wealth <- matrix(nrow=nrow(wealth),ncol=ncol(wealth))
-#standardize wealth data per column
-for(j in 1:ncol(std_wealth)){
-  std_wealth[,j] <- standardize(wealth[,j])
-}
+#standardize wealth data 
+
+  std_wealth <- as.data.frame(matrix(standardize(wealth),ncol=ncol(wealth),nrow=nrow(wealth)))
+
 #check the data
 std_wealth
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
 beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=16),rep(0,61))
-std_beta_wealth<-beta_wealth/5.5
+std_beta_wealth<-beta_wealth/5.5 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
 
 #Age at first reproduction (AFR)
 
@@ -123,6 +123,9 @@ for(j in 1:ncol(afrs)){
 # Individuals with more wealth have their first child later
 plot(plot_ind2$afr~plot_ind2$wealth)
 
+#check min and max ages at first reproduction
+min(plot_ind2$afr,na.rm=T)
+max(plot_ind2$afr,na.rm=T)
 
 # Introduce missing data in the wealth data frame
 for (i in 1:ncol(std_wealth)){
@@ -134,27 +137,31 @@ for (i in 1:ncol(std_wealth)){
 head(std_wealth)
 
 
-## Fit simulated data ----
+# Only take the years when individuals have a first baby, can adjust this according to the min/max ages at first birth observed
+std_wealth_restricted<-std_wealth[,12:31]
+afrs_restricted<-afrs[,12:31]
+
+## Fit simulated data, using the model in which wealth is transformed into a vector to use the merge function ----
 
 #put all the data together
 #create data
 data <- list(N = N, #population size
              A = A, #age
-             wealth = as.vector(t(std_wealth)), #absolute wealth
-             baby = afrs, #AFR
-             miss = sum((std_wealth)== -99), # number of missing values that need imputation
+             wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
+             baby = afrs_restricted, #AFR
+             miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
              #check data 
-             wealth_m=which(as.vector(t(std_wealth))== -99)) # provide the indexes for the missing data
+             wealth_m=which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
 
 data
 
 # compile model
 
-m2 <- cmdstan_model("firstbaby_abswealth.stan")
+m2_simv <- cmdstan_model("firstbaby_abswealth_vector.stan")
 
 # fit model
 
-fit2 <- m2$sample(data = data, 
+fit2_simv <- m2_simv$sample(data = data, 
                   chains = 4, 
                   parallel_chains = 10, 
                   adapt_delta = 0.95,
@@ -162,9 +169,42 @@ fit2 <- m2$sample(data = data,
                   init = 0)
 
 # save fit 
-fit_2 <- rstan::read_stan_csv(fit2$output_files())
-saveRDS(fit_2, "firstbaby2.rds")
+fit2_simv <- rstan::read_stan_csv(fit2_simv$output_files())
+saveRDS(fit2_simv, "firstbaby2_simv.rds")
 #load RDS file
-rds2 <- readRDS("firstbaby2.rds")
+rds2_simv <- readRDS("firstbaby2_simv.rds")
 #extract samples
-post2 <- extract.samples(rds2)
+post2_simv <- extract.samples(rds2_simv)
+
+
+
+## Fit simulated data, using the model in which missing values in wealth are imputed with an ifelse statement ----
+
+#put all the data together
+#create data
+data <- list(N = N, #population size
+             A = A, #age
+             wealth = std_wealth_restricted, #absolute wealth
+             baby = afrs_restricted) #AFR
+data
+
+# compile model
+
+m2_simif <- cmdstan_model("firstbaby_abswealth_ifelse.stan")
+
+# fit model
+
+fit2_simif <- m2_simif$sample(data = data, 
+                  chains = 4, 
+                  parallel_chains = 10, 
+                  adapt_delta = 0.95,
+                  max_treedepth = 13,
+                  init = 0)
+
+# save fit 
+fit2_simif <- rstan::read_stan_csv(fit2_simif$output_files())
+saveRDS(fit2_simif, "firstbaby2_simif.rds")
+#load RDS file
+rds2_simif <- readRDS("firstbaby2_simif.rds")
+#extract samples
+post2_simif <- extract.samples(rds2_simif)
