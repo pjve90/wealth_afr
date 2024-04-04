@@ -1498,7 +1498,7 @@ quantiles <- as.numeric(quantile(simwealth_g_real,seq(0,1,0.25)))
 #0= -21.1  25%= -11.725  50%=-2.35 75%=7.025 100%=16.4
 
 #colour palette
-palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
+palette_b<- c(NA,palette(gray(seq(0,0.9,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
 par(mfrow=c(1,1))
@@ -1511,14 +1511,14 @@ plot(c(0,1)~c(0,35),
 #add lines
 for(k in 2:(length(quantiles)-1)){
   #create matrix to store the data
-  p3_real_b <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+  p3_real_b <- matrix(nrow=nrow(post3_real$mu),ncol=ncol(post3_real$mu))
   p3_real_b
   #fill it in with values for age 25
-  for(j in 1:ncol(post2_real$mu)){
-    for(i in 1:nrow(post2_real$mu)){
-      p3_real_b[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                    post2_real$mu[i,j] + #age
-                                    post2_real$beta_wealth[i,j]*quantiles[k]) #wealth
+  for(j in 1:ncol(post3_real$mu)){
+    for(i in 1:nrow(post3_real$mu)){
+      p3_real_b[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                                    post3_real$mu[i,j] + #age
+                                    post3_real$beta_wealth[i,j]*quantiles[k]) #wealth
     }
   }
   #check data
@@ -1568,14 +1568,14 @@ plot(c(0,1)~c(0,35),
      main="Model with wealth variability: Quantile 25%",
      type="n")
 #create matrix to store the data
-p3_real_25 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p3_real_25 <- matrix(nrow=nrow(post3_real$mu),ncol=ncol(post3_real$mu))
 p3_real_25
 #fill it in with values for quantile 25%
-for(j in 1:ncol(post2_real$mu)){
-  for(i in 1:nrow(post2_real$mu)){
-    p3_real_25[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                   post2_real$mu[i,j] + #age
-                                   post2_real$beta_wealth[i,j]*quantiles[2]) #wealth
+for(j in 1:ncol(post3_real$mu)){
+  for(i in 1:nrow(post3_real$mu)){
+    p3_real_25[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                                   post3_real$mu[i,j] + #age
+                                   post3_real$beta_wealth[i,j]*quantiles[2]) #wealth
   }
 }
 #check data
@@ -1622,14 +1622,14 @@ plot(c(0,1)~c(0,35),
      main="Model with wealth variability: Quantile 50%",
      type="n")
 #create matrix to store the data
-p3_real_50 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p3_real_50 <- matrix(nrow=nrow(post3_real$mu),ncol=ncol(post3_real$mu))
 p3_real_50
 #fill it in with values for quantile 25%
-for(j in 1:ncol(post2_real$mu)){
-  for(i in 1:nrow(post2_real$mu)){
-    p3_real_50[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                   post2_real$mu[i,j] + #age
-                                   post2_real$beta_wealth[i,j]*quantiles[3]) #wealth
+for(j in 1:ncol(post3_real$mu)){
+  for(i in 1:nrow(post3_real$mu)){
+    p3_real_50[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                                   post3_real$mu[i,j] + #age
+                                   post3_real$beta_wealth[i,j]*quantiles[3]) #wealth
   }
 }
 #check data
@@ -1676,14 +1676,14 @@ plot(c(0,1)~c(0,35),
      main="Model with wealth variability: Quantile 50%",
      type="n")
 #create matrix to store the data
-p3_real_75 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p3_real_75 <- matrix(nrow=nrow(post3_real$mu),ncol=ncol(post3_real$mu))
 p3_real_75
 #fill it in with values for quantile 75%
-for(j in 1:ncol(post2_real$mu)){
-  for(i in 1:nrow(post2_real$mu)){
-    p3_real_75[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
-                                   post2_real$mu[i,j] + #age
-                                   post2_real$beta_wealth[i,j]*quantiles[4]) #wealth
+for(j in 1:ncol(post3_real$mu)){
+  for(i in 1:nrow(post3_real$mu)){
+    p3_real_75[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
+                                   post3_real$mu[i,j] + #age
+                                   post3_real$beta_wealth[i,j]*quantiles[4]) #wealth
   }
 }
 #check data
