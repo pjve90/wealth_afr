@@ -175,6 +175,43 @@ rds2_simv <- readRDS("firstbaby2_simv.rds")
 #extract samples
 post2_simv <- extract.samples(rds2_simv)
 
+#check the model
+#check trace of all main parameters
+#alpha
+traceplot(rds2_simv,pars="alpha")
+#mu
+#traceplot(rds2_simv,pars="mu") #only run if needed, because they are 91 plots
+#mu_raw
+#traceplot(rds2_simv,pars="mu_raw") #only run if needed, because they are 91 plots
+#mu_tau
+traceplot(rds2_simv,pars="mu_tau")
+#mu_kappa
+traceplot(rds2_simv,pars="mu_kappa")
+#mu_delta
+traceplot(rds2_simv,pars="mu_delta")
+#beta_wealth
+#traceplot(rds2_simv,pars="beta_wealth") #only run if needed, because they are 91 plots
+
+#summary of the model
+#create summary table
+#create summary table for alpha and hiper priors of Gaussian process
+tabs2_simv <- precis(rds2_simv,depth=3,pars=c("alpha",
+                                   "mu_raw",
+                                   "mu_tau",
+                                   "mu_delta"))
+#check table
+tabs2_simv
+#create summary table for mu
+tabs2_simv_mu <- precis(rds2_simv,depth=3,pars="mu")
+#check table
+tabs2_simv_mu
+plot(inv_logit(tabs2_simv_mu[,1]))
+#create summary table for beta
+tabs2_simv_beta <- precis(rds2_simv,depth=3,pars="beta_wealth")
+#check table
+tabs2_simv_beta
+plot((tabs2_simv_beta[,1]))
+
 ## Fit simulated data, using the model in which missing values in wealth are imputed with an ifelse statement ----
 
 #put all the data together
@@ -206,3 +243,41 @@ saveRDS(fit2_simif, "firstbaby2_simif.rds")
 rds2_simif <- readRDS("firstbaby2_simif.rds")
 #extract samples
 post2_simif <- extract.samples(rds2_simif)
+
+
+#check the model
+#check trace of all main parameters
+#alpha
+traceplot(rds2_simif,pars="alpha")
+#mu
+#traceplot(rds2_simif,pars="mu") #only run if needed, because they are 91 plots
+#mu_raw
+#traceplot(rds2_simif,pars="mu_raw") #only run if needed, because they are 91 plots
+#mu_tau
+traceplot(rds2_simif,pars="mu_tau")
+#mu_kappa
+traceplot(rds2_simif,pars="mu_kappa")
+#mu_delta
+traceplot(rds2_simif,pars="mu_delta")
+#beta_wealth
+#traceplot(rds2_simif,pars="beta_wealth") #only run if needed, because they are 91 plots
+
+#summary of the model
+#create summary table
+#create summary table for alpha and hiper priors of Gaussian process
+tabs2_simif <- precis(rds2_simif,depth=3,pars=c("alpha",
+                                              "mu_raw",
+                                              "mu_tau",
+                                              "mu_delta"))
+#check table
+tabs2_simif
+#create summary table for mu
+tabs2_simif_mu <- precis(rds2_simif,depth=3,pars="mu")
+#check table
+tabs2_simif_mu
+plot(inv_logit(tabs2_simif_mu[,1]))
+#create summary table for beta
+tabs2_simif_beta <- precis(rds2_simif,depth=3,pars="beta_wealth")
+#check table
+tabs2_simif_beta
+plot((tabs2_simif_beta[,1]))
