@@ -64,8 +64,8 @@ afr_matrix1_b
 #put all the data together
 #create dataset
 real_list1 <- list(N = nrow(real_data1), #population size
-              A = ncol(afr_matrix1), #age
-              baby = afr_matrix1) #AFR
+              A = ncol(afr_matrix1[,1:41]), #age
+              baby = afr_matrix1[,1:41]) #AFR
 
 # fit model
 fit1_real <- m1$sample(data = real_list1, 
@@ -134,14 +134,14 @@ for(j in 1:ncol(post1_real$mu)){
 p1_real
 #plot it!
 #prepare model prediction data
-plot_data1_real <- data.frame(age = 1:ncol(p1_real), 
-                         mu_mean = apply(p1_real, 2, mean), 
-                         mu_upp = apply(p1_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                         mu_low = apply(p1_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data1_real <- data.frame(age = 1:ncol(p1_real[,1:41]), 
+                         mu_mean = apply(p1_real[,1:41], 2, mean), 
+                         mu_upp = apply(p1_real[,1:41], 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                         mu_low = apply(p1_real[,1:41], 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
-plot_afr1 <- afr_matrix1
+plot_afr1 <- afr_matrix1[,1:41]
 #change -99 to NAs
 for(j in 1:ncol(plot_afr1)){
   for(i in 1:nrow(plot_afr1)){
@@ -155,11 +155,12 @@ plot_afr1
 
 #plot age random effect
 plot(plot_data1_real$mu_mean~plot_data1_real$age,
-     ylim=c(0,0.2),
+     ylim=c(0,0.25),
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
+     col=hcl.colors(10,"ag_Sunset")[5],
      type="l")
-lines(plot_data1_real$mu_upp~plot_data1_real$age,lty=2)
-lines(plot_data1_real$mu_low~plot_data1_real$age,lty=2)
-points(apply(plot_afr1,2,sum,na.rm=T)/sum(is.na(real_data1$afr)==F)~plot_data1_real$age,col="grey",pch=16)
+lines(plot_data1_real$mu_upp~plot_data1_real$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
+lines(plot_data1_real$mu_low~plot_data1_real$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
+points(apply(plot_afr1[,1:41],2,sum,na.rm=T)/sum(is.na(real_data1$afr)==F)~plot_data1_real$age,pch=16)

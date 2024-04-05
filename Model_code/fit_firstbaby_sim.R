@@ -150,7 +150,7 @@ plot(plot_data1$mu_mean~plot_data1$age,
      xlab="Age",
      main="Model with Gaussian process of age",
      type="l",
-     ylim=c(0,0.2),
+     ylim=c(0,0.25),
      col=hcl.colors(10,"ag_Sunset")[5]
      )
 lines(plot_data1$mu_upp~plot_data1$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
