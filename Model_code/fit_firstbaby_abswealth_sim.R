@@ -119,9 +119,9 @@ curve(mu_age[25]+std_beta_wealth[25]*x,from=min(std_wealth),to=max(std_wealth),a
 #pattern is that at younger ages, poor individuals have a higher probability of FR whereas at older ages the rich ones have a higher probability of FR
 
 # Introduce missing data in the wealth data frame
-for (i in 1:ncol(std_wealth)){
-  for (j in 1:nrow(std_wealth)){
-    if(runif(1,min=0,max=2)<0.4){std_wealth[j,i]<- -99} # 40% missing data
+for (j in 1:ncol(std_wealth)){
+  for (i in 1:nrow(std_wealth)){
+    if(runif(1,min=0,max=2)<0.4){std_wealth[i,j]<- -99} # 40% missing data
   }
 }
 #check data
