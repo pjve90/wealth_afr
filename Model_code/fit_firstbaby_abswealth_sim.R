@@ -45,10 +45,8 @@ apply(wealth,2,mean)
 plot(apply(wealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
 #standardise wealth data
-#create a matrix to store the standardised data
-std_wealth <- matrix(nrow=nrow(wealth),ncol=ncol(wealth))
 #standardize wealth data 
-std_wealth <- as.data.frame(matrix(standardize(wealth),ncol=ncol(wealth),nrow=nrow(wealth)))
+std_wealth <- matrix(standardize(wealth),ncol=ncol(wealth),nrow=nrow(wealth))
 #check the data
 std_wealth
 
@@ -135,7 +133,7 @@ min(which(apply(afrs,2,sum)>0))
 #14
 #max
 max(which(apply(afrs,2,sum)>0))
-#35
+#39
 
 std_wealth_restricted<-std_wealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
 afrs_restricted<-afrs[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
@@ -156,13 +154,13 @@ data2a
 
 # compile model
 
-m2_simv <- cmdstan_model("firstbaby_abswealth_vector.stan")
+m2_simv <- cmdstan_model("Model_code/firstbaby_abswealth_vector.stan")
 
 # fit model
 
 fit2_simv <- m2_simv$sample(data = data2a, 
                   chains = 4, 
-                  parallel_chains = 10, 
+                  parallel_chains = 15, 
                   adapt_delta = 0.95,
                   max_treedepth = 13,
                   init = 0)
@@ -212,6 +210,122 @@ tabs2_simv_beta <- precis(rds2_simv,depth=3,pars="beta_wealth")
 tabs2_simv_beta
 plot((tabs2_simv_beta[,1]))
 
+## Plot the fit of the simulated data ----
+
+#simulate wealth values
+simwealth_simv <- seq(from=round(min(std_wealth[which(std_wealth > -99)]),1),to=round(max(std_wealth[which(std_wealth > -99)]),1),length.out=nrow(std_wealth)) #specify according to range and length of wealth data
+simwealth_simv
+
+#colour palette
+palette<-c(rep("NA",14),palette(gray(seq(0,.9,length.out = 11)))) #darker lines = younger ages, lighter lines = older ages
+
+#plot empty plot
+par(mfrow=c(1,1))
+plot(c(0,0.3)~c(min(std_wealth[which(std_wealth > -99)]),max(std_wealth[which(std_wealth > -99)])),
+     ylab="Prob. FR",
+     xlab="Absolute wealth",
+     main="Model with absolute wealth",
+     type="n")
+
+#add lines
+for(k in seq(1,19,by=3)){
+  #create matrix to store the data
+  p2_simv <- matrix(nrow=nrow(post2_simv$mu),ncol=length(simwealth_simv))
+  p2_simv
+  #fill it in with values for age 25
+  for(j in 1:length(simwealth_simv)){
+    for(i in 1:nrow(post2_simv$mu)){
+      p2_simv[i,j] <- inv_logit(post2_simv$alpha[i] + #inv logit because originally is logit
+                                  post2_simv$mu[i,k] + #age
+                                  post2_simv$beta_wealth[i,k]*simwealth_simv[j]) #wealth
+    }
+  }
+  #check data
+  p2_simv
+  #plot it!
+  #prepare model prediction data
+  plot_data2_simv <- data.frame(wealth = simwealth_simv,
+                                mean = apply(p2_simv, 2, mean), 
+                                upp = apply(p2_simv, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p2_simv, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from simv data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #check the data
+  plot_afr2
+  
+  lines(plot_data2_simv$mean~plot_data2_simv$wealth,col=hcl.colors(ncol(post2_simv$mu),"ag_sunset")[k])
+}
+
+### Wealth ----
+
+#### All wealth classes ----
+
+#simulate wealth values
+simwealth_simv <- seq(from=round(min(std_wealth[which(std_wealth > -99)]),1),to=round(max(std_wealth[which(std_wealth > -99)]),1),length.out=nrow(std_wealth)) #specify according to range and length of wealth data
+simwealth_simv
+#get the quantiles
+quantiles <- as.numeric(quantile(simwealth_simv,seq(0,1,0.25)))
+quantiles
+#0= -2.6  25%= -1.3  50%=0 75%=1.3 100%=2.6
+
+#plot empty plot
+par(mfrow=c(1,1))
+plot(c(0,0.15)~c(0,ncol(post2_simv$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth",
+     type="n")
+
+#add lines
+for(k in 2:(length(quantiles)-1)){
+  #create matrix to store the data
+  p2_simv_b <- matrix(nrow=nrow(post2_simv$mu),ncol=ncol(post2_simv$mu))
+  p2_simv_b
+  #fill it in with values for age 25
+  for(j in 1:ncol(post2_simv$mu)){
+    for(i in 1:nrow(post2_simv$mu)){
+      p2_simv_b[i,j] <- inv_logit(post2_simv$alpha[i] + #inv logit because originally is logit
+                                    post2_simv$mu[i,j] + #age
+                                    post2_simv$beta_wealth[i,j]*quantiles[k]) #wealth
+    }
+  }
+  #check data
+  p2_simv_b
+  #plot it!
+  #prepare model prediction data
+  plot_data2_simv_b <- data.frame(age = 1:ncol(p2_simv_b),
+                                  mean = apply(p2_simv_b, 2, mean), 
+                                  upp = apply(p2_simv_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p2_simv_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #prepare afr probabilities from simv data
+  #create a matrix
+  plot_afr2 <- afr_matrix2
+  #change -99 to NAs
+  for(j in 1:ncol(plot_afr2)){
+    for(i in 1:nrow(plot_afr2)){
+      if(plot_afr2[i,j]==-99){
+        plot_afr2[i,j] <- NA
+      }
+    }
+  }
+  #check the data
+  plot_afr2
+  
+  lines(plot_data2_simv_b$mean~plot_data2_simv_b$age,col=hcl.colors(max((length(quantiles)-1)),"ag_sunset")[k])
+}
+
+
 ## Fit simulated data, using the model in which missing values in wealth are imputed with an ifelse statement ----
 
 #put all the data together
@@ -225,11 +339,11 @@ data2b
 
 # compile model
 
-m2_simif <- cmdstan_model("firstbaby_abswealth_ifelse.stan")
+m2_simif <- cmdstan_model("Model_code/firstbaby_abswealth_ifelse.stan")
 
 # fit model
 
-fit2_simif <- m2_simif$sample(data = data, 
+fit2_simif <- m2_simif$sample(data = data2b, 
                   chains = 4, 
                   parallel_chains = 10, 
                   adapt_delta = 0.95,
