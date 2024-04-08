@@ -45,8 +45,7 @@ apply(wealth,2,mean)
 plot(apply(wealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
 #standardise wealth data
-#standardize wealth data 
-std_wealth <- matrix(standardize(wealth),ncol=ncol(wealth),nrow=nrow(wealth))
+std_wealth <- matrix(standardize(as.vector(wealth)),ncol=ncol(wealth),nrow=nrow(wealth))
 #check the data
 std_wealth
 
