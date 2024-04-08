@@ -1263,14 +1263,16 @@ palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages,
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.6)~c(0,ncol(post2_real$mu)),
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 
 #add lines
-for(k in 1:(length(quantiles))){
+for(k in 1:(length(deciles))){
   #create matrix to store the data
   p2_real_b <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
   p2_real_b
@@ -1319,8 +1321,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 0%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_0 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_0
@@ -1365,8 +1369,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 10%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_10 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_10
@@ -1411,8 +1417,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 20%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_20 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_20
@@ -1457,8 +1465,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 30%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_30 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_30
@@ -1503,8 +1513,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 40%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_40 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_40
@@ -1550,8 +1562,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 50%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_50 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_50
@@ -1596,8 +1610,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 60%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_60 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_60
@@ -1642,8 +1658,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 70%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_70 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_70
@@ -1688,8 +1706,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 80%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_80 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_80
@@ -1734,8 +1754,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 90%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_90 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_90
@@ -1780,8 +1802,10 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
+     xaxt="n",
      main="Model with absolute wealth: decile 100%",
      type="n")
+axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=12:31)
 #create matrix to store the data
 p2_real_100 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
 p2_real_100
