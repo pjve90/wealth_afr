@@ -116,7 +116,7 @@ curve(mu_age[25]+std_beta_wealth[25]*x,from=min(std_wealth),to=max(std_wealth),a
 # Introduce missing data in the wealth data frame
 for (j in 1:ncol(std_wealth)){
   for (i in 1:nrow(std_wealth)){
-    if(runif(1,min=0,max=2)<0.4){std_wealth[i,j]<- -99} # 40% missing data
+    if(runif(1,min=0,max=1)<0.4){std_wealth[i,j]<- -99} # 40% missing data
   }
 }
 #check data
