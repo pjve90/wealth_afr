@@ -52,7 +52,7 @@ std_wealth
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
 beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=16),rep(0,62))
-std_beta_wealth<-beta_wealth/5.5 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
+std_beta_wealth<-beta_wealth/sd(as.vector(wealth)) # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
 
 #Age at first reproduction (AFR)
 
