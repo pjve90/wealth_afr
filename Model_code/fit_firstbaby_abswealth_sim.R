@@ -329,7 +329,7 @@ for(k in 2:(length(quantiles)-1)){
 #create data
 data2b <- list(N = nrow(afrs_restricted), #population size
              A = ncol(afrs_restricted), #age
-             wealth = std_wealth_restricted, #absolute wealth
+             wealth = as.matrix(std_wealth_restricted), #absolute wealth
              baby = afrs_restricted) #AFR
 #check data
 data2b
