@@ -69,8 +69,6 @@ plot(mu_age~c(1:length(mu_age)))
 #1=yes first birth
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
 afrs <- matrix(nrow=N,ncol=A+1)
-#make that ages from birth until 12 and from 33 until 90 with AFR=0 (based on range of values in data)
-afrs[,1:10] <- 0
 #randomly assign a positive output of AFR for individuals
 for(j in 1:ncol(afrs)){
   for(i in 1:nrow(afrs)){
