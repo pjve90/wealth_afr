@@ -350,7 +350,7 @@ plot(c(0,1)~c(min(real_list2$wealth[which(real_list2$wealth>-99)]),max(real_list
      type="n")
 
 #add lines
-for(k in seq(1,19,by=3)){
+for(k in 1:ncol(post2_real$mu)){
   #create matrix to store the data
   p2_real <- matrix(nrow=nrow(post2_real$mu),ncol=length(simwealth_real))
   p2_real
@@ -1250,26 +1250,27 @@ points(plot_afr2[,19]~plot_data2_real$wealth,col=alpha(palette[19],0.5),pch=16)
 #### All wealth classes ----
 
 #simulate wealth values
-range(real_list2$wealth) #use the range of values of real data as reference for simulation
-simwealth_real <- seq(from=round(min(range(real_list2$wealth)),1),to=round(max(range(real_list2$wealth)),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
+range(real_list2$wealth[which(real_list2$wealth>-99)]) #use the range of values of real data as reference for simulation
+simwealth_real <- seq(from=round(min(real_list2$wealth[which(real_list2$wealth>-99)]),1),to=round(max(real_list2$wealth[which(real_list2$wealth>-99)]),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
 simwealth_real
-#get the quantiles
-quantiles <- as.numeric(quantile(simwealth_real,seq(0,1,0.25)))
-#0= -6.6  25%= 0.3  50%=7.2 75%=14.1 100%=21.0
+
+#get the deciles
+deciles <- as.numeric(quantile(simwealth_real,seq(0,1,0.1)))
+deciles
 
 #colour palette
-palette_b<-hcl.colors(ncol(post2_real$mu),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
+palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,1)~c(0,35),
+plot(c(0,0.6)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
      main="Model with absolute wealth",
      type="n")
 
 #add lines
-for(k in 2:(length(quantiles)-1)){
+for(k in 1:(length(quantiles))){
   #create matrix to store the data
   p2_real_b <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
   p2_real_b
@@ -1278,7 +1279,7 @@ for(k in 2:(length(quantiles)-1)){
     for(i in 1:nrow(post2_real$mu)){
       p2_real_b[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
                                     post2_real$mu[i,j] + #age
-                                    post2_real$beta_wealth[i,j]*quantiles[k]) #wealth
+                                    post2_real$beta_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
@@ -1304,7 +1305,7 @@ for(k in 2:(length(quantiles)-1)){
   #check the data
   plot_afr2
   
-  lines(plot_data2_real_b$mean~plot_data2_real_b$age,col=palette_b[k])
+  points(plot_data2_real_b$mean~plot_data2_real_b$age,col=alpha(palette_b[k],0.75),pch=15)
 }
 
 #plot one plot per wealth quantile
@@ -1312,40 +1313,33 @@ for(k in 2:(length(quantiles)-1)){
 #define the layout
 par(mfrow=c(1,3))
 
-#### Quantile 25% ----
+#### Quantile 0% ----
 
-#simulate wealth values
-range(real_list2$wealth) #use the range of values of real data as reference for simulation
-simwealth_real <- seq(from=round(min(range(real_list2$wealth)),1),to=round(max(range(real_list2$wealth)),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
-simwealth_real
-
-#colour palette
-palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
-
-plot(c(0,1)~c(0,35),
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
-     xlab="Absolute wealth",
-     main="Model with absolute wealth: Quantile 25%",
+     xlab="Age",
+     main="Model with absolute wealth: decile 0%",
      type="n")
 #create matrix to store the data
-p2_real_25 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
-p2_real_25
+p2_real_0 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_0
 #fill it in with values for quantile 25%
 for(j in 1:ncol(post2_real$mu)){
   for(i in 1:nrow(post2_real$mu)){
-    p2_real_25[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+    p2_real_0[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
                                    post2_real$mu[i,j] + #age
-                                   post2_real$beta_wealth[i,j]*quantiles[2]) #wealth
+                                   post2_real$beta_wealth[i,j]*deciles[1]) #wealth
   }
 }
 #check data
-p2_real_25
+p2_real_0
 #plot it!
 #prepare model prediction data
-plot_data2_poor <- data.frame(age = 1:ncol(p2_real_25),
-                              mean = apply(p2_real_25, 2, mean), 
-                              upp = apply(p2_real_25, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                              low = apply(p2_real_25, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data2_0 <- data.frame(age = 1:ncol(p2_real_0),
+                            mean = apply(p2_real_0, 2, mean), 
+                            upp = apply(p2_real_0, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_0, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -1361,25 +1355,202 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-lines(plot_data2_poor$mean~plot_data2_poor$age,col=palette_b[2])
-lines(plot_data2_poor$upp~plot_data2_poor$age,col=palette_b[2],lty=2)
-lines(plot_data2_poor$low~plot_data2_poor$age,col=palette_b[2],lty=2)
-#  points(apply(plot_afr2,2,sum,na.rm=T)/sum(is.na(real_data2$afr)==F)~plot_data2_poor$age,col="gold",pch=16)
+points(plot_data2_0$mean~plot_data2_0$age,col=palette_b[1],pch=16)
+points(plot_data2_0$upp~plot_data2_0$age,col=palette_b[1],pch=4)
+points(plot_data2_0$low~plot_data2_0$age,col=palette_b[1],pch=4)
+
+#### Quantile 10% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 10%",
+     type="n")
+#create matrix to store the data
+p2_real_10 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_10
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_10[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[2]) #wealth
+  }
+}
+#check data
+p2_real_10
+#plot it!
+#prepare model prediction data
+plot_data2_10 <- data.frame(age = 1:ncol(p2_real_10),
+                              mean = apply(p2_real_10, 2, mean), 
+                              upp = apply(p2_real_10, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                              low = apply(p2_real_10, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_10$mean~plot_data2_10$age,col=palette_b[2],pch=16)
+points(plot_data2_10$upp~plot_data2_10$age,col=palette_b[2],pch=4)
+points(plot_data2_10$low~plot_data2_10$age,col=palette_b[2],pch=4)
+
+#### Quantile 20% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 20%",
+     type="n")
+#create matrix to store the data
+p2_real_20 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_20
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_20[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[3]) #wealth
+  }
+}
+#check data
+p2_real_20
+#plot it!
+#prepare model prediction data
+plot_data2_20 <- data.frame(age = 1:ncol(p2_real_20),
+                              mean = apply(p2_real_20, 2, mean), 
+                              upp = apply(p2_real_20, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                              low = apply(p2_real_20, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_20$mean~plot_data2_20$age,col=palette_b[3],pch=16)
+points(plot_data2_20$upp~plot_data2_20$age,col=palette_b[3],pch=4)
+points(plot_data2_20$low~plot_data2_20$age,col=palette_b[3],pch=4)
+
+#### Quantile 30% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 30%",
+     type="n")
+#create matrix to store the data
+p2_real_30 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_30
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_30[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[3]) #wealth
+  }
+}
+#check data
+p2_real_30
+#plot it!
+#prepare model prediction data
+plot_data2_30 <- data.frame(age = 1:ncol(p2_real_30),
+                            mean = apply(p2_real_30, 2, mean), 
+                            upp = apply(p2_real_30, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_30, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_30$mean~plot_data2_30$age,col=palette_b[4],pch=16)
+points(plot_data2_30$upp~plot_data2_30$age,col=palette_b[4],pch=4)
+points(plot_data2_30$low~plot_data2_30$age,col=palette_b[4],pch=4)
+
+#### Quantile 40% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 40%",
+     type="n")
+#create matrix to store the data
+p2_real_40 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_40
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_40[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[4]) #wealth
+  }
+}
+#check data
+p2_real_40
+#plot it!
+#prepare model prediction data
+plot_data2_40 <- data.frame(age = 1:ncol(p2_real_40),
+                            mean = apply(p2_real_40, 2, mean), 
+                            upp = apply(p2_real_40, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_40, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:35]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_40$mean~plot_data2_40$age,col=palette_b[5],pch=16)
+points(plot_data2_40$upp~plot_data2_40$age,col=palette_b[5],pch=4)
+points(plot_data2_40$low~plot_data2_40$age,col=palette_b[5],pch=4)
+
 
 #### Quantile 50% ----
 
-#simulate wealth values
-range(real_list2$wealth) #use the range of values of real data as reference for simulation
-simwealth_real <- seq(from=round(min(range(real_list2$wealth)),1),to=round(max(range(real_list2$wealth)),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
-simwealth_real
-
-#colour palette
-palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
-
-plot(c(0,1)~c(0,35),
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
-     xlab="Absolute wealth",
-     main="Model with absolute wealth: Quantile 50%",
+     xlab="Age",
+     main="Model with absolute wealth: decile 50%",
      type="n")
 #create matrix to store the data
 p2_real_50 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
@@ -1389,17 +1560,17 @@ for(j in 1:ncol(post2_real$mu)){
   for(i in 1:nrow(post2_real$mu)){
     p2_real_50[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
                                    post2_real$mu[i,j] + #age
-                                   post2_real$beta_wealth[i,j]*quantiles[3]) #wealth
+                                   post2_real$beta_wealth[i,j]*deciles[5]) #wealth
   }
 }
 #check data
 p2_real_50
 #plot it!
 #prepare model prediction data
-plot_data2_medium <- data.frame(age = 1:ncol(p2_real_50),
-                                mean = apply(p2_real_50, 2, mean), 
-                                upp = apply(p2_real_50, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                low = apply(p2_real_50, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data2_50 <- data.frame(age = 1:ncol(p2_real_50),
+                            mean = apply(p2_real_50, 2, mean), 
+                            upp = apply(p2_real_50, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_50, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -1415,49 +1586,41 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-lines(plot_data2_medium$mean~plot_data2_medium$age,col=palette_b[3])
-lines(plot_data2_medium$upp~plot_data2_medium$age,col=palette_b[3],lty=2)
-lines(plot_data2_medium$low~plot_data2_medium$age,col=palette_b[3],lty=2)
-#  points(apply(plot_afr2,2,sum,na.rm=T)/sum(is.na(real_data2$afr)==F)~plot_data2_medium$age,col="gold",pch=16)
+points(plot_data2_50$mean~plot_data2_50$age,col=palette_b[6],pch=16)
+points(plot_data2_50$upp~plot_data2_50$age,col=palette_b[6],pch=4)
+points(plot_data2_50$low~plot_data2_50$age,col=palette_b[6],pch=4)
 
-#### Quantile 75% ----
+#### Quantile 60% ----
 
-#simulate wealth values
-range(real_list2$wealth) #use the range of values of real data as reference for simulation
-simwealth_real <- seq(from=round(min(range(real_list2$wealth)),1),to=round(max(range(real_list2$wealth)),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
-simwealth_real
-
-#colour palette
-palette_b<- c(NA,palette(gray(seq(0,0.5,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
-
-plot(c(0,1)~c(0,35),
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
-     main="Model with absolute wealth: Quantile 50%",
+     main="Model with absolute wealth: decile 60%",
      type="n")
 #create matrix to store the data
-p2_real_75 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
-p2_real_75
-#fill it in with values for quantile 75%
+p2_real_60 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_60
+#fill it in with values for quantile 25%
 for(j in 1:ncol(post2_real$mu)){
   for(i in 1:nrow(post2_real$mu)){
-    p2_real_75[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+    p2_real_60[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
                                    post2_real$mu[i,j] + #age
-                                   post2_real$beta_wealth[i,j]*quantiles[4]) #wealth
+                                   post2_real$beta_wealth[i,j]*deciles[6]) #wealth
   }
 }
 #check data
-p2_real_75
+p2_real_60
 #plot it!
 #prepare model prediction data
-plot_data2_high <- data.frame(age = 1:ncol(p2_real_75),
-                              mean = apply(p2_real_75, 2, mean), 
-                              upp = apply(p2_real_75, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                              low = apply(p2_real_75, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data2_60 <- data.frame(age = 1:ncol(p2_real_60),
+                            mean = apply(p2_real_60, 2, mean), 
+                            upp = apply(p2_real_60, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_60, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
-plot_afr2 <- afr_matrix2[,1:35]
+plot_afr2 <- afr_matrix2[,1:36]
 #change -99 to NAs
 for(j in 1:ncol(plot_afr2)){
   for(i in 1:nrow(plot_afr2)){
@@ -1469,7 +1632,190 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-lines(plot_data2_high$mean~plot_data2_high$age,col=palette_b[3])
-lines(plot_data2_high$upp~plot_data2_high$age,col=palette_b[3],lty=2)
-lines(plot_data2_high$low~plot_data2_high$age,col=palette_b[3],lty=2)
-#  points(apply(plot_afr2,2,sum,na.rm=T)/sum(is.na(real_data2$afr)==F)~plot_data2_high$age,col="gold",pch=16)
+points(plot_data2_60$mean~plot_data2_60$age,col=palette_b[7],pch=16)
+points(plot_data2_60$upp~plot_data2_60$age,col=palette_b[7],pch=4)
+points(plot_data2_60$low~plot_data2_60$age,col=palette_b[7],pch=4)
+
+#### Quantile 70% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 70%",
+     type="n")
+#create matrix to store the data
+p2_real_70 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_70
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_70[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[7]) #wealth
+  }
+}
+#check data
+p2_real_70
+#plot it!
+#prepare model prediction data
+plot_data2_70 <- data.frame(age = 1:ncol(p2_real_70),
+                            mean = apply(p2_real_70, 2, mean), 
+                            upp = apply(p2_real_70, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_70, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:37]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_70$mean~plot_data2_70$age,col=palette_b[8],pch=16)
+points(plot_data2_70$upp~plot_data2_70$age,col=palette_b[8],pch=4)
+points(plot_data2_70$low~plot_data2_70$age,col=palette_b[8],pch=4)
+
+#### Quantile 80% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 80%",
+     type="n")
+#create matrix to store the data
+p2_real_80 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_80
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_80[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[8]) #wealth
+  }
+}
+#check data
+p2_real_80
+#plot it!
+#prepare model prediction data
+plot_data2_80 <- data.frame(age = 1:ncol(p2_real_80),
+                            mean = apply(p2_real_80, 2, mean), 
+                            upp = apply(p2_real_80, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_80, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:38]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_80$mean~plot_data2_80$age,col=palette_b[9],pch=16)
+points(plot_data2_80$upp~plot_data2_80$age,col=palette_b[9],pch=4)
+points(plot_data2_80$low~plot_data2_80$age,col=palette_b[9],pch=4)
+
+#### Quantile 90% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 90%",
+     type="n")
+#create matrix to store the data
+p2_real_90 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_90
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_90[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[9]) #wealth
+  }
+}
+#check data
+p2_real_90
+#plot it!
+#prepare model prediction data
+plot_data2_90 <- data.frame(age = 1:ncol(p2_real_90),
+                            mean = apply(p2_real_90, 2, mean), 
+                            upp = apply(p2_real_90, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_90, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:39]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_90$mean~plot_data2_90$age,col=palette_b[10],pch=16)
+points(plot_data2_90$upp~plot_data2_90$age,col=palette_b[10],pch=4)
+points(plot_data2_90$low~plot_data2_90$age,col=palette_b[10],pch=4)
+
+#### Quantile 100% ----
+
+par(mfrow=c(1,1))
+plot(c(0,1)~c(0,ncol(post2_real$mu)),
+     ylab="Prob. FR",
+     xlab="Age",
+     main="Model with absolute wealth: decile 100%",
+     type="n")
+#create matrix to store the data
+p2_real_100 <- matrix(nrow=nrow(post2_real$mu),ncol=ncol(post2_real$mu))
+p2_real_100
+#fill it in with values for quantile 25%
+for(j in 1:ncol(post2_real$mu)){
+  for(i in 1:nrow(post2_real$mu)){
+    p2_real_100[i,j] <- inv_logit(post2_real$alpha[i] + #inv logit because originally is logit
+                                   post2_real$mu[i,j] + #age
+                                   post2_real$beta_wealth[i,j]*deciles[9]) #wealth
+  }
+}
+#check data
+p2_real_100
+#plot it!
+#prepare model prediction data
+plot_data2_100 <- data.frame(age = 1:ncol(p2_real_100),
+                            mean = apply(p2_real_100, 2, mean), 
+                            upp = apply(p2_real_100, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                            low = apply(p2_real_100, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2[,1:39]
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(plot_data2_100$mean~plot_data2_100$age,col=palette_b[11],pch=16)
+points(plot_data2_100$upp~plot_data2_100$age,col=palette_b[11],pch=4)
+points(plot_data2_100$low~plot_data2_100$age,col=palette_b[11],pch=4)
