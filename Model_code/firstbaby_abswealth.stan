@@ -18,27 +18,17 @@ functions {
 
     return S * cholesky_decompose(Rho);
   }
-  
-  vector merge_missing( array[] int miss_indexes , array[] int x_obs , vector x_miss ) { // imputation function
-    int N = dims(x_obs)[1];
-    int N_miss = dims(x_miss)[1];
-    array[N,A] int merged;
-    merged = x_obs;
-    for ( i in 1:N_miss )
-    merged[ miss_indexes[i] ] = x_miss[i];
-    return merged;
-}
 }
 
 data {
 
   int N; // sample size of women
   int A; // maximum age of women
-  int N_wm; // number of missing data
   
   array[N,A] int wealth; // age-specific absolute wealth
   
-  array[N_wm] int wealth_m; // missing wealth data
+  int N_wealth_miss; // number of missing data
+  array[N,A] int id_wealth_miss; // indexes of missing wealth data
   
   array[N,A] int baby; // probability of FR
 
@@ -57,8 +47,8 @@ parameters {
   vector [A] beta_wealth;
 // missing wealth data
   vector [A] nu;
-  vector [A] sigma_wealth_m;
-  vector[N_wm] wealth_impute;
+  vector [A] sigma_wealth_miss;
+  array[N_wealth_miss,A] int wealth_impute;
 }
 
 
@@ -68,6 +58,21 @@ transformed parameters {
   vector [A] mu;
   
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
+    
+//Bayesian data imputation
+  array [N,A] int wealth_full; //full wealth data (original + imputed)
+  
+  wealth_full = wealth; // making the merged data as the same as the original data
+  if(N_wealth_miss > 0){         
+    for(i in 1:N){
+      for(j in 1:A){
+        if(wealth_miss_id[i,j]==1){
+          wealth_full[i,j] = wealth_impute[i,j];
+        } else{
+          wealth_full[i,j] = wealth[i,j];
+        }
+      }
+    }
   }
 
 model {
@@ -81,11 +86,10 @@ model {
 // absolute wealth
     beta_wealth ~ normal(0,1);
 // missing wealth data
-    array[N,A] int beta_merge;
-    beta_merge = merge_missing(wealth_m,to_array_2d(wealth),wealth_impute);
-    beta_merge ~ normal(nu,sigma_wealth_m);
+    array[N,A] int wealth_merge;
+    wealth_merge ~ normal(nu,sigma_wealth_m);
     nu ~ normal(0,1);
-    sigma_wealth_m ~ exponential(1);
+    sigma_wealth_miss ~ exponential(1);
     
     
   for (n in 1:N) {
@@ -96,7 +100,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        beta_wealth[a]*beta_merge[n,a] // absolute wealth
+        beta_wealth[a]*wealth_merge[n,a] // absolute wealth
         );
           
     }
