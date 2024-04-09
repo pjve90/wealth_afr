@@ -94,7 +94,7 @@ plot(apply(afrs,2,sum)/N,
      xlab="Age",
      ylab="Probability of first reproduction",
      pch=16) #data
-lines(mu_age+std_beta_wealth,col=hcl.colors(10,"ag_Sunset")[5]) #mu+std_beta
+points(mu_age+std_beta_wealth,col=alpha(hcl.colors(10,"ag_Sunset")[5],0.7),pch=15) #mu+std_beta
 
 #check age-specific relationship between wealth and prob. of FR
 #plot empty plot
@@ -329,7 +329,7 @@ for(k in 2:(length(quantiles)-1)){
 #create data
 data2b <- list(N = nrow(afrs_restricted), #population size
              A = ncol(afrs_restricted), #age
-             wealth = as.matrix(std_wealth_restricted), #absolute wealth
+             wealth = std_wealth_restricted, #absolute wealth
              baby = afrs_restricted) #AFR
 #check data
 data2b
