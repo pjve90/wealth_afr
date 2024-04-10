@@ -85,18 +85,21 @@ transformed parameters {
 }
 
 model {
-
+// global intercept
     alpha ~ normal(0,1);
-    
+// Gaussian process of age    
     mu_raw ~ normal(0, 1);
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
-    
+// wealth
     beta_wealth ~ normal(0,1); // absolute wealth
     gamma_wealth ~ normal(0,1); // wealth variability
+// missing wealth data
+    wealth_impute ~ normal(nu,sigma_wealth_miss);
+    nu ~ normal(0,1);
+    sigma_wealth_miss ~ exponential(1);
 
-    
   for (n in 1:N) {
   for (a in 1:A) {
     
