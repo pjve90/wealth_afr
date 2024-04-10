@@ -246,6 +246,87 @@ tab3_gamma <- precis(rds3,depth=2,pars="gamma_wealth")
 tab3_gamma
 plot((tab3_gamma[,1]))
 
+## Fit simulated data, using the combined data imputation approach and multiplicative ----
+
+#put all the data together
+#create data
+data3 <- list(N = nrow(afrs_restricted), #population size
+              A = ncol(afrs_restricted), #age
+              wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
+              N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+              id_wealth_miss = which(as.vector(t(std_wealth_restricted))== -99), # provide the indexes for the missing data
+              baby = afrs_restricted #AFR
+) 
+
+#check data
+data3
+
+# compile model
+
+m3 <- cmdstan_model("Model_code/firstbaby_diffwealth_multiplicative.stan")
+
+# fit model
+
+fit3 <- m3$sample(data = data3, 
+                  chains = 4, 
+                  parallel_chains = 10, 
+                  adapt_delta = 0.95,
+                  max_treedepth = 13,
+                  init = 0)
+
+# save fit 
+fit_3 <- rstan::read_stan_csv(fit3$output_files())
+saveRDS(fit_3, "firstbaby3.rds")
+#load RDS file
+rds3 <- readRDS("firstbaby3.rds")
+#extract samples
+post3 <- extract.samples(rds3)
+
+#check the model
+#check trace of all main parameters
+#alpha
+traceplot(rds3,pars="alpha")
+#mu
+#traceplot(rds3,pars="mu") #only run if needed, because they are 91 plots
+#mu_raw
+#traceplot(rds3,pars="mu_raw") #only run if needed, because they are 91 plots
+#mu_tau
+traceplot(rds3,pars="mu_tau")
+#mu_kappa
+traceplot(rds3,pars="mu_kappa")
+#mu_delta
+traceplot(rds3,pars="mu_delta")
+#beta_wealth
+#traceplot(rds3,pars="beta_wealth") #only run if needed, because they are 91 plots
+#gamma_wealth
+#traceplot(rds3,pars="gamma_wealth") #only run if needed, because they are 91 plots
+
+#summary of the model
+#create summary table
+#create summary table for alpha and hiper priors of Gaussian process
+tab3 <- precis(rds3,depth=2,pars=c("alpha",
+                                   "mu_raw",
+                                   "mu_tau",
+                                   "mu_delta"))
+#check table
+tab3
+#create summary table for mu
+tab3_mu <- precis(rds3,depth=2,pars="mu")
+#check table
+tab3_mu
+plot(inv_logit(tab3_mu[,1]))
+#create summary table for beta
+tab3_beta <- precis(rds3,depth=2,pars="beta_wealth")
+#check table
+tab3_beta
+plot((tab3_beta[,1]))
+#create summary table for gamma
+tab3_gamma <- precis(rds3,depth=2,pars="gamma_wealth")
+#check table
+tab3_gamma
+plot((tab3_gamma[,1]))
+
+
 ## Plot the fit of the simulated data ----
 
 #simulate wealth variability values

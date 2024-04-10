@@ -99,7 +99,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] * // age specific offset
-        exp(1)^(beta_wealth[a]*wealth_merge[(n-1)*a+a]) // times absolute wealth
+        exp(1)^(beta_wealth[a]*wealth_full[(n-1)*a+a]) // times absolute wealth
         );
           
     }
