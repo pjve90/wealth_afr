@@ -25,10 +25,10 @@ data {
   int N; // sample size of women
   int A; // maximum age of women
   
-  array[N,A] int wealth; // age-specific absolute wealth
+  vector[N*A] wealth; // age-specific absolute wealth
   
-  int N_wealth_miss; // number of missing data
-  array[N,A] int id_wealth_miss; // indexes of missing wealth data
+  int N_miss; // number of missing data
+  array[N_miss] int id_wealth_miss; // indexes of missing wealth data
   
   array[N,A] int baby; // probability of FR
 
@@ -46,11 +46,10 @@ parameters {
 // absolute wealth
   vector [A] beta_wealth;
 // missing wealth data
-  vector [A] nu;
-  vector [A] sigma_wealth_miss;
-  array[N_wealth_miss,A] int wealth_impute;
+  vector[N_miss] wealth_impute;
+  real nu;
+  real<lower=0> sigma_wealth_miss;
 }
-
 
 transformed parameters {
 
@@ -60,20 +59,16 @@ transformed parameters {
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
     
 //Bayesian data imputation
-  array [N,A] int wealth_full; //full wealth data (original + imputed)
+  vector[N*A] wealth_full; //full wealth data (original + imputed)
   
   wealth_full = wealth; // making the merged data as the same as the original data
-  if(N_wealth_miss > 0){         
-    for(i in 1:N){
-      for(j in 1:A){
-        if(wealth_miss_id[i,j]==1){
-          wealth_full[i,j] = wealth_impute[i,j];
-        } else{
-          wealth_full[i,j] = wealth[i,j];
-        }
+  
+  if(N_miss > 0){       //telling where is the missing data that needs to be imputed  
+    for(i in 1:N_miss){
+        wealth_full[id_wealth_miss[i]] = wealth_impute[i];
       }
     }
-  }
+}
 
 model {
 // global intercept
@@ -86,8 +81,7 @@ model {
 // absolute wealth
     beta_wealth ~ normal(0,1);
 // missing wealth data
-    array[N,A] int wealth_merge;
-    wealth_merge ~ normal(nu,sigma_wealth_m);
+    wealth_impute ~ normal(nu,sigma_wealth_miss);
     nu ~ normal(0,1);
     sigma_wealth_miss ~ exponential(1);
     
@@ -100,7 +94,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        beta_wealth[a]*wealth_merge[n,a] // absolute wealth
+        beta_wealth[a]*wealth_full[(n-1)*a+a] // absolute wealth
         );
           
     }

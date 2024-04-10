@@ -135,19 +135,59 @@ max(which(apply(afrs,2,sum)>0))
 std_wealth_restricted<-std_wealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
 afrs_restricted<-afrs[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
 
-id_wealth_miss <- matrix(nrow=nrow(std_wealth_restricted),ncol=ncol(std_wealth_restricted))
+## Fit simulated data, using the combined data imputation approach ----
 
-for (i in 1:nrow(std_wealth_restricted)){
-  for(j in 1:ncol(std_wealth_restricted)){
-    if(std_wealth_restricted[i,j] == -99){
-      id_wealth_miss[i,j] <- 1
-    }else{
-      id_wealth_miss[i,j] <- 0
-    }
-  }
-}
+#put all the data together
+#create data
+data2c <- list(N = nrow(afrs_restricted), #population size
+               A = ncol(afrs_restricted), #age
+               wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
+               N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+               id_wealth_miss = which(as.vector(t(std_wealth_restricted))== -99), # provide the indexes for the missing data
+               baby = afrs_restricted #AFR
+               ) 
 
-id_wealth_miss
+#check data 
+data2c
+
+# compile model
+
+m2_comb <- cmdstan_model("Model_code/firstbaby_abswealth.stan")
+
+# fit model
+
+fit2_comb <- m2_comb$sample(data = data2c, 
+                            chains = 4, 
+                            parallel_chains = 15, 
+                            adapt_delta = 0.95,
+                            max_treedepth = 13,
+                            init = 0)
+
+# save fit 
+fit2_simv <- rstan::read_stan_csv(fit2_simv$output_files())
+saveRDS(fit2_simv, "firstbaby2_simv.rds")
+#load RDS file
+rds2_simv <- readRDS("firstbaby2_simv.rds")
+#extract samples
+post2_simv <- extract.samples(rds2_simv)
+
+#check the model
+#check trace of all main parameters
+#alpha
+traceplot(rds2_simv,pars="alpha")
+#mu
+#traceplot(rds2_simv,pars="mu") #only run if needed, because they are 91 plots
+#mu_raw
+#traceplot(rds2_simv,pars="mu_raw") #only run if needed, because they are 91 plots
+#mu_tau
+traceplot(rds2_simv,pars="mu_tau")
+#mu_kappa
+traceplot(rds2_simv,pars="mu_kappa")
+#mu_delta
+traceplot(rds2_simv,pars="mu_delta")
+#beta_wealth
+#traceplot(rds2_simv,pars="beta_wealth") #only run if needed, because they are 91 plots
+
 
 ## Fit simulated data, using the model in which wealth is transformed into a vector to use the merge function ----
 
