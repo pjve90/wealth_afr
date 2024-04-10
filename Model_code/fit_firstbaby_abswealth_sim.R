@@ -188,6 +188,25 @@ traceplot(rds2_comb,pars="mu_delta")
 #beta_wealth
 #traceplot(rds2_comb,pars="beta_wealth") #only run if needed, because they are 91 plots
 
+#summary of the model
+#create summary table
+#create summary table for alpha and hiper priors of Gaussian process
+tabs2_comb <- precis(rds2_comb,depth=3,pars=c("alpha",
+                                              "mu_raw",
+                                              "mu_tau",
+                                              "mu_delta"))
+#check table
+tabs2_comb
+#create summary table for mu
+tabs2_comb_mu <- precis(rds2_comb,depth=3,pars="mu")
+#check table
+tabs2_comb_mu
+plot(inv_logit(tabs2_comb_mu[,1]))
+#create summary table for beta
+tabs2_comb_beta <- precis(rds2_comb,depth=3,pars="beta_wealth")
+#check table
+tabs2_comb_beta
+plot((tabs2_comb_beta[,1]))
 
 ## Fit simulated data, using the model in which wealth is transformed into a vector to use the merge function ----
 

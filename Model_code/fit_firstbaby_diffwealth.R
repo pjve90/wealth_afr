@@ -68,12 +68,12 @@ plot(beta_wealth~c(1:length(beta_wealth)))
 #create a matrix with individuals as rows and ages as columns (A+1) so the first column is birth)
 diffwealth <- matrix(nrow=N,ncol=A+1)
 #calculate the difference of wealth from one year to the next
-for(j in 1:ncol(diffw_matrix3)){
-  for(i in 1:nrow(diffw_matrix3)){
+for(j in 1:ncol(diffwealth)){
+  for(i in 1:nrow(diffwealth)){
     if(j ==1){
-      diffw_matrix3[i,j] <- std_abswealth[i,j] - std_abswealth[i,j]
+      diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j]
     } else{
-      diffw_matrix3[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-1]
+      diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-1]
     }
   }
 }
@@ -163,19 +163,27 @@ plot(plot_ind3$afr~plot_ind3$wealth_diff)
 
 ## Fit simulated data ----
 
+std_wealth_restricted<-std_wealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
+afrs_restricted<-afrs[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
+
+## Fit simulated data, using the combined data imputation approach ----
+
 #put all the data together
 #create data
-data3 <- list(N = N, #population size
-              A = A+1, #age
-              abswealth = std_abswealth, #standardised absolute wealth
-              diffwealth = diffwealth, #wealth variability
-              baby = afrs) #AFR
+data3 <- list(N = nrow(afrs_restricted), #population size
+               A = ncol(afrs_restricted), #age
+               wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
+               N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+               id_wealth_miss = which(as.vector(t(std_wealth_restricted))== -99), # provide the indexes for the missing data
+               baby = afrs_restricted #AFR
+) 
+
 #check data
 data3
 
 # compile model
 
-m3 <- cmdstan_model("c:/Users/pablo_varas/Nextcloud/PhD/Chapter 3/Wealth_AFR/Model_code/firstbaby_diffwealth.stan")
+m3 <- cmdstan_model("Model_code/firstbaby_diffwealth.stan")
 
 # fit model
 
