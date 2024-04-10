@@ -164,29 +164,29 @@ fit2_comb <- m2_comb$sample(data = data2c,
                             init = 0)
 
 # save fit 
-fit2_simv <- rstan::read_stan_csv(fit2_simv$output_files())
-saveRDS(fit2_simv, "firstbaby2_simv.rds")
+fit2_comb <- rstan::read_stan_csv(fit2_comb$output_files())
+saveRDS(fit2_comb, "firstbaby2_comb.rds")
 #load RDS file
-rds2_simv <- readRDS("firstbaby2_simv.rds")
+rds2_comb <- readRDS("firstbaby2_comb.rds")
 #extract samples
-post2_simv <- extract.samples(rds2_simv)
+post2_comb <- extract.samples(rds2_comb)
 
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds2_simv,pars="alpha")
+traceplot(rds2_comb,pars="alpha")
 #mu
-#traceplot(rds2_simv,pars="mu") #only run if needed, because they are 91 plots
+#traceplot(rds2_comb,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
-#traceplot(rds2_simv,pars="mu_raw") #only run if needed, because they are 91 plots
+#traceplot(rds2_comb,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-traceplot(rds2_simv,pars="mu_tau")
+traceplot(rds2_comb,pars="mu_tau")
 #mu_kappa
-traceplot(rds2_simv,pars="mu_kappa")
+traceplot(rds2_comb,pars="mu_kappa")
 #mu_delta
-traceplot(rds2_simv,pars="mu_delta")
+traceplot(rds2_comb,pars="mu_delta")
 #beta_wealth
-#traceplot(rds2_simv,pars="beta_wealth") #only run if needed, because they are 91 plots
+#traceplot(rds2_comb,pars="beta_wealth") #only run if needed, because they are 91 plots
 
 
 ## Fit simulated data, using the model in which wealth is transformed into a vector to use the merge function ----
