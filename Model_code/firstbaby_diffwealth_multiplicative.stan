@@ -18,8 +18,7 @@ functions {
 
     return S * cholesky_decompose(Rho);
   }
-  
-  
+
 }
 
 data {
@@ -45,14 +44,14 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
-// absolute wealth
-  vector [A] beta_wealth;
+// wealth
+  vector[A] beta_wealth; // absolute wealth
+  vector[A] gamma_wealth; // short-term wealth variability
 // missing wealth data
   vector[N_miss] wealth_impute;
   real nu;
   real<lower=0> sigma_wealth_miss;
 }
-
 
 transformed parameters {
 
@@ -71,9 +70,32 @@ transformed parameters {
         wealth_full[id_wealth_miss[i]] = wealth_impute[i];
       }
     }
+
+//Short-term wealth variability
+  vector[N*A] diffwealth; //short-term wealth variability
+  
+  for(i in 1:N*A){
+    if(i == 1){
+      diffwealth[i] = wealth_full[i] - wealth_full[i];
+    }else{
+      diffwealth[i] = wealth_full[i] - wealth_full[i-1];
+    }
   }
+  
+}
 
-
+//Short-term wealth variability
+  vector[N*A] diffwealth; //short-term wealth variability
+  
+  for(i in 1:N*A){
+    if(i == 1){
+      diffwealth[i] = wealth_full[i] - wealth_full[i];
+    }else{
+      diffwealth[i] = wealth_full[i] - wealth_full[i-1];
+    }
+  }
+  
+}
 
 model {
 // global intercept
@@ -83,14 +105,14 @@ model {
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
-// absolute wealth
-    beta_wealth ~ normal(0,1);
+// wealth
+    beta_wealth ~ normal(0,1); // absolute wealth
+    gamma_wealth ~ normal(0,1); // wealth variability
 // missing wealth data
     wealth_impute ~ normal(nu,sigma_wealth_miss);
     nu ~ normal(0,1);
     sigma_wealth_miss ~ exponential(1);
-    
-    
+
   for (n in 1:N) {
   for (a in 1:A) {
     
@@ -98,10 +120,11 @@ model {
 
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
-        mu[a] * // age specific offset
-        exp(1)^(beta_wealth[a]*wealth_merge[(n-1)*a+a]) // times absolute wealth
+        mu[a] * // age
+        exp(1)^(beta_wealth[a]*wealth_full[(n-1)*a+a]) + // absolute wealth
+        mu[a] * // age
+        exp(1)^(gamma_wealth[a]*diffwealth[(n-1)*a+a]) // wealth variability
         );
-          
     }
     }
     }
