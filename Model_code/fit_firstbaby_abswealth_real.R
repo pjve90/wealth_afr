@@ -1313,6 +1313,7 @@ for(k in 1:(length(deciles))){
   plot_afr2
   
   points(plot_data2_add_real_b$mean~plot_data2_add_real_b$age,col=alpha(palette_b[k],0.75),pch=15)
+  lines(plot_data2_add_real_b$mean~plot_data2_add_real_b$age,col=palette_b[k])
 }
 
 #plot one plot per wealth quantile

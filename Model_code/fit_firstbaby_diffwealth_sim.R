@@ -315,7 +315,7 @@ for(k in 1:length(age_quantiles)){
 ### Wealth ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),to=round(max(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),length.out=nrow(std_abswealth)) #specify according to range and length of wealth data
+simwealth_add <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
@@ -326,7 +326,7 @@ palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages,
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.3)~c(0,ncol(post3_add$mu)),
+plot(c(0,0.16)~c(0,ncol(post3_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
      #xaxt="n",
@@ -344,7 +344,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post3_add$mu)){
       p3_add_b[i,j] <- inv_logit(post3_add$alpha[i] + #inv logit because originally is logit
                                    post3_add$mu[i,j] + #age
-                                   post3_add$beta_wealth[i,j]*deciles[k]) #wealth
+                                   post3_add$gamma_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data

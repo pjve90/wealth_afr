@@ -1,6 +1,6 @@
-# Model with wealth variability ----
+# Model with absolute wealth ----
 
-#The code in this script is meant to fit a Bayesian model with welath variability, absolute wealth and a Gaussian process of age, in order to see the relationship between wealth variability and the probability of first reproduction of women.
+#The code in this script is meant to fit a Bayesian model with absolute wealth and a Gaussian process of age, in order to see the relationship between absolute wealth and the probability of first reproduction of women.
 #First, there is data simulation that follows the expectations from the literature.
 #Second, the simulated data is fitted to the Bayesian model.
 #Third, we use the real data to see how the model fits. 
@@ -39,7 +39,7 @@ afr_matrix3
 #check the age-specific probability of FR
 apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))
 #plot it
-plot(apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))~c(1:ncol(afr_matrix3)),xlab="Age",ylab="Probability of first reproduction")
+plot(apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))~c(1:ncol(afr_matrix3)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix3)){
@@ -54,7 +54,7 @@ for(j in 1:ncol(afr_matrix3)){
 #check the data
 afr_matrix3
 
-# Age-specific absolute wealth 
+#Age-specific absolute wealth
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
@@ -149,134 +149,118 @@ apply(absw_matrix3,2,mean,na.rm=T)
 #plot it
 plot(apply(absw_matrix3,2,mean,na.rm=T)~c(1:ncol(absw_matrix3)),xlab="Age",ylab="Average absolute wealth")
 
-#NaN in columns where there are no values of wealth
+# #NaN in columns where there are no values of wealth
+# 
+# # Simple data imputation 
+# 
+# #replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
+# for(i in 1:length(absw_matrix3[,1])){
+#   if(is.na(absw_matrix3[i,1]) & is.na(absw_matrix3[i,2])){
+#     absw_matrix3[i,1] <- mean(absw_matrix3[,1],na.rm = T)
+#   }else if(is.na(absw_matrix3[i,1]) & !is.na(absw_matrix3[i,2])){
+#     absw_matrix3[i,1] <- absw_matrix3[i,2]
+#   }
+# }
+# #check the data
+# absw_matrix3
+# sum(is.na(absw_matrix3[,1]))
+# #n=0
+# #replace the missing wealth data by putting the mean between the two ages it is
+# for(j in 2:(ncol(absw_matrix3)-1)){
+#   for(i in 1:nrow(absw_matrix3)){
+#     if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&!is.na(absw_matrix3[i,j+1])){
+#       absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,j+1]))
+#     } else if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&is.na(absw_matrix3[i,j+1])){
+#       absw_matrix3[i,j] <- mean(absw_matrix3[,j],na.rm=T)
+#     } 
+#   }
+# }
+# #check the data
+# absw_matrix3
+# sum(is.na(absw_matrix3))
+# #n=21824
+# #replace the missing wealth data by putting the mean between the two ages it is
+# for(j in 2:(ncol(absw_matrix3)-1)){
+#   for(i in 1:nrow(absw_matrix3)){
+#     if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&!is.na(absw_matrix3[i,j+1])){
+#       absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,j+1]))
+#     } else if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&is.na(absw_matrix3[i,j+1])){
+#       absw_matrix3[i,j] <- mean(absw_matrix3[,j],na.rm=T)
+#     } 
+#   }
+# }
+# #check the data
+# absw_matrix3
+# sum(is.na(absw_matrix3))
+# #n=9179
+# #replace the missing wealth data by putting either the mean between the two ages it is or by repeating the value from previous year
+# for(j in 2:(ncol(absw_matrix3)-1)){
+#   for(i in 1:nrow(absw_matrix3)){
+#     if(is.na(absw_matrix3[i,j])&length(is.na(absw_matrix3[i,j:91]))!=sum(is.na(absw_matrix3[i,j:91]))){
+#       absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,max(which(!is.na(absw_matrix3[i,])==T))]))
+#     } else if(is.na(absw_matrix3[i,j])&length(is.na(absw_matrix3[i,j:91]))==sum(is.na(absw_matrix3[i,j:91]))){
+#       absw_matrix3[i,j] <- absw_matrix3[i,j-1]
+#     }
+#   }
+# }
+# #check the data
+# absw_matrix3
+# sum(is.na(absw_matrix3))
+# #n=540
+# #replace last column with the values from last year
+# absw_matrix3[,max(ncol(absw_matrix3))] <- absw_matrix3[,max(ncol(absw_matrix3))-1]
+# #check the data
+# absw_matrix3
+# sum(is.na(absw_matrix3))
+# #n=0
+# #check the age-specific frequency of absolute wealth
+# apply(absw_matrix3,2,mean)
+# #plot it
+# plot(apply(absw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
 
-#Simple data imputation 
-
-#replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
-for(i in 1:length(absw_matrix3[,1])){
-  if(is.na(absw_matrix3[i,1]) & is.na(absw_matrix3[i,2])){
-    absw_matrix3[i,1] <- mean(absw_matrix3[,1],na.rm = T)
-  }else if(is.na(absw_matrix3[i,1]) & !is.na(absw_matrix3[i,2])){
-    absw_matrix3[i,1] <- absw_matrix3[i,2]
-  }
-}
+#standardise absolute wealth
+std_absw_matrix3 <- matrix(standardize(as.vector(absw_matrix3)),ncol=ncol(absw_matrix3),nrow=nrow(absw_matrix3))
 #check the data
-absw_matrix3
-sum(is.na(absw_matrix3[,1]))
-#n=0
-#replace the missing wealth data by putting the mean between the two ages it is
-for(j in 2:(ncol(absw_matrix3)-1)){
-  for(i in 1:nrow(absw_matrix3)){
-    if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&!is.na(absw_matrix3[i,j+1])){
-      absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,j+1]))
-    } else if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&is.na(absw_matrix3[i,j+1])){
-      absw_matrix3[i,j] <- mean(absw_matrix3[,j],na.rm=T)
-    } 
-  }
-}
-#check the data
-absw_matrix3
-sum(is.na(absw_matrix3))
-#n=21824
-#replace the missing wealth data by putting the mean between the two ages it is
-for(j in 2:(ncol(absw_matrix3)-1)){
-  for(i in 1:nrow(absw_matrix3)){
-    if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&!is.na(absw_matrix3[i,j+1])){
-      absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,j+1]))
-    } else if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&is.na(absw_matrix3[i,j+1])){
-      absw_matrix3[i,j] <- mean(absw_matrix3[,j],na.rm=T)
-    } 
-  }
-}
-#check the data
-absw_matrix3
-sum(is.na(absw_matrix3))
-#n=9179
-#replace the missing wealth data by putting either the mean between the two ages it is or by repeating the value from previous year
-for(j in 2:(ncol(absw_matrix3)-1)){
-  for(i in 1:nrow(absw_matrix3)){
-    if(is.na(absw_matrix3[i,j])&length(is.na(absw_matrix3[i,j:91]))!=sum(is.na(absw_matrix3[i,j:91]))){
-      absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,max(which(!is.na(absw_matrix3[i,])==T))]))
-    } else if(is.na(absw_matrix3[i,j])&length(is.na(absw_matrix3[i,j:91]))==sum(is.na(absw_matrix3[i,j:91]))){
-      absw_matrix3[i,j] <- absw_matrix3[i,j-1]
-    }
-  }
-}
-#check the data
-absw_matrix3
-sum(is.na(absw_matrix3))
-#n=540
-#replace last column with the values from last year
-absw_matrix3[,max(ncol(absw_matrix3))] <- absw_matrix3[,max(ncol(absw_matrix3))-1]
-#check the data
-absw_matrix3
-sum(is.na(absw_matrix3))
-#n=0
-#check the age-specific frequency of absolute wealth
-apply(absw_matrix3,2,mean)
-#plot it
-plot(apply(absw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
-
-#standardise absolute wealth per column
-#create a matrix
-std_absw_matrix3 <- matrix(nrow=nrow(absw_matrix3),ncol=ncol(absw_matrix3))
-#standardize wealth data per column
-for(j in 1:ncol(std_absw_matrix3)){
-  std_absw_matrix3[,j] <- standardize(absw_matrix3[,j])
-}
-#check data
 std_absw_matrix3
-#replace NaN with zero...not sure is right, though...probably will change with bayesian imputation
+#check the age-specific average of absolute wealth
+apply(std_absw_matrix3,2,mean,na.rm=T)
+#plot it
+plot(apply(std_absw_matrix3,2,mean,na.rm=T)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
+
+#change NAs for -99
+#replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
 for(j in 1:ncol(std_absw_matrix3)){
   for(i in 1:nrow(std_absw_matrix3)){
     if(is.na(std_absw_matrix3[i,j])){
-      std_absw_matrix3[i,j] <- 0
-    } else{
-      std_absw_matrix3[i,j] <- std_absw_matrix3[i,j]
+      std_absw_matrix3[i,j] <- -99
     }
   }
 }
 #check the data
 std_absw_matrix3
-#check the age-specific frequency of absolute wealth
-apply(std_absw_matrix3,2,mean)
-#plot it
-plot(apply(std_absw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
 
-# Wealth variability
+## Additive model: fit real data ----
 
-#age-specific change in wealth
-#create matrix to store the age-specific wealth variation
-diffw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=A+1)
-#calculate the age-specific wealth variation
-for(j in 1:ncol(diffw_matrix3)){
-  for(i in 1:nrow(diffw_matrix3)){
-    if(j ==1){
-      diffw_matrix3[i,j] <- std_absw_matrix3[i,j] - std_absw_matrix3[i,j]
-    } else{
-      diffw_matrix3[i,j] <- std_absw_matrix3[i,j] - std_absw_matrix3[i,j-1]
-    }
-  }
-}
-#check data
-diffw_matrix3
-sum(is.na(diffw_matrix3))
-#n=0
-#check the age-specific frequency of wealth variability
-apply(diffw_matrix3,2,mean)
-#plot it
-plot(apply(diffw_matrix3,2,mean)~c(1:(A+1)),xlab="Age",ylab="Wealth variability")
+# Only take the years when individuals have a first baby
+#check min and max ages at first reproduction
+#min
+min(real_data3$afr,na.rm=T)
+#13
+#max
+max(real_data3$afr,na.rm=T)
+#32
 
-## Fit real data ----
+std_wealth_restricted <- std_absw_matrix3[,min(real_data3$afr,na.rm=T):max(real_data3$afr,na.rm=T)]
+afrs_restricted <- afr_matrix3[,min(real_data3$afr,na.rm=T):max(real_data3$afr,na.rm=T)]
 
 #put all the data together
-#create data
-real_list3 <- list(N = nrow(real_data3), #population size
-                   A = ncol(afr_matrix3[,1:35]), #age
-                   abswealth = std_absw_matrix3[,1:35], #standardised absolute wealth
-                   diffwealth = diffw_matrix3[,1:35], #wealth variability
-                   baby = afr_matrix3[,1:35]) #AFR
+#create dataset
+real_list3 <- list(N = nrow(afrs_restricted), #population size
+                   A = ncol(afrs_restricted), #age
+                   wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
+                   baby = afrs_restricted, #AFR
+                   miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+                   wealth_m=which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
 #check data
 real_list3
 

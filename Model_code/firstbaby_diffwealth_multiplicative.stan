@@ -45,7 +45,6 @@ parameters {
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
 // wealth
-  vector[A] beta_wealth; // absolute wealth
   vector[A] gamma_wealth; // short-term wealth variability
 // missing wealth data
   vector[N_miss] wealth_impute;
@@ -93,7 +92,6 @@ model {
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
 // wealth
-    beta_wealth ~ normal(0,1); // absolute wealth
     gamma_wealth ~ normal(0,1); // wealth variability
 // missing wealth data
     wealth_impute ~ normal(nu,sigma_wealth_miss);
