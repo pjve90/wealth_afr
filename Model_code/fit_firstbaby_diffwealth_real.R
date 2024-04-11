@@ -219,7 +219,7 @@ plot(apply(absw_matrix3,2,mean,na.rm=T)~c(1:ncol(absw_matrix3)),xlab="Age",ylab=
 # plot(apply(absw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
 
 #standardise absolute wealth
-std_absw_matrix3 <- matrix(standardize(as.vector(absw_matrix3)),ncol=ncol(absw_matrix3),nrow=nrow(absw_matrix3))
+std_absw_matrix3 <- matrix(standardize(log(as.vector(absw_matrix3))),ncol=ncol(absw_matrix3),nrow=nrow(absw_matrix3))
 #check the data
 std_absw_matrix3
 #check the age-specific average of absolute wealth
@@ -259,12 +259,17 @@ real_list3 <- list(N = nrow(afrs_restricted), #population size
                    A = ncol(afrs_restricted), #age
                    wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
                    baby = afrs_restricted, #AFR
-                   miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
-                   wealth_m=which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
+                   N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+                   id_wealth_miss =which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
 #check data
 real_list3
 
-fit3_real <- m3$sample(data = real_list3, 
+# compile model
+
+m3_add <- cmdstan_model("Model_code/firstbaby_diffwealth_additive.stan")
+
+#fit model
+fit3_add_real <- m3_add$sample(data = real_list3, 
                        chains = 4, 
                        parallel_chains = 15, 
                        adapt_delta = 0.95,
@@ -273,113 +278,111 @@ fit3_real <- m3$sample(data = real_list3,
 
 
 # save fit 
-fit_3_real <- rstan::read_stan_csv(fit3_real$output_files())
-saveRDS(fit_3_real, "firstbaby3_real.rds")
+fit_3_add_real <- rstan::read_stan_csv(fit3_add_real$output_files())
+saveRDS(fit_3_add_real, "firstbaby3_add_real.rds")
 #load RDS file
-rds3_real <- readRDS("firstbaby3_real.rds")
+rds3_add_real <- readRDS("firstbaby3_add_real.rds")
 #extract samples
-post3_real <- extract.samples(rds3_real)
+post3_add_real <- extract.samples(rds3_add_real)
 
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds3_real,pars="alpha")
+traceplot(rds3_add_real,pars="alpha")
 #mu
-#traceplot(rds3_real,pars="mu") #only run if needed, because they are 91 plots
+#traceplot(rds3_add_real,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
-#traceplot(rds3_real,pars="mu_raw") #only run if needed, because they are 91 plots
+#traceplot(rds3_add_real,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-traceplot(rds3_real,pars="mu_tau")
+traceplot(rds3_add_real,pars="mu_tau")
 #mu_kappa
-traceplot(rds3_real,pars="mu_kappa")
+traceplot(rds3_add_real,pars="mu_kappa")
 #mu_delta
-traceplot(rds3_real,pars="mu_delta")
+traceplot(rds3_add_real,pars="mu_delta")
 #beta_wealth
-#traceplot(rds3_real,pars="beta_wealth") #only run if needed, because they are 91 plots
+#traceplot(rds3_add_real,pars="beta_wealth") #only run if needed, because they are 91 plots
 #gamma_wealth
-#traceplot(rds3_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
+#traceplot(rds3_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
 
 #summary of the model
 #create summary table
 #create summary table for alpha and hiper priors of Gaussian process
-tab3_real <- precis(rds3_real,depth=2,pars=c("alpha",
+tab3_add_real <- precis(rds3_add_real,depth=2,pars=c("alpha",
                                              "mu_raw",
                                              "mu_tau",
                                              "mu_delta"))
 #check table
-tab3_real
+tab3_add_real
 #create summary table for mu
-tab3_real_mu <- precis(rds3_real,depth=2,pars="mu")
+tab3_add_real_mu <- precis(rds3_add_real,depth=2,pars="mu")
 #check table
-tab3_real_mu
-#create summary table for beta
-tab3_real_beta <- precis(rds3_real,depth=2,pars="beta_wealth")
-#check table
-tab3_real_beta
+tab3_add_real_mu
 #create summary table for gamma
-tab3_real_gamma <- precis(rds3_real,depth=2,pars="gamma_wealth")
+tab3_add_real_gamma <- precis(rds3_add_real,depth=2,pars="gamma_wealth")
 #check table
-tab3_real_gamma
+tab3_add_real_gamma
 
 # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 #mu
-tab3_real_mu[,1]<-round(inv_logit(tab3_real_mu[,1]),3)
-tab3_real_mu[,3]<-round(inv_logit(tab3_real_mu[,3]),3)
-tab3_real_mu[,4]<-round(inv_logit(tab3_real_mu[,4]),3)
-#beta_wealth
-tab3_real_beta[,1]<-round(inv_logit(tab3_real_beta[,1]),3)
-tab3_real_beta[,3]<-round(inv_logit(tab3_real_beta[,3]),3)
-tab3_real_beta[,4]<-round(inv_logit(tab3_real_beta[,4]),3)
+tab3_add_real_mu[,1]<-round(inv_logit(tab3_add_real_mu[,1]),3)
+tab3_add_real_mu[,3]<-round(inv_logit(tab3_add_real_mu[,3]),3)
+tab3_add_real_mu[,4]<-round(inv_logit(tab3_add_real_mu[,4]),3)
 #gamma_wealth
-tab3_real_gamma[,1]<-round(inv_logit(tab3_real_gamma[,1]),3)
-tab3_real_gamma[,3]<-round(inv_logit(tab3_real_gamma[,3]),3)
-tab3_real_gamma[,4]<-round(inv_logit(tab3_real_gamma[,4]),3)
+tab3_add_real_gamma[,1]<-round(inv_logit(tab3_add_real_gamma[,1]),3)
+tab3_add_real_gamma[,3]<-round(inv_logit(tab3_add_real_gamma[,3]),3)
+tab3_add_real_gamma[,4]<-round(inv_logit(tab3_add_real_gamma[,4]),3)
 
 ## Plot the fit of the real data ----
 
-### All ages ----
+#### All ages ----
 
-#simulate wealth variability values
-range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
-simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(diffw_matrix3)) #specify according to range and length according to sample size
-simwealth_g_real
+simwealth_g <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
+simwealth_g
+
+#simulate wealth values
+simwealth_add_real <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
+simwealth_add_real
+
+#get age quantiles
+age_quantiles <- as.numeric(round(quantile(1:ncol(post3_add_real$mu),seq(0,1,0.25))))
+age_quantiles
 
 #colour palette
-palette<-c(rep("NA",14),palette(gray(seq(0,.7,length.out = 11)))) #darker lines = younger ages, lighter lines = older ages
+palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.5)~c(min(simwealth_g_real),max(simwealth_g_real)),
+plot(c(0,0.6)~c(min(post3_add_real$diffwealth),max(post3_add_real$diffwealth)),
      ylab="Prob. FR",
      xlab="Wealth variability",
      main="Model with wealth variability",
      type="n")
+
 #add lines
-for(k in seq(15,25,by=2)){
+for(k in 1:length(age_quantiles)){
   #create matrix to store the data
-  p3_real <- matrix(nrow=nrow(post3_real$mu),ncol=length(simwealth_g_real))
-  p3_real
-  #fill it in with values for age 35
-  for(j in 1:length(simwealth_g_real)){
-    for(i in 1:nrow(post3_real$mu)){
-      p3_real[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
-                                  post3_real$mu[i,k] +
-                                  post3_real$beta_wealth[i,k]*0 + #zero because that is the average from the standardization
-                                  post3_real$gamma_wealth[i,k]*simwealth_g[j])
+  p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
+  p3_add_real
+  #fill it in with values for age 25
+  for(j in 1:length(simwealth_add_real)){
+    for(i in 1:nrow(post3_add_real$mu)){
+      p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
+                                      post3_add_real$mu[i,age_quantiles[k]] + #age
+                                      post3_add_real$gamma_wealth[i,age_quantiles[k]]*simwealth_add_real[j]) #wealth
     }
   }
   #check data
-  p3_real
+  p3_add_real
   #plot it!
   #prepare model prediction data
-  plot_data3_real <- data.frame(wealth = simwealth_g_real,
-                                mean = apply(p3_real, 2, mean), 
-                                upp = apply(p3_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                low = apply(p3_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_data3_add_real <- data.frame(wealth = simwealth_add_real,
+                                    mean = apply(p3_add_real, 2, mean), 
+                                    upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                    low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #prepare afr probabilities from real data
   #create a matrix
-  plot_afr3 <- afr_matrix3
+  plot_afr3 <- afrs_restricted
   #change -99 to NAs
   for(j in 1:ncol(plot_afr3)){
     for(i in 1:nrow(plot_afr3)){
@@ -391,7 +394,7 @@ for(k in seq(15,25,by=2)){
   #check the data
   plot_afr3
   
-  lines(plot_data3_real$mean~plot_data3_real$wealth,col=palette[k])
+  lines(plot_data3_add_real$mean~plot_data3_add_real$wealth,col=palette[k])
 }
 
 #plot one plot per age between 15 and 25
@@ -679,46 +682,51 @@ points(plot_afr3[,25]~plot_data3_real$wealth,col=alpha(palette[25],0.5),pch=16)
 
 #### All wealth classes ----
 
+simwealth_g <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
+simwealth_g
+
 #simulate wealth values
-range(real_list3$diffwealth) #use the range of values of real data as reference for simulation
-simwealth_g_real <- seq(from=round(min(range(real_list3$diffwealth)),1),to=round(max(range(real_list3$diffwealth)),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
-simwealth_g_real
-#get the quantiles
-quantiles <- as.numeric(quantile(simwealth_g_real,seq(0,1,0.25)))
-#0= -21.1  25%= -11.725  50%=-2.35 75%=7.025 100%=16.4
+simwealth_add_real <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
+simwealth_add_real
+
+#get the deciles
+deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
+deciles
 
 #colour palette
-palette_b<- c(NA,palette(gray(seq(0,0.9,length.out = (length(quantiles)-2))))) #darker lines = younger ages, lighter lines = older ages
+palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,1)~c(0,35),
+plot(c(0,0.6)~c(0,ncol(post3_add_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
-     main="Model with wealth variability",
+     #     xaxt="n",
+     main="Model with absolute wealth",
      type="n")
+#axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
 
 #add lines
-for(k in 2:(length(quantiles)-1)){
+for(k in 1:(length(deciles))){
   #create matrix to store the data
-  p3_real_b <- matrix(nrow=nrow(post3_real$mu),ncol=ncol(post3_real$mu))
-  p3_real_b
+  p3_add_real_b <- matrix(nrow=nrow(post3_add_real$mu),ncol=ncol(post3_add_real$mu))
+  p3_add_real_b
   #fill it in with values for age 25
-  for(j in 1:ncol(post3_real$mu)){
-    for(i in 1:nrow(post3_real$mu)){
-      p3_real_b[i,j] <- inv_logit(post3_real$alpha[i] + #inv logit because originally is logit
-                                    post3_real$mu[i,j] + #age
-                                    post3_real$beta_wealth[i,j]*quantiles[k]) #wealth
+  for(j in 1:ncol(post3_add_real$mu)){
+    for(i in 1:nrow(post3_add_real$mu)){
+      p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
+                                        post3_add_real$mu[i,j] + #age
+                                        post3_add_real$gamma_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
-  p3_real_b
+  p3_add_real_b
   #plot it!
   #prepare model prediction data
-  plot_data3_real_b <- data.frame(age = 1:ncol(p3_real_b),
-                                  mean = apply(p3_real_b, 2, mean), 
-                                  upp = apply(p3_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p3_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_data3_add_real_b <- data.frame(age = 1:ncol(p3_add_real_b),
+                                      mean = apply(p3_add_real_b, 2, mean), 
+                                      upp = apply(p3_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                      low = apply(p3_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #prepare afr probabilities from real data
   #create a matrix
@@ -734,8 +742,10 @@ for(k in 2:(length(quantiles)-1)){
   #check the data
   plot_afr3
   
-  lines(plot_data3_real_b$mean~plot_data3_real_b$age,col=palette_b[k])
+  points(plot_data3_add_real_b$mean~plot_data3_add_real_b$age,col=alpha(palette_b[k],0.75),pch=15)
+  lines(plot_data3_add_real_b$mean~plot_data3_add_real_b$age,col=palette_b[k])
 }
+
 
 #plot one plot per wealth quantile
 
