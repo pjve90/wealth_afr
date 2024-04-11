@@ -97,6 +97,7 @@ plot(apply(afrs,2,sum)/N,
      ylab="Probability of first reproduction",
      pch=16) #data
 points(mu_age+std_beta_wealth,col=alpha(hcl.colors(10,"ag_Sunset")[5],0.7),pch=15) #mu+std_beta
+lines(mu_age+std_beta_wealth,col=alpha(hcl.colors(10,"ag_Sunset")[5],0.7)) #mu+std_beta
 
 #check age-specific relationship between wealth and prob. of FR
 #plot empty plot
@@ -242,8 +243,8 @@ for(k in 1:length(age_quantiles)){
   for(j in 1:length(simwealth_add)){
     for(i in 1:nrow(post2_add$mu)){
       p2_add[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                  post2_add$mu[i,k] + #age
-                                  post2_add$beta_wealth[i,k]*simwealth_add[j]) #wealth
+                                  post2_add$mu[i,age_quantiles[k]] + #age
+                                  post2_add$beta_wealth[i,age_quantiles[k]]*simwealth_add[j]) #wealth
     }
   }
   #check data
@@ -292,7 +293,7 @@ plot(c(0,0.5)~c(0,ncol(post2_add$mu)),
      xaxt="n",
      main="Model with absolute wealth",
      type="n")
-axis(1,at=seq(0,ncol(post2_add$mu),by=1),labels=14:29)
+axis(1,at=seq(0,ncol(post2_add$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
 
 #add lines
 for(k in 1:(length(deciles))){
