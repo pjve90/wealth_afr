@@ -219,7 +219,7 @@ plot(apply(absw_matrix2,2,mean,na.rm=T)~c(1:ncol(absw_matrix2)),xlab="Age",ylab=
 # plot(apply(absw_matrix2,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
 
 #standardise absolute wealth
-std_absw_matrix2 <- matrix(standardize(as.vector(absw_matrix2)),ncol=ncol(absw_matrix2),nrow=nrow(absw_matrix2))
+std_absw_matrix2 <- matrix(standardize(log(as.vector(absw_matrix2))),ncol=ncol(absw_matrix2),nrow=nrow(absw_matrix2))
 #check the data
 std_absw_matrix2
 #check the age-specific average of absolute wealth
@@ -259,8 +259,8 @@ real_list2 <- list(N = nrow(afrs_restricted), #population size
                    A = ncol(afrs_restricted), #age
                    wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
                    baby = afrs_restricted, #AFR
-                   miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
-                   wealth_m=which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
+                   N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+                   id_wealth_miss=which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
 #check data
 real_list2
 
@@ -268,7 +268,7 @@ real_list2
 m2_add <- cmdstan_model("Model_code/firstbaby_abswealth_additive.stan")
 
 # fit model
-fit2_add_real <- m2_addv$sample(data = real_list2, 
+fit2_add_real <- m2_add$sample(data = real_list2, 
                             chains = 4, 
                             parallel_chains = 15, 
                             adapt_delta = 0.95,
@@ -313,12 +313,12 @@ tab2_add_real
 tab2_mu_add_real <- precis(rds2_add_real,depth=3,pars="mu")
 #check table
 tab2_mu_add_real
-plot(inv_logit(tabs2_mu_add_real[,1]))
+plot(inv_logit(tab2_mu_add_real[,1]))
 #create summary table for beta
 tab2_beta_add_real <- precis(rds2_add_real,depth=3,pars="beta_wealth")
 #check table
 tab2_beta_add_real
-plot((tabs2_beta_add_real[,1]))
+plot((tab2_beta_add_real[,1]))
 
 # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 #mu
@@ -337,7 +337,7 @@ tab2_beta_add_real[,4]<-round(inv_logit(tab2_beta_add_real[,4]),3)
 #### All ages ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(real_list2$wealth[which(real_list2$wealth>-99)]),1),to=round(max(real_list2$wealth[which(real_list2$wealth>-99)]),1),length.out=nrow(real_list2$wealth)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(real_list2$wealth[which(real_list2$wealth>-99)]),1),to=round(max(real_list2$wealth[which(real_list2$wealth>-99)]),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
 simwealth_add_real
 
 #get age quantiles
@@ -349,7 +349,7 @@ palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger a
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,1)~c(min(real_list2$wealth[which(real_list2$wealth>-99)]),max(real_list2$wealth[which(real_list2$wealth>-99)])),
+plot(c(0,0.6)~c(min(real_list2$wealth[which(real_list2$wealth>-99)]),max(real_list2$wealth[which(real_list2$wealth>-99)])),
      ylab="Prob. FR",
      xlab="Absolute wealth",
      main="Model with absolute wealth",
@@ -397,7 +397,7 @@ for(k in 1:length(age_quantiles)){
 #plot one plot per age between 13 and 31
 
 #### Age 13 ----
-plot(c(0,1)~c(min(real_list2$wealth[which(real_list2$wealth>-99)]),max(real_list2$wealth[which(real_list2$wealth>-99)])),
+plot(c(0,0.6)~c(min(real_list2$wealth[which(real_list2$wealth>-99)]),max(real_list2$wealth[which(real_list2$wealth>-99)])),
      ylab="Prob. FR",
      xlab="Absolute wealth",
      main="Model with absolute wealth: Age 13",
@@ -1256,7 +1256,7 @@ points(plot_afr2[,19]~plot_data2_real$wealth,col=alpha(palette[19],0.5),pch=16)
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(real_list2$wealth[which(real_list2$wealth>-99)]),1),to=round(max(real_list2$wealth[which(real_list2$wealth>-99)]),1),length.out=nrow(real_list2$wealth)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(real_list2$wealth[which(real_list2$wealth>-99)]),1),to=round(max(real_list2$wealth[which(real_list2$wealth>-99)]),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
 simwealth_add_real
 
 #get the deciles
@@ -1268,7 +1268,7 @@ palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages,
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
+plot(c(0,0.6)~c(0,ncol(post2_add_real$mu)),
      ylab="Prob. FR",
      xlab="Age",
 #     xaxt="n",
@@ -1313,6 +1313,7 @@ for(k in 1:(length(deciles))){
   plot_afr2
   
   points(plot_data2_add_real_b$mean~plot_data2_add_real_b$age,col=alpha(palette_b[k],0.75),pch=15)
+  lines(plot_data2_add_real_b$mean~plot_data2_add_real_b$age,col=palette_b[k])
 }
 
 #plot one plot per wealth quantile

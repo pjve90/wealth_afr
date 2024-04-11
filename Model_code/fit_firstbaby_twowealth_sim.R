@@ -128,30 +128,30 @@ apply(afrs,2,sum)/N
 plot(apply(afrs,2,sum)/N,xlab="Age",ylab="Prob FR")
 points(mu_age,col="grey",pch=4)
 
-#plot age-specific relationship between absolute wealth and AFR
-#prepare data
-plot_ind3 <- as.data.frame(matrix(ncol=3,nrow=N))
-colnames(plot_ind3)<-c("afr","abs_wealth","wealth_diff")
-#calculate the AFR for each individual
-for(i in 1:nrow(plot_ind3)){
-  if(sum(afrs[i,])==0){
-    plot_ind3[i,]$afr<-NA
-  }else{
-    plot_ind3[i,]$afr<-which(afrs[i,]==1)
-  }
-}
-#add the age-specific absolute wealth
-for(i in 1:nrow(plot_ind3)){
-  plot_ind3[i,]$abs_wealth<-std_abswealth[i,which(afrs[i,]==1)]
-}
-#add the age-specific wealth variability
-for(i in 1:nrow(plot_ind3)){
-  plot_ind3[i,]$wealth_diff<-diffwealth[i,which(afrs[i,]==1)]
-}
-#plot the relationship between absolute wealth and AFR
-plot(plot_ind3$afr~plot_ind3$abs_wealth)
-#plot the relationship between wealth variability and AFR
-plot(plot_ind3$afr~plot_ind3$wealth_diff)
+# #plot age-specific relationship between absolute wealth and AFR
+# #prepare data
+# plot_ind3 <- as.data.frame(matrix(ncol=3,nrow=N))
+# colnames(plot_ind3)<-c("afr","abs_wealth","wealth_diff")
+# #calculate the AFR for each individual
+# for(i in 1:nrow(plot_ind3)){
+#   if(sum(afrs[i,])==0){
+#     plot_ind3[i,]$afr<-NA
+#   }else{
+#     plot_ind3[i,]$afr<-which(afrs[i,]==1)
+#   }
+# }
+# #add the age-specific absolute wealth
+# for(i in 1:nrow(plot_ind3)){
+#   plot_ind3[i,]$abs_wealth<-std_abswealth[i,which(afrs[i,]==1)]
+# }
+# #add the age-specific wealth variability
+# for(i in 1:nrow(plot_ind3)){
+#   plot_ind3[i,]$wealth_diff<-diffwealth[i,which(afrs[i,]==1)]
+# }
+# #plot the relationship between absolute wealth and AFR
+# plot(plot_ind3$afr~plot_ind3$abs_wealth)
+# #plot the relationship between wealth variability and AFR
+# plot(plot_ind3$afr~plot_ind3$wealth_diff)
 
 # Introduce missing data in the wealth data frame
 for (j in 1:ncol(std_abswealth)){
@@ -395,7 +395,8 @@ simwealth_b <- seq(from=round(min(std_abswealth_restricted[which(std_abswealth_r
 simwealth_b
 
 #simulate wealth variability values
-simwealth_g <- seq(from=round(min(diffwealth),1),to=round(max(diffwealth),1),length.out=nrow(diffwealth)) #specify according to range and length related to sample size
+diffwealth_restricted<-diffwealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
+simwealth_g <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
 simwealth_g
 
 #get age quantiles
@@ -455,7 +456,7 @@ for(k in 1:length(age_quantiles)){
 ### Wealth ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(diffwealth),1),to=round(max(diffwealth),1),length.out=nrow(diffwealth)) #specify according to range and length related to sample size
+simwealth_add <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))

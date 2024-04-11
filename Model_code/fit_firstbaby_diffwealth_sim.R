@@ -127,31 +127,31 @@ apply(afrs,2,sum)/N
 plot(apply(afrs,2,sum)/N,xlab="Age",ylab="Prob FR")
 points(mu_age,col="grey",pch=4)
 
-#plot age-specific relationship between absolute wealth and AFR
-#prepare data
-plot_ind3 <- as.data.frame(matrix(ncol=3,nrow=N))
-colnames(plot_ind3)<-c("afr","abs_wealth","wealth_diff")
-#calculate the AFR for each individual
-for(i in 1:nrow(plot_ind3)){
-  if(sum(afrs[i,])==0){
-    plot_ind3[i,]$afr<-NA
-  }else{
-    plot_ind3[i,]$afr<-which(afrs[i,]==1)
-  }
-}
-#add the age-specific absolute wealth
-for(i in 1:nrow(plot_ind3)){
-  plot_ind3[i,]$abs_wealth<-std_abswealth[i,which(afrs[i,]==1)]
-}
-#add the age-specific wealth variability
-for(i in 1:nrow(plot_ind3)){
-  plot_ind3[i,]$wealth_diff<-diffwealth[i,which(afrs[i,]==1)]
-}
-#plot the relationship between absolute wealth and AFR
-plot(plot_ind3$afr~plot_ind3$abs_wealth)
-#plot the relationship between wealth variability and AFR
-plot(plot_ind3$afr~plot_ind3$wealth_diff)
-
+# #plot age-specific relationship between absolute wealth and AFR
+# #prepare data
+# plot_ind3 <- as.data.frame(matrix(ncol=3,nrow=N))
+# colnames(plot_ind3)<-c("afr","abs_wealth","wealth_diff")
+# #calculate the AFR for each individual
+# for(i in 1:nrow(plot_ind3)){
+#   if(sum(afrs[i,])==0){
+#     plot_ind3[i,]$afr<-NA
+#   }else{
+#     plot_ind3[i,]$afr<-which(afrs[i,]==1)
+#   }
+# }
+# #add the age-specific absolute wealth
+# for(i in 1:nrow(plot_ind3)){
+#   plot_ind3[i,]$abs_wealth<-std_abswealth[i,which(afrs[i,]==1)]
+# }
+# #add the age-specific wealth variability
+# for(i in 1:nrow(plot_ind3)){
+#   plot_ind3[i,]$wealth_diff<-diffwealth[i,which(afrs[i,]==1)]
+# }
+# #plot the relationship between absolute wealth and AFR
+# plot(plot_ind3$afr~plot_ind3$abs_wealth)
+# #plot the relationship between wealth variability and AFR
+# plot(plot_ind3$afr~plot_ind3$wealth_diff)
+# 
 # Introduce missing data in the wealth data frame
 for (j in 1:ncol(std_abswealth)){
   for (i in 1:nrow(std_abswealth)){
@@ -326,11 +326,11 @@ palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages,
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.3)~c(0,ncol(post3_add$mu)),
+plot(c(0,0.5)~c(0,ncol(post3_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
      #xaxt="n",
-     main="Model with absolute wealth",
+     main="Model with wealth variability",
      type="n")
 #axis(1,at=seq(0,ncol(post3_add$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
 
@@ -344,7 +344,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post3_add$mu)){
       p3_add_b[i,j] <- inv_logit(post3_add$alpha[i] + #inv logit because originally is logit
                                    post3_add$mu[i,j] + #age
-                                   post3_add$beta_wealth[i,j]*deciles[k]) #wealth
+                                   post3_add$gamma_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
