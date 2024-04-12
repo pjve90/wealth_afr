@@ -254,9 +254,7 @@ plot((tab3_add_gamma[,1]))
 ### Age ----
 
 #simulate wealth variability values
-diffwealth_restricted<-diffwealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
-
-simwealth_g <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
+simwealth_g <- seq(from=round(min(post3_add$diffwealth),1),to=round(max(post3_add$diffwealth),1),length.out=nrow(std_abswealth_restricted)) #specify according to range and length related to sample size
 simwealth_g
 
 #get age quantiles
@@ -267,7 +265,7 @@ age_quantiles
 palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-plot(c(0,0.1)~c(min(simwealth_g),max(simwealth_g)),
+plot(c(0,0.6)~c(min(simwealth_g),max(simwealth_g)),
      ylab="Prob. FR",
      xlab="Wealth variability",
      main="Model with wealth variability",
@@ -315,7 +313,7 @@ for(k in 1:length(age_quantiles)){
 ### Wealth ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
+simwealth_add <- seq(from=round(min(post3_add$diffwealth),1),to=round(max(post3_add$diffwealth),1),length.out=nrow(std_abswealth_restricted)) #specify according to range and length related to sample size
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
@@ -326,7 +324,7 @@ palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages,
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.16)~c(0,ncol(post3_add$mu)),
+plot(c(0,0.6)~c(0,ncol(post3_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
      #xaxt="n",
