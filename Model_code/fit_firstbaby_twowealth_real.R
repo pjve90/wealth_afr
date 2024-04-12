@@ -241,20 +241,31 @@ for(j in 1:ncol(std_absw_matrix4)){
 #check the data
 std_absw_matrix4
 
-## Fit simulated data, using the combined data imputation approach ----
+## Fit real data, using the combined data imputation approach ----
+
+# Only take the years when individuals have a first baby
+#check min and max ages at first reproduction
+#min
+min(real_data4$afr,na.rm=T)
+#13
+#max
+max(real_data4$afr,na.rm=T)
+#32
+
+std_wealth_restricted <- std_absw_matrix4[,min(real_data4$afr,na.rm=T):max(real_data4$afr,na.rm=T)]
+afrs_restricted <- afr_matrix4[,min(real_data4$afr,na.rm=T):max(real_data4$afr,na.rm=T)]
+
 
 #put all the data together
-#create data
-data4 <- list(N = nrow(afrs_restricted), #population size
-              A = ncol(afrs_restricted), #age
-              wealth = as.vector(t(std_abswealth_restricted)), #absolute wealth
-              N_miss = sum((std_abswealth_restricted)== -99), # number of missing values that need imputation
-              id_wealth_miss = which(as.vector(t(std_abswealth_restricted))== -99), # provide the indexes for the missing data
-              baby = afrs_restricted #AFR
-) 
-
+#create dataset
+real_list4 <- list(N = nrow(afrs_restricted), #population size
+                   A = ncol(afrs_restricted), #age
+                   wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
+                   baby = afrs_restricted, #AFR
+                   N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
+                   id_wealth_miss =which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
 #check data
-data4
+real_list4
 
 # compile model
 
@@ -262,9 +273,9 @@ m4_add <- cmdstan_model("Model_code/firstbaby_twowealth_additive.stan")
 
 # fit model
 
-fit4_add <- m4_add$sample(data = data4, 
+fit4_add <- m4_add$sample(data = real_list4, 
                           chains = 4, 
-                          parallel_chains = 10, 
+                          parallel_chains = 15, 
                           adapt_delta = 0.95,
                           max_treedepth = 13,
                           init = 0)
@@ -328,11 +339,11 @@ plot((tab4_add_gamma[,1]))
 ### Age ----
 
 #simulate wealth values
-simwealth_b <- seq(from=round(min(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),to=round(max(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),length.out=nrow(std_abswealth_restricted)) #specify according to range and length of wealth data
+simwealth_b <- seq(from=round(min(post4_add$wealth_full),1),to=round(max(post4_add$wealth_full),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length of wealth data
 simwealth_b
 
 #simulate wealth variability values
-simwealth_g <- seq(from=round(min(diffwealth),1),to=round(max(diffwealth),1),length.out=nrow(diffwealth)) #specify according to range and length related to sample size
+simwealth_g <- seq(from=round(min(post4_add$diffwealth),1),to=round(max(post4_add$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
 simwealth_g
 
 #get age quantiles
@@ -343,7 +354,8 @@ age_quantiles
 palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-plot(c(0,0.4)~c(round(min(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),round(max(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1)),
+par(mfrow=c(1,1))
+plot(c(0,0.4)~c(round(min(post4_add$wealth_full),1),round(max(post4_add$wealth_full),1)),
      ylab="Prob. FR",
      xlab="Std. Absolute wealth",
      main="Model with both wealth predictors",
@@ -392,7 +404,7 @@ for(k in 1:length(age_quantiles)){
 ### Wealth ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),to=round(max(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),length.out=nrow(std_abswealth_restricted)) #specify according to range and length of wealth data
+simwealth_add <- seq(from=round(min(post4_add$wealth_full),1),to=round(max(post4_add$wealth_full),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length of wealth data
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
@@ -457,12 +469,11 @@ for(k in 1:(length(deciles))){
 ### Age ----
 
 #simulate wealth values
-simwealth_b <- seq(from=round(min(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),to=round(max(std_abswealth_restricted[which(std_abswealth_restricted > -99)]),1),length.out=nrow(std_abswealth_restricted)) #specify according to range and length of wealth data
+simwealth_b <- seq(from=round(min(post4_add$wealth_full),1),to=round(max(post4_add$wealth_full),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length of wealth data
 simwealth_b
 
 #simulate wealth variability values
-diffwealth_restricted<-diffwealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
-simwealth_g <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
+simwealth_g <- seq(from=round(min(post4_add$diffwealth),1),to=round(max(post4_add$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
 simwealth_g
 
 #get age quantiles
@@ -522,7 +533,7 @@ for(k in 1:length(age_quantiles)){
 ### Wealth ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(diffwealth_restricted),1),to=round(max(diffwealth_restricted),1),length.out=nrow(diffwealth_restricted)) #specify according to range and length related to sample size
+simwealth_add <- seq(from=round(min(post4_add$diffwealth),1),to=round(max(post4_add$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
@@ -533,7 +544,7 @@ palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages,
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.12)~c(0,ncol(post4_add$mu)),
+plot(c(0,0.6)~c(0,ncol(post4_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
      #     xaxt="n",
