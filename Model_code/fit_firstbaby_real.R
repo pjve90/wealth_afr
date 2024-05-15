@@ -11,6 +11,8 @@
 library(cmdstanr)
 #install.packages("rethinking")
 library(rethinking)
+#install.packages("scales")
+library(scales)
 
 ## Data wrangling of real data ----
 
@@ -159,12 +161,13 @@ plot(plot_data1_real$mu_mean~plot_data1_real$age,
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
+     pch=16,
      lwd=2,
      ylim=c(0,0.35),
-     col=hcl.colors(10,"ag_Sunset")[5],
-     type="l")
-polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(plot_data1_real$mu_low,rev(plot_data1_real$mu_upp)),col=alpha(hcl.colors(10,"ag_Sunset")[5],0.5))
-lines(plot_data1_real$mu_upp~plot_data1_real$age,col=hcl.colors(10,"ag_Sunset")[5])
-lines(plot_data1_real$mu_low~plot_data1_real$age,col=hcl.colors(10,"ag_Sunset")[5])
-points(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=alpha("black",0.5))
+     col=hcl.colors(4,"temps")[3]
+)
+lines(plot_data1_real$mu_mean~plot_data1_real$age,col=hcl.colors(4,"temps")[3],lwd=2)
+polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(plot_data1_real$mu_low,rev(plot_data1_real$mu_upp)),col=alpha(hcl.colors(4,"temps")[3],0.5),border=NA)
+points(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[4])
+lines(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[4],lwd=2)
 

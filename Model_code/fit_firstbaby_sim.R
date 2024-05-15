@@ -23,13 +23,13 @@ library(scales)
 N <- 100
 
 #Age
-#maximum age of 90 years old
-A <- 90
+#maximum age of 73 years old (based on Pimbwe data)
+A <- 73
 
 #Age at first reproduction (AFR)
 
 #simulate an age-specific parameter for AFR (mu)
-mu_age<-c(rep(0,13),seq(from=0.001,to=0.2,length=6),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,52))
+mu_age<-c(rep(0,12),seq(from=0.001,to=0.2,length=7),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,35))
 mu_age
 #check that they sum to 1
 sum(mu_age)
@@ -66,11 +66,12 @@ apply(afrs,2,sum,na.rm = T)
 apply(afrs,2,sum,na.rm = T)/N
 #plot it
 plot(apply(afrs,2,sum,na.rm = T)/N,
-     ylim=c(0,0.2),
+     ylim=c(0,0.35),
      xlab="Age",
      ylab="Probability of first reproduction",
+     col=hcl.colors(2,"temps")[2],
      pch=16) #data
-lines(mu_age,col=hcl.colors(10,"ag_Sunset")[5]) #mu
+lines(mu_age,col=hcl.colors(2,"temps")[1],lwd=2) #mu
 
 ## Fit simulated data ----
 
@@ -86,7 +87,6 @@ for(j in 1:ncol(afrs)){
 }
 #check the data
 afrs
-
 
 #put all the data together
 #create dataset
@@ -188,7 +188,7 @@ plot(plot_data1$mu_mean~plot_data1$age,
      main="Model with Gaussian process of age",
      pch=16,
      lwd=2,
-     ylim=c(0,0.25),
+     ylim=c(0,0.35),
      col=hcl.colors(2,"temps")[1]
      )
 lines(plot_data1$mu_mean~plot_data1$age,col=hcl.colors(2,"temps")[1],lwd=2)
