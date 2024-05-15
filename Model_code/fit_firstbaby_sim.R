@@ -186,11 +186,13 @@ plot(plot_data1$mu_mean~plot_data1$age,
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
+     pch=16,
      lwd=2,
      ylim=c(0,0.25),
-     col=hcl.colors(10,"ag_Sunset")[5]
+     col=hcl.colors(2,"temps")[1]
      )
-polygon(c(plot_data1$age,rev(plot_data1$age)),c(plot_data1$mu_low,rev(plot_data1$mu_upp)),col=alpha(hcl.colors(10,"ag_Sunset")[5],0.5))
-lines(plot_data1$mu_upp~plot_data1$age,col=hcl.colors(10,"ag_Sunset")[5])
-lines(plot_data1$mu_low~plot_data1$age,col=hcl.colors(10,"ag_Sunset")[5])
-points(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=alpha("black",0.5))
+lines(plot_data1$mu_mean~plot_data1$age,col=hcl.colors(2,"temps")[1],lwd=2)
+polygon(c(plot_data1$age,rev(plot_data1$age)),c(plot_data1$mu_low,rev(plot_data1$mu_upp)),col=alpha(hcl.colors(2,"temps")[1],0.5),border=NA)
+points(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(2,"temps")[2])
+lines(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(2,"temps")[2],lwd=2)
+
