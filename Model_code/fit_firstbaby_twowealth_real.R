@@ -31,7 +31,6 @@ for(i in 1:nrow(afr_matrix4)){
   if(!is.na(afr)){
     afr_matrix4[i,1:(afr-1)] <- 0
     afr_matrix4[i,afr] <- 1
-    afr_matrix4[i,(afr+1):aoc] <- 0
   } else{
     afr_matrix4[i,1:aoc] <- rep(0,length(afr_matrix4[i,1:aoc]))
   }

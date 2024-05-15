@@ -19,16 +19,15 @@ real_data1 <- read.csv("dataf.csv")[,-1]
 head(real_data1)
 
 #Calculate age-specific age at first reproduction
-#create a matrix to store the age-specific age of censor
-afr_matrix1 <- matrix(nrow=nrow(real_data1),ncol=A+1)
-#calculate for each age when the woman is censored (1) or not (0)
+#create a matrix to store the age-specific age of first reproduction
+afr_matrix1 <- matrix(nrow=nrow(real_data1),ncol=max(real_data1$aoc)+1) #ages defined by the oldest woman in the sample
+#calculate for each age when the woman has her first baby (1) or not (0)
 for(i in 1:nrow(afr_matrix1)){
   afr <- real_data1$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
   aoc <- real_data1$aoc[i] + 1 #adding 1 so if she is censored in the same year as registered = 1
   if(!is.na(afr)){
     afr_matrix1[i,1:(afr-1)] <- 0
     afr_matrix1[i,afr] <- 1
-    afr_matrix1[i,(afr+1):aoc] <- 0
   } else{
     afr_matrix1[i,1:aoc] <- rep(0,length(afr_matrix1[i,1:aoc]))
   }
@@ -38,7 +37,7 @@ afr_matrix1
 #check the age-specific probability of AFR, proportion relative to all women whose AFR is known
 apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))
 #plot it
-plot(apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))~c(1:(A+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
+plot(apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix1)){
@@ -55,17 +54,17 @@ afr_matrix1
 
 # reduce computation by only calculating probabilities for the realistic data range - if we do not observe AFR above a certain age, we cannot model the probabilities. We add 5 years as buffer
 max(real_data1$afr,na.rm=T) # 32 years old
-afr_matrix1_b <- afr_matrix1[,1:(max(real_data1$afr,na.rm=T)+5)]
-#check the data
-afr_matrix1_b
 
 ## Fit real data ----
 
 #put all the data together
 #create dataset
 real_list1 <- list(N = nrow(real_data1), #population size
-              A = ncol(afr_matrix1[,1:41]), #age
-              baby = afr_matrix1[,1:41]) #AFR
+              A = ncol(afr_matrix1), #age
+              baby = afr_matrix1) #AFR
+
+# compile model
+m1 <- cmdstan_model("Model_code/firstbaby.stan")
 
 # fit model
 fit1_real <- m1$sample(data = real_list1, 
@@ -111,6 +110,8 @@ tab1_real
 tab1_mu_real <- precis(rds1_real,depth=3,pars="mu")
 #check table
 tab1_mu_real
+plot(tab1_mu_real)
+plot(inv_logit(tab1_mu_real[,1]))
 
 # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 tab1_mu_real[,1]<-round(inv_logit(tab1_mu_real[,1]),3)
@@ -134,33 +135,36 @@ for(j in 1:ncol(post1_real$mu)){
 p1_real
 #plot it!
 #prepare model prediction data
-plot_data1_real <- data.frame(age = 1:ncol(p1_real[,1:41]), 
-                         mu_mean = apply(p1_real[,1:41], 2, mean), 
-                         mu_upp = apply(p1_real[,1:41], 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                         mu_low = apply(p1_real[,1:41], 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data1_real <- data.frame(age = 1:ncol(p1_real), 
+                         mu_mean = apply(p1_real, 2, mean), 
+                         mu_upp = apply(p1_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                         mu_low = apply(p1_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
-plot_afr1 <- afr_matrix1[,1:41]
+plot_afr1_real <- afr_matrix1
 #change -99 to NAs
-for(j in 1:ncol(plot_afr1)){
-  for(i in 1:nrow(plot_afr1)){
-    if(plot_afr1[i,j]==-99){
-      plot_afr1[i,j] <- NA
+for(j in 1:ncol(plot_afr1_real)){
+  for(i in 1:nrow(plot_afr1_real)){
+    if(plot_afr1_real[i,j]==-99){
+      plot_afr1_real[i,j] <- NA
     }
   }
 }
 #check the data
-plot_afr1
+plot_afr1_real
 
 #plot age random effect
 plot(plot_data1_real$mu_mean~plot_data1_real$age,
-     ylim=c(0,0.25),
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
+     lwd=2,
+     ylim=c(0,0.35),
      col=hcl.colors(10,"ag_Sunset")[5],
      type="l")
-lines(plot_data1_real$mu_upp~plot_data1_real$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
-lines(plot_data1_real$mu_low~plot_data1_real$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
-points(apply(plot_afr1[,1:41],2,sum,na.rm=T)/sum(is.na(real_data1$afr)==F)~plot_data1_real$age,pch=16)
+polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(plot_data1_real$mu_low,rev(plot_data1_real$mu_upp)),col=alpha(hcl.colors(10,"ag_Sunset")[5],0.5))
+lines(plot_data1_real$mu_upp~plot_data1_real$age,col=hcl.colors(10,"ag_Sunset")[5])
+lines(plot_data1_real$mu_low~plot_data1_real$age,col=hcl.colors(10,"ag_Sunset")[5])
+points(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=alpha("black",0.5))
+

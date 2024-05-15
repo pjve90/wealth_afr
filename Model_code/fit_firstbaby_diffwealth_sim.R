@@ -104,20 +104,27 @@ plot(mu_age~c(1:length(mu_age)))
 #1=yes first birth
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
 afrs <- matrix(nrow=N,ncol=A+1)
+#assign first column a zero, because they cannot have their first baby when born
+afrs[,1] <- 0
+afrs
 #randomly assign a positive output of AFR for individuals
-for(j in 1:ncol(afrs)){
+for(j in 2:ncol(afrs)){
   for(i in 1:nrow(afrs)){
-    if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afr_prob <- mu_age[j]+ #age
+    if(!is.na(afrs[i,j-1])){
+      if(afrs[i,j-1] == 0){
+        afr_prob <- mu_age[j]+ #age
         gamma_wealth[j]*diffwealth[i,j] #wealth variability
       if(afr_prob<0){afr_prob<-0}
       afrs[i,j] <- rbinom(1,1,afr_prob)
-    } else{
-      afrs[i,j] <- 0
-    }  
+      else{
+        afrs[i,j] <- NA
+      }
+      } else{
+        afrs[i,j] <- NA
+      }
+    }
   }
 }
-
 #check the data
 #see the data
 head(afrs)

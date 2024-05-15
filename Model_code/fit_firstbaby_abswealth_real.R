@@ -29,7 +29,6 @@ for(i in 1:nrow(afr_matrix2)){
   if(!is.na(afr)){
     afr_matrix2[i,1:(afr-1)] <- 0
     afr_matrix2[i,afr] <- 1
-    afr_matrix2[i,(afr+1):aoc] <- 0
   } else{
     afr_matrix2[i,1:aoc] <- rep(0,length(afr_matrix2[i,1:aoc]))
   }
@@ -249,9 +248,9 @@ min(real_data2$afr,na.rm=T)
 #max
 max(real_data2$afr,na.rm=T)
 #32
-
-std_wealth_restricted <- std_absw_matrix2[,min(real_data2$afr,na.rm=T):max(real_data2$afr,na.rm=T)]
-afrs_restricted <- afr_matrix2[,min(real_data2$afr,na.rm=T):max(real_data2$afr,na.rm=T)]
+#subset wealth and afrs to those ages where women have their first child. Adding one, since first column in the matrix is year 0
+std_wealth_restricted <- std_absw_matrix2[,round(min(real_data2$afr,na.rm=T)):round(max(real_data2$afr,na.rm=T))+1]
+afrs_restricted <- afr_matrix2[,round(min(real_data2$afr,na.rm=T)):round(max(real_data2$afr,na.rm=T))+1]
 
 #put all the data together
 #create dataset
@@ -343,6 +342,8 @@ simwealth_add_real
 #get age quantiles
 age_quantiles <- as.numeric(round(quantile(1:ncol(post2_add_real$mu),seq(0,1,0.25))))
 age_quantiles
+age_quantiles[1] <- age_quantiles[1]+1 #adding one year to reach the minimum age at first reproduction in the data
+age_quantiles
 
 #colour palette
 palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
@@ -401,6 +402,8 @@ simwealth_add_real
 
 #get age quantiles
 age_quantiles <- as.numeric(round(quantile(1:ncol(post2_add_real$mu),seq(0,1,0.25))))
+age_quantiles
+age_quantiles[1] <- age_quantiles[1]+1 #adding one year to reach the minimum age at first reproduction in the data
 age_quantiles
 
 #colour palette

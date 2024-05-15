@@ -39,24 +39,31 @@ plot(mu_age~c(1:length(mu_age)))
 #1=yes first birth
 #create a matrix with individuals as rows and ages as columns (A+1 so the first column is birth)
 afrs <- matrix(nrow=N,ncol=A+1)
+#assign first column a zero, because they cannot have their first baby when born
+afrs[,1] <- 0
+afrs
 #randomly assign a positive output of AFR for individuals
-for(j in 1:ncol(afrs)){
+for(j in 2:ncol(afrs)){
   for(i in 1:nrow(afrs)){
-    if(is.na(sum(afrs[i,1:j]))==TRUE & sum(afrs[i,1:j-1]) == 0){
-      afr_prob <- mu_age[j]
-      afrs[i,j] <- rbinom(1,1,afr_prob)
+    if(!is.na(afrs[i,j-1])){
+      if(afrs[i,j-1] == 0){
+        afr_prob <- mu_age[j]
+        afrs[i,j] <- rbinom(1,1,afr_prob)
+      } else{
+        afrs[i,j] <- NA
+      }
     } else{
-      afrs[i,j] <- 0
-    }  
+      afrs[i,j] <- NA
+   }
   }
 }
 #check the data
 head(afrs)
 #check the age-specific frequency of FR
-apply(afrs,2,sum)
-apply(afrs,2,sum)/N
+apply(afrs,2,sum,na.rm = T)
+apply(afrs,2,sum,na.rm = T)/N
 #plot it
-plot(apply(afrs,2,sum)/N,
+plot(apply(afrs,2,sum,na.rm = T)/N,
      ylim=c(0,0.2),
      xlab="Age",
      ylab="Probability of first reproduction",
@@ -65,11 +72,25 @@ lines(mu_age,col=hcl.colors(10,"ag_Sunset")[5]) #mu
 
 ## Fit simulated data ----
 
+#replace NAs with -99
+for(j in 1:ncol(afrs)){
+  for(i in 1:nrow(afrs)){
+    if(is.na(afrs[i,j])){
+      afrs[i,j] <- -99
+    } else{
+      afrs[i,j] <- afrs[i,j]
+    }
+  }
+}
+#check the data
+afrs
+
+
 #put all the data together
 #create dataset
 data1 <- list(N = N, #population size
-              A = 41, #age until which women have their first child in reality
-              baby = afrs[,1:41]) #AFR
+              A = A+1, #age until which women have their first child in reality
+              baby = afrs) #AFR
 
 # compile model
 m1 <- cmdstan_model("Model_code/firstbaby.stan")
@@ -144,15 +165,30 @@ plot_data1 <- data.frame(age = 1:ncol(post1$mu),
                          mu_low = apply(p1, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 
+#change -99 to NAs
+#create a matrix
+plot_afr1 <- afrs
+#change -99 to NAs
+for(j in 1:ncol(plot_afr1)){
+  for(i in 1:nrow(plot_afr1)){
+    if(plot_afr1[i,j]==-99){
+      plot_afr1[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr1
+
 #plot age random effect
 plot(plot_data1$mu_mean~plot_data1$age,
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
-     type="l",
+     lwd=2,
      ylim=c(0,0.25),
      col=hcl.colors(10,"ag_Sunset")[5]
      )
-lines(plot_data1$mu_upp~plot_data1$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
-lines(plot_data1$mu_low~plot_data1$age,lty=2,col=hcl.colors(10,"ag_Sunset")[5])
-points(apply(afrs[,1:ncol(post1$mu)],2,sum)/N~plot_data1$age,pch=16)
+polygon(c(plot_data1$age,rev(plot_data1$age)),c(plot_data1$mu_low,rev(plot_data1$mu_upp)),col=alpha(hcl.colors(10,"ag_Sunset")[5],0.5))
+lines(plot_data1$mu_upp~plot_data1$age,col=hcl.colors(10,"ag_Sunset")[5])
+lines(plot_data1$mu_low~plot_data1$age,col=hcl.colors(10,"ag_Sunset")[5])
+points(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=alpha("black",0.5))
