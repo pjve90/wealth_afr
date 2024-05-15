@@ -1,7 +1,5 @@
 # Model with absolute wealth ----
 
-# Additive model ----
-
 #The code in this script is meant to fit a Bayesian model with absolute wealth and a Gaussian process of age, in order to see the relationship between absolute wealth and the probability of first reproduction of women.
 #First, there is data simulation that follows the expectations from the literature.
 #Second, the simulated data is fitted to the Bayesian model.
@@ -23,15 +21,15 @@ library(rethinking)
 N <- 100
 
 #Age
-#maximum age of 90 years old
-A <- 90
+#maximum age of 73 years old (based on Pimbwe data)
+A <- 73
 
 #Absolute wealth
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
 wealth <- matrix(nrow=N,ncol=A+1)
-#randomly assign an amount of wealth for each individual at age 0
-wealth[,1] <- rnorm(100,15,5)
+#randomly assign an amount of wealth for each individual at age 0 - based on the distribution of household assets in the data
+wealth[,1] <- exp(rnorm(100,5,1))
 #simulate wealth of individuals through time, based on previous absolute wealth
 for(j in 2:ncol(wealth)){
   for(i in 1:nrow(wealth)){
@@ -46,20 +44,25 @@ apply(wealth,2,mean)
 #plot it
 plot(apply(wealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
-#standardise wealth data
-std_wealth <- matrix(standardize(as.vector(wealth)),ncol=ncol(wealth),nrow=nrow(wealth))
+#log-transform and standardise wealth data
+std_wealth <- matrix(standardize(log(as.vector(wealth))),ncol=ncol(wealth),nrow=nrow(wealth))
 #check the data
 std_wealth
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=16),rep(0,62))
-std_beta_wealth<-beta_wealth/sd(as.vector(wealth)) # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
+beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+beta_wealth
+plot(beta_wealth~c(1:length(beta_wealth)))
+# adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
+std_beta_wealth<-beta_wealth/sd(as.vector(wealth))
+std_beta_wealth
+plot(std_beta_wealth~c(1:length(std_beta_wealth)))
 
 #Age at first reproduction (AFR)
 
 #simulate an age-specific parameter for AFR (mu)
-mu_age<-c(rep(0,13),seq(from=0.001,to=0.2,length=6),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,52))
+mu_age<-c(rep(0,12),seq(from=0.001,to=0.2,length=7),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,35))
 mu_age
 #check that they sum to 1
 sum(mu_age)
@@ -83,46 +86,34 @@ for(j in 2:ncol(afrs)){
         std_beta_wealth[j]*std_wealth[i,j] #wealth
         if(afr_prob<0){afr_prob<-0}
       afrs[i,j] <- rbinom(1,1,afr_prob)
-      else{
+      }else{
         afrs[i,j] <- NA
-      }
+        }
       } else{
         afrs[i,j] <- NA
-      }
     }
   }
 }
+
 #check the data
 #see the data
 head(afrs)
 #check the age-specific probability of FR
-apply(afrs,2,sum)
-apply(afrs,2,sum)/N
+apply(afrs,2,sum,na.rm=T)
+apply(afrs,2,sum,na.rm=T)/N
 #plot it
-plot(apply(afrs,2,sum)/N,
-     ylim=c(-0.01,0.2),
+
+palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
+
+plot(apply(afrs,2,sum,na.rm=T)/N,
+     ylim=c(0,0.25),
      xlab="Age",
      ylab="Probability of first reproduction",
+     col=hcl.colors(length(palette),"temps")[palette[2]],
      pch=16) #data
-points(mu_age+std_beta_wealth,col=alpha(hcl.colors(10,"ag_Sunset")[5],0.7),pch=15) #mu+std_beta
-lines(mu_age+std_beta_wealth,col=alpha(hcl.colors(10,"ag_Sunset")[5],0.7)) #mu+std_beta
-
-#check age-specific relationship between wealth and prob. of FR
-#plot empty plot
-plot(c(-0.01,0.25)~c(min(std_wealth),max(std_wealth)),
-     xlab="Age-specific absolute wealth",
-     ylab="Age-specific prob. of FR",
-     type="n"
-     )
-#add the curves
-#more purple are younger and more yellow are older
-curve(mu_age[15]+std_beta_wealth[15]*x,from=min(std_wealth),to=max(std_wealth),add=T,col=hcl.colors(6,"ag_Sunset")[1])
-curve(mu_age[17]+std_beta_wealth[17]*x,from=min(std_wealth),to=max(std_wealth),add=T,col=hcl.colors(6,"ag_Sunset")[2])
-curve(mu_age[19]+std_beta_wealth[19]*x,from=min(std_wealth),to=max(std_wealth),add=T,col=hcl.colors(6,"ag_Sunset")[3])
-curve(mu_age[21]+std_beta_wealth[21]*x,from=min(std_wealth),to=max(std_wealth),add=T,col=hcl.colors(6,"ag_Sunset")[4])
-curve(mu_age[23]+std_beta_wealth[23]*x,from=min(std_wealth),to=max(std_wealth),add=T,col=hcl.colors(6,"ag_Sunset")[5])
-curve(mu_age[25]+std_beta_wealth[25]*x,from=min(std_wealth),to=max(std_wealth),add=T,col=hcl.colors(6,"ag_Sunset")[6])
-#pattern is that at younger ages, poor individuals have a higher probability of FR whereas at older ages the rich ones have a higher probability of FR
+lines(apply(afrs,2,sum,na.rm = T)/N~c(1:ncol(afrs)),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
+points(mu_age+std_beta_wealth,col=hcl.colors(length(palette),"temps")[palette[1]],pch=15) #mu+std_beta
+lines(mu_age+std_beta_wealth,col=hcl.colors(length(palette),"temps")[palette[1]],lwd=2) #mu+std_beta
 
 # Introduce missing data in the wealth data frame
 for (j in 1:ncol(std_wealth)){
@@ -150,12 +141,12 @@ afrs_restricted<-afrs[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,su
 
 #put all the data together
 #create data
-data2 <- list(N = nrow(afrs_restricted), #population size
-               A = ncol(afrs_restricted), #age
-               wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
-               N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
-               id_wealth_miss = which(as.vector(t(std_wealth_restricted))== -99), # provide the indexes for the missing data
-               baby = afrs_restricted #AFR
+data2 <- list(N = nrow(afrs), #population size
+               A = ncol(afrs), #age
+               wealth = as.vector(t(std_wealth)), #absolute wealth
+               N_miss = sum((std_wealth)== -99), # number of missing values that need imputation
+               id_wealth_miss = which(as.vector(t(std_wealth))== -99), # provide the indexes for the missing data
+               baby = afrs #AFR
                ) 
 
 #check data 
@@ -185,17 +176,17 @@ post2_add <- extract.samples(rds2_add)
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds2_add,pars="alpha")
+rstan::traceplot(rds2_add,pars="alpha")
 #mu
 #traceplot(rds2_add,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
 #traceplot(rds2_add,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-traceplot(rds2_add,pars="mu_tau")
+rstan::traceplot(rds2_add,pars="mu_tau")
 #mu_kappa
-traceplot(rds2_add,pars="mu_kappa")
+rstan::traceplot(rds2_add,pars="mu_kappa")
 #mu_delta
-traceplot(rds2_add,pars="mu_delta")
+rstan::traceplot(rds2_add,pars="mu_delta")
 #beta_wealth
 #traceplot(rds2_add,pars="beta_wealth") #only run if needed, because they are 91 plots
 
@@ -224,7 +215,7 @@ plot((tabs2_add_beta[,1]))
 ### Age ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(std_wealth_restricted[which(std_wealth_restricted > -99)]),1),to=round(max(std_wealth_restricted[which(std_wealth_restricted > -99)]),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length of wealth data
+simwealth_add <- seq(from=round(min(std_wealth[which(std_wealth > -99)]),1),to=round(max(std_wealth[which(std_wealth > -99)]),1),length.out=nrow(std_wealth)) #specify according to range and length of wealth data
 simwealth_add
 
 #get age quantiles
@@ -284,14 +275,14 @@ for(k in 1:length(age_quantiles)){
 ### Wealth ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(std_wealth_restricted[which(std_wealth_restricted > -99)]),1),to=round(max(std_wealth_restricted[which(std_wealth_restricted > -99)]),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length of wealth data
+simwealth_add <- seq(from=round(min(std_wealth[which(std_wealth > -99)]),1),to=round(max(std_wealth[which(std_wealth > -99)]),1),length.out=nrow(std_wealth)) #specify according to range and length of wealth data
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
+palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
 par(mfrow=c(1,1))
@@ -339,8 +330,8 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(plot_data2_add_b$mean~plot_data2_add_b$age,col=alpha(palette_b[k],0.75),pch=15)
-  lines(plot_data2_add_b$mean~plot_data2_add_b$age,col=palette_b[k])
+  points(plot_data2_add_b$mean~plot_data2_add_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
+  lines(plot_data2_add_b$mean~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
 }
 
 # Multiplicative model ----

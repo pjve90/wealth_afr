@@ -69,9 +69,11 @@ plot(apply(afrs,2,sum,na.rm = T)/N,
      ylim=c(0,0.35),
      xlab="Age",
      ylab="Probability of first reproduction",
-     col=hcl.colors(2,"temps")[2],
+     col=hcl.colors(4,"temps")[4],
      pch=16) #data
-lines(mu_age,col=hcl.colors(2,"temps")[1],lwd=2) #mu
+lines(apply(afrs,2,sum,na.rm = T)/N~c(1:ncol(afrs)),col=hcl.colors(4,"temps")[4],lwd=2)
+points(mu_age,col=hcl.colors(4,"temps")[1],pch=15) #mu
+lines(mu_age,col=hcl.colors(4,"temps")[1],lwd=2) #mu
 
 ## Fit simulated data ----
 
@@ -189,10 +191,10 @@ plot(plot_data1$mu_mean~plot_data1$age,
      pch=16,
      lwd=2,
      ylim=c(0,0.35),
-     col=hcl.colors(2,"temps")[1]
+     col=hcl.colors(4,"temps")[1]
      )
-lines(plot_data1$mu_mean~plot_data1$age,col=hcl.colors(2,"temps")[1],lwd=2)
-polygon(c(plot_data1$age,rev(plot_data1$age)),c(plot_data1$mu_low,rev(plot_data1$mu_upp)),col=alpha(hcl.colors(2,"temps")[1],0.5),border=NA)
-points(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(2,"temps")[2])
-lines(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(2,"temps")[2],lwd=2)
+lines(plot_data1$mu_mean~plot_data1$age,col=hcl.colors(4,"temps")[1],lwd=2)
+polygon(c(plot_data1$age,rev(plot_data1$age)),c(plot_data1$mu_low,rev(plot_data1$mu_upp)),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
+points(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4])
+lines(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4],lwd=2)
 

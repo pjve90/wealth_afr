@@ -87,17 +87,17 @@ post1_real <- extract.samples(rds1_real)
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds1_real,pars="alpha")
+rstan::traceplot(rds1_real,pars="alpha")
 #mu
 #traceplot(rds1_real,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
 #traceplot(rds1_real,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-traceplot(rds1_real,pars="mu_tau")
+rstan::traceplot(rds1_real,pars="mu_tau")
 #mu_kappa
-traceplot(rds1_real,pars="mu_kappa")
+rstan::traceplot(rds1_real,pars="mu_kappa")
 #mu_delta
-traceplot(rds1_real,pars="mu_delta")
+rstan::traceplot(rds1_real,pars="mu_delta")
 
 #summary of the model
 #create summary table
@@ -164,10 +164,10 @@ plot(plot_data1_real$mu_mean~plot_data1_real$age,
      pch=16,
      lwd=2,
      ylim=c(0,0.35),
-     col=hcl.colors(4,"temps")[3]
+     col=hcl.colors(4,"temps")[2]
 )
-lines(plot_data1_real$mu_mean~plot_data1_real$age,col=hcl.colors(4,"temps")[3],lwd=2)
-polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(plot_data1_real$mu_low,rev(plot_data1_real$mu_upp)),col=alpha(hcl.colors(4,"temps")[3],0.5),border=NA)
-points(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[4])
-lines(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[4],lwd=2)
+lines(plot_data1_real$mu_mean~plot_data1_real$age,col=hcl.colors(4,"temps")[2],lwd=2)
+polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(plot_data1_real$mu_low,rev(plot_data1_real$mu_upp)),col=alpha(hcl.colors(4,"temps")[2],0.5),border=NA)
+points(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
+lines(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3],lwd=2)
 
