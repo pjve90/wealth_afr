@@ -248,6 +248,7 @@ min(real_data2$afr,na.rm=T)
 #max
 max(real_data2$afr,na.rm=T)
 #32
+
 #subset wealth and afrs to those ages where women have their first child. Adding one, since first column in the matrix is year 0
 std_wealth_restricted <- std_absw_matrix2[,round(min(real_data2$afr,na.rm=T)):round(max(real_data2$afr,na.rm=T))+1]
 afrs_restricted <- afr_matrix2[,round(min(real_data2$afr,na.rm=T)):round(max(real_data2$afr,na.rm=T))+1]
@@ -346,15 +347,20 @@ age_quantiles[1] <- age_quantiles[1]+1 #adding one year to reach the minimum age
 age_quantiles
 
 #colour palette
-palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
+palette<-hcl.colors(length(age_quantiles),"zissou 1") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-par(mfrow=c(1,1))
-plot(c(0,0.6)~c(min(simwealth_add_real),max(simwealth_add_real)),
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,7))
+plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
      ylab="Probability of first reproduction",
      xlab="Standardised absolute wealth",
-     type="n")
-
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.lab=1.5)
+axis(1,cex.axis=1.2)
+axis(2,cex.axis=1.2)
+legend(3.8,0.75,c(age_quantiles+12),lty=1,col=palette,title="Age")
 #add lines
 for(k in 1:length(age_quantiles)){
   #create matrix to store the data
@@ -407,17 +413,25 @@ age_quantiles[1] <- age_quantiles[1]+1 #adding one year to reach the minimum age
 age_quantiles
 
 #colour palette
-palette<-hcl.colors(length(age_quantiles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
+palette<-hcl.colors(length(age_quantiles),"zissou 1") #darker lines = younger ages, lighter lines = older ages
 
 #define layout of plots
 layout( matrix(c(1,1,2,2,3,3,0,4,4,5,5,0), nrow=2, byrow=TRUE) )
 
-#### Age quantile 1 ----
+#### Age 13 ----
 
 plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
      ylab="Probability of first reproduction",
      xlab="Standardised absolute wealth",
-     type="n")
+     main="Age 13",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.3)
+axis(1,cex.axis=1.5)
+axis(2,cex.axis=1.5)
+
 #create matrix to store the data
 p2_add_real <- matrix(nrow=nrow(post2_add_real$mu),ncol=length(simwealth_add_real))
 p2_add_real
@@ -425,7 +439,7 @@ p2_add_real
 for(j in 1:length(simwealth_add_real)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
-                                    post2_add_real$mu[i,age_quantiles[1]] + #age
+                                    post2_add_real$mu[i,age_quantiles[1]+1] + #age
                                     post2_add_real$beta_wealth[i,age_quantiles[1]]*simwealth_add_real[j]) #wealth
   }
 }
@@ -455,14 +469,22 @@ plot_afr2
 lines(plot_data2_add_real$mean~plot_data2_add_real$wealth,col=palette[1])
 lines(plot_data2_add_real$upp~plot_data2_add_real$wealth,col=palette[1],lty=2)
 lines(plot_data2_add_real$low~plot_data2_add_real$wealth,col=palette[1],lty=2)
-points(plot_afr2[,age_quantiles[1]]~plot_data2_add_real$wealth,col=alpha(palette[1],0.5),pch=16)
+points(plot_afr2[,age_quantiles[1]]~plot_data2_add_real$wealth,col=alpha(palette[1],0.25),pch=16)
 
-#### Age quantile 2 ----
+#### Age 18 ----
 
 plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
      ylab="Probability of first reproduction",
      xlab="Standardised absolute wealth",
-     type="n")
+     main="Age 18",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.3)
+axis(1,cex.axis=1.5)
+axis(2,cex.axis=1.5)
+
 #create matrix to store the data
 p2_add_real <- matrix(nrow=nrow(post2_add_real$mu),ncol=length(simwealth_add_real))
 p2_add_real
@@ -500,14 +522,22 @@ plot_afr2
 lines(plot_data2_add_real$mean~plot_data2_add_real$wealth,col=palette[2])
 lines(plot_data2_add_real$upp~plot_data2_add_real$wealth,col=palette[2],lty=2)
 lines(plot_data2_add_real$low~plot_data2_add_real$wealth,col=palette[2],lty=2)
-points(plot_afr2[,age_quantiles[2]]~plot_data2_add_real$wealth,col=alpha(palette[2],0.5),pch=16)
+points(plot_afr2[,age_quantiles[2]]~plot_data2_add_real$wealth,col=alpha(palette[2],0.25),pch=16)
 
-#### Age quantile 3 ----
+#### Age 23 ----
 
 plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
      ylab="Probability of first reproduction",
      xlab="Standardised absolute wealth",
-     type="n")
+     main="Age 23",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.3)
+axis(1,cex.axis=1.5)
+axis(2,cex.axis=1.5)
+
 #create matrix to store the data
 p2_add_real <- matrix(nrow=nrow(post2_add_real$mu),ncol=length(simwealth_add_real))
 p2_add_real
@@ -545,14 +575,22 @@ plot_afr2
 lines(plot_data2_add_real$mean~plot_data2_add_real$wealth,col=palette[3])
 lines(plot_data2_add_real$upp~plot_data2_add_real$wealth,col=palette[3],lty=2)
 lines(plot_data2_add_real$low~plot_data2_add_real$wealth,col=palette[3],lty=2)
-points(plot_afr2[,age_quantiles[3]]~plot_data2_add_real$wealth,col=alpha(palette[3],0.5),pch=16)
+points(plot_afr2[,age_quantiles[3]]~plot_data2_add_real$wealth,col=alpha(palette[3],0.25),pch=16)
 
-#### Age quantile 4 ----
+#### Age 27 ----
 
 plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
      ylab="Probability of first reproduction",
      xlab="Standardised absolute wealth",
-     type="n")
+     main="Age 27",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.3)
+axis(1,cex.axis=1.5)
+axis(2,cex.axis=1.5)
+
 #create matrix to store the data
 p2_add_real <- matrix(nrow=nrow(post2_add_real$mu),ncol=length(simwealth_add_real))
 p2_add_real
@@ -590,14 +628,22 @@ plot_afr2
 lines(plot_data2_add_real$mean~plot_data2_add_real$wealth,col=palette[4])
 lines(plot_data2_add_real$upp~plot_data2_add_real$wealth,col=palette[4],lty=2)
 lines(plot_data2_add_real$low~plot_data2_add_real$wealth,col=palette[4],lty=2)
-points(plot_afr2[,age_quantiles[4]]~plot_data2_add_real$wealth,col=alpha(palette[4],0.5),pch=16)
+points(plot_afr2[,age_quantiles[4]]~plot_data2_add_real$wealth,col=alpha(palette[4],0.25),pch=16)
 
-#### Age quantile 5 ----
+#### Age 32 ----
 
 plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
      ylab="Probability of first reproduction",
      xlab="Standardised absolute wealth",
-     type="n")
+     main="Age 32",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.3)
+axis(1,cex.axis=1.5)
+axis(2,cex.axis=1.5)
+
 #create matrix to store the data
 p2_add_real <- matrix(nrow=nrow(post2_add_real$mu),ncol=length(simwealth_add_real))
 p2_add_real
@@ -635,7 +681,7 @@ plot_afr2
 lines(plot_data2_add_real$mean~plot_data2_add_real$wealth,col=palette[5])
 lines(plot_data2_add_real$upp~plot_data2_add_real$wealth,col=palette[5],lty=2)
 lines(plot_data2_add_real$low~plot_data2_add_real$wealth,col=palette[5],lty=2)
-points(plot_afr2[,age_quantiles[5]]~plot_data2_add_real$wealth,col=alpha(palette[5],0.5),pch=16)
+points(plot_afr2[,age_quantiles[5]]~plot_data2_add_real$wealth,col=alpha(palette[5],0.25),pch=16)
 
 ### Wealth ----
 
@@ -650,17 +696,20 @@ deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
+palette_b<-hcl.colors(length(deciles),"berlin") #darker lines = younger ages, lighter lines = older ages
 
 #plot empty plot
-par(mfrow=c(1,1))
-plot(c(0,0.6)~c(0,ncol(post2_add_real$mu)),
-     ylab="Prob. FR",
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,7))
+plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
+     ylab="Probability of first reproduction",
      xlab="Age",
-#     xaxt="n",
-     main="Model with absolute wealth",
-     type="n")
-#axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.lab=1.5)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
+axis(2,cex.axis=1.2)
+legend(21,0.75,c("Poor","Middle","Rich"),lty=1,col=palette_b,title="Wealth")
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -713,22 +762,25 @@ deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-hcl.colors(length(deciles),"ag_sunset") #darker lines = younger ages, lighter lines = older ages
+palette_b<-hcl.colors(length(deciles),"berlin") #darker lines = younger ages, lighter lines = older ages
 
 #define layout of plots
 par(mfrow=c(1,3))
 
-#### Quantile 0% ----
+#### Minimum wealth ----
 
 #plot empty plot
-par(mfrow=c(1,1))
-plot(c(0,0.6)~c(0,ncol(post2_add_real$mu)),
+plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Probability of first reproduction",
      xlab="Age",
-     #     xaxt="n",
-     main="Model with absolute wealth",
-     type="n")
-#axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
+     main="Poor",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.5)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
+axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p2_add_real_0_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -771,17 +823,20 @@ lines(plot_data2_add_real_0_b$upp~plot_data2_add_real_0_b$age,col=palette_b[1],l
 points(plot_data2_add_real_0_b$low~plot_data2_add_real_0_b$age,col=alpha(palette_b[1],0.75),pch=4)
 lines(plot_data2_add_real_0_b$low~plot_data2_add_real_0_b$age,col=palette_b[1],lty=2)
 
-#### Quantile 50% ----
+#### Median wealth ----
 
 #plot empty plot
-par(mfrow=c(1,1))
-plot(c(0,0.6)~c(0,ncol(post2_add_real$mu)),
+plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Probability of first reproduction",
      xlab="Age",
-     #     xaxt="n",
-     main="Model with absolute wealth",
-     type="n")
-#axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
+     main="Medium",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.5)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
+axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p2_add_real_50_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -824,17 +879,20 @@ lines(plot_data2_add_real_50_b$upp~plot_data2_add_real_50_b$age,col=palette_b[2]
 points(plot_data2_add_real_50_b$low~plot_data2_add_real_50_b$age,col=alpha(palette_b[2],0.75),pch=4)
 lines(plot_data2_add_real_50_b$low~plot_data2_add_real_50_b$age,col=palette_b[2],lty=2)
 
-#### Quantile 100% ----
+#### Maximum wealth ----
 
 #plot empty plot
-par(mfrow=c(1,1))
-plot(c(0,0.6)~c(0,ncol(post2_add_real$mu)),
+plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Probability of first reproduction",
      xlab="Age",
-     #     xaxt="n",
-     main="Model with absolute wealth",
-     type="n")
-#axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
+     main="Rich",
+     xaxt="n",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.5)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=round(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
+axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p2_add_real_100_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -874,5 +932,6 @@ points(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=alpha(pa
 lines(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=palette_b[3])
 points(plot_data2_add_real_100_b$upp~plot_data2_add_real_100_b$age,col=alpha(palette_b[3],0.75),pch=4)
 lines(plot_data2_add_real_100_b$upp~plot_data2_add_real_100_b$age,col=palette_b[3],lty=2)
-points(plot_data2_add_real_100_b$low~plot_data2_add_real_100_b$age,col=alpha(palette_b[2],0.75),pch=4)
+points(plot_data2_add_real_100_b$low~plot_data2_add_real_100_b$age,col=alpha(palette_b[3],0.75),pch=4)
 lines(plot_data2_add_real_100_b$low~plot_data2_add_real_100_b$age,col=palette_b[3],lty=2)
+
