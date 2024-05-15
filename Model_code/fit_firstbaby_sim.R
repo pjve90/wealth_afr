@@ -11,6 +11,8 @@
 library(cmdstanr)
 #install.packages("rethinking")
 library(rethinking)
+#install.packages("scales")
+library(scales)
 
 ## Data simulation ----
 
@@ -114,17 +116,17 @@ post1 <- extract.samples(rds1)
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds1,pars="alpha")
+rstan::traceplot(rds1,pars="alpha")
 #mu
 #traceplot(rds1,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
 #traceplot(rds1,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-traceplot(rds1,pars="mu_tau")
+rstan::traceplot(rds1,pars="mu_tau")
 #mu_kappa
-traceplot(rds1,pars="mu_kappa")
+rstan::traceplot(rds1,pars="mu_kappa")
 #mu_delta
-traceplot(rds1,pars="mu_delta")
+rstan::traceplot(rds1,pars="mu_delta")
 
 #summary of the model
 #create summary table
