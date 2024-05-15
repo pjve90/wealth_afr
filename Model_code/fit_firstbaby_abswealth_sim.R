@@ -139,6 +139,19 @@ afrs_restricted<-afrs[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,su
 
 ## Fit simulated data, using the combined data imputation approach ----
 
+#replace NAs with -99
+for(j in 1:ncol(afrs)){
+  for(i in 1:nrow(afrs)){
+    if(is.na(afrs[i,j])){
+      afrs[i,j] <- -99
+    } else{
+      afrs[i,j] <- afrs[i,j]
+    }
+  }
+}
+#check the data
+afrs
+
 #put all the data together
 #create data
 data2 <- list(N = nrow(afrs), #population size
