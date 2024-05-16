@@ -39,7 +39,7 @@ afr_matrix1
 #check the age-specific probability of AFR, proportion relative to all women whose AFR is known
 apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))
 #plot it
-plot(apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
+plot(cumprod(1-apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T)))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix1)){
@@ -113,12 +113,12 @@ tab1_mu_real <- precis(rds1_real,depth=3,pars="mu")
 #check table
 tab1_mu_real
 plot(tab1_mu_real)
-plot(inv_logit(tab1_mu_real[,1]))
+plot(cumprod(1-inv_logit(tab1_mu_real[,1])),ylim=c(0,))
 
-# To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
-tab1_mu_real[,1]<-round(inv_logit(tab1_mu_real[,1]),3)
-tab1_mu_real[,3]<-round(inv_logit(tab1_mu_real[,3]),3)
-tab1_mu_real[,4]<-round(inv_logit(tab1_mu_real[,4]),3)
+# # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
+# tab1_mu_real[,1]<-round(inv_logit(tab1_mu_real[,1]),3)
+# tab1_mu_real[,3]<-round(inv_logit(tab1_mu_real[,3]),3)
+# tab1_mu_real[,4]<-round(inv_logit(tab1_mu_real[,4]),3)
 
 ## Plot the fit of the real data ----
 
@@ -157,17 +157,17 @@ for(j in 1:ncol(plot_afr1_real)){
 plot_afr1_real
 
 #plot age random effect
-plot(plot_data1_real$mu_mean~plot_data1_real$age,
+plot(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
      pch=16,
      lwd=2,
-     ylim=c(0,0.35),
+     ylim=c(0,1),
      col=hcl.colors(4,"temps")[2]
 )
-lines(plot_data1_real$mu_mean~plot_data1_real$age,col=hcl.colors(4,"temps")[2],lwd=2)
-polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(plot_data1_real$mu_low,rev(plot_data1_real$mu_upp)),col=alpha(hcl.colors(4,"temps")[2],0.5),border=NA)
-points(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
-lines(apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3],lwd=2)
+lines(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,col=hcl.colors(4,"temps")[2],lwd=2)
+polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(cumprod(1-plot_data1_real$mu_low),rev(cumprod(1-plot_data1_real$mu_upp))),col=alpha(hcl.colors(4,"temps")[2],0.5),border=NA)
+points(cumprod(1-apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T)))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
+lines(cumprod(1-apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T)))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3],lwd=2)
 

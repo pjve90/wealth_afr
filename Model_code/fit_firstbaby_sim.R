@@ -34,7 +34,7 @@ mu_age
 #check that they sum to 1
 sum(mu_age)
 #plot it!
-plot(mu_age~c(1:length(mu_age)))
+plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
 
 #simulate binary ouput of AFR for each age
 #0=no first birth
@@ -65,15 +65,15 @@ head(afrs)
 apply(afrs,2,sum,na.rm = T)
 apply(afrs,2,sum,na.rm = T)/N
 #plot it
-plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/N)[1:40],
+plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/N),
      ylim=c(0,1),
      xlab="Age",
      ylab="Probability of first reproduction",
      col=hcl.colors(4,"temps")[4],
      pch=16) #data
-lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/N)[1:40],col=hcl.colors(4,"temps")[4],lwd=2)
-points(mu_age,col=hcl.colors(4,"temps")[1],pch=15) #mu
-lines(mu_age,col=hcl.colors(4,"temps")[1],lwd=2) #mu
+lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/N),col=hcl.colors(4,"temps")[4],lwd=2)
+points(cumprod(1-mu_age),col=hcl.colors(4,"temps")[1],pch=15) #mu
+lines(cumprod(1-mu_age),col=hcl.colors(4,"temps")[1],lwd=2) #mu
 
 ## Fit simulated data ----
 
@@ -143,7 +143,8 @@ tab1
 tab1_mu <- precis(rds1,depth=3,pars="mu")
 #check table
 tab1_mu
-plot(inv_logit(tab1_mu[,1]))
+plot(tab1_mu)
+plot(cumprod(1-inv_logit(tab1_mu[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
