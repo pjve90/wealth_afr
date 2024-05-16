@@ -65,13 +65,13 @@ head(afrs)
 apply(afrs,2,sum,na.rm = T)
 apply(afrs,2,sum,na.rm = T)/N
 #plot it
-plot(apply(afrs,2,sum,na.rm = T)/N,
-     ylim=c(0,0.35),
+plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/N)[1:40],
+     ylim=c(0,1),
      xlab="Age",
      ylab="Probability of first reproduction",
      col=hcl.colors(4,"temps")[4],
      pch=16) #data
-lines(apply(afrs,2,sum,na.rm = T)/N~c(1:ncol(afrs)),col=hcl.colors(4,"temps")[4],lwd=2)
+lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/N)[1:40],col=hcl.colors(4,"temps")[4],lwd=2)
 points(mu_age,col=hcl.colors(4,"temps")[1],pch=15) #mu
 lines(mu_age,col=hcl.colors(4,"temps")[1],lwd=2) #mu
 
@@ -184,17 +184,16 @@ for(j in 1:ncol(plot_afr1)){
 plot_afr1
 
 #plot age random effect
-plot(plot_data1$mu_mean~plot_data1$age,
+plot(cumprod(1-plot_data1$mu_mean)~plot_data1$age,
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Model with Gaussian process of age",
      pch=16,
      lwd=2,
-     ylim=c(0,0.35),
+     ylim=c(0,1),
      col=hcl.colors(4,"temps")[1]
      )
-lines(plot_data1$mu_mean~plot_data1$age,col=hcl.colors(4,"temps")[1],lwd=2)
-polygon(c(plot_data1$age,rev(plot_data1$age)),c(plot_data1$mu_low,rev(plot_data1$mu_upp)),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
-points(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4])
-lines(apply(plot_afr1,2,sum,na.rm = T)/N~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4],lwd=2)
-
+lines(cumprod(1-plot_data1$mu_mean)~plot_data1$age,col=hcl.colors(4,"temps")[1],lwd=2)
+polygon(c(plot_data1$age,rev(plot_data1$age)),c(cumprod(1-plot_data1$mu_low),rev(cumprod(1-plot_data1$mu_upp))),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
+points(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/N)~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4])
+lines(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/N)~plot_data1$age,col=hcl.colors(4,"temps")[4],lwd=2)
