@@ -60,12 +60,12 @@ transformed parameters {
 
 model {
     
-    alpha ~ normal(0,0.5);
+    alpha ~ normal(0,1);
     
-    mu_raw ~ normal(0, 0.5);
+    mu_raw ~ normal(0, 1);
     mu_kappa ~ beta(12,2);
-    mu_tau ~ exponential(0.5);
-    mu_delta ~ exponential(0.5);
+    mu_tau ~ exponential(1);
+    mu_delta ~ exponential(1);
 
 
   for (n in 1:N) {
