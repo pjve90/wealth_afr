@@ -29,10 +29,9 @@ A <- 73
 #Age at first reproduction (AFR)
 
 #simulate an age-specific parameter for AFR (mu)
-mu_age<-c(rep(0,12),seq(from=0.001,to=0.2,length=7),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,35))
+mu_age<-c(rep(0,12),seq(from=0.001,to=0.2,length=7),seq(from=0.13,to=0.01,length=5),seq(from=0.01, to=0.001,length=10),rep(0,40))
+length(mu_age)
 mu_age
-#check that they sum to 1
-sum(mu_age)
 #plot it!
 plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
 

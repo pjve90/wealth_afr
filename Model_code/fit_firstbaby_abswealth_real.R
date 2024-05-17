@@ -267,22 +267,24 @@ tab2_add_real
 tab2_mu_add_real <- precis(rds2_add_real,depth=3,pars="mu")
 #check table
 tab2_mu_add_real
-plot(inv_logit(tab2_mu_add_real[,1]))
+plot(tab2_mu_add_real)
+plot(cumprod(1-tab2_mu_add_real[,1]),ylim=c(0,1))
 #create summary table for beta
 tab2_beta_add_real <- precis(rds2_add_real,depth=3,pars="beta_wealth")
 #check table
 tab2_beta_add_real
-plot((tab2_beta_add_real[,1]))
+plot(tab2_beta_add_real)
+plot(cumprod(1-tab2_beta_add_real[,1]),ylim=c(0,1))
 
-# To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
-#mu
-tab2_mu_add_real[,1]<-round(inv_logit(tab2_mu_add_real[,1]),3)
-tab2_mu_add_real[,3]<-round(inv_logit(tab2_mu_add_real[,3]),3)
-tab2_mu_add_real[,4]<-round(inv_logit(tab2_mu_add_real[,4]),3)
-#beta_wealth
-tab2_beta_add_real[,1]<-round(inv_logit(tab2_beta_add_real[,1]),3)
-tab2_beta_add_real[,3]<-round(inv_logit(tab2_beta_add_real[,3]),3)
-tab2_beta_add_real[,4]<-round(inv_logit(tab2_beta_add_real[,4]),3)
+# # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
+# #mu
+# tab2_mu_add_real[,1]<-round(inv_logit(tab2_mu_add_real[,1]),3)
+# tab2_mu_add_real[,3]<-round(inv_logit(tab2_mu_add_real[,3]),3)
+# tab2_mu_add_real[,4]<-round(inv_logit(tab2_mu_add_real[,4]),3)
+# #beta_wealth
+# tab2_beta_add_real[,1]<-round(inv_logit(tab2_beta_add_real[,1]),3)
+# tab2_beta_add_real[,3]<-round(inv_logit(tab2_beta_add_real[,3]),3)
+# tab2_beta_add_real[,4]<-round(inv_logit(tab2_beta_add_real[,4]),3)
 
 ## Plot the fit of the real data ----
 
@@ -382,12 +384,10 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Poor",
-     xaxt="n",
      yaxt="n",
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
 axis(2,cex.axis=1.2)
 
 #create matrix to store the data
@@ -425,8 +425,8 @@ for(j in 1:ncol(plot_afr2)){
 plot_afr2
 
 points(plot_data2_add_real_0_b$mean~plot_data2_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),pch=15)
-lines(plot_data2_add_real_0_b$mean~plot_data2_add_real_0_b$age,col=hcl.colors(length(palette),"temps")[palette[1]])
-polygon(c(plot_data2_add_real_0_b$age,rev(plot_data2_add_real_0_b$age)),c(plot_data2_add_real_0_b$low,rev(plot_data2_add_real_0_b$upp)),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
+lines(plot_data2_add_real_0_b$mean~plot_data2_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_0_b$age,rev(plot_data2_add_real_0_b$age)),c(plot_data2_add_real_0_b$low,rev(plot_data2_add_real_0_b$upp)),col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.5),border=NA)
 
 #### Median wealth ----
 
@@ -435,12 +435,10 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Medium",
-     xaxt="n",
      yaxt="n",
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
 axis(2,cex.axis=1.2)
 
 #create matrix to store the data
@@ -478,8 +476,8 @@ for(j in 1:ncol(plot_afr2)){
 plot_afr2
 
 points(plot_data2_add_real_50_b$mean~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),pch=15)
-lines(plot_data2_add_real_50_b$mean~plot_data2_add_real_50_b$age,col=hcl.colors(length(palette),"temps")[palette[2]])
-polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(plot_data2_add_real_50_b$low,rev(plot_data2_add_real_50_b$upp)),col=alpha(hcl.colors(4,"temps")[2],0.5),border=NA)
+lines(plot_data2_add_real_50_b$mean~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(plot_data2_add_real_50_b$low,rev(plot_data2_add_real_50_b$upp)),col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.5),border=NA)
 
 #### Maximum wealth ----
 
