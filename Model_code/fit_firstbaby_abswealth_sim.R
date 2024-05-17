@@ -69,7 +69,7 @@ mu_age
 #check that they sum to 1
 sum(mu_age)
 #plot it!
-plot(mu_age~c(1:length(mu_age)))
+plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
 
 #simulate binary ouput of AFR for each age
 #0=no first birth
@@ -107,15 +107,15 @@ apply(afrs,2,sum,na.rm=T)/N
 #color palette
 palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
 #plot
-plot(apply(afrs,2,sum,na.rm=T)/N,
-     ylim=c(0,0.25),
+plot(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),
+     ylim=c(0,1),
      xlab="Age",
      ylab="Probability of first reproduction",
      col=hcl.colors(length(palette),"temps")[palette[2]],
      pch=16) #data
-lines(apply(afrs,2,sum,na.rm = T)/N~c(1:ncol(afrs)),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
-points(mu_age+std_beta_wealth,col=hcl.colors(length(palette),"temps")[palette[1]],pch=15) #mu+std_beta
-lines(mu_age+std_beta_wealth,col=hcl.colors(length(palette),"temps")[palette[1]],lwd=2) #mu+std_beta
+lines(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
+points(cumprod(1-(mu_age+std_beta_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],pch=15) #mu+std_beta
+lines(cumprod(1-(mu_age+std_beta_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],lwd=2) #mu+std_beta
 
 # Introduce missing data in the wealth data frame
 for (j in 1:ncol(std_wealth)){
@@ -134,7 +134,7 @@ min(which(apply(afrs,2,sum,na.rm=T)>0))
 #14
 #max
 max(which(apply(afrs,2,sum,na.rm=T)>0))
-#29
+#38
 
 std_wealth_restricted<-std_wealth[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
 afrs_restricted<-afrs[,min(which(apply(afrs,2,sum)>0)):max(which(apply(afrs,2,sum)>0))]
@@ -239,13 +239,13 @@ palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter line
 
 #plot empty plot
 par(mfrow=c(1,1))
-plot(c(0,0.5)~c(0,ncol(post2_add$mu)),
+plot(c(0,1)~c(0,ncol(post2_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
      xaxt="n",
      main="Model with absolute wealth",
      type="n")
-axis(1,at=seq(0,ncol(post2_add$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
+#axis(1,at=seq(0,ncol(post2_add$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -283,6 +283,7 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(plot_data2_add_b$mean~plot_data2_add_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
-  lines(plot_data2_add_b$mean~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
+  points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
+  lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
+  polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b1$mu_low),rev(cumprod(1-plot_data2_add_b$mu_upp))),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
 }
