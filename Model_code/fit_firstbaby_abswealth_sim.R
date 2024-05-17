@@ -242,10 +242,8 @@ par(mfrow=c(1,1))
 plot(c(0,1)~c(0,ncol(post2_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
-     xaxt="n",
      main="Model with absolute wealth",
      type="n")
-#axis(1,at=seq(0,ncol(post2_add$mu),by=1),labels=min(which(apply(afrs,2,sum)>0)):(max(which(apply(afrs,2,sum)>0))+1))
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -285,5 +283,5 @@ for(k in 1:(length(deciles))){
   
   points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
   lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
-  polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b1$mu_low),rev(cumprod(1-plot_data2_add_b$mu_upp))),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
+  polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.5),border=NA)
 }
