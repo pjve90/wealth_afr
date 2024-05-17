@@ -18,6 +18,12 @@ functions {
 
     return S * cholesky_decompose(Rho);
   }
+  
+  vector cumulative_product(vector X) { // cumulative product function
+
+    return exp(cumulative_sum(log(X)));
+
+  }
 
 }
 
@@ -29,7 +35,6 @@ data {
   array[N,A] int baby; // probability of AFR
   
 }
-
 
 parameters {
 
@@ -55,12 +60,12 @@ transformed parameters {
 
 model {
     
-    alpha ~ normal(0,1);
+    alpha ~ normal(0,0.5);
     
-    mu_raw ~ normal(0, 1);
+    mu_raw ~ normal(0, 0.5);
     mu_kappa ~ beta(12,2);
-    mu_tau ~ exponential(1);
-    mu_delta ~ exponential(1);
+    mu_tau ~ exponential(0.5);
+    mu_delta ~ exponential(0.5);
 
 
   for (n in 1:N) {
@@ -76,3 +81,21 @@ model {
     }
 
 }
+
+// generated quantities {
+//   vector[A] p_base; 
+//   vector[A] cp_base;
+  
+//   for(a in 1:A){
+//     p_base[a] = inv_logit(
+//       alpha +
+//       mu[a]
+//       );
+//   }
+  
+//   for(a in 1:A){
+//     cp_base[a] = cumulative_product(
+//       p_base[a]
+//       );
+//   }
+// }

@@ -113,7 +113,7 @@ tab1_mu_real <- precis(rds1_real,depth=3,pars="mu")
 #check table
 tab1_mu_real
 plot(tab1_mu_real)
-plot(cumprod(1-inv_logit(tab1_mu_real[,1])),ylim=c(0,))
+plot(cumprod(1-inv_logit(tab1_mu_real[,1])),ylim=c(0,1))
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # tab1_mu_real[,1]<-round(inv_logit(tab1_mu_real[,1]),3)
