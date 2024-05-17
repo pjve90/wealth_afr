@@ -227,6 +227,8 @@ plot((tabs2_add_beta[,1]))
 
 ## Plot the fit of the simulated data ----
 
+#### All wealth classes ----
+
 #simulate wealth values
 simwealth_add <- seq(from=round(min(std_wealth[which(std_wealth > -99)]),1),to=round(max(std_wealth[which(std_wealth > -99)]),1),length.out=nrow(std_wealth)) #specify according to range and length of wealth data
 simwealth_add
@@ -285,3 +287,172 @@ for(k in 1:(length(deciles))){
   lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
   polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.5),border=NA)
 }
+
+#### De-couple plot by min, mean, max ----
+
+#simulate wealth values
+simwealth_add <- seq(from=round(min(post2_add$wealth_full),1),to=round(max(post2_add$wealth_full),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
+simwealth_add
+
+#get the deciles
+deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
+deciles
+
+#colour palette
+palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
+
+#define layout of plots
+par(mfrow=c(1,3))
+
+#### Minimum wealth ----
+
+#plot empty plot
+plot(c(0,1)~c(0,ncol(post2_add$mu)),
+     ylab="Probability of first reproduction",
+     xlab="Age",
+     main="Poor",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.5)
+axis(2,cex.axis=1.2)
+
+#create matrix to store the data
+p2_add_0_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
+p2_add_0_b
+#fill it in with values for age 25
+for(j in 1:ncol(post2_add$mu)){
+  for(i in 1:nrow(post2_add$mu)){
+    p2_add_0_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
+                                        post2_add$mu[i,j] + #age
+                                        post2_add$beta_wealth[i,j]*deciles[1]) #wealth
+  }
+}
+#check data
+p2_add_0_b
+#plot it!
+#prepare model prediction data
+plot_data2_add_0_b <- data.frame(age = 1:ncol(p2_add_0_b),
+                                      mean = apply(p2_add_0_b, 2, mean), 
+                                      upp = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                      low = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),lwd=2)
+polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_data2_add_0_b$low),rev(cumprod(1-cumprod(1-plot_data2_add_0_b$upp)))),col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.5),border=NA)
+
+#### Median wealth ----
+
+#plot empty plot
+plot(c(0,1)~c(0,ncol(post2_add$mu)),
+     ylab="Probability of first reproduction",
+     xlab="Age",
+     main="Medium",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.5)
+axis(2,cex.axis=1.2)
+
+#create matrix to store the data
+p2_add_50_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
+p2_add_50_b
+#fill it in with values for age 25
+for(j in 1:ncol(post2_add$mu)){
+  for(i in 1:nrow(post2_add$mu)){
+    p2_add_50_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
+                                         post2_add$mu[i,j] + #age
+                                         post2_add$beta_wealth[i,j]*deciles[2]) #wealth
+  }
+}
+#check data
+p2_add_50_b
+#plot it!
+#prepare model prediction data
+plot_data2_add_50_b <- data.frame(age = 1:ncol(p2_add_50_b),
+                                       mean = apply(p2_add_50_b, 2, mean), 
+                                       upp = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                       low = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),lwd=2)
+polygon(c(plot_data2_add_50_b$age,rev(plot_data2_add_50_b$age)),c(cumprod(1-plot_data2_add_50_b$low),rev(cumprod(1-plot_data2_add_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.5),border=NA)
+
+#### Maximum wealth ----
+
+#plot empty plot
+plot(c(0,1)~c(0,ncol(post2_add$mu)),
+     ylab="Probability of first reproduction",
+     xlab="Age",
+     main="Rich",
+     yaxt="n",
+     type="n",
+     cex.main=1.5,
+     cex.lab=1.5)
+axis(2,cex.axis=1.2)
+
+#create matrix to store the data
+p2_add_100_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
+p2_add_100_b
+#fill it in with values for age 25
+for(j in 1:ncol(post2_add$mu)){
+  for(i in 1:nrow(post2_add$mu)){
+    p2_add_100_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
+                                          post2_add$mu[i,j] + #age
+                                          post2_add$beta_wealth[i,j]*deciles[3]) #wealth
+  }
+}
+#check data
+p2_add_100_b
+#plot it!
+#prepare model prediction data
+plot_data2_add_100_b <- data.frame(age = 1:ncol(p2_add_100_b),
+                                        mean = apply(p2_add_100_b, 2, mean), 
+                                        upp = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                        low = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+) 
+#prepare afr probabilities from real data
+#create a matrix
+plot_afr2 <- afr_matrix2
+#change -99 to NAs
+for(j in 1:ncol(plot_afr2)){
+  for(i in 1:nrow(plot_afr2)){
+    if(plot_afr2[i,j]==-99){
+      plot_afr2[i,j] <- NA
+    }
+  }
+}
+#check the data
+plot_afr2
+
+points(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),lwd=2)
+polygon(c(plot_data2_add_100_b$age,rev(plot_data2_add_100_b$age)),c(cumprod(1-plot_data2_add_100_b$low),rev(cumprod(1-plot_data2_add_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.5),border=NA)

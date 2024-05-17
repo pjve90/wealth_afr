@@ -486,12 +486,10 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Probability of first reproduction",
      xlab="Age",
      main="Rich",
-     xaxt="n",
      yaxt="n",
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=round(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
 axis(2,cex.axis=1.2)
 
 #create matrix to store the data
@@ -529,5 +527,5 @@ for(j in 1:ncol(plot_afr2)){
 plot_afr2
 
 points(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),pch=15)
-lines(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=hcl.colors(length(palette),"temps")[palette[3]])
-polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(plot_data2_add_real_100_b$low,rev(plot_data2_add_real_100_b$upp)),col=alpha(hcl.colors(4,"temps")[3],0.5),border=NA)
+lines(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(plot_data2_add_real_100_b$low,rev(plot_data2_add_real_100_b$upp)),col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.5),border=NA)
