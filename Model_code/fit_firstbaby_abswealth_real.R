@@ -23,7 +23,7 @@ head(real_data2)
 # Age at first reproduction 
 
 #create a matrix to store the age-specific age of censor
-afr_matrix2 <- matrix(nrow=nrow(real_data2),ncol=max(real_data1$aoc)+1)
+afr_matrix2 <- matrix(nrow=nrow(real_data2),ncol=max(real_data2$aoc)+1)
 #calculate for each age when the woman is censored (1) or not (0)
 for(i in 1:nrow(afr_matrix2)){
   afr <- real_data2$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
@@ -40,7 +40,7 @@ afr_matrix2
 #check the age-specific probability of FR
 apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))
 #plot it
-plot(apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
+plot(cumprod(1-apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T)))~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -59,7 +59,7 @@ afr_matrix2
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
-absw_matrix2 <- matrix(nrow = nrow(real_data2),ncol=max(real_data1$aoc)+1)
+absw_matrix2 <- matrix(nrow = nrow(real_data2),ncol=max(real_data2$aoc)+1)
 #calculate for each age the amount of wealth the household of a woman has, based on each census
 #95
 for(i in 1:nrow(absw_matrix2)){
@@ -353,8 +353,10 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(plot_data2_add_real_b$mean~plot_data2_add_real_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
-  lines(plot_data2_add_real_b$mean~plot_data2_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
+  points(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
+  lines(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
+  polygon(c(plot_data2_add_real_b$age,rev(plot_data2_add_real_b$age)),c(cumprod(1-plot_data2_add_real_b$low),rev(cumprod(1-plot_data2_add_real_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.5),border=NA)
+  
 }
 
 #### De-couple plot by wealth quantile ----
