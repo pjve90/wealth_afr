@@ -19,8 +19,8 @@ library(scales)
 #The script in this section is to create synthetic data that follows the causal relationship between age and the probability of first reproduction.
 
 #Population size
-#100 individuals
-N <- 100
+#500 individuals
+N <- 500
 
 #Age
 #maximum age of 73 years old (based on Pimbwe data)
