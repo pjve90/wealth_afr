@@ -381,7 +381,7 @@ par(mfrow=c(1,3))
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Poor",
      yaxt="n",
@@ -432,7 +432,7 @@ polygon(c(plot_data2_add_real_0_b$age,rev(plot_data2_add_real_0_b$age)),c(plot_d
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Medium",
      yaxt="n",
@@ -483,7 +483,7 @@ polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(plot
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Rich",
      yaxt="n",

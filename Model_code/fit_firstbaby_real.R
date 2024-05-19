@@ -39,7 +39,7 @@ afr_matrix1
 #check the age-specific probability of AFR, proportion relative to all women whose AFR is known
 apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))
 #plot it
-plot(cumprod(1-apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T)))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,1))
+plot(cumprod(1-apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T)))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth,ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix1)){
@@ -158,7 +158,7 @@ plot_afr1_real
 
 #plot age random effect
 plot(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth,
      xlab="Age",
      main="Model with Gaussian process of age",
      pch=16,

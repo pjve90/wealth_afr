@@ -110,7 +110,7 @@ palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
 plot(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),
      ylim=c(0,1),
      xlab="Age",
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      col=hcl.colors(length(palette),"temps")[palette[2]],
      pch=16) #data
 lines(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
@@ -271,7 +271,7 @@ for(k in 1:(length(deciles))){
   ) 
   #prepare afr probabilities from real data
   #create a matrix
-  plot_afr2 <- afrs_restricted
+  plot_afr2 <- afrs
   #change -99 to NAs
   for(j in 1:ncol(plot_afr2)){
     for(i in 1:nrow(plot_afr2)){
@@ -283,12 +283,12 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
+  points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]],pch=15)
   lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
   polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.5),border=NA)
 }
 
-#### De-couple plot by min, mean, max ----
+## De-couple plot by min, mean, max ----
 
 #simulate wealth values
 simwealth_add <- seq(from=round(min(post2_add$wealth_full),1),to=round(max(post2_add$wealth_full),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
@@ -308,7 +308,7 @@ par(mfrow=c(1,3))
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Poor",
      yaxt="n",
@@ -359,7 +359,7 @@ polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_d
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Medium",
      yaxt="n",
@@ -410,7 +410,7 @@ polygon(c(plot_data2_add_50_b$age,rev(plot_data2_add_50_b$age)),c(cumprod(1-plot
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Rich",
      yaxt="n",

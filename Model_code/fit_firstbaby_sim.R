@@ -67,7 +67,7 @@ apply(afrs,2,sum,na.rm = T)/N
 plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/N),
      ylim=c(0,1),
      xlab="Age",
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      col=hcl.colors(4,"temps")[4],
      pch=16) #data
 lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/N),col=hcl.colors(4,"temps")[4],lwd=2)
@@ -185,7 +185,7 @@ plot_afr1
 
 #plot age random effect
 plot(cumprod(1-plot_data1$mu_mean)~plot_data1$age,
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with Gaussian process of age",
      pch=16,
