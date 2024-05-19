@@ -39,7 +39,7 @@ afr_matrix1
 #check the age-specific probability of AFR, proportion relative to all women whose AFR is known
 apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T))
 #plot it
-plot(cumprod(1-apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T)))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth,ylim=c(0,1))
+plot(cumprod(1-apply(afr_matrix1,2,sum,na.rm=T)/sum(apply(afr_matrix1,2,sum,na.rm=T)))~c(1:(max(real_data1$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix1)){
@@ -122,6 +122,9 @@ plot(cumprod(1-inv_logit(tab1_mu_real[,1])),ylim=c(0,1))
 
 ## Plot the fit of the real data ----
 
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+
 #plot the predictions from the model with the data
 #compute probability of FR at each age
 p1_real <- matrix(nrow=nrow(post1_real$mu),ncol=ncol(post1_real$mu))
@@ -158,16 +161,21 @@ plot_afr1_real
 
 #plot age random effect
 plot(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,
-     ylab="Cumulative probability of first birth,
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with Gaussian process of age",
      pch=16,
      lwd=2,
      ylim=c(0,1),
-     col=hcl.colors(4,"temps")[2]
+     col=hcl.colors(4,"temps")[2],
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
+     type="n"
 )
+points(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[2])
 lines(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,col=hcl.colors(4,"temps")[2],lwd=2)
 polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(cumprod(1-plot_data1_real$mu_low),rev(cumprod(1-plot_data1_real$mu_upp))),col=alpha(hcl.colors(4,"temps")[2],0.5),border=NA)
-points(cumprod(1-apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T)))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
-lines(cumprod(1-apply(plot_afr1_real,2,sum,na.rm=T)/sum(apply(plot_afr1_real,2,sum,na.rm=T)))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3],lwd=2)
-
+points(cumprod(1-apply(plot_afr1_real,2,sum,na.rm = T)/N)~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
+lines(cumprod(1-apply(plot_afr1_real,2,sum,na.rm = T)/N)~plot_data1_real$age,col=hcl.colors(4,"temps")[3],lwd=2)
+legend(77.5,1,c("Predicted","Real"),lty=1,col=hcl.colors(4,"temps")[c(2,3)],lwd=2,pch=16)

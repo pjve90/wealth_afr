@@ -147,6 +147,9 @@ plot(cumprod(1-inv_logit(tab1_mu[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+
 #plot the predictions from the model with the simulated data
 #compute probability of FR at each age
 p1 <- matrix(nrow=nrow(post1$mu),ncol=ncol(post1$mu))
@@ -191,9 +194,15 @@ plot(cumprod(1-plot_data1$mu_mean)~plot_data1$age,
      pch=16,
      lwd=2,
      ylim=c(0,1),
-     col=hcl.colors(4,"temps")[1]
+     col=hcl.colors(4,"temps")[1],
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
+     type="n"
      )
+points(cumprod(1-plot_data1$mu_mean)~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[1])
 lines(cumprod(1-plot_data1$mu_mean)~plot_data1$age,col=hcl.colors(4,"temps")[1],lwd=2)
 polygon(c(plot_data1$age,rev(plot_data1$age)),c(cumprod(1-plot_data1$mu_low),rev(cumprod(1-plot_data1$mu_upp))),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
 points(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/N)~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4])
 lines(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/N)~plot_data1$age,col=hcl.colors(4,"temps")[4],lwd=2)
+legend(77.5,1,c("Predicted","Simulated"),lty=1,col=hcl.colors(4,"temps")[c(1,4)],lwd=2,pch=16)

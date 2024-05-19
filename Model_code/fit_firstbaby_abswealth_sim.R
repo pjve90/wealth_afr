@@ -239,13 +239,19 @@ deciles
 #colour palette
 palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
 
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+
 #plot empty plot
-par(mfrow=c(1,1))
-plot(c(0,1)~c(0,ncol(post2_add$mu)),
+plot(c(0,1)~c(0,74),
      ylab="Prob. FR",
      xlab="Age",
      main="Model with absolute wealth",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
      type="n")
+legend(77.5,1,c("Predicted","Real data"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -283,9 +289,9 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]],pch=15)
-  lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
-  polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.5),border=NA)
+  points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]],pch=15)
+  lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]])
+  polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
 }
 
 ## De-couple plot by min, mean, max ----
@@ -302,7 +308,7 @@ deciles
 palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
 
 #define layout of plots
-par(mfrow=c(1,3))
+par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 
 #### Minimum wealth ----
 
@@ -314,8 +320,9 @@ plot(c(0,1)~c(0,ncol(post2_add$mu)),
      yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+     )
 
 #create matrix to store the data
 p2_add_0_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
@@ -351,9 +358,9 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),lwd=2)
-polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_data2_add_0_b$low),rev(cumprod(1-cumprod(1-plot_data2_add_0_b$upp)))),col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
+polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_data2_add_0_b$low),rev(cumprod(1-cumprod(1-plot_data2_add_0_b$upp)))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
 
 #### Median wealth ----
 
@@ -402,9 +409,9 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),lwd=2)
-polygon(c(plot_data2_add_50_b$age,rev(plot_data2_add_50_b$age)),c(cumprod(1-plot_data2_add_50_b$low),rev(cumprod(1-plot_data2_add_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),lwd=2)
+polygon(c(plot_data2_add_50_b$age,rev(plot_data2_add_50_b$age)),c(cumprod(1-plot_data2_add_50_b$low),rev(cumprod(1-plot_data2_add_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.5),border=NA)
 
 #### Maximum wealth ----
 
@@ -453,6 +460,8 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),lwd=2)
-polygon(c(plot_data2_add_100_b$age,rev(plot_data2_add_100_b$age)),c(cumprod(1-plot_data2_add_100_b$low),rev(cumprod(1-plot_data2_add_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
+polygon(c(plot_data2_add_100_b$age,rev(plot_data2_add_100_b$age)),c(cumprod(1-plot_data2_add_100_b$low),rev(cumprod(1-plot_data2_add_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
+
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
