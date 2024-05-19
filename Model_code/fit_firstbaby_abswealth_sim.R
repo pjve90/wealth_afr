@@ -251,7 +251,7 @@ plot(c(0,1)~c(0,74),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(77.5,1,c("Predicted","Real data"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -317,7 +317,6 @@ plot(c(0,1)~c(0,ncol(post2_add$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Poor",
-     yaxt="n",
      type="n",
      cex.main=1.5,
      cex.lab=1.5,
@@ -360,7 +359,7 @@ plot_afr2
 
 points(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
 lines(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
-polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_data2_add_0_b$low),rev(cumprod(1-cumprod(1-plot_data2_add_0_b$upp)))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
+polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_data2_add_0_b$low),rev(cumprod(1-plot_data2_add_0_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
 
 #### Median wealth ----
 
