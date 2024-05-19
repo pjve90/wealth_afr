@@ -243,7 +243,7 @@ palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter line
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-plot(c(0,1)~c(0,74),
+plot(c(0,1)~c(0,ncol(post2_add$mu)),
      ylab="Prob. FR",
      xlab="Age",
      main="Model with absolute wealth",
@@ -251,7 +251,7 @@ plot(c(0,1)~c(0,74),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){

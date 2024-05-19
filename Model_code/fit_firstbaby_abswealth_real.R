@@ -40,7 +40,7 @@ afr_matrix2
 #check the age-specific probability of FR
 apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))
 #plot it
-plot(cumprod(1-apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T)))~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,1))
+plot(cumprod(1-apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T)))~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -240,17 +240,17 @@ post2_add_real <- extract.samples(rds2_add_real)
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds2_add_real,pars="alpha")
+rstan::traceplot(rds2_add_real,pars="alpha")
 #mu
 #traceplot(rds2_add_real,pars="mu") #only run if needed, because they are 92 plots
 #mu_raw
 #traceplot(rds2_add_real,pars="mu_raw") #only run if needed, because they are 92 plots
 #mu_tau
-traceplot(rds2_add_real,pars="mu_tau")
+rstan::traceplot(rds2_add_real,pars="mu_tau")
 #mu_kappa
-traceplot(rds2_add_real,pars="mu_kappa")
+rstan::traceplot(rds2_add_real,pars="mu_kappa")
 #mu_delta
-traceplot(rds2_add_real,pars="mu_delta")
+rstan::traceplot(rds2_add_real,pars="mu_delta")
 #beta_wealth
 #traceplot(rds2_add_real,pars="beta_wealth") #only run if needed, because they are 91 plots
 
@@ -306,18 +306,18 @@ palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
 #select the numbers for color palette
 palette_b<-palette[4:length(deciles)] 
 
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+
 #plot empty plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,7))
 plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     xaxt="n",
-     yaxt="n",
      type="n",
-     cex.lab=1.5)
-axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=(round(min(real_data2$afr,na.rm=T))-1):round(max(real_data2$afr,na.rm=T)),cex.axis=1.2)
-axis(2,cex.axis=1.2)
-legend(21,0.75,c("Poor","Middle","Rich"),lty=1,col=palette_b,title="Wealth")
+     cex.aixs=1.2,
+     cex.lab=1.5,
+     cex.main=1.5)
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -355,9 +355,9 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.75),pch=15)
-  lines(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette[k]])
-  polygon(c(plot_data2_add_real_b$age,rev(plot_data2_add_real_b$age)),c(cumprod(1-plot_data2_add_real_b$low),rev(cumprod(1-plot_data2_add_real_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette[k]],0.5),border=NA)
+  points(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.75),pch=15)
+  lines(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]])
+  polygon(c(plot_data2_add_real_b$age,rev(plot_data2_add_real_b$age)),c(cumprod(1-plot_data2_add_real_b$low),rev(cumprod(1-plot_data2_add_real_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
   
 }
 
@@ -372,10 +372,10 @@ deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-hcl.colors(length(deciles),"berlin") #darker lines = younger ages, lighter lines = older ages
+palette_b<-palette[4:length(deciles)] 
 
 #define layout of plots
-par(mfrow=c(1,3))
+par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 
 #### Minimum wealth ----
 
@@ -384,11 +384,11 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Poor",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+     )
 
 #create matrix to store the data
 p2_add_real_0_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -424,9 +424,9 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(plot_data2_add_real_0_b$mean~plot_data2_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),pch=15)
-lines(plot_data2_add_real_0_b$mean~plot_data2_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.75),lwd=2)
-polygon(c(plot_data2_add_real_0_b$age,rev(plot_data2_add_real_0_b$age)),c(plot_data2_add_real_0_b$low,rev(plot_data2_add_real_0_b$upp)),col=alpha(hcl.colors(length(palette),"temps")[palette[1]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_real_0_b$mean)~plot_data2_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_real_0_b$mean)~plot_data2_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_0_b$age,rev(plot_data2_add_real_0_b$age)),c(cumprod(1-plot_data2_add_real_0_b$low),rev(cumprod(1-plot_data2_add_real_0_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
 
 #### Median wealth ----
 
@@ -435,11 +435,11 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Medium",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+     )
 
 #create matrix to store the data
 p2_add_real_50_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -475,9 +475,9 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(plot_data2_add_real_50_b$mean~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),pch=15)
-lines(plot_data2_add_real_50_b$mean~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.75),lwd=2)
-polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(plot_data2_add_real_50_b$low,rev(plot_data2_add_real_50_b$upp)),col=alpha(hcl.colors(length(palette),"temps")[palette[2]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_real_50_b$mean)~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_real_50_b$mean)~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(cumprod(1-plot_data2_add_real_50_b$low),rev(cumprod(1-plot_data2_add_real_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
 
 #### Maximum wealth ----
 
@@ -486,11 +486,11 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Rich",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+     )
 
 #create matrix to store the data
 p2_add_real_100_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -526,6 +526,8 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),pch=15)
-lines(plot_data2_add_real_100_b$mean~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.75),lwd=2)
-polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(plot_data2_add_real_100_b$low,rev(plot_data2_add_real_100_b$upp)),col=alpha(hcl.colors(length(palette),"temps")[palette[3]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(cumprod(1-plot_data2_add_real_100_b$low),rev(cumprod(1-plot_data2_add_real_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
+
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
