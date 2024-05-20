@@ -304,7 +304,7 @@ deciles
 #numbers for color palette
 palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
 #select the numbers for color palette
-palette_b<-palette[4:length(deciles)] 
+palette_b<-palette[(length(deciles)+1):(length(deciles)+3)]
 
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
