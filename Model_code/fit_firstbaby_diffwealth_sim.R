@@ -147,7 +147,7 @@ apply(afrs,2,sum,na.rm=T)
 apply(afrs,2,sum,na.rm=T)/N
 #plot it
 #color palette
-palette <- c(1,12,7,2,11,6)
+palette <- c(1,3,6,2,4,5)
 #plot
 plot(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),
      ylim=c(0,1),
@@ -283,7 +283,7 @@ deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
+palette_b<-palette[1:length(deciles)]
 
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))

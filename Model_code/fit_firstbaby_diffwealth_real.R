@@ -321,393 +321,47 @@ tab3_add_real_gamma <- precis(rds3_add_real,depth=2,pars="gamma_wealth")
 #check table
 tab3_add_real_gamma
 
-# To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
-#mu
-tab3_add_real_mu[,1]<-round(inv_logit(tab3_add_real_mu[,1]),3)
-tab3_add_real_mu[,3]<-round(inv_logit(tab3_add_real_mu[,3]),3)
-tab3_add_real_mu[,4]<-round(inv_logit(tab3_add_real_mu[,4]),3)
-#gamma_wealth
-tab3_add_real_gamma[,1]<-round(inv_logit(tab3_add_real_gamma[,1]),3)
-tab3_add_real_gamma[,3]<-round(inv_logit(tab3_add_real_gamma[,3]),3)
-tab3_add_real_gamma[,4]<-round(inv_logit(tab3_add_real_gamma[,4]),3)
+# # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
+# #mu
+# tab3_add_real_mu[,1]<-round(inv_logit(tab3_add_real_mu[,1]),3)
+# tab3_add_real_mu[,3]<-round(inv_logit(tab3_add_real_mu[,3]),3)
+# tab3_add_real_mu[,4]<-round(inv_logit(tab3_add_real_mu[,4]),3)
+# #gamma_wealth
+# tab3_add_real_gamma[,1]<-round(inv_logit(tab3_add_real_gamma[,1]),3)
+# tab3_add_real_gamma[,3]<-round(inv_logit(tab3_add_real_gamma[,3]),3)
+# tab3_add_real_gamma[,4]<-round(inv_logit(tab3_add_real_gamma[,4]),3)
 
 ## Plot the fit of the real data ----
-
-### Age ----
-
-#### All ages ----
-
-#simulate wealth values
-simwealth_add_real <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
-simwealth_add_real
-
-#get age quantiles
-age_quantiles <- as.numeric(round(quantile(1:ncol(post3_add_real$mu),seq(0,1,0.25))))
-age_quantiles
-
-#colour palette
-palette<-hcl.colors(length(age_quantiles),"zissou 1") #darker lines = younger ages, lighter lines = older ages
-
-#plot empty plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,7))
-plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
-     ylab="Probability of first reproduction",
-     xlab="Std. short-term variability",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.lab=1.5)
-axis(1,cex.axis=1.2)
-axis(2,cex.axis=1.2)
-legend(4.3,0.75,c(age_quantiles+12),lty=1,col=palette,title="Age")
-
-#add lines
-for(k in 1:length(age_quantiles)){
-  #create matrix to store the data
-  p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
-  p3_add_real
-  #fill it in with values for age 25
-  for(j in 1:length(simwealth_add_real)){
-    for(i in 1:nrow(post3_add_real$mu)){
-      p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                      post3_add_real$mu[i,age_quantiles[k]] + #age
-                                      post3_add_real$gamma_wealth[i,age_quantiles[k]]*simwealth_add_real[j]) #wealth
-    }
-  }
-  #check data
-  p3_add_real
-  #plot it!
-  #prepare model prediction data
-  plot_post3_add_real <- data.frame(wealth = simwealth_add_real,
-                                    mean = apply(p3_add_real, 2, mean), 
-                                    upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                    low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr3 <- afrs_restricted
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr3)){
-    for(i in 1:nrow(plot_afr3)){
-      if(plot_afr3[i,j]==-99){
-        plot_afr3[i,j] <- NA
-      }
-    }
-  }
-  #check the data
-  plot_afr3
-  
-  lines(plot_post3_add_real$mean~plot_post3_add_real$wealth,col=palette[k])
-}
-
-#### De-couple plot by age ----
-
-#simulate wealth values
-simwealth_add_real <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
-simwealth_add_real
-
-#get age quantiles
-age_quantiles <- as.numeric(round(quantile(1:ncol(post3_add_real$mu),seq(0,1,0.25))))
-age_quantiles
-
-#colour palette
-palette<-hcl.colors(length(age_quantiles),"zissou 1") #darker lines = younger ages, lighter lines = older ages
-
-#define layout of plots
-layout( matrix(c(1,1,2,2,3,3,0,4,4,5,5,0), nrow=2, byrow=TRUE) )
-
-#### Age 13 ----
-
-plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
-     ylab="Probability of first reproduction",
-     xlab="Std. short-term variability",
-     main="Age 13",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-axis(1,cex.axis=1.2)
-axis(2,cex.axis=1.2)
-
-#create matrix to store the data
-p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
-p3_add_real
-#fill it in with values for age 25
-for(j in 1:length(simwealth_add_real)){
-  for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                    post3_add_real$mu[i,age_quantiles[1]+1] + #age
-                                    post3_add_real$gamma_wealth[i,age_quantiles[1]]*simwealth_add_real[j]) #wealth
-  }
-}
-#check data
-p3_add_real
-#plot it!
-#prepare model prediction data
-plot_post3_add_real <- data.frame(wealth = simwealth_add_real,
-                                  mean = apply(p3_add_real, 2, mean), 
-                                  upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr3 <- afrs_restricted
-#change -99 to NAs
-for(j in 1:ncol(plot_afr3)){
-  for(i in 1:nrow(plot_afr3)){
-    if(plot_afr3[i,j]==-99){
-      plot_afr3[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr3
-
-lines(plot_post3_add_real$mean~plot_post3_add_real$wealth,col=palette[1])
-lines(plot_post3_add_real$upp~plot_post3_add_real$wealth,col=palette[1],lty=2)
-lines(plot_post3_add_real$low~plot_post3_add_real$wealth,col=palette[1],lty=2)
-points(plot_afr3[,age_quantiles[1]]~plot_post3_add_real$wealth,col=alpha(palette[1],0.25),pch=16)
-
-#### Age 18 ----
-
-plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
-     ylab="Probability of first reproduction",
-     xlab="Std. short-term variability",
-     main="Age 18",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-axis(1,cex.axis=1.2)
-axis(2,cex.axis=1.2)
-
-#create matrix to store the data
-p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
-p3_add_real
-#fill it in with values for age 25
-for(j in 1:length(simwealth_add_real)){
-  for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                    post3_add_real$mu[i,age_quantiles[2]] + #age
-                                    post3_add_real$gamma_wealth[i,age_quantiles[2]]*simwealth_add_real[j]) #wealth
-  }
-}
-#check data
-p3_add_real
-#plot it!
-#prepare model prediction data
-plot_post3_add_real <- data.frame(wealth = simwealth_add_real,
-                                  mean = apply(p3_add_real, 2, mean), 
-                                  upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr3 <- afrs_restricted
-#change -99 to NAs
-for(j in 1:ncol(plot_afr3)){
-  for(i in 1:nrow(plot_afr3)){
-    if(plot_afr3[i,j]==-99){
-      plot_afr3[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr3
-
-lines(plot_post3_add_real$mean~plot_post3_add_real$wealth,col=palette[2])
-lines(plot_post3_add_real$upp~plot_post3_add_real$wealth,col=palette[2],lty=2)
-lines(plot_post3_add_real$low~plot_post3_add_real$wealth,col=palette[2],lty=2)
-points(plot_afr3[,age_quantiles[2]]~plot_post3_add_real$wealth,col=alpha(palette[2],0.25),pch=16)
-
-#### Age 23 ----
-
-plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
-     ylab="Probability of first reproduction",
-     xlab="Std. short-term variability",
-     main="Age 23",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-axis(1,cex.axis=1.2)
-axis(2,cex.axis=1.2)
-
-#create matrix to store the data
-p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
-p3_add_real
-#fill it in with values for age 25
-for(j in 1:length(simwealth_add_real)){
-  for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                    post3_add_real$mu[i,age_quantiles[3]] + #age
-                                    post3_add_real$gamma_wealth[i,age_quantiles[3]]*simwealth_add_real[j]) #wealth
-  }
-}
-#check data
-p3_add_real
-#plot it!
-#prepare model prediction data
-plot_post3_add_real <- data.frame(wealth = simwealth_add_real,
-                                  mean = apply(p3_add_real, 2, mean), 
-                                  upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr3 <- afrs_restricted
-#change -99 to NAs
-for(j in 1:ncol(plot_afr3)){
-  for(i in 1:nrow(plot_afr3)){
-    if(plot_afr3[i,j]==-99){
-      plot_afr3[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr3
-
-lines(plot_post3_add_real$mean~plot_post3_add_real$wealth,col=palette[3])
-lines(plot_post3_add_real$upp~plot_post3_add_real$wealth,col=palette[3],lty=2)
-lines(plot_post3_add_real$low~plot_post3_add_real$wealth,col=palette[3],lty=2)
-points(plot_afr3[,age_quantiles[3]]~plot_post3_add_real$wealth,col=alpha(palette[3],0.25),pch=16)
-
-#### Age 27 ----
-
-plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
-     ylab="Probability of first reproduction",
-     xlab="Std. short-term variability",
-     main="Age 27",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-axis(1,cex.axis=1.2)
-axis(2,cex.axis=1.2)
-
-#create matrix to store the data
-p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
-p3_add_real
-#fill it in with values for age 25
-for(j in 1:length(simwealth_add_real)){
-  for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                    post3_add_real$mu[i,age_quantiles[4]] + #age
-                                    post3_add_real$gamma_wealth[i,age_quantiles[4]]*simwealth_add_real[j]) #wealth
-  }
-}
-#check data
-p3_add_real
-#plot it!
-#prepare model prediction data
-plot_post3_add_real <- data.frame(wealth = simwealth_add_real,
-                                  mean = apply(p3_add_real, 2, mean), 
-                                  upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr3 <- afrs_restricted
-#change -99 to NAs
-for(j in 1:ncol(plot_afr3)){
-  for(i in 1:nrow(plot_afr3)){
-    if(plot_afr3[i,j]==-99){
-      plot_afr3[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr3
-
-lines(plot_post3_add_real$mean~plot_post3_add_real$wealth,col=palette[4])
-lines(plot_post3_add_real$upp~plot_post3_add_real$wealth,col=palette[4],lty=2)
-lines(plot_post3_add_real$low~plot_post3_add_real$wealth,col=palette[4],lty=2)
-points(plot_afr3[,age_quantiles[4]]~plot_post3_add_real$wealth,col=alpha(palette[4],0.25),pch=16)
-
-#### Age 32 ----
-
-plot(c(0,1)~c(min(simwealth_add_real),max(simwealth_add_real)),
-     ylab="Probability of first reproduction",
-     xlab="Std. short-term variability",
-     main="Age 32",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-axis(1,cex.axis=1.2)
-axis(2,cex.axis=1.2)
-
-#create matrix to store the data
-p3_add_real <- matrix(nrow=nrow(post3_add_real$mu),ncol=length(simwealth_add_real))
-p3_add_real
-#fill it in with values for age 25
-for(j in 1:length(simwealth_add_real)){
-  for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                    post3_add_real$mu[i,age_quantiles[5]] + #age
-                                    post3_add_real$gamma_wealth[i,age_quantiles[5]]*simwealth_add_real[j]) #wealth
-  }
-}
-#check data
-p3_add_real
-#plot it!
-#prepare model prediction data
-plot_post3_add_real <- data.frame(wealth = simwealth_add_real,
-                                  mean = apply(p3_add_real, 2, mean), 
-                                  upp = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p3_add_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr3 <- afrs_restricted
-#change -99 to NAs
-for(j in 1:ncol(plot_afr3)){
-  for(i in 1:nrow(plot_afr3)){
-    if(plot_afr3[i,j]==-99){
-      plot_afr3[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr3
-
-lines(plot_post3_add_real$mean~plot_post3_add_real$wealth,col=palette[5])
-lines(plot_post3_add_real$upp~plot_post3_add_real$wealth,col=palette[5],lty=2)
-lines(plot_post3_add_real$low~plot_post3_add_real$wealth,col=palette[5],lty=2)
-points(plot_afr3[,age_quantiles[5]]~plot_post3_add_real$wealth,col=alpha(palette[5],0.25),pch=16)
 
 ### Wealth ----
 
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(post3_add_real$diffwealth),1),to=round(max(post3_add_real$diffwealth),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(std_diffwealth[which(std_diffwealth > -99)]),1),to=round(max(std_diffwealth[which(std_diffwealth > -99)]),1),length.out=nrow(std_diffwealth)) #specify according to range and length of wealth data
 simwealth_add_real
-
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-hcl.colors(length(deciles),"berlin") #darker lines = younger ages, lighter lines = older ages
+palette <- c(1,3,6,2,4,5)
+#select the numbers for color palette
+palette_b<-palette[(length(deciles)+1):(length(deciles)+3)]
+
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,7))
 plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     xaxt="n",
-     yaxt="n",
-     type="n",
-     cex.lab=1.5)
-axis(1,at=seq(0,ncol(post3_add_real$mu),by=1),labels=(round(min(real_data3$afr,na.rm=T))-1):round(max(real_data3$afr,na.rm=T)),cex.axis=1.5)
-axis(2,cex.axis=1.5)
-legend(21,0.75,c("Loss","Stable","Gain"),lty=1,col=palette_b,title="Wealth")
+     main="Model with absolute change (1 year)",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
+     type="n")
+legend(77.5,1,c("No change","Mid. change", "Max. change"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -718,22 +372,22 @@ for(k in 1:(length(deciles))){
   for(j in 1:ncol(post3_add_real$mu)){
     for(i in 1:nrow(post3_add_real$mu)){
       p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                        post3_add_real$mu[i,j] + #age
-                                        post3_add_real$gamma_wealth[i,j]*deciles[k]) #wealth
+                                   post3_add_real$mu[i,j] + #age
+                                   post3_add_real$beta_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
   p3_add_real_b
   #plot it!
   #prepare model prediction data
-  plot_post3_add_real_b <- data.frame(age = 1:ncol(p3_add_real_b),
-                                      mean = apply(p3_add_real_b, 2, mean), 
-                                      upp = apply(p3_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p3_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_data3_add_real_b <- data.frame(age = 1:ncol(p3_add_real_b),
+                                 mean = apply(p3_add_real_b, 2, mean), 
+                                 upp = apply(p3_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p3_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #prepare afr probabilities from real data
   #create a matrix
-  plot_afr3 <- afr_matrix3
+  plot_afr3 <- afrs
   #change -99 to NAs
   for(j in 1:ncol(plot_afr3)){
     for(i in 1:nrow(plot_afr3)){
@@ -745,14 +399,15 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr3
   
-  points(plot_post3_add_real_b$mean~plot_post3_add_real_b$age,col=alpha(palette_b[k],0.75),pch=15)
-  lines(plot_post3_add_real_b$mean~plot_post3_add_real_b$age,col=palette_b[k])
+  points(cumprod(1-plot_data3_add_real_b$mean)~plot_data3_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]],pch=15)
+  lines(cumprod(1-plot_data3_add_real_b$mean)~plot_data3_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]])
+  polygon(c(plot_data3_add_real_b$age,rev(plot_data3_add_real_b$age)),c(cumprod(1-plot_data3_add_real_b$low),rev(cumprod(1-plot_data3_add_real_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
 }
 
-#### De-couple plot by wealth quantile ----
+## De-couple plot by min, mean, max ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(post3_add_real$wealth_full),1),to=round(max(post3_add_real$wealth_full),1),length.out=nrow(std_wealth_restricted)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(post3_add_real$wealth_full),1),to=round(max(post3_add_real$wealth_full),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
 simwealth_add_real
 
 #get the deciles
@@ -760,25 +415,23 @@ deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-hcl.colors(length(deciles),"berlin") #darker lines = younger ages, lighter lines = older ages
+palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
 
 #define layout of plots
-par(mfrow=c(1,3))
+par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 
 #### Minimum wealth ----
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Loss",
-     xaxt="n",
-     yaxt="n",
+     main="No change",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(1,at=seq(0,ncol(post3_add_real$mu),by=1),labels=(round(min(real_data3$afr,na.rm=T))-1):round(max(real_data3$afr,na.rm=T)),cex.axis=1.5)
-axis(2,cex.axis=1.5)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
 p3_add_real_0_b <- matrix(nrow=nrow(post3_add_real$mu),ncol=ncol(post3_add_real$mu))
@@ -787,18 +440,18 @@ p3_add_real_0_b
 for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_0_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                        post3_add_real$mu[i,j] + #age
-                                        post3_add_real$gamma_wealth[i,j]*deciles[1]) #wealth
+                                   post3_add_real$mu[i,j] + #age
+                                   post3_add_real$beta_wealth[i,j]*deciles[1]) #wealth
   }
 }
 #check data
 p3_add_real_0_b
 #plot it!
 #prepare model prediction data
-plot_post3_add_real_0_b <- data.frame(age = 1:ncol(p3_add_real_0_b),
-                                      mean = apply(p3_add_real_0_b, 2, mean), 
-                                      upp = apply(p3_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p3_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data3_add_real_0_b <- data.frame(age = 1:ncol(p3_add_real_0_b),
+                                 mean = apply(p3_add_real_0_b, 2, mean), 
+                                 upp = apply(p3_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p3_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -814,27 +467,22 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(plot_post3_add_real_0_b$mean~plot_post3_add_real_0_b$age,col=alpha(palette_b[1],0.75),pch=15)
-lines(plot_post3_add_real_0_b$mean~plot_post3_add_real_0_b$age,col=palette_b[1])
-points(plot_post3_add_real_0_b$upp~plot_post3_add_real_0_b$age,col=alpha(palette_b[1],0.75),pch=4)
-lines(plot_post3_add_real_0_b$upp~plot_post3_add_real_0_b$age,col=palette_b[1],lty=2)
-points(plot_post3_add_real_0_b$low~plot_post3_add_real_0_b$age,col=alpha(palette_b[1],0.75),pch=4)
-lines(plot_post3_add_real_0_b$low~plot_post3_add_real_0_b$age,col=palette_b[1],lty=2)
+points(cumprod(1-plot_data3_add_real_0_b$mean)~plot_data3_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
+lines(cumprod(1-plot_data3_add_real_0_b$mean)~plot_data3_add_real_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
+polygon(c(plot_data3_add_real_0_b$age,rev(plot_data3_add_real_0_b$age)),c(cumprod(1-plot_data3_add_real_0_b$low),rev(cumprod(1-plot_data3_add_real_0_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
 
 #### Median wealth ----
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Stable",
-     xaxt="n",
+     main="Mid. change",
      yaxt="n",
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(1,at=seq(0,ncol(post3_add_real$mu),by=1),labels=(round(min(real_data3$afr,na.rm=T))-1):round(max(real_data3$afr,na.rm=T)),cex.axis=1.5)
-axis(2,cex.axis=1.5)
+axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p3_add_real_50_b <- matrix(nrow=nrow(post3_add_real$mu),ncol=ncol(post3_add_real$mu))
@@ -843,18 +491,18 @@ p3_add_real_50_b
 for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_50_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                         post3_add_real$mu[i,j] + #age
-                                         post3_add_real$gamma_wealth[i,j]*deciles[2]) #wealth
+                                    post3_add_real$mu[i,j] + #age
+                                    post3_add_real$beta_wealth[i,j]*deciles[2]) #wealth
   }
 }
 #check data
 p3_add_real_50_b
 #plot it!
 #prepare model prediction data
-plot_post3_add_real_50_b <- data.frame(age = 1:ncol(p3_add_real_50_b),
-                                       mean = apply(p3_add_real_50_b, 2, mean), 
-                                       upp = apply(p3_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                       low = apply(p3_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data3_add_real_50_b <- data.frame(age = 1:ncol(p3_add_real_50_b),
+                                  mean = apply(p3_add_real_50_b, 2, mean), 
+                                  upp = apply(p3_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p3_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -870,27 +518,22 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(plot_post3_add_real_50_b$mean~plot_post3_add_real_50_b$age,col=alpha(palette_b[2],0.75),pch=15)
-lines(plot_post3_add_real_50_b$mean~plot_post3_add_real_50_b$age,col=palette_b[2])
-points(plot_post3_add_real_50_b$upp~plot_post3_add_real_50_b$age,col=alpha(palette_b[2],0.75),pch=4)
-lines(plot_post3_add_real_50_b$upp~plot_post3_add_real_50_b$age,col=palette_b[2],lty=2)
-points(plot_post3_add_real_50_b$low~plot_post3_add_real_50_b$age,col=alpha(palette_b[2],0.75),pch=4)
-lines(plot_post3_add_real_50_b$low~plot_post3_add_real_50_b$age,col=palette_b[2],lty=2)
+points(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),pch=15)
+lines(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),lwd=2)
+polygon(c(plot_data3_add_real_50_b$age,rev(plot_data3_add_real_50_b$age)),c(cumprod(1-plot_data3_add_real_50_b$low),rev(cumprod(1-plot_data3_add_real_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.5),border=NA)
 
 #### Maximum wealth ----
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
-     ylab="Probability of first reproduction",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Gain",
-     xaxt="n",
+     main="Max. change",
      yaxt="n",
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(1,at=seq(0,ncol(post3_add_real$mu),by=1),labels=(round(min(real_data3$afr,na.rm=T))-1):round(max(real_data3$afr,na.rm=T)),cex.axis=1.5)
-axis(2,cex.axis=1.5)
+axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p3_add_real_100_b <- matrix(nrow=nrow(post3_add_real$mu),ncol=ncol(post3_add_real$mu))
@@ -899,18 +542,18 @@ p3_add_real_100_b
 for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_100_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                          post3_add_real$mu[i,j] + #age
-                                          post3_add_real$gamma_wealth[i,j]*deciles[3]) #wealth
+                                     post3_add_real$mu[i,j] + #age
+                                     post3_add_real$beta_wealth[i,j]*deciles[3]) #wealth
   }
 }
 #check data
 p3_add_real_100_b
 #plot it!
 #prepare model prediction data
-plot_post3_add_real_100_b <- data.frame(age = 1:ncol(p3_add_real_100_b),
-                                        mean = apply(p3_add_real_100_b, 2, mean), 
-                                        upp = apply(p3_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                        low = apply(p3_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data3_add_real_100_b <- data.frame(age = 1:ncol(p3_add_real_100_b),
+                                   mean = apply(p3_add_real_100_b, 2, mean), 
+                                   upp = apply(p3_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                   low = apply(p3_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -926,10 +569,9 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(plot_post3_add_real_100_b$mean~plot_post3_add_real_100_b$age,col=alpha(palette_b[3],0.75),pch=15)
-lines(plot_post3_add_real_100_b$mean~plot_post3_add_real_100_b$age,col=palette_b[3])
-points(plot_post3_add_real_100_b$upp~plot_post3_add_real_100_b$age,col=alpha(palette_b[3],0.75),pch=4)
-lines(plot_post3_add_real_100_b$upp~plot_post3_add_real_100_b$age,col=palette_b[3],lty=2)
-points(plot_post3_add_real_100_b$low~plot_post3_add_real_100_b$age,col=alpha(palette_b[3],0.75),pch=4)
-lines(plot_post3_add_real_100_b$low~plot_post3_add_real_100_b$age,col=palette_b[3],lty=2)
+points(cumprod(1-plot_data3_add_real_100_b$mean)~plot_data3_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),pch=15)
+lines(cumprod(1-plot_data3_add_real_100_b$mean)~plot_data3_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
+polygon(c(plot_data3_add_real_100_b$age,rev(plot_data3_add_real_100_b$age)),c(cumprod(1-plot_data3_add_real_100_b$low),rev(cumprod(1-plot_data3_add_real_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
+
+legend(77.5,1,c("No change","Mid. change", "Max. change"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
