@@ -372,7 +372,10 @@ deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-palette[4:length(deciles)] 
+#numbers for color palette
+palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
+#select the numbers for color palette
+palette_b<-palette[(length(deciles)+1):(length(deciles)+3)]
 
 #define layout of plots
 par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
