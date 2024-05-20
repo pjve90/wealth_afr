@@ -475,9 +475,9 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(cumprod(1-plot_data2_add_real_50_b$mean)~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_real_50_b$mean)~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
-polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(cumprod(1-plot_data2_add_real_50_b$low),rev(cumprod(1-plot_data2_add_real_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_real_50_b$mean)~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_real_50_b$mean)~plot_data2_add_real_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(cumprod(1-plot_data2_add_real_50_b$low),rev(cumprod(1-plot_data2_add_real_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.5),border=NA)
 
 #### Maximum wealth ----
 
@@ -526,8 +526,8 @@ for(j in 1:ncol(plot_afr2)){
 #check the data
 plot_afr2
 
-points(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
-polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(cumprod(1-plot_data2_add_real_100_b$low),rev(cumprod(1-plot_data2_add_real_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
+points(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),pch=15)
+lines(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
+polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(cumprod(1-plot_data2_add_real_100_b$low),rev(cumprod(1-plot_data2_add_real_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
 
 legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
