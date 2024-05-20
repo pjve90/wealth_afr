@@ -31,7 +31,7 @@ A <- 73
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
 abswealth <- matrix(nrow=N,ncol=A+1)
 #randomly assign an amount of wealth for each individual at age 0
-abswealth[,1] <- rnorm(100,15,5)
+abswealth[,1] <- exp(rnorm(100,5,1))
 #change wealth of individuals through time
 for(j in 2:ncol(abswealth)){
   for(i in 1:nrow(abswealth)){
@@ -57,7 +57,7 @@ beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
 beta_wealth
 plot(beta_wealth~c(1:length(beta_wealth)))
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_beta_wealth<-beta_wealth/sd(as.vector(wealth))
+std_beta_wealth<-beta_wealth/sd(as.vector(abswealth))
 std_beta_wealth
 plot(std_beta_wealth~c(1:length(std_beta_wealth)))
 
@@ -88,7 +88,7 @@ apply(abs(diffwealth),2,mean)
 plot(apply(abs(diffwealth),2,mean),xlab="Age",ylab="Average wealth variability")
 
 #standardise wealth variability
-std_diffwealth <- matrix(standardize(abs(as.vector(diffwealth))),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+std_diffwealth <- matrix(standardize(log(abs(as.vector(diffwealth))+1)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
 #check the data
 std_diffwealth
 
