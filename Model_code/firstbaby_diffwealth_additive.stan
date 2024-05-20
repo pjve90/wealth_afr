@@ -75,9 +75,9 @@ transformed parameters {
   
   for(i in 1:N*A){
     if(i == 1){
-      diffwealth[i] = wealth_full[i] - wealth_full[i];
+      diffwealth[i] = fabs(wealth_full[i] - wealth_full[i]);
     }else{
-      diffwealth[i] = wealth_full[i] - wealth_full[i-1];
+      diffwealth[i] = fabs(wealth_full[i] - wealth_full[i-1]);
     }
   }
   

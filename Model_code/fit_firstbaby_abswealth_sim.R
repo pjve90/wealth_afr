@@ -105,7 +105,7 @@ apply(afrs,2,sum,na.rm=T)
 apply(afrs,2,sum,na.rm=T)/N
 #plot it
 #color palette
-palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
+palette <- c(1,12,7,2,11,6)
 #plot
 plot(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),
      ylim=c(0,1),
@@ -246,7 +246,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
 plot(c(0,1)~c(0,ncol(post2_add$mu)),
-     ylab="Prob. FR",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with absolute wealth",
      cex.axis=1.2,
