@@ -192,7 +192,7 @@ for(j in 1:ncol(std_absw_matrix2)){
 #check the data
 std_absw_matrix2
 
-## Additive model: fit real data ----
+## Fit real data ----
 
 # Only take the years when individuals have a first baby
 #check min and max ages at first reproduction
@@ -314,7 +314,7 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      type="n",
-     cex.aixs=1.2,
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5)
 legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
@@ -530,4 +530,4 @@ points(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,c
 lines(cumprod(1-plot_data2_add_real_100_b$mean)~plot_data2_add_real_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
 polygon(c(plot_data2_add_real_100_b$age,rev(plot_data2_add_real_100_b$age)),c(cumprod(1-plot_data2_add_real_100_b$low),rev(cumprod(1-plot_data2_add_real_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
 
-legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)

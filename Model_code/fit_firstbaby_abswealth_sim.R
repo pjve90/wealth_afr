@@ -218,12 +218,14 @@ tabs2_add
 tabs2_add_mu <- precis(rds2_add,depth=3,pars="mu")
 #check table
 tabs2_add_mu
-plot(inv_logit(tabs2_add_mu[,1]))
+plot(tabs2_add_mu)
+plot(cumprod(1-inv_logit(tabs2_add_mu[,1])),ylim=c(0,1))
 #create summary table for beta
 tabs2_add_beta <- precis(rds2_add,depth=3,pars="beta_wealth")
 #check table
 tabs2_add_beta
-plot((tabs2_add_beta[,1]))
+plot(tabs2_add_beta)
+plot(cumprod(1-inv_logit(tabs2_add_beta[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
@@ -463,4 +465,4 @@ points(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(h
 lines(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
 polygon(c(plot_data2_add_100_b$age,rev(plot_data2_add_100_b$age)),c(cumprod(1-plot_data2_add_100_b$low),rev(cumprod(1-plot_data2_add_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
 
-legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],title="Age",lwd=2,pch=16)
+legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
