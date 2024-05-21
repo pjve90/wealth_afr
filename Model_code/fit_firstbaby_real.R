@@ -176,6 +176,6 @@ plot(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,
 points(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[2])
 lines(cumprod(1-plot_data1_real$mu_mean)~plot_data1_real$age,col=hcl.colors(4,"temps")[2],lwd=2)
 polygon(c(plot_data1_real$age,rev(plot_data1_real$age)),c(cumprod(1-plot_data1_real$mu_low),rev(cumprod(1-plot_data1_real$mu_upp))),col=alpha(hcl.colors(4,"temps")[2],0.5),border=NA)
-points(cumprod(1-apply(plot_afr1_real,2,sum,na.rm = T)/N)~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
-lines(cumprod(1-apply(plot_afr1_real,2,sum,na.rm = T)/N)~plot_data1_real$age,col=hcl.colors(4,"temps")[3],lwd=2)
+points(cumprod(1-apply(plot_afr1_real,2,sum,na.rm = T)/apply(afr_matrix1,2,function(x)sum(!is.na(x))))~plot_data1_real$age,pch=16,col=hcl.colors(4,"temps")[3])
+lines(cumprod(1-apply(plot_afr1_real,2,sum,na.rm = T)/apply(afr_matrix1,2,function(x)sum(!is.na(x))))~plot_data1_real$age,col=hcl.colors(4,"temps")[3],lwd=2)
 legend(77.5,1,c("Predicted","Real"),lty=1,col=hcl.colors(4,"temps")[c(2,3)],lwd=2,pch=16)

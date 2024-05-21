@@ -81,21 +81,3 @@ model {
     }
 
 }
-
-// generated quantities {
-//   vector[A] p_base; 
-//   vector[A] cp_base;
-  
-//   for(a in 1:A){
-//     p_base[a] = inv_logit(
-//       alpha +
-//       mu[a]
-//       );
-//   }
-  
-//   for(a in 1:A){
-//     cp_base[a] = cumulative_product(
-//       p_base[a]
-//       );
-//   }
-// }

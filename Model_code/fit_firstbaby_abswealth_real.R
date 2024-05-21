@@ -38,9 +38,9 @@ for(i in 1:nrow(afr_matrix2)){
 #check the data
 afr_matrix2
 #check the age-specific probability of FR
-apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T))
+apply(afr_matrix2,2,sum,na.rm=T)/apply(afr_matrix2,2,function(x)sum(!is.na(x)))
 #plot it
-plot(cumprod(1-apply(afr_matrix2,2,sum,na.rm=T)/sum(apply(afr_matrix2,2,sum,na.rm=T)))~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
+plot(cumprod(1-apply(afr_matrix2,2,sum,na.rm=T)/apply(afr_matrix2,2,function(x)sum(!is.na(x))))~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -360,6 +360,9 @@ for(k in 1:(length(deciles))){
   polygon(c(plot_data2_add_real_b$age,rev(plot_data2_add_real_b$age)),c(cumprod(1-plot_data2_add_real_b$low),rev(cumprod(1-plot_data2_add_real_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
   
 }
+
+points(cumprod(1-apply(plot_afr2,2,sum,na.rm=T)/apply(plot_afr2,2,function(x)sum(!is.na(x))))~plot_data2$age,pch=16,col="black")
+lines(cumprod(1-apply(plot_afr2,2,sum,na.rm=T)/apply(plot_afr2,2,function(x)sum(!is.na(x))))~plot_data2$age,col="black",lwd=2)
 
 #### De-couple plot by wealth quantile ----
 
