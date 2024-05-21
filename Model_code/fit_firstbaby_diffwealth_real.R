@@ -209,7 +209,7 @@ afrs_restricted <- afr_matrix3[,round(min(real_data3$afr,na.rm=T)):round(max(rea
 #put all the data together
 #create dataset
 real_list3 <- list(N = nrow(real_data3), #population size
-                   A = ncol(afrs_matrix3), #age
+                   A = ncol(afr_matrix3), #age
                    wealth = as.vector(t(std_absw_matrix3)), #absolute wealth
                    baby = afr_matrix3, #AFR
                    N_miss = sum((std_absw_matrix3)== -99), # number of missing values that need imputation

@@ -29,10 +29,15 @@ A <- 73
 #Age at first reproduction (AFR)
 
 #simulate an age-specific parameter for AFR (mu)
-mu_age<-c(rep(0,12),seq(from=0.001,to=0.2,length=7),seq(from=0.13,to=0.01,length=5),seq(from=0.01, to=0.001,length=10),rep(0,40))
+mu_age<-c(rep(0,12),seq(from=0.001,to=0.3,length=9),seq(from=0.14,to=0.01,length=11),seq(from=0.01, to=0.001,length=10),rep(0,32))
 length(mu_age)
 mu_age
+alpha <- mean(rnorm(500,0,1))
+
 #plot it!
+plot(mu_age~c(1:length(mu_age)),ylim=c(0,1))
+
+plot(cumprod(1-(alpha+mu_age))~c(1:length(mu_age)),ylim=c(0,1))
 plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
 
 #simulate binary ouput of AFR for each age
@@ -62,17 +67,18 @@ for(j in 2:ncol(afrs)){
 head(afrs)
 #check the age-specific frequency of FR
 apply(afrs,2,sum,na.rm = T)
-apply(afrs,2,sum,na.rm = T)/N
+apply(afrs,2,sum,na.rm = T)/apply(afrs,2,function(x)sum(!is.na(x)))
 #plot it
-plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/N),
+plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/apply(afrs,2,function(x)sum(!is.na(x)))),
      ylim=c(0,1),
      xlab="Age",
      ylab="Cumulative probability of first birth",
      col=hcl.colors(4,"temps")[4],
      pch=16) #data
-lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/N),col=hcl.colors(4,"temps")[4],lwd=2)
-points(cumprod(1-mu_age),col=hcl.colors(4,"temps")[1],pch=15) #mu
-lines(cumprod(1-mu_age),col=hcl.colors(4,"temps")[1],lwd=2) #mu
+lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/apply(afrs,2,function(x)sum(!is.na(x)))),col=hcl.colors(4,"temps")[4],lwd=2)
+points(cumprod(1-(mu_age)),col=hcl.colors(4,"temps")[1],pch=15) #mu
+lines(cumprod(1-(mu_age)),col=hcl.colors(4,"temps")[1],lwd=2) #mu
+points(cumprod(1-apply(afr_matrix1,2,sum,na.rm=T)/apply(afr_matrix1,2,function(x)sum(!is.na(x)))),col=hcl.colors(4,"temps")[3],pch=15)
 
 ## Fit simulated data ----
 
@@ -203,6 +209,6 @@ plot(cumprod(1-plot_data1$mu_mean)~plot_data1$age,
 points(cumprod(1-plot_data1$mu_mean)~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[1])
 lines(cumprod(1-plot_data1$mu_mean)~plot_data1$age,col=hcl.colors(4,"temps")[1],lwd=2)
 polygon(c(plot_data1$age,rev(plot_data1$age)),c(cumprod(1-plot_data1$mu_low),rev(cumprod(1-plot_data1$mu_upp))),col=alpha(hcl.colors(4,"temps")[1],0.5),border=NA)
-points(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/N)~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4])
-lines(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/N)~plot_data1$age,col=hcl.colors(4,"temps")[4],lwd=2)
+points(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/apply(plot_afr1,2,function(x)sum(!is.na(x))))~plot_data1$age,pch=16,col=hcl.colors(4,"temps")[4])
+lines(cumprod(1-apply(plot_afr1,2,sum,na.rm = T)/apply(plot_afr1,2,function(x)sum(!is.na(x))))~plot_data1$age,col=hcl.colors(4,"temps")[4],lwd=2)
 legend(77.5,1,c("Predicted","Simulated"),lty=1,col=hcl.colors(4,"temps")[c(1,4)],lwd=2,pch=16)
