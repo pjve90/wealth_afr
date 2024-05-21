@@ -178,7 +178,7 @@ std_absw_matrix2
 #check the age-specific average of absolute wealth
 apply(std_absw_matrix2,2,mean,na.rm=T)
 #plot it
-plot(apply(std_absw_matrix2,2,mean,na.rm=T)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
+plot(apply(std_absw_matrix2,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
 
 #change NAs for -99
 #replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
@@ -302,7 +302,7 @@ deciles
 
 #colour palette
 #numbers for color palette
-palette <- c(1,12,7,2,11,6,3,10,8,4,9,5)
+palette <- c(1,3,6,2,4,5)
 #select the numbers for color palette
 palette_b<-palette[(length(deciles)+1):(length(deciles)+3)]
 

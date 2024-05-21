@@ -11,6 +11,8 @@
 library(cmdstanr)
 #install.packages("rethinking")
 library(rethinking)
+#install.packages("scales")
+library(scales)
 
 ## Data wrangling of real data ----
 
@@ -21,7 +23,7 @@ head(real_data3)
 # Age at first reproduction 
 
 #create a matrix to store the age-specific age of censor
-afr_matrix3 <- matrix(nrow=nrow(real_data3),ncol=A+1)
+afr_matrix3 <- matrix(nrow=nrow(real_data3),ncol=max(real_data3$aoc)+1)
 #calculate for each age when the woman is censored (1) or not (0)
 for(i in 1:nrow(afr_matrix3)){
   afr <- real_data3$afr[i] + 1 #adding 1 so if she reproduces in the same year as registered = 1
@@ -38,7 +40,7 @@ afr_matrix3
 #check the age-specific probability of FR
 apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))
 #plot it
-plot(apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))~c(1:ncol(afr_matrix3)),xlab="Age",ylab="Probability of first reproduction",ylim=c(0,0.2))
+plot(cumprod(1-apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T)))~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix3)){
@@ -57,17 +59,20 @@ afr_matrix3
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
-absw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=A+1)
+absw_matrix3 <- matrix(nrow = nrow(real_data3),ncol=max(real_data3$aoc)+1)
 #calculate for each age the amount of wealth the household of a woman has, based on each census
 #95
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw95[i]
   age_absw <- real_data3$age_absw95[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= (real_data3$aoc[i]+1)){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -75,11 +80,14 @@ absw_matrix3
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw98[i]
   age_absw <- real_data3$age_absw98[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= real_data3$aoc[i]){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -87,11 +95,14 @@ absw_matrix3
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw00[i]
   age_absw <- real_data3$age_absw00[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= real_data3$aoc[i]){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -99,11 +110,14 @@ absw_matrix3
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw02[i]
   age_absw <- real_data3$age_absw02[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= real_data3$aoc[i]){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -111,11 +125,14 @@ absw_matrix3
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw04[i]
   age_absw <- real_data3$age_absw04[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= real_data3$aoc[i]){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -123,11 +140,14 @@ absw_matrix3
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw06[i]
   age_absw <- real_data3$age_absw06[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= real_data3$aoc[i]){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -135,11 +155,14 @@ absw_matrix3
 for(i in 1:nrow(absw_matrix3)){
   absw <- real_data3$absw10[i]
   age_absw <- real_data3$age_absw10[i] + 1 #adding 1 so if she reproduces/censors in the same is registered = 1
-  if(!is.na(age_absw)){
+  if(!is.na(age_absw) & age_absw <= (real_data3$aoc[i]+1)){
     absw_matrix3[i,age_absw] <- absw
-  } else{
-    absw_matrix3[i,age_absw] <- NA
-  }
+  } else
+    if(!is.na(age_absw) & age_absw > (real_data3$aoc[i]+1)){
+      absw_matrix3[i,(real_data3$aoc[i]+1)] <- NA
+    } else{
+      absw_matrix3[i,age_absw] <- NA
+    }
 }
 #check data
 absw_matrix3
@@ -148,75 +171,6 @@ apply(absw_matrix3,2,mean,na.rm=T)
 #plot it
 plot(apply(absw_matrix3,2,mean,na.rm=T)~c(1:ncol(absw_matrix3)),xlab="Age",ylab="Average absolute wealth")
 
-# #NaN in columns where there are no values of wealth
-# 
-# # Simple data imputation 
-# 
-# #replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
-# for(i in 1:length(absw_matrix3[,1])){
-#   if(is.na(absw_matrix3[i,1]) & is.na(absw_matrix3[i,2])){
-#     absw_matrix3[i,1] <- mean(absw_matrix3[,1],na.rm = T)
-#   }else if(is.na(absw_matrix3[i,1]) & !is.na(absw_matrix3[i,2])){
-#     absw_matrix3[i,1] <- absw_matrix3[i,2]
-#   }
-# }
-# #check the data
-# absw_matrix3
-# sum(is.na(absw_matrix3[,1]))
-# #n=0
-# #replace the missing wealth data by putting the mean between the two ages it is
-# for(j in 2:(ncol(absw_matrix3)-1)){
-#   for(i in 1:nrow(absw_matrix3)){
-#     if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&!is.na(absw_matrix3[i,j+1])){
-#       absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,j+1]))
-#     } else if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&is.na(absw_matrix3[i,j+1])){
-#       absw_matrix3[i,j] <- mean(absw_matrix3[,j],na.rm=T)
-#     } 
-#   }
-# }
-# #check the data
-# absw_matrix3
-# sum(is.na(absw_matrix3))
-# #n=21824
-# #replace the missing wealth data by putting the mean between the two ages it is
-# for(j in 2:(ncol(absw_matrix3)-1)){
-#   for(i in 1:nrow(absw_matrix3)){
-#     if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&!is.na(absw_matrix3[i,j+1])){
-#       absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,j+1]))
-#     } else if(is.na(absw_matrix3[i,j])&!is.na(absw_matrix3[i,j-1])&is.na(absw_matrix3[i,j+1])){
-#       absw_matrix3[i,j] <- mean(absw_matrix3[,j],na.rm=T)
-#     } 
-#   }
-# }
-# #check the data
-# absw_matrix3
-# sum(is.na(absw_matrix3))
-# #n=9179
-# #replace the missing wealth data by putting either the mean between the two ages it is or by repeating the value from previous year
-# for(j in 2:(ncol(absw_matrix3)-1)){
-#   for(i in 1:nrow(absw_matrix3)){
-#     if(is.na(absw_matrix3[i,j])&length(is.na(absw_matrix3[i,j:91]))!=sum(is.na(absw_matrix3[i,j:91]))){
-#       absw_matrix3[i,j] <- mean(c(absw_matrix3[i,j-1],absw_matrix3[i,max(which(!is.na(absw_matrix3[i,])==T))]))
-#     } else if(is.na(absw_matrix3[i,j])&length(is.na(absw_matrix3[i,j:91]))==sum(is.na(absw_matrix3[i,j:91]))){
-#       absw_matrix3[i,j] <- absw_matrix3[i,j-1]
-#     }
-#   }
-# }
-# #check the data
-# absw_matrix3
-# sum(is.na(absw_matrix3))
-# #n=540
-# #replace last column with the values from last year
-# absw_matrix3[,max(ncol(absw_matrix3))] <- absw_matrix3[,max(ncol(absw_matrix3))-1]
-# #check the data
-# absw_matrix3
-# sum(is.na(absw_matrix3))
-# #n=0
-# #check the age-specific frequency of absolute wealth
-# apply(absw_matrix3,2,mean)
-# #plot it
-# plot(apply(absw_matrix3,2,mean)~c(1:91),xlab="Age",ylab="Average absolute wealth")
-
 #standardise absolute wealth
 std_absw_matrix3 <- matrix(standardize(log(as.vector(absw_matrix3))),ncol=ncol(absw_matrix3),nrow=nrow(absw_matrix3))
 #check the data
@@ -224,7 +178,7 @@ std_absw_matrix3
 #check the age-specific average of absolute wealth
 apply(std_absw_matrix3,2,mean,na.rm=T)
 #plot it
-plot(apply(std_absw_matrix3,2,mean,na.rm=T)~c(1:(A+1)),xlab="Age",ylab="Average absolute wealth")
+plot(apply(std_absw_matrix3,2,mean,na.rm=T)~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
 
 #change NAs for -99
 #replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
@@ -238,7 +192,7 @@ for(j in 1:ncol(std_absw_matrix3)){
 #check the data
 std_absw_matrix3
 
-## Additive model: fit real data ----
+## Fit real data ----
 
 # Only take the years when individuals have a first baby
 #check min and max ages at first reproduction
@@ -254,12 +208,12 @@ afrs_restricted <- afr_matrix3[,round(min(real_data3$afr,na.rm=T)):round(max(rea
 
 #put all the data together
 #create dataset
-real_list3 <- list(N = nrow(afrs_restricted), #population size
-                   A = ncol(afrs_restricted), #age
-                   wealth = as.vector(t(std_wealth_restricted)), #absolute wealth
-                   baby = afrs_restricted, #AFR
-                   N_miss = sum((std_wealth_restricted)== -99), # number of missing values that need imputation
-                   id_wealth_miss =which(as.vector(t(std_wealth_restricted))== -99)) # provide the indexes for the missing data
+real_list3 <- list(N = nrow(real_data3), #population size
+                   A = ncol(afrs_matrix3), #age
+                   wealth = as.vector(t(std_absw_matrix3)), #absolute wealth
+                   baby = afr_matrix3, #AFR
+                   N_miss = sum((std_absw_matrix3)== -99), # number of missing values that need imputation
+                   id_wealth_miss =which(as.vector(t(std_absw_matrix3))== -99)) # provide the indexes for the missing data
 #check data
 real_list3
 
@@ -287,17 +241,17 @@ post3_add_real <- extract.samples(rds3_add_real)
 #check the model
 #check trace of all main parameters
 #alpha
-traceplot(rds3_add_real,pars="alpha")
+rstan::traceplot(rds3_add_real,pars="alpha")
 #mu
 #traceplot(rds3_add_real,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
 #traceplot(rds3_add_real,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-traceplot(rds3_add_real,pars="mu_tau")
+rstan::traceplot(rds3_add_real,pars="mu_tau")
 #mu_kappa
-traceplot(rds3_add_real,pars="mu_kappa")
+rstan::traceplot(rds3_add_real,pars="mu_kappa")
 #mu_delta
-traceplot(rds3_add_real,pars="mu_delta")
+rstan::traceplot(rds3_add_real,pars="mu_delta")
 #gamma_wealth
 #traceplot(rds3_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
 #gamma_wealth
@@ -316,10 +270,14 @@ tab3_add_real
 tab3_add_real_mu <- precis(rds3_add_real,depth=2,pars="mu")
 #check table
 tab3_add_real_mu
+plot(tab3_mu_add_real)
+plot(cumprod(1-tab3_mu_add_real[,1]),ylim=c(0,1))
 #create summary table for gamma
 tab3_add_real_gamma <- precis(rds3_add_real,depth=2,pars="gamma_wealth")
 #check table
 tab3_add_real_gamma
+plot(tab3_gamma_add_real)
+plot(cumprod(1-tab3_gamma_add_real[,1]),ylim=c(0,1))
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
@@ -338,7 +296,7 @@ tab3_add_real_gamma
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(std_diffwealth[which(std_diffwealth > -99)]),1),to=round(max(std_diffwealth[which(std_diffwealth > -99)]),1),length.out=nrow(std_diffwealth)) #specify according to range and length of wealth data
+simwealth_add_real <- seq(from=round(min(post3_add_real$wealth_full),1),to=round(max(post3_add_real$wealth_full),1),length.out=nrow(std_absw_matrix3)) #specify according to range and length related to sample size
 simwealth_add_real
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
