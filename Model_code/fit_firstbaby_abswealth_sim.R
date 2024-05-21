@@ -296,9 +296,6 @@ for(k in 1:(length(deciles))){
   polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
 }
 
-points(cumprod(1-apply(plot_afr2,2,sum,na.rm = T)/apply(plot_afr2,2,function(x)sum(!is.na(x))))~plot_data2$age,pch=16,col="black")
-lines(cumprod(1-apply(plot_afr2,2,sum,na.rm = T)/apply(plot_afr2,2,function(x)sum(!is.na(x))))~plot_data2$age,col="black",lwd=2)
-
 ## De-couple plot by min, mean, max ----
 
 #simulate wealth values

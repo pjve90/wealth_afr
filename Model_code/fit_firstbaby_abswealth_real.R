@@ -361,9 +361,6 @@ for(k in 1:(length(deciles))){
   
 }
 
-points(cumprod(1-apply(plot_afr2,2,sum,na.rm=T)/apply(plot_afr2,2,function(x)sum(!is.na(x))))~plot_data2$age,pch=16,col="black")
-lines(cumprod(1-apply(plot_afr2,2,sum,na.rm=T)/apply(plot_afr2,2,function(x)sum(!is.na(x))))~plot_data2$age,col="black",lwd=2)
-
 #### De-couple plot by wealth quantile ----
 
 #simulate wealth values

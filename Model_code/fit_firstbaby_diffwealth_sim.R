@@ -106,11 +106,11 @@ plot(std_gamma_wealth~c(1:length(std_gamma_wealth)))
 #Age at first reproduction (AFR)
 
 #simulate an age-specific parameter for AFR (mu)
-mu_age<-c(rep(0,12),seq(from=0.001,to=0.2,length=7),seq(from=0.14,to=0.01,length=5),seq(from=0.01, to=0.001,length=15),rep(0,35))
+mu_age<-c(rep(0,12),seq(from=0.001,to=0.3,length=9),seq(from=0.14,to=0.01,length=11),seq(from=0.01, to=0.001,length=10),rep(0,32))
+length(mu_age)
 mu_age
-#check that they sum to 1
-sum(mu_age)
 #plot it!
+plot(mu_age~c(1:length(mu_age)),ylim=c(0,1))
 plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
 
 #simulate binary ouput of AFR for each age
@@ -127,7 +127,7 @@ for(j in 2:ncol(afrs)){
     if(!is.na(afrs[i,j-1])){
       if(afrs[i,j-1] == 0){
         afr_prob <- mu_age[j]+ #age
-          gamma_wealth[j]*diffwealth[i,j] #wealth variability
+          std_gamma_wealth[j]*std_diffwealth[i,j] #wealth variability
         if(afr_prob<0){afr_prob<-0}
         afrs[i,j] <- rbinom(1,1,afr_prob)
       }else{
@@ -144,18 +144,18 @@ for(j in 2:ncol(afrs)){
 head(afrs)
 #check the age-specific probability of FR
 apply(afrs,2,sum,na.rm=T)
-apply(afrs,2,sum,na.rm=T)/N
+apply(afrs,2,sum,na.rm = T)/apply(afrs,2,function(x)sum(!is.na(x)))
 #plot it
 #color palette
 palette <- c(1,3,6,2,4,5)
 #plot
-plot(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),
+plot(cumprod(1-apply(afrs,2,sum,na.rm=T)/apply(afrs,2,function(x)sum(!is.na(x)))),
      ylim=c(0,1),
      xlab="Age",
      ylab="Cumulative probability of first birth",
      col=hcl.colors(length(palette),"temps")[palette[2]],
      pch=15) #data
-lines(cumprod(1-apply(afrs,2,sum,na.rm=T)/N),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
+lines(cumprod(1-apply(afrs,2,sum,na.rm=T)/apply(afrs,2,function(x)sum(!is.na(x)))),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
 points(cumprod(1-(mu_age+std_gamma_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],pch=15) #mu+std_beta
 lines(cumprod(1-(mu_age+std_gamma_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],lwd=2) #mu+std_beta
 

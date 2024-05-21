@@ -38,9 +38,9 @@ for(i in 1:nrow(afr_matrix3)){
 #check the data
 afr_matrix3
 #check the age-specific probability of FR
-apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T))
+apply(afr_matrix3,2,sum,na.rm=T)/apply(afr_matrix3,2,function(x)sum(!is.na(x)))
 #plot it
-plot(cumprod(1-apply(afr_matrix3,2,sum,na.rm=T)/sum(apply(afr_matrix3,2,sum,na.rm=T)))~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
+plot(cumprod(1-apply(afr_matrix3,2,sum,na.rm=T)/apply(afr_matrix3,2,function(x)sum(!is.na(x))))~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
 
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix3)){
