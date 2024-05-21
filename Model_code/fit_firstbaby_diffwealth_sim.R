@@ -261,15 +261,15 @@ tab3_add
 #create summary table for mu
 tab3_add_mu <- precis(rds3_add,depth=2,pars="mu")
 #check table
-tabs3_add_mu
-plot(tabs3_add_mu)
-plot(cumprod(1-inv_logit(tabs3_add_mu[,1])),ylim=c(0,1))
+tab3_add_mu
+plot(tab3_add_mu)
+plot(cumprod(1-inv_logit(tab3_add_mu[,1])),ylim=c(0,1))
 #create summary table for gamma
 tab3_add_gamma <- precis(rds3_add,depth=2,pars="gamma_wealth")
 #check table
-tabs3_add_gamma
-plot(tabs3_add_gama)
-plot(cumprod(1-inv_logit(tabs3_add_gamma[,1])),ylim=c(0,1))
+tab3_add_gamma
+plot(tab3_add_gamma)
+plot(cumprod(1-inv_logit(tab3_add_gamma[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
@@ -309,7 +309,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post3_add$mu)){
       p3_add_b[i,j] <- inv_logit(post3_add$alpha[i] + #inv logit because originally is logit
                                    post3_add$mu[i,j] + #age
-                                   post3_add$beta_wealth[i,j]*deciles[k]) #wealth
+                                   post3_add$gamma_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
