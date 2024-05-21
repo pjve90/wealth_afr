@@ -355,7 +355,7 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr2
   
-  points(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.75),pch=15)
+  points(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]],pch=15)
   lines(cumprod(1-plot_data2_add_real_b$mean)~plot_data2_add_real_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]])
   polygon(c(plot_data2_add_real_b$age,rev(plot_data2_add_real_b$age)),c(cumprod(1-plot_data2_add_real_b$low),rev(cumprod(1-plot_data2_add_real_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
   
