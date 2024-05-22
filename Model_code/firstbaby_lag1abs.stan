@@ -43,8 +43,8 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
-// lagged absolute wealth of 2 years
-  vector [A] eps_wealth;
+// lagged absolute wealth
+  vector [A] delta_wealth;
 // missing wealth data
   vector[N_miss] wealth_impute;
   real nu;
@@ -70,13 +70,13 @@ transformed parameters {
     }
     
 //Lagged absolute wealth by one year
-  vector[N*A] lagg2wealth; // lagged absolute wealth
+  vector[N*A] lagg1wealth; // lagged absolute wealth
   
   for(i in 1:N*A){
-    if(i == 1 | i == 2){
-      lagg2wealth[i] = wealth_full[i] - wealth_full[i];
+    if(i == 1){
+      lagg1wealth[i] = wealth_full[i] - wealth_full[i];
     }else{
-      lagg2wealth[i] = wealth_full[i-2];
+      lagg1wealth[i] = wealth_full[i-1];
     }
   }
   
@@ -91,7 +91,7 @@ model {
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
 // lagged absolute wealth
-    eps_wealth ~ normal(0,1);
+    delta_wealth ~ normal(0,1);
 // missing wealth data
     wealth_impute ~ normal(nu,sigma_wealth_miss);
     nu ~ normal(0,1);
@@ -106,7 +106,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        eps_wealth[a]*lagg2wealth[(n-1)*a+a] // lagged absolute wealth
+        delta_wealth[a]*lagg1wealth[(n-1)*a+a] // lagged absolute wealth
         );
           
     }
