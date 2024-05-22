@@ -53,7 +53,7 @@ std_abswealth
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+beta_wealth<-c(rep(0,12),seq(from=-0.1,to=0.09,length=19),seq(from=0.09,to=0.1,length=11),rep(0,32))
 beta_wealth
 plot(beta_wealth~c(1:length(beta_wealth)))
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
@@ -95,7 +95,7 @@ std_diffwealth
 
 #simulate an age-specific parameter for wealth variability
 #if seq starts from a positive value and goes to a negative value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-gamma_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
+gamma_wealth<-c(rep(0,12),seq(from=0.1,to=-0.09,length=19),seq(from=-0.09,to=-0.1,length=11),rep(0,32))
 gamma_wealth
 plot(gamma_wealth~c(1:length(gamma_wealth)))
 # adjust for the fact that gamma links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
