@@ -166,7 +166,7 @@ afrs
 
 #put all the data together
 #create data
-data2 <- list(N = nrow(afrs), #population size
+data5 <- list(N = nrow(afrs), #population size
               A = ncol(afrs), #age
               wealth = as.vector(t(std_wealth)), #absolute wealth
               N_miss = sum((std_wealth)== -99), # number of missing values that need imputation
@@ -175,15 +175,15 @@ data2 <- list(N = nrow(afrs), #population size
 ) 
 
 #check data 
-data2
+data5
 
 # compile model
 
-m2_add <- cmdstan_model("Model_code/firstbaby_lag2abs.stan")
+m5_add <- cmdstan_model("Model_code/firstbaby_lag2abs.stan")
 
 # fit model
 
-fit2_add <- m2_add$sample(data = data2, 
+fit5_add <- m5_add$sample(data = data5, 
                           chains = 4, 
                           parallel_chains = 15, 
                           adapt_delta = 0.95,
@@ -191,51 +191,51 @@ fit2_add <- m2_add$sample(data = data2,
                           init = 0)
 
 # save fit 
-fit2_add <- rstan::read_stan_csv(fit2_add$output_files())
-saveRDS(fit2_add, "firstbaby2_add.rds")
+fit5_add <- rstan::read_stan_csv(fit5_add$output_files())
+saveRDS(fit5_add, "firstbaby2_add.rds")
 #load RDS file
-rds2_add <- readRDS("firstbaby2_add.rds")
+rds5_add <- readRDS("firstbaby2_add.rds")
 #extract samples
-post2_add <- extract.samples(rds2_add)
+post5_add <- extract.samples(rds5_add)
 
 #check the model
 #check trace of all main parameters
 #alpha
-rstan::traceplot(rds2_add,pars="alpha")
+rstan::traceplot(rds5_add,pars="alpha")
 #mu
-#traceplot(rds2_add,pars="mu") #only run if needed, because they are 91 plots
+#traceplot(rds5_add,pars="mu") #only run if needed, because they are 91 plots
 #mu_raw
-#traceplot(rds2_add,pars="mu_raw") #only run if needed, because they are 91 plots
+#traceplot(rds5_add,pars="mu_raw") #only run if needed, because they are 91 plots
 #mu_tau
-rstan::traceplot(rds2_add,pars="mu_tau")
+rstan::traceplot(rds5_add,pars="mu_tau")
 #mu_kappa
-rstan::traceplot(rds2_add,pars="mu_kappa")
+rstan::traceplot(rds5_add,pars="mu_kappa")
 #mu_delta
-rstan::traceplot(rds2_add,pars="mu_delta")
+rstan::traceplot(rds5_add,pars="mu_delta")
 #beta_wealth
-#traceplot(rds2_add,pars="beta_wealth") #only run if needed, because they are 91 plots
+#traceplot(rds5_add,pars="beta_wealth") #only run if needed, because they are 91 plots
 
 #summary of the model
 #create summary table
 #create summary table for alpha and hiper priors of Gaussian process
-tabs2_add <- precis(rds2_add,depth=3,pars=c("alpha",
+tabs5_add <- precis(rds5_add,depth=3,pars=c("alpha",
                                             "mu_raw",
                                             "mu_tau",
                                             "mu_delta"))
 #check table
-tabs2_add
+tabs5_add
 #create summary table for mu
-tabs2_add_mu <- precis(rds2_add,depth=3,pars="mu")
+tabs5_add_mu <- precis(rds5_add,depth=3,pars="mu")
 #check table
-tabs2_add_mu
-plot(tabs2_add_mu)
-plot(cumprod(1-inv_logit(tabs2_add_mu[,1])),ylim=c(0,1))
+tabs5_add_mu
+plot(tabs5_add_mu)
+plot(cumprod(1-inv_logit(tabs5_add_mu[,1])),ylim=c(0,1))
 #create summary table for beta
-tabs2_add_beta <- precis(rds2_add,depth=3,pars="beta_wealth")
+tabs5_add_beta <- precis(rds5_add,depth=3,pars="beta_wealth")
 #check table
-tabs2_add_beta
-plot(tabs2_add_beta)
-plot(cumprod(1-inv_logit(tabs2_add_beta[,1])),ylim=c(0,1))
+tabs5_add_beta
+plot(tabs5_add_beta)
+plot(cumprod(1-inv_logit(tabs5_add_beta[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
@@ -255,7 +255,7 @@ palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter line
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post2_add$mu)),
+plot(c(0,1)~c(0,ncol(post5_add$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with absolute wealth",
@@ -268,48 +268,48 @@ legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"te
 #add lines
 for(k in 1:(length(deciles))){
   #create matrix to store the data
-  p2_add_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
-  p2_add_b
+  p5_add_b <- matrix(nrow=nrow(post5_add$mu),ncol=ncol(post5_add$mu))
+  p5_add_b
   #fill it in with values for age 25
-  for(j in 1:ncol(post2_add$mu)){
-    for(i in 1:nrow(post2_add$mu)){
-      p2_add_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                   post2_add$mu[i,j] + #age
-                                   post2_add$beta_wealth[i,j]*deciles[k]) #wealth
+  for(j in 1:ncol(post5_add$mu)){
+    for(i in 1:nrow(post5_add$mu)){
+      p5_add_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
+                                   post5_add$mu[i,j] + #age
+                                   post5_add$beta_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
-  p2_add_b
+  p5_add_b
   #plot it!
   #prepare model prediction data
-  plot_data2_add_b <- data.frame(age = 1:ncol(p2_add_b),
-                                 mean = apply(p2_add_b, 2, mean), 
-                                 upp = apply(p2_add_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                 low = apply(p2_add_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_data5_add_b <- data.frame(age = 1:ncol(p5_add_b),
+                                 mean = apply(p5_add_b, 2, mean), 
+                                 upp = apply(p5_add_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p5_add_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #prepare afr probabilities from real data
   #create a matrix
-  plot_afr2 <- afrs
+  plot_afr5 <- afrs
   #change -99 to NAs
-  for(j in 1:ncol(plot_afr2)){
-    for(i in 1:nrow(plot_afr2)){
-      if(plot_afr2[i,j]==-99){
-        plot_afr2[i,j] <- NA
+  for(j in 1:ncol(plot_afr5)){
+    for(i in 1:nrow(plot_afr5)){
+      if(plot_afr5[i,j]==-99){
+        plot_afr5[i,j] <- NA
       }
     }
   }
   #check the data
-  plot_afr2
+  plot_afr5
   
-  points(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]],pch=15)
-  lines(cumprod(1-plot_data2_add_b$mean)~plot_data2_add_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]])
-  polygon(c(plot_data2_add_b$age,rev(plot_data2_add_b$age)),c(cumprod(1-plot_data2_add_b$low),rev(cumprod(1-plot_data2_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
+  points(cumprod(1-plot_data5_add_b$mean)~plot_data5_add_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]],pch=15)
+  lines(cumprod(1-plot_data5_add_b$mean)~plot_data5_add_b$age,col=hcl.colors(length(palette),"temps")[palette_b[k]])
+  polygon(c(plot_data5_add_b$age,rev(plot_data5_add_b$age)),c(cumprod(1-plot_data5_add_b$low),rev(cumprod(1-plot_data5_add_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[k]],0.5),border=NA)
 }
 
 ## De-couple plot by min, mean, max ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(post2_add$wealth_full),1),to=round(max(post2_add$wealth_full),1),length.out=nrow(std_absw_matrix2)) #specify according to range and length related to sample size
+simwealth_add <- seq(from=round(min(post5_add$wealth_full),1),to=round(max(post5_add$wealth_full),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
 simwealth_add
 
 #get the deciles
@@ -325,7 +325,7 @@ par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 #### Minimum wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post2_add$mu)),
+plot(c(0,1)~c(0,ncol(post5_add$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Poor",
@@ -336,143 +336,143 @@ plot(c(0,1)~c(0,ncol(post2_add$mu)),
 )
 
 #create matrix to store the data
-p2_add_0_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
-p2_add_0_b
+p5_add_0_b <- matrix(nrow=nrow(post5_add$mu),ncol=ncol(post5_add$mu))
+p5_add_0_b
 #fill it in with values for age 25
-for(j in 1:ncol(post2_add$mu)){
-  for(i in 1:nrow(post2_add$mu)){
-    p2_add_0_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                   post2_add$mu[i,j] + #age
-                                   post2_add$beta_wealth[i,j]*deciles[1]) #wealth
+for(j in 1:ncol(post5_add$mu)){
+  for(i in 1:nrow(post5_add$mu)){
+    p5_add_0_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
+                                   post5_add$mu[i,j] + #age
+                                   post5_add$beta_wealth[i,j]*deciles[1]) #wealth
   }
 }
 #check data
-p2_add_0_b
+p5_add_0_b
 #plot it!
 #prepare model prediction data
-plot_data2_add_0_b <- data.frame(age = 1:ncol(p2_add_0_b),
-                                 mean = apply(p2_add_0_b, 2, mean), 
-                                 upp = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                 low = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data5_add_0_b <- data.frame(age = 1:ncol(p5_add_0_b),
+                                 mean = apply(p5_add_0_b, 2, mean), 
+                                 upp = apply(p5_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p5_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
-plot_afr2 <- afr_matrix2
+plot_afr5 <- afr_matrix5
 #change -99 to NAs
-for(j in 1:ncol(plot_afr2)){
-  for(i in 1:nrow(plot_afr2)){
-    if(plot_afr2[i,j]==-99){
-      plot_afr2[i,j] <- NA
+for(j in 1:ncol(plot_afr5)){
+  for(i in 1:nrow(plot_afr5)){
+    if(plot_afr5[i,j]==-99){
+      plot_afr5[i,j] <- NA
     }
   }
 }
 #check the data
-plot_afr2
+plot_afr5
 
-points(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_0_b$mean)~plot_data2_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
-polygon(c(plot_data2_add_0_b$age,rev(plot_data2_add_0_b$age)),c(cumprod(1-plot_data2_add_0_b$low),rev(cumprod(1-plot_data2_add_0_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
+points(cumprod(1-plot_data5_add_0_b$mean)~plot_data5_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),pch=15)
+lines(cumprod(1-plot_data5_add_0_b$mean)~plot_data5_add_0_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.75),lwd=2)
+polygon(c(plot_data5_add_0_b$age,rev(plot_data5_add_0_b$age)),c(cumprod(1-plot_data5_add_0_b$low),rev(cumprod(1-plot_data5_add_0_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[1]],0.5),border=NA)
 
 #### Median wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post2_add$mu)),
+plot(c(0,1)~c(0,ncol(post5_add$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Medium",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
-p2_add_50_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
-p2_add_50_b
+p5_add_50_b <- matrix(nrow=nrow(post5_add$mu),ncol=ncol(post5_add$mu))
+p5_add_50_b
 #fill it in with values for age 25
-for(j in 1:ncol(post2_add$mu)){
-  for(i in 1:nrow(post2_add$mu)){
-    p2_add_50_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                    post2_add$mu[i,j] + #age
-                                    post2_add$beta_wealth[i,j]*deciles[2]) #wealth
+for(j in 1:ncol(post5_add$mu)){
+  for(i in 1:nrow(post5_add$mu)){
+    p5_add_50_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
+                                    post5_add$mu[i,j] + #age
+                                    post5_add$beta_wealth[i,j]*deciles[2]) #wealth
   }
 }
 #check data
-p2_add_50_b
+p5_add_50_b
 #plot it!
 #prepare model prediction data
-plot_data2_add_50_b <- data.frame(age = 1:ncol(p2_add_50_b),
-                                  mean = apply(p2_add_50_b, 2, mean), 
-                                  upp = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data5_add_50_b <- data.frame(age = 1:ncol(p5_add_50_b),
+                                  mean = apply(p5_add_50_b, 2, mean), 
+                                  upp = apply(p5_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p5_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
-plot_afr2 <- afr_matrix2
+plot_afr5 <- afr_matrix5
 #change -99 to NAs
-for(j in 1:ncol(plot_afr2)){
-  for(i in 1:nrow(plot_afr2)){
-    if(plot_afr2[i,j]==-99){
-      plot_afr2[i,j] <- NA
+for(j in 1:ncol(plot_afr5)){
+  for(i in 1:nrow(plot_afr5)){
+    if(plot_afr5[i,j]==-99){
+      plot_afr5[i,j] <- NA
     }
   }
 }
 #check the data
-plot_afr2
+plot_afr5
 
-points(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_50_b$mean)~plot_data2_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),lwd=2)
-polygon(c(plot_data2_add_50_b$age,rev(plot_data2_add_50_b$age)),c(cumprod(1-plot_data2_add_50_b$low),rev(cumprod(1-plot_data2_add_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.5),border=NA)
+points(cumprod(1-plot_data5_add_50_b$mean)~plot_data5_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),pch=15)
+lines(cumprod(1-plot_data5_add_50_b$mean)~plot_data5_add_50_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.75),lwd=2)
+polygon(c(plot_data5_add_50_b$age,rev(plot_data5_add_50_b$age)),c(cumprod(1-plot_data5_add_50_b$low),rev(cumprod(1-plot_data5_add_50_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[2]],0.5),border=NA)
 
 #### Maximum wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post2_add$mu)),
+plot(c(0,1)~c(0,ncol(post5_add$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Rich",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
-p2_add_100_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
-p2_add_100_b
+p5_add_100_b <- matrix(nrow=nrow(post5_add$mu),ncol=ncol(post5_add$mu))
+p5_add_100_b
 #fill it in with values for age 25
-for(j in 1:ncol(post2_add$mu)){
-  for(i in 1:nrow(post2_add$mu)){
-    p2_add_100_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                     post2_add$mu[i,j] + #age
-                                     post2_add$beta_wealth[i,j]*deciles[3]) #wealth
+for(j in 1:ncol(post5_add$mu)){
+  for(i in 1:nrow(post5_add$mu)){
+    p5_add_100_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
+                                     post5_add$mu[i,j] + #age
+                                     post5_add$beta_wealth[i,j]*deciles[3]) #wealth
   }
 }
 #check data
-p2_add_100_b
+p5_add_100_b
 #plot it!
 #prepare model prediction data
-plot_data2_add_100_b <- data.frame(age = 1:ncol(p2_add_100_b),
-                                   mean = apply(p2_add_100_b, 2, mean), 
-                                   upp = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                   low = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+plot_data5_add_100_b <- data.frame(age = 1:ncol(p5_add_100_b),
+                                   mean = apply(p5_add_100_b, 2, mean), 
+                                   upp = apply(p5_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                   low = apply(p5_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
-plot_afr2 <- afr_matrix2
+plot_afr5 <- afr_matrix5
 #change -99 to NAs
-for(j in 1:ncol(plot_afr2)){
-  for(i in 1:nrow(plot_afr2)){
-    if(plot_afr2[i,j]==-99){
-      plot_afr2[i,j] <- NA
+for(j in 1:ncol(plot_afr5)){
+  for(i in 1:nrow(plot_afr5)){
+    if(plot_afr5[i,j]==-99){
+      plot_afr5[i,j] <- NA
     }
   }
 }
 #check the data
-plot_afr2
+plot_afr5
 
-points(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),pch=15)
-lines(cumprod(1-plot_data2_add_100_b$mean)~plot_data2_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
-polygon(c(plot_data2_add_100_b$age,rev(plot_data2_add_100_b$age)),c(cumprod(1-plot_data2_add_100_b$low),rev(cumprod(1-plot_data2_add_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
+points(cumprod(1-plot_data5_add_100_b$mean)~plot_data5_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),pch=15)
+lines(cumprod(1-plot_data5_add_100_b$mean)~plot_data5_add_100_b$age,col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.75),lwd=2)
+polygon(c(plot_data5_add_100_b$age,rev(plot_data5_add_100_b$age)),c(cumprod(1-plot_data5_add_100_b$low),rev(cumprod(1-plot_data5_add_100_b$upp))),col=alpha(hcl.colors(length(palette),"temps")[palette_b[3]],0.5),border=NA)
 
 legend(77.5,1,c("Poor","Middle","Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
