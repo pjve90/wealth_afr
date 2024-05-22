@@ -46,10 +46,10 @@ apply(abswealth,2,mean)
 #plot it
 plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
-#standardise wealth data
-std_abswealth <- matrix(standardize(as.vector(abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
+#log-transform and standardise wealth data
+std_wealth <- matrix(standardize(log(as.vector(wealth))),ncol=ncol(wealth),nrow=nrow(wealth))
 #check the data
-std_abswealth
+std_wealth
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
