@@ -60,6 +60,11 @@ sum(beta_wealth)
 #plot it!
 plot(beta_wealth~c(1:length(beta_wealth)))
 
+# adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
+std_beta_wealth<-beta_wealth/sd(as.vector(abswealth))
+std_beta_wealth
+plot(std_beta_wealth~c(1:length(std_beta_wealth)))
+
 #Difference of wealth
 #simulate absolute wealth for each age
 #create a matrix with individuals as rows and ages as columns (A+1) so the first column is birth)
@@ -89,11 +94,8 @@ std_diffwealth
 
 #simulate an age-specific parameter for wealth variability
 #if seq starts from a positive value and goes to a negative value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-gamma_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=16),rep(0,62))
+gamma_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
 gamma_wealth
-#check that they sum to 1
-sum(gamma_wealth)
-#plot it!
 plot(gamma_wealth~c(1:length(gamma_wealth)))
 # adjust for the fact that gamma links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
 std_gamma_wealth<-gamma_wealth/sd(as.vector(abswealth))
