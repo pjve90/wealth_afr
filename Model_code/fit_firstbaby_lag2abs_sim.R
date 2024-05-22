@@ -1,4 +1,4 @@
-# Model with lagged effect of 2 years of absolute wealth ----
+# Model with absolute wealth ----
 
 #The code in this script is meant to fit a Bayesian model with absolute wealth and a Gaussian process of age, in order to see the relationship between absolute wealth and the probability of first reproduction of women.
 #First, there is data simulation that follows the expectations from the literature.
@@ -61,6 +61,16 @@ std_beta_wealth<-beta_wealth/sd(as.vector(wealth))
 std_beta_wealth
 plot(std_beta_wealth~c(1:length(std_beta_wealth)))
 
+#simulate an age-specific parameter for wealth (delta)
+#if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
+delta_wealth<-c(rep(0,12),seq(from=-0.1,to=0.09,length=19),seq(from=0.09,to=0.1,length=11),rep(0,32))
+delta_wealth
+plot(delta_wealth~c(1:length(delta_wealth)))
+# adjust for the fact that delta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
+std_delta_wealth<-delta_wealth/sd(as.vector(wealth))
+std_delta_wealth
+plot(std_delta_wealth~c(1:length(std_delta_wealth)))
+
 #Age at first reproduction (AFR)
 
 #simulate an age-specific parameter for AFR (mu)
@@ -85,14 +95,14 @@ for(j in 2:ncol(afrs)){
     if(!is.na(afrs[i,j-1])){
       if(afrs[i,j-1] == 0){
         afr_prob <- mu_age[j]+ #age
-        std_beta_wealth[j]*std_wealth[i,j] #wealth
+          std_delta_wealth[j]*std_wealth[i,j-1] #lagged absolute wealth by 1 year
         if(afr_prob<0){afr_prob<-0}
-      afrs[i,j] <- rbinom(1,1,afr_prob)
+        afrs[i,j] <- rbinom(1,1,afr_prob)
       }else{
         afrs[i,j] <- NA
-        }
-      } else{
-        afrs[i,j] <- NA
+      }
+    } else{
+      afrs[i,j] <- NA
     }
   }
 }
@@ -114,8 +124,8 @@ plot(cumprod(1-apply(afrs,2,sum,na.rm = T)/apply(afrs,2,function(x)sum(!is.na(x)
      col=hcl.colors(length(palette),"temps")[palette[2]],
      pch=16) #data
 lines(cumprod(1-apply(afrs,2,sum,na.rm = T)/apply(afrs,2,function(x)sum(!is.na(x)))),col=hcl.colors(length(palette),"temps")[palette[2]],lwd=2)
-points(cumprod(1-(mu_age+std_beta_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],pch=15) #mu+std_beta
-lines(cumprod(1-(mu_age+std_beta_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],lwd=2) #mu+std_beta
+points(cumprod(1-(mu_age+std_delta_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],pch=15) #mu+std_beta
+lines(cumprod(1-(mu_age+std_delta_wealth)),col=hcl.colors(length(palette),"temps")[palette[1]],lwd=2) #mu+std_beta
 
 # Introduce missing data in the wealth data frame
 for (j in 1:ncol(std_wealth)){
@@ -157,28 +167,28 @@ afrs
 #put all the data together
 #create data
 data2 <- list(N = nrow(afrs), #population size
-               A = ncol(afrs), #age
-               wealth = as.vector(t(std_wealth)), #absolute wealth
-               N_miss = sum((std_wealth)== -99), # number of missing values that need imputation
-               id_wealth_miss = which(as.vector(t(std_wealth))== -99), # provide the indexes for the missing data
-               baby = afrs #AFR
-               ) 
+              A = ncol(afrs), #age
+              wealth = as.vector(t(std_wealth)), #absolute wealth
+              N_miss = sum((std_wealth)== -99), # number of missing values that need imputation
+              id_wealth_miss = which(as.vector(t(std_wealth))== -99), # provide the indexes for the missing data
+              baby = afrs #AFR
+) 
 
 #check data 
 data2
 
 # compile model
 
-m2_add <- cmdstan_model("Model_code/firstbaby_abswealth_additive.stan")
+m2_add <- cmdstan_model("Model_code/firstbaby_lag2abs.stan")
 
 # fit model
 
 fit2_add <- m2_add$sample(data = data2, 
-                            chains = 4, 
-                            parallel_chains = 15, 
-                            adapt_beta = 0.95,
-                            max_treedepth = 13,
-                            init = 0)
+                          chains = 4, 
+                          parallel_chains = 15, 
+                          adapt_delta = 0.95,
+                          max_treedepth = 13,
+                          init = 0)
 
 # save fit 
 fit2_add <- rstan::read_stan_csv(fit2_add$output_files())
@@ -200,8 +210,8 @@ rstan::traceplot(rds2_add,pars="alpha")
 rstan::traceplot(rds2_add,pars="mu_tau")
 #mu_kappa
 rstan::traceplot(rds2_add,pars="mu_kappa")
-#mu_beta
-rstan::traceplot(rds2_add,pars="mu_beta")
+#mu_delta
+rstan::traceplot(rds2_add,pars="mu_delta")
 #beta_wealth
 #traceplot(rds2_add,pars="beta_wealth") #only run if needed, because they are 91 plots
 
@@ -209,9 +219,9 @@ rstan::traceplot(rds2_add,pars="mu_beta")
 #create summary table
 #create summary table for alpha and hiper priors of Gaussian process
 tabs2_add <- precis(rds2_add,depth=3,pars=c("alpha",
-                                              "mu_raw",
-                                              "mu_tau",
-                                              "mu_beta"))
+                                            "mu_raw",
+                                            "mu_tau",
+                                            "mu_delta"))
 #check table
 tabs2_add
 #create summary table for mu
@@ -264,8 +274,8 @@ for(k in 1:(length(deciles))){
   for(j in 1:ncol(post2_add$mu)){
     for(i in 1:nrow(post2_add$mu)){
       p2_add_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                    post2_add$mu[i,j] + #age
-                                    post2_add$beta_wealth[i,j]*deciles[k]) #wealth
+                                   post2_add$mu[i,j] + #age
+                                   post2_add$beta_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
@@ -273,9 +283,9 @@ for(k in 1:(length(deciles))){
   #plot it!
   #prepare model prediction data
   plot_data2_add_b <- data.frame(age = 1:ncol(p2_add_b),
-                                  mean = apply(p2_add_b, 2, mean), 
-                                  upp = apply(p2_add_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                  low = apply(p2_add_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                                 mean = apply(p2_add_b, 2, mean), 
+                                 upp = apply(p2_add_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p2_add_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #prepare afr probabilities from real data
   #create a matrix
@@ -323,7 +333,7 @@ plot(c(0,1)~c(0,ncol(post2_add$mu)),
      cex.main=1.5,
      cex.lab=1.5,
      cex.axis=1.2
-     )
+)
 
 #create matrix to store the data
 p2_add_0_b <- matrix(nrow=nrow(post2_add$mu),ncol=ncol(post2_add$mu))
@@ -332,8 +342,8 @@ p2_add_0_b
 for(j in 1:ncol(post2_add$mu)){
   for(i in 1:nrow(post2_add$mu)){
     p2_add_0_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                        post2_add$mu[i,j] + #age
-                                        post2_add$beta_wealth[i,j]*deciles[1]) #wealth
+                                   post2_add$mu[i,j] + #age
+                                   post2_add$beta_wealth[i,j]*deciles[1]) #wealth
   }
 }
 #check data
@@ -341,9 +351,9 @@ p2_add_0_b
 #plot it!
 #prepare model prediction data
 plot_data2_add_0_b <- data.frame(age = 1:ncol(p2_add_0_b),
-                                      mean = apply(p2_add_0_b, 2, mean), 
-                                      upp = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                                 mean = apply(p2_add_0_b, 2, mean), 
+                                 upp = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p2_add_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -383,8 +393,8 @@ p2_add_50_b
 for(j in 1:ncol(post2_add$mu)){
   for(i in 1:nrow(post2_add$mu)){
     p2_add_50_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                         post2_add$mu[i,j] + #age
-                                         post2_add$beta_wealth[i,j]*deciles[2]) #wealth
+                                    post2_add$mu[i,j] + #age
+                                    post2_add$beta_wealth[i,j]*deciles[2]) #wealth
   }
 }
 #check data
@@ -392,9 +402,9 @@ p2_add_50_b
 #plot it!
 #prepare model prediction data
 plot_data2_add_50_b <- data.frame(age = 1:ncol(p2_add_50_b),
-                                       mean = apply(p2_add_50_b, 2, mean), 
-                                       upp = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                       low = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                                  mean = apply(p2_add_50_b, 2, mean), 
+                                  upp = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p2_add_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix
@@ -434,8 +444,8 @@ p2_add_100_b
 for(j in 1:ncol(post2_add$mu)){
   for(i in 1:nrow(post2_add$mu)){
     p2_add_100_b[i,j] <- inv_logit(post2_add$alpha[i] + #inv logit because originally is logit
-                                          post2_add$mu[i,j] + #age
-                                          post2_add$beta_wealth[i,j]*deciles[3]) #wealth
+                                     post2_add$mu[i,j] + #age
+                                     post2_add$beta_wealth[i,j]*deciles[3]) #wealth
   }
 }
 #check data
@@ -443,9 +453,9 @@ p2_add_100_b
 #plot it!
 #prepare model prediction data
 plot_data2_add_100_b <- data.frame(age = 1:ncol(p2_add_100_b),
-                                        mean = apply(p2_add_100_b, 2, mean), 
-                                        upp = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                        low = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                                   mean = apply(p2_add_100_b, 2, mean), 
+                                   upp = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                   low = apply(p2_add_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
 #prepare afr probabilities from real data
 #create a matrix

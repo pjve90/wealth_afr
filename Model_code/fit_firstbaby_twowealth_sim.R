@@ -127,8 +127,8 @@ for(j in 2:ncol(afrs)){
     if(!is.na(afrs[i,j-1])){
       if(afrs[i,j-1] == 0){
         afr_prob <- mu_age[j]+ #age
-        std_beta_wealth[j]*std_abswealth[i,j]+ #absolute wealth
-        std_gamma_wealth[j]*std_diffwealth[i,j] #wealth variability
+          std_beta_wealth[j]*std_abswealth[i,j]+ #absolute wealth
+          std_gamma_wealth[j]*std_diffwealth[i,j] #wealth variability
         if(afr_prob<0){afr_prob<-0}
         afrs[i,j] <- rbinom(1,1,afr_prob)
       }else{
@@ -386,7 +386,8 @@ for(j in 1:ncol(post4_add$mu)){
   for(i in 1:nrow(post4_add$mu)){
     p4_add_0_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                    post4_add$mu[i,j] + #age
-                                   post4_add$beta_wealth[i,j]*deciles[1]) #wealth
+                                   post4_add$beta_wealth[i,j]*deciles[1] + #absolute wealth
+                                   post4_add$gamma_wealth[i,j]*0) #wealth variability / zero because that is the average from the standardisation
   }
 }
 #check data
@@ -437,7 +438,8 @@ for(j in 1:ncol(post4_add$mu)){
   for(i in 1:nrow(post4_add$mu)){
     p4_add_50_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                     post4_add$mu[i,j] + #age
-                                    post4_add$beta_wealth[i,j]*deciles[2]) #wealth
+                                    post4_add$beta_wealth[i,j]*deciles[2] + #absolute wealth
+                                    post4_add$gamma_wealth[i,j]*0) #wealth variability / zero because that is the average from the standardisation
   }
 }
 #check data
@@ -488,7 +490,8 @@ for(j in 1:ncol(post4_add$mu)){
   for(i in 1:nrow(post4_add$mu)){
     p4_add_100_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                      post4_add$mu[i,j] + #age
-                                     post4_add$beta_wealth[i,j]*deciles[3]) #wealth
+                                     post4_add$beta_wealth[i,j]*deciles[3] + #absolute wealth
+                                     post4_add$gamma_wealth[i,j]*0) #wealth variability / zero because that is the average from the standardisation
   }
 }
 #check data
@@ -558,7 +561,8 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post4_add$mu)){
       p4_add_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                    post4_add$mu[i,j] + #age
-                                   post4_add$gamma_wealth[i,j]*deciles[k]) #wealth
+                                   post4_add$beta_wealth[i,j]*0 + #absolute wealth / zero because that is the average from the standardisation
+                                   post4_add$gamma_wealth[i,j]*deciles[k]) #wealth variability
     }
   }
   #check data
@@ -626,7 +630,8 @@ for(j in 1:ncol(post4_add$mu)){
   for(i in 1:nrow(post4_add$mu)){
     p4_add_0_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                    post4_add$mu[i,j] + #age
-                                   post4_add$beta_wealth[i,j]*deciles[1]) #wealth
+                                   post4_add$beta_wealth[i,j]*0 + #absolute wealth / zero because that is the average from the standardisation
+                                   post4_add$gamma_wealth[i,j]*deciles[1]) #wealth variability
   }
 }
 #check data
@@ -677,7 +682,8 @@ for(j in 1:ncol(post4_add$mu)){
   for(i in 1:nrow(post4_add$mu)){
     p4_add_50_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                     post4_add$mu[i,j] + #age
-                                    post4_add$beta_wealth[i,j]*deciles[2]) #wealth
+                                    post4_add$beta_wealth[i,j]*0 + #absolute wealth / zero because that is the average from the standardisation
+                                    post4_add$gamma_wealth[i,j]*deciles[2]) #wealth variability
   }
 }
 #check data
@@ -728,7 +734,8 @@ for(j in 1:ncol(post4_add$mu)){
   for(i in 1:nrow(post4_add$mu)){
     p4_add_100_b[i,j] <- inv_logit(post4_add$alpha[i] + #inv logit because originally is logit
                                      post4_add$mu[i,j] + #age
-                                     post4_add$beta_wealth[i,j]*deciles[3]) #wealth
+                                     post4_add$beta_wealth[i,j]*0 + #absolute wealth / zero because that is the average from the standardisation
+                                     post4_add$gamma_wealth[i,j]*deciles[3]) #wealth variability
   }
 }
 #check data

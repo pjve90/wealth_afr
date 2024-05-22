@@ -433,12 +433,12 @@ polygon(c(plot_data4_add_real_0_b$age,rev(plot_data4_add_real_0_b$age)),c(cumpro
 plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Medium",
-     yaxt="n",
+     main="Middle",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
 p4_add_real_50_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
@@ -485,11 +485,11 @@ plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Rich",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
 p4_add_real_100_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
@@ -679,11 +679,11 @@ plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Mid. change",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
 p4_add_real_50_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
@@ -729,12 +729,12 @@ polygon(c(plot_data4_add_real_50_b$age,rev(plot_data4_add_real_50_b$age)),c(cump
 plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Max. change",
-     yaxt="n",
+     main="Max change",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+)
 
 #create matrix to store the data
 p4_add_real_100_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
