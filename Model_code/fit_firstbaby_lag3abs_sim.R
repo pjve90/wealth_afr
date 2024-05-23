@@ -179,7 +179,7 @@ data7
 
 # compile model
 
-m7_add <- cmdstan_model("Model_code/firstbaby_lag2abs.stan")
+m7_add <- cmdstan_model("Model_code/firstbaby_lag3abs.stan")
 
 # fit model
 

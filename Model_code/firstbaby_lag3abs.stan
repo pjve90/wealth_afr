@@ -73,7 +73,7 @@ transformed parameters {
   vector[N*A] lagg3wealth; // lagged absolute wealth
   
   for(i in 1:N*A){
-    if(i == 1 | i == 2 | i == 3){
+    if(i == 1 || i == 2 || i == 3){
       lagg3wealth[i] = wealth_full[i] - wealth_full[i];
     }else{
       lagg3wealth[i] = wealth_full[i-3];

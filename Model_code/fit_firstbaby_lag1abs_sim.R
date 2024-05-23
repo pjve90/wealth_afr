@@ -179,7 +179,7 @@ data5
 
 # compile model
 
-m5_add <- cmdstan_model("Model_code/firstbaby_lag2abs.stan")
+m5_add <- cmdstan_model("Model_code/firstbaby_lag1abs.stan")
 
 # fit model
 
@@ -231,11 +231,11 @@ tabs5_add_mu
 plot(tabs5_add_mu)
 plot(cumprod(1-inv_logit(tabs5_add_mu[,1])),ylim=c(0,1))
 #create summary table for beta
-tabs5_add_beta <- precis(rds5_add,depth=3,pars="beta_wealth")
+tabs5_add_delta <- precis(rds5_add,depth=3,pars="beta_wealth")
 #check table
-tabs5_add_beta
-plot(tabs5_add_beta)
-plot(cumprod(1-inv_logit(tabs5_add_beta[,1])),ylim=c(0,1))
+tabs5_add_delta
+plot(tabs5_add_delta)
+plot(cumprod(1-inv_logit(tabs5_add_delta[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
@@ -275,7 +275,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add$mu)){
       p5_add_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
                                    post5_add$mu[i,j] + #age
-                                   post5_add$beta_wealth[i,j]*deciles[k]) #wealth
+                                   post5_add$delta_wealth[i,j]*deciles[k]) #wealth
     }
   }
   #check data
@@ -343,7 +343,7 @@ for(j in 1:ncol(post5_add$mu)){
   for(i in 1:nrow(post5_add$mu)){
     p5_add_0_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
                                    post5_add$mu[i,j] + #age
-                                   post5_add$beta_wealth[i,j]*deciles[1]) #wealth
+                                   post5_add$delta_wealth[i,j]*deciles[1]) #wealth
   }
 }
 #check data
@@ -394,7 +394,7 @@ for(j in 1:ncol(post5_add$mu)){
   for(i in 1:nrow(post5_add$mu)){
     p5_add_50_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
                                     post5_add$mu[i,j] + #age
-                                    post5_add$beta_wealth[i,j]*deciles[2]) #wealth
+                                    post5_add$delta_wealth[i,j]*deciles[2]) #wealth
   }
 }
 #check data
@@ -445,7 +445,7 @@ for(j in 1:ncol(post5_add$mu)){
   for(i in 1:nrow(post5_add$mu)){
     p5_add_100_b[i,j] <- inv_logit(post5_add$alpha[i] + #inv logit because originally is logit
                                      post5_add$mu[i,j] + #age
-                                     post5_add$beta_wealth[i,j]*deciles[3]) #wealth
+                                     post5_add$delta_wealth[i,j]*deciles[3]) #wealth
   }
 }
 #check data
