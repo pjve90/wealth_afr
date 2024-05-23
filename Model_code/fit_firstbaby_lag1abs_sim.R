@@ -231,7 +231,7 @@ tabs5_add_mu
 plot(tabs5_add_mu)
 plot(cumprod(1-inv_logit(tabs5_add_mu[,1])),ylim=c(0,1))
 #create summary table for beta
-tabs5_add_delta <- precis(rds5_add,depth=3,pars="beta_wealth")
+tabs5_add_delta <- precis(rds5_add,depth=3,pars="delta_wealth")
 #check table
 tabs5_add_delta
 plot(tabs5_add_delta)

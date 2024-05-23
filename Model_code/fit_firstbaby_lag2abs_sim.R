@@ -231,11 +231,11 @@ tabs6_add_mu
 plot(tabs6_add_mu)
 plot(cumprod(1-inv_logit(tabs6_add_mu[,1])),ylim=c(0,1))
 #create summary table for beta
-tabs6_add_beta <- precis(rds6_add,depth=3,pars="eps_wealth")
+tabs6_add_eps <- precis(rds6_add,depth=3,pars="eps_wealth")
 #check table
-tabs6_add_beta
-plot(tabs6_add_beta)
-plot(cumprod(1-inv_logit(tabs6_add_beta[,1])),ylim=c(0,1))
+tabs6_add_eps
+plot(tabs6_add_eps)
+plot(cumprod(1-inv_logit(tabs6_add_eps[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 

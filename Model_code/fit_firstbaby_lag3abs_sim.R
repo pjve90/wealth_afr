@@ -231,11 +231,11 @@ tabs7_add_mu
 plot(tabs7_add_mu)
 plot(cumprod(1-inv_logit(tabs7_add_mu[,1])),ylim=c(0,1))
 #create summary table for beta
-tabs7_add_beta <- precis(rds7_add,depth=3,pars="zeta_wealth")
+tabs7_add_zeta <- precis(rds7_add,depth=3,pars="zeta_wealth")
 #check table
-tabs7_add_beta
-plot(tabs7_add_beta)
-plot(cumprod(1-inv_logit(tabs7_add_beta[,1])),ylim=c(0,1))
+tabs7_add_zeta
+plot(tabs7_add_zeta)
+plot(cumprod(1-inv_logit(tabs7_add_zeta[,1])),ylim=c(0,1))
 
 ## Plot the fit of the simulated data ----
 
