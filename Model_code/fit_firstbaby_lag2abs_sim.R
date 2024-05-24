@@ -186,7 +186,7 @@ m6_add <- cmdstan_model("Model_code/firstbaby_lag2abs.stan")
 fit6_add <- m6_add$sample(data = data6, 
                           chains = 4, 
                           parallel_chains = 15, 
-                          adapt_eps = 0.95,
+                          adapt_delta = 0.95,
                           max_treedepth = 13,
                           init = 0)
 

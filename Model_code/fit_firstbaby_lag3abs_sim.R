@@ -186,7 +186,7 @@ m7_add <- cmdstan_model("Model_code/firstbaby_lag3abs.stan")
 fit7_add <- m7_add$sample(data = data7, 
                           chains = 4, 
                           parallel_chains = 15, 
-                          adapt_eps = 0.95,
+                          adapt_delta = 0.95,
                           max_treedepth = 13,
                           init = 0)
 
