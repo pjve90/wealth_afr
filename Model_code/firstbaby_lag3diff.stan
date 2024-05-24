@@ -18,7 +18,6 @@ functions {
 
     return S * cholesky_decompose(Rho);
   }
-
 }
 
 data {
@@ -44,8 +43,8 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
-// wealth
-  vector[A] gamma_wealth; // short-term wealth variability
+// lagged absolute wealth of 2 years
+  vector [A] iota_wealth;
 // missing wealth data
   vector[N_miss] wealth_impute;
   real nu;
@@ -69,18 +68,20 @@ transformed parameters {
         wealth_full[id_wealth_miss[i]] = wealth_impute[i];
       }
     }
-
-//Short-term wealth variability
-  vector[N*A] diffwealth; //short-term wealth variability
+    
+//Lagged effect of absolute wealth change (1 year)
+  vector[N*A] lagg3diff; //lagged effect of absolute change
   
   for(i in 1:N*A){
-    if(i == 1){
-      diffwealth[i] = wealth_full[i] - wealth_full[i];
+    if(i == 1 || i== 2 || i == 3 || i == 4){
+      lagg3diff[i] = wealth_full[i] - wealth_full[i];
     }else{
-      diffwealth[i] = wealth_full[i] - wealth_full[i-1];
+      lagg3diff[i] = wealth_full[i] - wealth_full[i-4];
     }
   }
-  vector[N*A] std_diffwealth =  (log(abs(diffwealth)+1)) - mean((log(abs(diffwealth)+1))) / sd((log(abs(diffwealth)+1))) ; // absolute values, log-transform, and standardised
+  
+  vector[N*A] std_lagg3diff =  ((log(abs(lagg3diff)+1)) - mean((log(abs(lagg3diff)+1)))) / sd((log(abs(lagg3diff)+1))) ; // absolute values, log-transform, and standardised
+
 }
 
 model {
@@ -91,23 +92,25 @@ model {
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
-// wealth
-    gamma_wealth ~ normal(0,1); // wealth variability
+// lagged absolute wealth change
+    iota_wealth ~ normal(0,1);
 // missing wealth data
     wealth_impute ~ normal(nu,sigma_wealth_miss);
     nu ~ normal(0,1);
     sigma_wealth_miss ~ exponential(1);
-
+    
+    
   for (n in 1:N) {
-  for (a in 1:A) {
+  for (a in 2:A) {
     
     if(baby[n,a] != -99){
 
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        gamma_wealth[a]*std_diffwealth[(n-1)*a+a] // wealth variability
+        iota_wealth[a]*std_lagg3diff[(n-1)*a+a] // lagged absolute wealth
         );
+          
     }
     }
     }
