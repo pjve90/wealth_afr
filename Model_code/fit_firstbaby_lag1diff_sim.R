@@ -29,25 +29,25 @@ A <- 73
 #Absolute wealth
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
-wealth <- matrix(nrow=N,ncol=A+1)
+abswealth <- matrix(nrow=N,ncol=A+1)
 #randomly assign an amount of wealth for each individual at age 0 - based on the distribution of household assets in the data
-wealth[,1] <- exp(rnorm(100,5,1))
+abswealth[,1] <- exp(rnorm(100,5,1))
 #simulate wealth of individuals through time, based on previous absolute wealth
 for(j in 2:ncol(wealth)){
   for(i in 1:nrow(wealth)){
-    wealth[i,j] <- wealth[i,j-1]+rnorm(1,0,0.25)
+    abswealth[i,j] <- abswealth[i,j-1]+rnorm(1,0,0.25)
   }
 }
 #check the data
 #see the data
-head(wealth)
+head(abswealth)
 #check the age-specific absolute wealth
-apply(wealth,2,mean)
+apply(abswealth,2,mean)
 #plot it
-plot(apply(wealth,2,mean),xlab="Age",ylab="Average absolute wealth")
+plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
 #log-transform and standardise wealth data
-std_abswealth <- matrix(standardize(log(as.vector(wealth))),ncol=ncol(wealth),nrow=nrow(wealth))
+std_abswealth <- matrix(standardize(log(as.vector(abswealth))),ncol=ncol(abswealth),nrow=nrow(abswealth))
 #check the data
 std_abswealth
 
