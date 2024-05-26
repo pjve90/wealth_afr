@@ -225,7 +225,7 @@ fit9_add <- m9_add$sample(data = data9,
 fit9_add <- rstan::read_stan_csv(fit9_add$output_files())
 saveRDS(fit9_add, "firstbaby9_add.rds")
 #load RDS file
-rds9_add <- readRDS("firstbaby8_add.rds")
+rds9_add <- readRDS("firstbaby9_add.rds")
 #extract samples
 post9_add <- extract.samples(rds9_add)
 

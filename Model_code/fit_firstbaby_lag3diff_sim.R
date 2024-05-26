@@ -47,7 +47,7 @@ apply(abswealth,2,mean)
 plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth")
 
 #log-transform and standardise wealth data
-std_abswealth <- matrix(standardize(log(as.vector(abswealth))),ncol=ncolabswealth),nrow=nrow(abswealth))
+std_abswealth <- matrix(standardize(log(as.vector(abswealth))),ncol=ncol(abswealth),nrow=nrow(abswealth))
 #check the data
 std_abswealth
 
