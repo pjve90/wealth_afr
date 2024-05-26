@@ -88,7 +88,7 @@ apply(abs(diffwealth),2,mean)
 plot(apply(abs(diffwealth),2,mean),xlab="Age",ylab="Average wealth variability")
 
 #standardise wealth variability
-std_diffwealth <- matrix(standardize(log(abs(as.vector(diffwealth))+1)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+std_diffwealth <- matrix(standardize(abs(as.vector(diffwealth))),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
 #check the data
 std_diffwealth
 
