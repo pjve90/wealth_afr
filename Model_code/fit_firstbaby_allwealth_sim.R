@@ -55,14 +55,14 @@ points(apply(abswealth,2,mean),pch=16)
 hist(abswealth)
 
 #log-transform and standardise wealth data
-std_wealth <- matrix(standardize(log(as.vector(wealth))),ncol=ncol(wealth),nrow=nrow(wealth))
+std_abswealth <- matrix(standardize(log(as.vector(abswealth))),ncol=ncol(abswealth),nrow=nrow(abswealth))
 #check the data
-head(std_wealth)
+head(std_abswealth)
 #check the age-specific absolute wealth
-apply(std_wealth,2,mean)
+apply(std_abswealth,2,mean)
 #plot it
-plot(apply(std_wealth,2,mean),xlab="Age",ylab="Average std. absolute wealth",type="h",lwd=2)
-points(apply(std_wealth,2,mean),pch=16)
+plot(apply(std_abswealth,2,mean),xlab="Age",ylab="Average std. absolute wealth",type="h",lwd=2)
+points(apply(std_abswealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(std_wealth)
 
@@ -536,11 +536,11 @@ for(j in 5:ncol(afrs)){
         afr_prob <- mu_age[j]+ #age
           std_beta_wealth[j]*std_abswealth[i,j]+ #current absolute wealth
           std_gamma_wealth[j]*std_diffwealth[i,j]+ #current wealth change
-          std_delta_wealth[j]*std_lagg1wealth[i,j]+ #1-year lagged absolute wealth
+          std_delta_wealth[j]*lagg1wealth[i,j]+ #1-year lagged absolute wealth
           std_epsilon_wealth[j]*std_lagg1diff[i,j]+ #1-year lagged wealth change
-          std_zeta_wealth[j]*std_lagg2wealth[i,j]+ #2-year lagged absolute wealth
+          std_zeta_wealth[j]*lagg2wealth[i,j]+ #2-year lagged absolute wealth
           std_eta_wealth[j]*std_lagg2diff[i,j]+ #2-year lagged wealth change
-          std_theta_wealth[j]*std_lagg3wealth[i,j]+ #3-year lagged absolute wealth
+          std_theta_wealth[j]*lagg3wealth[i,j]+ #3-year lagged absolute wealth
           std_iota_wealth[j]*std_lagg3diff[i,j]+ #3-year lagged wealth change
           std_kappa_wealth[j]*std_cmawealth[i,j]+ #cumulative moving average of wealth
           std_lambda_wealth[j]*std_cmvwealth[i,j] #cumulative moving vaiance of wealth
@@ -585,7 +585,7 @@ head(std_abswealth)
 
 # Only take the years when individuals have a first baby
 #check min and max ages at first reproduction
-apply(afrs,2,sum)
+apply(afrs,2,sum,na.rm=T)
 #min
 min(which(apply(afrs,2,sum)>0))
 #14
