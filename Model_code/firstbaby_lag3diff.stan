@@ -108,7 +108,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        iota_wealth[a]*std_lagg3diff[(n-1)*a+a] // lagged absolute wealth
+        iota_wealth[a]*std_lagg3diff[(n-1)*A+a] // lagged absolute wealth
         );
           
     }

@@ -106,7 +106,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        gamma_wealth[a]*std_diffwealth[(n-1)*a+a] // wealth variability
+        gamma_wealth[a]*std_diffwealth[(n-1)*A+a] // wealth variability
         );
     }
     }

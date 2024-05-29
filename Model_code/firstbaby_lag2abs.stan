@@ -106,7 +106,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        eps_wealth[a]*lagg2wealth[(n-1)*a+a] // lagged absolute wealth
+        eps_wealth[a]*lagg2wealth[(n-1)*A+a] // lagged absolute wealth
         );
           
     }

@@ -43,8 +43,8 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
-// lagged absolute wealth of 2 years
-  vector [A] eta_wealth;
+// cumulative moving variance
+  vector [A] lambda_wealth;
 // missing wealth data
   vector[N_miss] wealth_impute;
   real nu;
@@ -69,19 +69,29 @@ transformed parameters {
       }
     }
     
-//Lagged effect of absolute wealth change (1 year)
-  vector[N*A] lagg1diff; //lagged effect of absolute change
+//Cumulative moving variance
+  vector[N*A] cmawealth; // vector to store the cumulative moving averages
+  vector[N*A] cmvwealth; // vector to store the cumulative moving averages
+  real sum_squared_diff;      // Sum of squared differences from the mean
   
-  for(i in 1:N*A){
-    if(i == 1 || i == 2){
-      lagg1diff[i] = wealth_full[i] - wealth_full[i];
-    }else{
-      lagg1diff[i] = wealth_full[i] - wealth_full[i-2];
-    }
+  
+  for (n in 1:N)
+  {
+    cmawealth[(n-1)*A+1] = wealth_full[(n-1)*A+1]; // adding in the vector the wealth at birth (column 1 in matrix)
+    cmvwealth[(n-1)*A+1] = 0.0; // adding in the vector the variability at birth (column 1 in matrix)
+    sum_squared_diff = 0.0;
   }
   
-  vector[N*A] std_lagg1diff =  ((log(abs(lagg1diff)+1)) - mean((log(abs(lagg1diff)+1)))) / sd((log(abs(lagg1diff)+1))) ; // absolute values, log-transform, and standardised
+  for (n in 1:N) {
+  for (a in 2:A) {
+    
+    cmawealth[(n-1)*A+a] = (cmawealth[(n-1)*A+(a-1)] * (a-1) + wealth_full[(n-1)*A+a]) / a; // cumulative moving average
+    sum_squared_diff += (wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+(a-1)]) * (wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+a]); // sum of squared differences from the mean
+    cmvwealth[(n-1)*A+a] = sum_squared_diff / a; // cumulative moving variance
 
+    }
+    }
+      
 }
 
 model {
@@ -92,8 +102,8 @@ model {
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
-// lagged absolute wealth change
-    eta_wealth ~ normal(0,1);
+// lagged absolute wealth
+    lambda_wealth ~ normal(0,1);
 // missing wealth data
     wealth_impute ~ normal(nu,sigma_wealth_miss);
     nu ~ normal(0,1);
@@ -101,14 +111,14 @@ model {
     
     
   for (n in 1:N) {
-  for (a in 2:A) {
+  for (a in 1:A) {
     
     if(baby[n,a] != -99){
 
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        eta_wealth[a]*std_lagg1diff[(n-1)*A+a] // lagged absolute wealth
+        lambda_wealth[a]*cmvwealth[(n-1)*A+a] // lagged absolute wealth
         );
           
     }
