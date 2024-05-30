@@ -64,12 +64,13 @@ apply(std_abswealth,2,mean)
 plot(apply(std_abswealth,2,mean),xlab="Age",ylab="Average std. absolute wealth",type="h",lwd=2)
 points(apply(std_abswealth,2,mean),pch=16)
 abline(h=0,lty=2)
-hist(std_wealth)
+hist(std_abswealth)
 
 #### Simulate parameter for absolute wealth ----
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
+#Current beta values mean that at the youngest age, an increase in wealth by one order of magnitude (e.g. from 10 to 100 or from 100 to 1000) leads to a decrease in the probability of reproduction of 10%. This is because the wealth values are log-transformed.
 beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
 beta_wealth
 #plot it!
@@ -77,7 +78,7 @@ plot(beta_wealth~c(1:length(beta_wealth)),pch=16,xlab="Age",ylab="Beta parameter
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_beta_wealth<-beta_wealth/sd(as.vector(abswealth)) #shall we use the log-transformed of abswealth?
+std_beta_wealth<-beta_wealth/sd(log(as.vector(abswealth))) 
 std_beta_wealth
 plot(std_beta_wealth~c(1:length(std_beta_wealth)),pch=16,xlab="Age",ylab="Std. beta parameter")
 abline(h=0,lty=2)
@@ -110,7 +111,7 @@ abline(h=0,lty=2)
 hist(diffwealth)
 
 #standardise and get the absolute value for current absolute wealth change
-std_diffwealth <- matrix(abs(standardize(as.vector(diffwealth))),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+std_diffwealth <- matrix(standardize(abs(as.vector(diffwealth))),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
 #check the data
 std_diffwealth
 #plot it
@@ -129,8 +130,11 @@ gamma_wealth
 plot(gamma_wealth~c(1:length(gamma_wealth)),pch=16,xlab="Age",ylab="Gamma parameter")
 abline(h=0,lty=2)
 
+# First adjust for the fact that the wealth values themselves are standardized, but the gamma_wealth is assumed to link to the changes in log wealth
+std_gamma_abswealth<-gamma_wealth/sd(log(as.vector(abswealth)))
+
 # adjust for the fact that gamma links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_gamma_wealth<-gamma_wealth/sd(as.vector(diffwealth))
+std_gamma_wealth<-std_gamma_abswealth/sd(abs(as.vector(diffwealth)))
 std_gamma_wealth
 plot(std_gamma_wealth~c(1:length(std_gamma_wealth)),pch=16,xlab="Age",ylab="Std. gamma parameter")
 abline(h=0,lty=2)
