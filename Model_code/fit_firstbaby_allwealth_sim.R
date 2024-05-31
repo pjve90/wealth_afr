@@ -54,8 +54,12 @@ plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth",type="h",
 points(apply(abswealth,2,mean),pch=16)
 hist(abswealth)
 
-#log-transform and standardise wealth data
-std_abswealth <- matrix(standardize(log(as.vector(abswealth))),ncol=ncol(abswealth),nrow=nrow(abswealth))
+#log-transform wealth data
+log_abswealth <- matrix(log(as.vector(abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
+#check the data
+head(log_abswealth)
+#standardise wealth data
+std_abswealth <- matrix(standardize(as.vector(log_abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
 #check the data
 head(std_abswealth)
 #check the age-specific absolute wealth
@@ -70,15 +74,14 @@ hist(std_abswealth)
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-#Current beta values mean that at the youngest age, an increase in wealth by one order of magnitude (e.g. from 10 to 100 or from 100 to 1000) leads to a decrease in the probability of reproduction of 10%. This is because the wealth values are log-transformed.
-beta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+beta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 beta_wealth
 #plot it!
 plot(beta_wealth~c(1:length(beta_wealth)),pch=16,xlab="Age",ylab="Beta parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_beta_wealth<-beta_wealth/sd(log(as.vector(abswealth))) 
+std_beta_wealth<-beta_wealth/sd(log_abswealth) 
 std_beta_wealth
 plot(std_beta_wealth~c(1:length(std_beta_wealth)),pch=16,xlab="Age",ylab="Std. beta parameter")
 abline(h=0,lty=2)
@@ -93,9 +96,9 @@ diffwealth <- matrix(nrow=N,ncol=A+1)
 for(j in 1:ncol(diffwealth)){
   for(i in 1:nrow(diffwealth)){
     if(j ==1){
-      diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j]
+      diffwealth[i,j] <- abswealth[i,j] - abswealth[i,j]
     } else{
-      diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-1]
+      diffwealth[i,j] <- abswealth[i,j] - abswealth[i,j-1]
     }
   }
 }
@@ -110,8 +113,13 @@ points(apply(diffwealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(diffwealth)
 
-#standardise and get the absolute value for current absolute wealth change
-std_diffwealth <- matrix(standardize(abs(as.vector(diffwealth))),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+#get the absolute value of wealth change
+abs_diffwealth <- matrix(abs(as.vector(diffwealth)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+#check data
+abs_diffwealth
+hist(abs_diffwealth)
+#standardise the absolute wealth change
+std_diffwealth <- matrix(standardize(as.vector(abs_diffwealth)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
 #check the data
 std_diffwealth
 #plot it
@@ -124,17 +132,14 @@ hist(std_diffwealth)
 
 #simulate an age-specific parameter for wealth variability
 #if seq starts from a positive value and goes to a negative value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-gamma_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
+gamma_wealth<-c(rep(0,13),seq(from=0.01,to=-0.01,length=20),rep(0,41))
 gamma_wealth
 #plot it
 plot(gamma_wealth~c(1:length(gamma_wealth)),pch=16,xlab="Age",ylab="Gamma parameter")
 abline(h=0,lty=2)
 
-# First adjust for the fact that the wealth values themselves are standardized, but the gamma_wealth is assumed to link to the changes in log wealth
-std_gamma_abswealth<-gamma_wealth/sd(log(as.vector(abswealth)))
-
 # adjust for the fact that gamma links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_gamma_wealth<-std_gamma_abswealth/sd(abs(as.vector(diffwealth)))
+std_gamma_wealth<-gamma_wealth/sd(abs_diffwealth)
 std_gamma_wealth
 plot(std_gamma_wealth~c(1:length(std_gamma_wealth)),pch=16,xlab="Age",ylab="Std. gamma parameter")
 abline(h=0,lty=2)
@@ -163,18 +168,18 @@ points(apply(lagg1wealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(lagg1wealth)
 
-#### Simulate parameter for 1-year lagged absolute wealth ----
+i#### Simulate parameter for 1-year lagged absolute wealth ----
 
 #simulate an age-specific parameter for 1-year lagged wealth (delta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-delta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+delta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 delta_wealth
 #plot it!
 plot(delta_wealth~c(1:length(delta_wealth)),pch=16,xlab="Age",ylab="Delta parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_delta_wealth<-delta_wealth/sd(as.vector(abswealth))
+std_delta_wealth<-delta_wealth/sd(log_abswealth)
 std_delta_wealth
 #plot it
 plot(std_delta_wealth~c(1:length(std_delta_wealth)),pch=16,xlab="Age",ylab="Std. delta parameter")
@@ -190,7 +195,7 @@ lagg1diff <- matrix(nrow=N,ncol=A+1)
 #calculate the 1-year lagged absolute wealth for each age
 for(j in 3:ncol(lagg1diff)){
   for(i in 1:nrow(lagg1diff)){
-    lagg1diff[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-2] #1-year lagged absolute wealth
+    lagg1diff[i,j] <- abswealth[i,j] - abswealth[i,j-2] #1-year lagged absolute wealth
   }
 }
 #check the data
@@ -204,27 +209,33 @@ points(apply(lagg1diff,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(lagg1diff)
 
-#standardise wealth data
-std_lagg1diff <- matrix(abs(standardize(as.vector(lagg1diff))),ncol=ncol(lagg1diff),nrow=nrow(lagg1diff))
+#get the absolute value of wealth change
+abs_lagg1diff <- matrix(abs(as.vector(lagg1diff)),ncol=ncol(lagg1diff),nrow=nrow(lagg1diff))
+#check data
+abs_lagg1diff
+hist(abs_lagg1diff)
+#standardise the absolute wealth change
+std_lagg1diff <- matrix(standardize(as.vector(abs_lagg1diff)),ncol=ncol(lagg1diff),nrow=nrow(lagg1diff))
 #check the data
 std_lagg1diff
 #plot it
-plot(apply(std_lagg1diff,2,mean),xlab="Age",ylab="Std. average 1-year lagged absolute wealth change",type="h",lwd=2)
+plot(apply(std_lagg1diff,2,mean),xlab="Age",ylab="Average std. current wealth change",type="h",lwd=2)
 points(apply(std_lagg1diff,2,mean),pch=16)
+abline(h=0,lty=2)
 hist(std_lagg1diff)
 
 #### Simulate parameter for 1-year lagged absolute wealth change ----
 
 #simulate an age-specific parameter for 1-year lagged wealth (epsilon)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-epsilon_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
+epsilon_wealth<-c(rep(0,13),seq(from=0.01,to=-0.01,length=20),rep(0,41))
 epsilon_wealth
 #plot it!
 plot(epsilon_wealth~c(1:length(epsilon_wealth)),pch=16,xlab="Age",ylab="Epsilon parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_epsilon_wealth<-epsilon_wealth/sd(as.vector(diffwealth))
+std_epsilon_wealth<-epsilon_wealth/sd(abs_lagg1diff,na.rm = T)
 std_epsilon_wealth
 #plot it!
 plot(std_epsilon_wealth~c(1:length(std_epsilon_wealth)),pch=16,xlab="Age",ylab="Std. epsilon parameter")
@@ -258,14 +269,14 @@ hist(lagg2wealth)
 
 #simulate an age-specific parameter for 2-year lagged wealth (zeta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-zeta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+zeta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 zeta_wealth
 #plot it!
 plot(zeta_wealth~c(1:length(zeta_wealth)),pch=16,xlab="Age",ylab="Zeta parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_zeta_wealth<-zeta_wealth/sd(as.vector(abswealth))
+std_zeta_wealth<-zeta_wealth/sd(log_abswealth)
 std_zeta_wealth
 #plot it
 plot(std_zeta_wealth~c(1:length(std_zeta_wealth)),pch=16,xlab="Age",ylab="Std. zeta parameter")
@@ -281,7 +292,7 @@ lagg2diff <- matrix(nrow=N,ncol=A+1)
 #calculate the 2-year lagged absolute wealth for each age
 for(j in 4:ncol(lagg2diff)){
   for(i in 1:nrow(lagg2diff)){
-    lagg2diff[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-3] #2-year lagged absolute wealth
+    lagg2diff[i,j] <- abswealth[i,j] - abswealth[i,j-3] #2-year lagged absolute wealth
   }
 }
 #check the data
@@ -295,27 +306,33 @@ points(apply(lagg2diff,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(lagg2diff)
 
-#standardise wealth data
-std_lagg2diff <- matrix(abs(standardize(as.vector(lagg2diff))),ncol=ncol(lagg2diff),nrow=nrow(lagg2diff))
+#get the absolute value of wealth change
+abs_lagg2diff <- matrix(abs(as.vector(lagg2diff)),ncol=ncol(lagg2diff),nrow=nrow(lagg2diff))
+#check data
+abs_lagg2diff
+hist(abs_lagg2diff)
+#standardise the absolute wealth change
+std_lagg2diff <- matrix(standardize(as.vector(abs_lagg2diff)),ncol=ncol(lagg2diff),nrow=nrow(lagg2diff))
 #check the data
 std_lagg2diff
 #plot it
-plot(apply(std_lagg2diff,2,mean),xlab="Age",ylab="Average 2-year lagged absolute wealth change",type="h",lty=1.5)
+plot(apply(std_lagg2diff,2,mean),xlab="Age",ylab="Average std. current wealth change",type="h",lwd=2)
 points(apply(std_lagg2diff,2,mean),pch=16)
+abline(h=0,lty=2)
 hist(std_lagg2diff)
 
 #### Simulate parameter for 2-year lagged absolute wealth change ----
 
 #simulate an age-specific parameter for 2-year lagged wealth change (eta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-eta_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
+eta_wealth<-c(rep(0,13),seq(from=0.01,to=-0.01,length=20),rep(0,41))
 eta_wealth
 #plot it!
 plot(eta_wealth~c(1:length(eta_wealth)),pch=16,xlab="Age",ylab="Eta parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_eta_wealth<-eta_wealth/sd(as.vector(diffwealth))
+std_eta_wealth<-eta_wealth/sd(abs_lagg2diff,na.rm = T)
 std_eta_wealth
 #plot it
 plot(std_eta_wealth~c(1:length(std_eta_wealth)),pch=16,xlab="Age",ylab="Std. eta parameter")
@@ -349,14 +366,14 @@ hist(lagg3wealth)
 
 #simulate an age-specific parameter for 3-year lagged wealth (theta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-theta_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+theta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 theta_wealth
 #plot it!
 plot(theta_wealth~c(1:length(theta_wealth)),pch=16,xlab="Age",ylab="Theta parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_theta_wealth<-theta_wealth/sd(as.vector(abswealth))
+std_theta_wealth<-theta_wealth/sd(log_abswealth)
 std_theta_wealth
 plot(std_theta_wealth~c(1:length(std_theta_wealth)),pch=16,xlab="Age",ylab="Std. theta parameter")
 abline(h=0,lty=2)
@@ -371,7 +388,7 @@ lagg3diff <- matrix(nrow=N,ncol=A+1)
 #calculate the 3-year lagged absolute wealth for each age
 for(j in 5:ncol(lagg3diff)){
   for(i in 1:nrow(lagg3diff)){
-    lagg3diff[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-4] #3-year lagged absolute wealth
+    lagg3diff[i,j] <- abswealth[i,j] - abswealth[i,j-4] #3-year lagged absolute wealth
   }
 }
 #check the data
@@ -385,27 +402,33 @@ points(apply(lagg3diff,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(lagg3diff)
 
-#standardise wealth data
-std_lagg3diff <- matrix(abs(standardize(as.vector(lagg3diff))),ncol=ncol(lagg3diff),nrow=nrow(lagg3diff))
+#get the absolute value of wealth change
+abs_lagg3diff <- matrix(abs(as.vector(lagg3diff)),ncol=ncol(lagg3diff),nrow=nrow(lagg3diff))
+#check data
+abs_lagg3diff
+hist(abs_lagg3diff)
+#standardise the absolute wealth change
+std_lagg3diff <- matrix(standardize(as.vector(abs_lagg3diff)),ncol=ncol(lagg3diff),nrow=nrow(lagg3diff))
 #check the data
 std_lagg3diff
 #plot it
-plot(apply(std_lagg3diff,2,mean),xlab="Age",ylab="Average 3-year lagged absolute wealth change",type="h",lwd=2)
+plot(apply(std_lagg3diff,2,mean),xlab="Age",ylab="Average std. current wealth change",type="h",lwd=2)
 points(apply(std_lagg3diff,2,mean),pch=16)
+abline(h=0,lty=2)
 hist(std_lagg3diff)
 
 #### Simulate parameter for 3-year lagged absolute wealth change ----
 
 #simulate an age-specific parameter for 3-year lagged wealth change (iota)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-iota_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
+iota_wealth<-c(rep(0,13),seq(from=0.01,to=-0.01,length=20),rep(0,41))
 iota_wealth
 #plot it!
 plot(iota_wealth~c(1:length(iota_wealth)),pch=16,xlab="Age",ylab="Iota parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that biota links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_iota_wealth<-iota_wealth/sd(as.vector(diffwealth))
+std_iota_wealth<-iota_wealth/sd(abs_lagg3diff,na.rm = T)
 std_iota_wealth
 plot(std_iota_wealth~c(1:length(std_iota_wealth)),pch=16,xlab="Age",ylab="Std. iota parameter")
 abline(h=0,lty=2)
@@ -420,7 +443,7 @@ cmawealth <- matrix(nrow=N,ncol=A+1)
 #calculate the 3-year lagged absolute wealth for each age
 for(j in 1:ncol(cmawealth)){
   for(i in 1:nrow(cmawealth)){
-    cmawealth[i,j] <- mean(std_abswealth[i,1:j]) #cumulative moving average
+    cmawealth[i,j] <- mean(abswealth[i,1:j]) #cumulative moving average
   }
 }
 #check the data
@@ -434,12 +457,18 @@ points(apply(cmawealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(cmawealth)
 
-#standardise wealth data
-std_cmawealth <- matrix(standardize(as.vector(cmawealth)),ncol=ncol(cmawealth),nrow=nrow(cmawealth))
+#log-transform wealth data
+log_cmawealth <- matrix(log(as.vector(cmawealth)),ncol=ncol(cmawealth),nrow=nrow(cmawealth))
 #check the data
-std_cmawealth
+head(log_cmawealth)
+#standardise wealth data
+std_cmawealth <- matrix(standardize(as.vector(log_cmawealth)),ncol=ncol(cmawealth),nrow=nrow(cmawealth))
+#check the data
+head(std_cmawealth)
+#check the age-specific cmaolute wealth
+apply(std_cmawealth,2,mean)
 #plot it
-plot(apply(std_cmawealth,2,mean),xlab="Age",ylab="Std. average cumulative moving average of wealth",type="h",lwd=2)
+plot(apply(std_cmawealth,2,mean),xlab="Age",ylab="Average std. cmaolute wealth",type="h",lwd=2)
 points(apply(std_cmawealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(std_cmawealth)
@@ -448,14 +477,14 @@ hist(std_cmawealth)
 
 #simulate an age-specific parameter for cumulative moving average (kappa)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-kappa_wealth<-c(rep(0,13),seq(from=-0.1,to=0.1,length=20),rep(0,41))
+kappa_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 kappa_wealth
 #plot it!
 plot(kappa_wealth~c(1:length(kappa_wealth)),pch=16,xlab="Age",ylab="Kappa parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_kappa_wealth<-kappa_wealth/sd(as.vector(cmawealth))
+std_kappa_wealth<-kappa_wealth/sd(log_cmawealth) 
 std_kappa_wealth
 #plot it
 plot(std_kappa_wealth~c(1:length(std_kappa_wealth)),pch=16,xlab="Age",ylab="Std. kappa parameter")
@@ -471,7 +500,7 @@ cmvwealth <- matrix(nrow=N,ncol=A+1)
 #calculate the 3-year lagged absolute wealth for each age
 for(j in 1:ncol(cmvwealth)){
   for(i in 1:nrow(cmvwealth)){
-    cmvwealth[i,j] <- var(std_abswealth[i,1:j]) #cumulative moving variance
+    cmvwealth[i,j] <- var(abswealth[i,1:j]) #cumulative moving variance
   }
 }
 #check the data
@@ -485,12 +514,18 @@ points(apply(cmvwealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(cmvwealth)
 
-#standardise and log transform cumulative moving variance
-std_cmvwealth <- matrix(standardize(log(as.vector(cmvwealth))),ncol=ncol(cmvwealth),nrow=nrow(cmvwealth))
+#log-transform wealth data
+log_cmvwealth <- matrix(log(as.vector(cmvwealth)),ncol=ncol(cmvwealth),nrow=nrow(cmvwealth))
 #check the data
-std_cmvwealth
+head(log_cmvwealth)
+#standardise wealth data
+std_cmvwealth <- matrix(standardize(as.vector(log_cmvwealth)),ncol=ncol(cmvwealth),nrow=nrow(cmvwealth))
+#check the data
+head(std_cmvwealth)
+#check the age-specific cmvolute wealth
+apply(std_cmvwealth,2,mean)
 #plot it
-plot(apply(std_cmvwealth,2,mean),xlab="Age",ylab="Average cumulative moving variance of wealth",type="h",lwd=2)
+plot(apply(std_cmvwealth,2,mean),xlab="Age",ylab="Average std. cmvolute wealth",type="h",lwd=2)
 points(apply(std_cmvwealth,2,mean),pch=16)
 abline(h=0,lty=2)
 hist(std_cmvwealth)
@@ -499,14 +534,14 @@ hist(std_cmvwealth)
 
 #simulate an age-specific parameter for cumulative moving variance (lambda)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-lambda_wealth<-c(rep(0,13),seq(from=0.1,to=-0.1,length=20),rep(0,41))
+lambda_wealth<-c(rep(0,13),seq(from=0.01,to=-0.01,length=20),rep(0,41))
 lambda_wealth
 #plot it!
 plot(lambda_wealth~c(1:length(lambda_wealth)),pch=16,xlab="Age",ylab="Lambda parameter")
 abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_lambda_wealth<-lambda_wealth/sd(as.vector(cmvwealth),na.rm = T)
+std_lambda_wealth<-lambda_wealth/sd(log_cmvwealth, na.rm=T)
 std_lambda_wealth
 #plot it!
 plot(std_lambda_wealth~c(1:length(std_lambda_wealth)),pch=16,xlab="Age",ylab="Std. lambda parameter")
@@ -521,7 +556,7 @@ mu_age
 #plot it!
 plot(mu_age~c(1:length(mu_age)),ylim=c(0,1),pch=16)
 lines(mu_age,pch=16,lwd=2)
-plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1),pch=16)
+plot(cumprod(mu_age)~c(1:length(mu_age)),ylim=c(0,1),pch=16)
 lines(cumprod(1-mu_age),lwd=2)
 
 #simulate binary ouput of AFR for each age
@@ -548,7 +583,7 @@ for(j in 5:ncol(afrs)){
           std_iota_wealth[j]*std_lagg3diff[i,j]+ #3-year lagged wealth change
           std_kappa_wealth[j]*std_cmawealth[i,j]+ #cumulative moving average of wealth
           std_lambda_wealth[j]*std_cmvwealth[i,j] #cumulative moving vaiance of wealth
-        if(afr_prob<0){afr_prob<-0}
+        if(afr_prob<=0){afr_prob<-0}
         afrs[i,j] <- rbinom(1,1,afr_prob)
       }else{
         afrs[i,j] <- NA
