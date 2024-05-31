@@ -32,6 +32,7 @@ data {
   array[N_miss] int id_wealth_miss; // indexes of missing wealth data
   
   array[N,A] int baby; // probability of FR
+  
 
 }
 
@@ -80,25 +81,39 @@ transformed parameters {
       }
     }
 
+//reverse standardisation
+  vector[N*A] rev_wealth_full; // vector containig the reversed standardised wealth data 
+  
+  for (i in 1:(N*A)){
+    rev_wealth_full[i] = wealth_full[i]*sd(wealth)+mean(wealth); 
+  }
+  
+//reverse log transformation
+  vector[N*A] og_wealth_full; //vector containing the reversed log transformed wealth data
+  
+  for (i in 1:(N*A)){
+    og_wealth_full[i] = exp(rev_wealth_full[i]); 
+  }
+
 //current absolute wealth change
   vector[N*A] diffwealth; //current absolute wealth change
 // setting the wealth change as zero at birth
   for (n in 1:N)
   {
     
-    diffwealth[(n-1)*A+1] = wealth_full[(n-1)*A+1] - wealth_full[(n-1)*A+1];
+    diffwealth[(n-1)*A+1] = 0;
     
   }
 //calculate the current absolute wealth change
   for (n in 1:N) {
   for (a in 2:A) {
     
-      diffwealth[(n-1)*A+a] = wealth_full[(n-1)*A+a] - wealth_full[(n-1)*A+(a-1)];
+      diffwealth[(n-1)*A+a] = og_wealth_full[(n-1)*A+a] - og_wealth_full[(n-1)*A+(a-1)];
       
   }
   }
 //standardise the current absolute wealth change
-  vector[N*A] std_diffwealth =  abs((diffwealth - mean(diffwealth)) / sd(diffwealth)) ;
+  vector[N*A] std_diffwealth =  (abs(diffwealth) - mean(abs(diffwealth))) / sd(abs(diffwealth)) ;
 
 //1-year lagged absolute wealth
   vector[N*A] lagg1wealth; // 1-year lagged absolute wealth
@@ -132,12 +147,12 @@ transformed parameters {
   for (n in 1:N){
   for (a in 3:A){
   
-    lagg1wealth[(n-1)*A+a] = wealth_full[(n-1)*A+a] - wealth_full[(n-1)*A+(a-2)];
+    lagg1wealth[(n-1)*A+a] = og_wealth_full[(n-1)*A+a] - og_wealth_full[(n-1)*A+(a-2)];
     
   }
   }
 //standadrise the 1-year lagged absolute wealth change
-  vector[N*A] std_lagg1diff =  abs((lagg1diff - mean(lagg1diff)) / sd(lagg1diff)) ; // absolute standardised wealth
+  vector[N*A] std_lagg1diff =  (abs(lagg1diff) - mean(abs(lagg1diff))) / sd(abs(lagg1diff)) ; // absolute standardised wealth
   
 //2-year lagged absolute wealth
   vector[N*A] lagg2wealth; // 2-year lagged absolute wealth
@@ -173,12 +188,12 @@ transformed parameters {
   for (a in 4:A){
   {
     
-    lagg2wealth[(n-1)*A+a] = wealth_full[(n-1)*A+a] - wealth_full[(n-1)*A+(a-3)];
+    lagg2wealth[(n-1)*A+a] = og_wealth_full[(n-1)*A+a] - og_wealth_full[(n-1)*A+(a-3)];
     
   }
   }
 //standadrise the 2-year lagged absolute wealth change
-  vector[N*A] std_lagg2diff =  abs((lagg2diff - mean(lagg2diff)) / sd(lagg2diff)) ; // absolute standardised wealth change
+  vector[N*A] std_lagg2diff =  (abs(lagg2diff) - mean(abs(lagg2diff))) / sd(abs(lagg2diff)) ; // absolute standardised wealth change
 
 //3-year lagged absolute wealth
   vector[N*A] lagg3wealth; // 3-year lagged absolute wealth
@@ -214,30 +229,31 @@ transformed parameters {
   for (a in 5:A){
   {
     
-    lagg3wealth[(n-1)*A+a] = wealth_full[(n-1)*A+a] - wealth_full[(n-1)*A+(a-4)];
+    lagg3wealth[(n-1)*A+a] = og_wealth_full[(n-1)*A+a] - og_wealth_full[(n-1)*A+(a-4)];
     
   }
   }
 //standadrise the 3-year lagged absolute wealth change
-  vector[N*A] std_lagg3diff =  abs((lagg3diff - mean(lagg3diff)) / sd(lagg3diff)) ; // absolute standardised wealth change
+  vector[N*A] std_lagg3diff =  (abs(lagg3diff) - mean(abs(lagg3diff))) / sd(abs(lagg3diff)) ; // absolute standardised wealth change
 
 //Cumulative moving average
   vector[N*A] cmawealth; // vector to store the cumulative moving averages
 
   for (n in 1:N)
   {
-    cmawealth[(n-1)*A+1] = wealth_full[(n-1)*A+1]; // adding in the vector the wealth at birth
+    cmawealth[(n-1)*A+1] = og_wealth_full[(n-1)*A+1]; // adding in the vector the wealth at birth
   }
   
   for (n in 1:N) {
   for (a in 2:A) {
     
-    cmawealth[(n-1)*A+a] = (cmawealth[(n-1)*A+(a-1)] * (a-1) + wealth_full[(n-1)*A+a]) / a; //calculate the cumulate moving average
+    cmawealth[(n-1)*A+a] = (cmawealth[(n-1)*A+(a-1)] * (a-1) + og_wealth_full[(n-1)*A+a]) / a; //calculate the cumulate moving average
           
     }
     }
 
-   vector[N*A] std_cma=(cmawealth - mean(cmawealth))/sd(cmawealth); // standardised cumulative moving average
+//standardise the cumulative moving average
+   vector[N*A] std_cma=(log(cmawealth) - mean(log(cmawealth)))/sd(log(cmawealth)); // standardised cumulative moving average
     
 //Cumulative moving variance
   vector[N*A] cmvwealth; // vector to store the cumulative moving variances
@@ -252,13 +268,13 @@ transformed parameters {
   for (n in 1:N) {
   for (a in 2:A) {
     
-    sum_squared_diff += (wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+a]) * (wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+a]); // sum of squared differences from the mean
+    sum_squared_diff += (og_wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+a]) * (og_wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+a]); // sum of squared differences from the mean
     cmvwealth[(n-1)*A+a] = sum_squared_diff / a; // cumulative moving variance
 
     }
     }
-   
-  vector[N*A] std_cmv=(cmvwealth - mean(cmvwealth))/sd(cmvwealth); // standardised cumulative moving variance 
+//standardise the cumulative moving variance   
+  vector[N*A] std_cmv=(log(cmvwealth) - mean(log(cmvwealth)))/sd(log(cmvwealth)); // standardised cumulative moving variance 
 
 }
 
