@@ -18,6 +18,9 @@ library(scales)
 
 #The script in this section is to create synthetic data that follows the causal relationship between absolute wealth and the probability of first reproduction.
 
+#set seed
+set.seed(1960)
+
 #Population size
 #500 individuals
 N <- 500
@@ -26,50 +29,78 @@ N <- 500
 #maximum age of 73 years old (based on Pimbwe data)
 A <- 73
 
-#Absolute wealth
+### Absolute wealth ----
+
+#### Simulate absolute wealth ----
+
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
-wealth <- matrix(nrow=N,ncol=A+1)
+abswealth <- matrix(nrow=N,ncol=A+1)
 #randomly assign an amount of wealth for each individual at age 0 - based on the distribution of household assets in the data
-wealth[,1] <- exp(rnorm(100,5,1))
+abswealth[,1] <- exp(rnorm(100,4.5,1))
 #simulate wealth of individuals through time, based on previous absolute wealth
-for(j in 2:ncol(wealth)){
-  for(i in 1:nrow(wealth)){
-    wealth[i,j] <- wealth[i,j-1]+rnorm(1,0,0.25)
+for(j in 2:ncol(abswealth)){
+  for(i in 1:nrow(abswealth)){
+    abswealth[i,j] <- abswealth[i,j-1]+rnorm(1,0,0.25)
   }
 }
 #check the data
 #see the data
-head(wealth)
+head(abswealth)
 #check the age-specific absolute wealth
-apply(wealth,2,mean)
+apply(abswealth,2,mean)
 #plot it
-plot(apply(wealth,2,mean),xlab="Age",ylab="Average absolute wealth")
+plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth",type="h",lwd=2)
+points(apply(abswealth,2,mean),pch=16)
+hist(abswealth)
 
-#log-transform and standardise wealth data
-std_wealth <- matrix(standardize(log(as.vector(wealth))),ncol=ncol(wealth),nrow=nrow(wealth))
+#log-transform wealth data
+log_abswealth <- matrix(log(as.vector(abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
 #check the data
-std_wealth
+head(log_abswealth)
+#standardise wealth data
+std_abswealth <- matrix(standardize(as.vector(log_abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
+#check the data
+head(std_abswealth)
+#check the age-specific absolute wealth
+apply(std_abswealth,2,mean)
+#plot it
+plot(apply(std_abswealth,2,mean),xlab="Age",ylab="Average std. absolute wealth",type="h",lwd=2)
+points(apply(std_abswealth,2,mean),pch=16)
+abline(h=0,lty=2)
+hist(std_abswealth)
+
+#### Simulate parameter for absolute wealth ----
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-beta_wealth<-c(rep(0,12),seq(from=-0.1,to=0.09,length=19),seq(from=0.09,to=0.1,length=11),rep(0,32))
+beta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 beta_wealth
-plot(beta_wealth~c(1:length(beta_wealth)))
-# adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_beta_wealth<-beta_wealth/sd(as.vector(wealth))
-std_beta_wealth
-plot(std_beta_wealth~c(1:length(std_beta_wealth)))
+#plot it!
+plot(beta_wealth~c(1:length(beta_wealth)),pch=16,xlab="Age",ylab="Beta parameter")
+abline(h=0,lty=2)
 
-#Age at first reproduction (AFR)
+# adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
+std_beta_wealth<-beta_wealth/sd(log_abswealth) 
+std_beta_wealth
+plot(std_beta_wealth~c(1:length(std_beta_wealth)),pch=16,xlab="Age",ylab="Std. beta parameter")
+abline(h=0,lty=2)
+
+### Age at first reproduction (AFR) ----
+
+#### Simulate parameter for AFR ----
 
 #simulate an age-specific parameter for AFR (mu)
 mu_age<-c(rep(0,12),seq(from=0.001,to=0.3,length=9),seq(from=0.14,to=0.01,length=11),seq(from=0.01, to=0.001,length=10),rep(0,32))
 length(mu_age)
 mu_age
 #plot it!
-plot(mu_age~c(1:length(mu_age)),ylim=c(0,1))
-plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
+plot(mu_age~c(1:length(mu_age)),ylim=c(0,1),pch=16)
+lines(mu_age,pch=16,lwd=2)
+plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1),pch=16)
+lines(cumprod(1-mu_age),lwd=2)
+
+#### simulate AFR ----
 
 #simulate binary ouput of AFR for each age
 #0=no first birth
@@ -85,7 +116,7 @@ for(j in 2:ncol(afrs)){
     if(!is.na(afrs[i,j-1])){
       if(afrs[i,j-1] == 0){
         afr_prob <- mu_age[j]+ #age
-        std_beta_wealth[j]*std_wealth[i,j] #wealth
+        std_beta_wealth[j]*std_abswealth[i,j] #wealth
         if(afr_prob<0){afr_prob<-0}
       afrs[i,j] <- rbinom(1,1,afr_prob)
       }else{
@@ -158,9 +189,9 @@ afrs
 #create data
 data2 <- list(N = nrow(afrs), #population size
                A = ncol(afrs), #age
-               wealth = as.vector(t(std_wealth)), #absolute wealth
-               N_miss = sum((std_wealth)== -99), # number of missing values that need imputation
-               id_wealth_miss = which(as.vector(t(std_wealth))== -99), # provide the indexes for the missing data
+               wealth = as.vector(t(std_abswealth)), #absolute wealth
+               N_miss = sum((std_abswealth)== -99), # number of missing values that need imputation
+               id_wealth_miss = which(as.vector(t(std_abswealth))== -99), # provide the indexes for the missing data
                baby = afrs #AFR
                ) 
 
@@ -176,7 +207,7 @@ m2_add <- cmdstan_model("Model_code/firstbaby_abswealth_additive.stan")
 fit2_add <- m2_add$sample(data = data2, 
                             chains = 4, 
                             parallel_chains = 15, 
-                            adapt_beta = 0.95,
+                            adapt_delta = 0.95,
                             max_treedepth = 13,
                             init = 0)
 
@@ -200,8 +231,8 @@ rstan::traceplot(rds2_add,pars="alpha")
 rstan::traceplot(rds2_add,pars="mu_tau")
 #mu_kappa
 rstan::traceplot(rds2_add,pars="mu_kappa")
-#mu_beta
-rstan::traceplot(rds2_add,pars="mu_beta")
+#mu_delta
+rstan::traceplot(rds2_add,pars="mu_delta")
 #beta_wealth
 #traceplot(rds2_add,pars="beta_wealth") #only run if needed, because they are 91 plots
 
@@ -211,7 +242,7 @@ rstan::traceplot(rds2_add,pars="mu_beta")
 tabs2_add <- precis(rds2_add,depth=3,pars=c("alpha",
                                               "mu_raw",
                                               "mu_tau",
-                                              "mu_beta"))
+                                              "mu_delta"))
 #check table
 tabs2_add
 #create summary table for mu
@@ -232,7 +263,7 @@ plot(cumprod(1-inv_logit(tabs2_add_beta[,1])),ylim=c(0,1))
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_add <- seq(from=round(min(std_wealth[which(std_wealth > -99)]),1),to=round(max(std_wealth[which(std_wealth > -99)]),1),length.out=nrow(std_wealth)) #specify according to range and length of wealth data
+simwealth_add <- seq(from=round(min(std_abswealth[which(std_abswealth > -99)]),1),to=round(max(std_abswealth[which(std_abswealth > -99)]),1),length.out=nrow(std_abswealth)) #specify according to range and length of wealth data
 simwealth_add
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add,seq(0,1,0.5)))
