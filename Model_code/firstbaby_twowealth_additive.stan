@@ -46,7 +46,7 @@ parameters {
   real <lower = 0> mu_delta;
 // wealth
   vector[A] beta_wealth; // absolute wealth
-  vector[A] gamma_wealth; // short-term wealth variability
+  vector[A] gamma_wealth; // current absolute wealth change
 // missing wealth data
   vector[N_miss] wealth_impute;
   real nu;
@@ -71,16 +71,40 @@ transformed parameters {
       }
     }
 
-//Short-term wealth variability
-  vector[N*A] diffwealth; //short-term wealth variability
+//reverse standardisation
+  vector[N*A] rev_wealth_full; // vector containig the reversed standardised wealth data 
   
-  for(i in 1:N*A){
-    if(i == 1){
-      diffwealth[i] = wealth_full[i] - wealth_full[i];
-    }else{
-      diffwealth[i] = wealth_full[i] - wealth_full[i-1];
-    }
+  for (i in 1:(N*A)){
+    rev_wealth_full[i] = wealth_full[i]*sd(wealth)+mean(wealth); 
   }
+  
+//reverse log transformation
+  vector[N*A] og_wealth_full; //vector containing the reversed log transformed wealth data
+  
+  for (i in 1:(N*A)){
+    og_wealth_full[i] = exp(rev_wealth_full[i]); 
+  }
+
+//current absolute wealth change
+  vector[N*A] diffwealth; //current absolute wealth change
+// setting the wealth change as zero at birth
+  for (n in 1:N)
+  {
+    
+    diffwealth[(n-1)*A+1] = 0;
+    
+  }
+//calculate the current absolute wealth change
+  for (n in 1:N) {
+  for (a in 2:A) {
+    
+      diffwealth[(n-1)*A+a] = og_wealth_full[(n-1)*A+a] - og_wealth_full[(n-1)*A+(a-1)];
+      
+  }
+  }
+//absolute value and standardisation of current wealth change
+  vector[N*A] abs_diffwealth = abs(diffwealth); //vector containing the absolute values
+  vector[N*A] std_diffwealth =  (abs_diffwealth - mean(abs_diffwealth)) / sd(abs_diffwealth); // vector containing the standardised absolute wealth change
   
 }
 
@@ -94,7 +118,7 @@ model {
     mu_delta ~ exponential(1);
 // wealth
     beta_wealth ~ normal(0,1); // absolute wealth
-    gamma_wealth ~ normal(0,1); // wealth variability
+    gamma_wealth ~ normal(0,1); // current absolute wealth change
 // missing wealth data
     wealth_impute ~ normal(nu,sigma_wealth_miss);
     nu ~ normal(0,1);
@@ -109,7 +133,7 @@ model {
         alpha + // global intercept
         mu[a] + // age
         beta_wealth[a]*wealth_full[(n-1)*A+a] + // absolute wealth
-        gamma_wealth[a]*diffwealth[(n-1)*A+a] // wealth variability
+        gamma_wealth[a]*std_diffwealth[(n-1)*A+a] // current absolute wealth change
         );
     }
     }

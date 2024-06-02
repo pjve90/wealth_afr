@@ -18,6 +18,9 @@ library(scales)
 
 #The script in this section is to create synthetic data that follows the causal relationship between wealth variability and the probability of first reproduction.
 
+#set seed
+set.seed(1459)
+
 #Population size
 #500 individuals
 N <- 500
@@ -26,12 +29,15 @@ N <- 500
 #maximum age of 73 years old
 A <- 73
 
-#Absolute wealth
+### Absolute wealth ----
+
+#### Simulate absolute wealth ----
+
 #simulate absolute wealth for each age
 #create a matrix with individuals as rowas and ages as columns (A+1) so the first column is birth)
 abswealth <- matrix(nrow=N,ncol=A+1)
 #randomly assign an amount of wealth for each individual at age 0
-abswealth[,1] <- exp(rnorm(100,5,1))
+abswealth[,1] <- exp(rnorm(N,4.5,1))
 #change wealth of individuals through time
 for(j in 2:ncol(abswealth)){
   for(i in 1:nrow(abswealth)){
@@ -44,74 +50,115 @@ head(abswealth)
 #check the age-specific absolute wealth
 apply(abswealth,2,mean)
 #plot it
-plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth")
+plot(apply(abswealth,2,mean),xlab="Age",ylab="Average absolute wealth",type="h",lwd=2)
+points(apply(abswealth,2,mean),pch=16)
+hist(abswealth)
 
-#log-transform and standardise wealth data
-std_wealth <- matrix(standardize(log(as.vector(wealth))),ncol=ncol(wealth),nrow=nrow(wealth))
+#log-transform wealth data
+log_abswealth <- matrix(log(as.vector(abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
 #check the data
-std_wealth
+head(log_abswealth)
+#standardise wealth data
+std_abswealth <- matrix(standardize(as.vector(log_abswealth)),ncol=ncol(abswealth),nrow=nrow(abswealth))
+#check the data
+head(std_abswealth)
+#check the age-specific absolute wealth
+apply(std_abswealth,2,mean)
+#plot it
+plot(apply(std_abswealth,2,mean),xlab="Age",ylab="Average std. absolute wealth",type="h",lwd=2)
+points(apply(std_abswealth,2,mean),pch=16)
+abline(h=0,lty=2)
+hist(std_abswealth)
+
+#### Simulate parameter for absolute wealth ----
 
 #simulate an age-specific parameter for wealth (beta)
 #if seq starts from a negative value and goes to a positive value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-beta_wealth<-c(rep(0,12),seq(from=-0.1,to=0.09,length=19),seq(from=0.09,to=0.1,length=11),rep(0,32))
+beta_wealth<-c(rep(0,13),seq(from=-0.01,to=0.01,length=20),rep(0,41))
 beta_wealth
-#check that they sum to 1
-sum(beta_wealth)
 #plot it!
-plot(beta_wealth~c(1:length(beta_wealth)))
+plot(beta_wealth~c(1:length(beta_wealth)),pch=16,xlab="Age",ylab="Beta parameter")
+abline(h=0,lty=2)
 
 # adjust for the fact that beta links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_beta_wealth<-beta_wealth/sd(as.vector(abswealth))
+std_beta_wealth<-beta_wealth/sd(log_abswealth) 
 std_beta_wealth
-plot(std_beta_wealth~c(1:length(std_beta_wealth)))
+plot(std_beta_wealth~c(1:length(std_beta_wealth)),pch=16,xlab="Age",ylab="Std. beta parameter")
+abline(h=0,lty=2)
 
-#Difference of wealth
-#simulate absolute wealth for each age
+### Current absolute wealth change ----
+
+#### Simulate absolute wealth change for each age---- 
+
 #create a matrix with individuals as rows and ages as columns (A+1) so the first column is birth)
 diffwealth <- matrix(nrow=N,ncol=A+1)
 #calculate the difference of wealth from one year to the next
 for(j in 1:ncol(diffwealth)){
   for(i in 1:nrow(diffwealth)){
     if(j ==1){
-      diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j]
+      diffwealth[i,j] <- abswealth[i,j] - abswealth[i,j]
     } else{
-      diffwealth[i,j] <- std_abswealth[i,j] - std_abswealth[i,j-1]
+      diffwealth[i,j] <- abswealth[i,j] - abswealth[i,j-1]
     }
   }
 }
 #check the data
 #see the data
 head(diffwealth)
-#check the age-specific wealth variability
+#check the age-specific current absolute wealth change
 apply(diffwealth,2,mean)
 #plot it
-plot(apply(diffwealth,2,mean),xlab="Age",ylab="Average wealth variability")
+plot(apply(diffwealth,2,mean),xlab="Age",ylab="Average current wealth change",type="h",lwd=2)
+points(apply(diffwealth,2,mean),pch=16)
+abline(h=0,lty=2)
+hist(diffwealth)
 
-#standardise wealth variability
-std_diffwealth <- matrix(standardize(log(abs(as.vector(diffwealth))+1)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+#get the absolute value of wealth change
+abs_diffwealth <- matrix(abs(as.vector(diffwealth)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
+#check data
+abs_diffwealth
+hist(abs_diffwealth)
+#standardise the absolute wealth change
+std_diffwealth <- matrix(standardize(as.vector(abs_diffwealth)),ncol=ncol(diffwealth),nrow=nrow(diffwealth))
 #check the data
 std_diffwealth
+#plot it
+plot(apply(std_diffwealth,2,mean),xlab="Age",ylab="Average std. current wealth change",type="h",lwd=2)
+points(apply(std_diffwealth,2,mean),pch=16)
+abline(h=0,lty=2)
+hist(std_diffwealth)
+
+#### Simulate parameter for current absolute wealth change ----
 
 #simulate an age-specific parameter for wealth variability
 #if seq starts from a positive value and goes to a negative value, this means that individuals who have more wealth are less likely to have their first child at younger ages and more likely to have their first child at older ages
-gamma_wealth<-c(rep(0,12),seq(from=0.1,to=-0.09,length=19),seq(from=-0.09,to=-0.1,length=11),rep(0,32))
+gamma_wealth<-c(rep(0,13),seq(from=0.01,to=-0.01,length=20),rep(0,41))
 gamma_wealth
-plot(gamma_wealth~c(1:length(gamma_wealth)))
+#plot it
+plot(gamma_wealth~c(1:length(gamma_wealth)),pch=16,xlab="Age",ylab="Gamma parameter")
+abline(h=0,lty=2)
+
 # adjust for the fact that gamma links to the standardised values of wealth, so the relative effect is smaller on the standardised scale
-std_gamma_wealth<-gamma_wealth/sd(as.vector(abswealth))
+std_gamma_wealth<-gamma_wealth/sd(abs_diffwealth)
 std_gamma_wealth
-plot(std_gamma_wealth~c(1:length(std_gamma_wealth)))
+plot(std_gamma_wealth~c(1:length(std_gamma_wealth)),pch=16,xlab="Age",ylab="Std. gamma parameter")
+abline(h=0,lty=2)
 
+### Age at first reproduction (AFR) ----
 
-#Age at first reproduction (AFR)
+#### Simulate parameter for AFR ----
 
 #simulate an age-specific parameter for AFR (mu)
 mu_age<-c(rep(0,12),seq(from=0.001,to=0.3,length=9),seq(from=0.14,to=0.01,length=11),seq(from=0.01, to=0.001,length=10),rep(0,32))
 length(mu_age)
 mu_age
 #plot it!
-plot(mu_age~c(1:length(mu_age)),ylim=c(0,1))
-plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1))
+plot(mu_age~c(1:length(mu_age)),ylim=c(0,1),pch=16)
+lines(mu_age,pch=16,lwd=2)
+plot(cumprod(1-mu_age)~c(1:length(mu_age)),ylim=c(0,1),pch=16)
+lines(cumprod(1-mu_age),lwd=2)
+
+#### simulate AFR ----
 
 #simulate binary ouput of AFR for each age
 #0=no first birth
