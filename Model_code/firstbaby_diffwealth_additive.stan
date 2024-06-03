@@ -45,7 +45,7 @@ parameters {
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
 // wealth
-  vector[A] gamma_wealth; // short-term wealth variability
+  vector[A] gamma_wealth; // current absolute wealth change
 // missing wealth data
   vector[N_miss] wealth_impute;
   real nu;
@@ -60,7 +60,7 @@ transformed parameters {
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
     
 //Bayesian data imputation
-  vector[N*A] wealth_full; //full wealth data (original + imputed)
+  vector[N*A] wealth_full; //vector containing full wealth data (original + imputed)
   
   wealth_full = wealth; // making the merged data as the same as the original data
   
@@ -72,9 +72,11 @@ transformed parameters {
 
 //reverse standardisation
   vector[N*A] rev_wealth_full; // vector containig the reversed standardised wealth data 
+  real mean_wealth = mean(wealth_full); // mean of imputed wealth
+  real sd_wealth = sd(wealth_full); // standard deviation of imputed wealth
   
   for (i in 1:(N*A)){
-    rev_wealth_full[i] = wealth_full[i]*sd(wealth)+mean(wealth); 
+    rev_wealth_full[i] = wealth_full[i]*sd_wealth+mean_wealth; 
   }
   
 //reverse log transformation
@@ -103,7 +105,9 @@ transformed parameters {
   }
 //absolute value and standardisation of current wealth change
   vector[N*A] abs_diffwealth = abs(diffwealth); //vector containing the absolute values
-  vector[N*A] std_diffwealth =  (abs_diffwealth - mean(abs_diffwealth)) / sd(abs_diffwealth); // vector containing the standardised absolute wealth change
+  real mean_abs_diffwealth = mean(abs_diffwealth); //mean of absolute values
+  real sd_abs_diffwealth = sd(abs_diffwealth); // standard deviation of absolute values
+  vector[N*A] std_diffwealth =  (abs_diffwealth - mean_abs_diffwealth) / sd_abs_diffwealth; // vector containing the standardised absolute wealth change
 }
 
 model {
