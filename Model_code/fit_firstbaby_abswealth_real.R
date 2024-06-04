@@ -170,6 +170,7 @@ plot(apply(std_absw_matrix2,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="A
 
 ## Fit real data ----
 
+#Age at first birth
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
   for(i in 1:nrow(afr_matrix2)){
@@ -183,6 +184,7 @@ for(j in 1:ncol(afr_matrix2)){
 #check the data
 afr_matrix2
 
+#Wealth
 #matrix identifying missing wealth data
 #create matrix
 miss_absw_matrix2 <- std_absw_matrix2
@@ -198,6 +200,19 @@ for (i in 1:nrow(std_absw_matrix2)){
 }
 #check data
 miss_absw_matrix2
+
+#replace NAs with -99
+for(j in 1:ncol(std_absw_matrix2)){
+  for(i in 1:nrow(std_absw_matrix2)){
+    if(is.na(std_absw_matrix2[i,j])){
+      std_absw_matrix2[i,j] <- -99
+    } else{
+      std_absw_matrix2[i,j] <- std_absw_matrix2[i,j]
+    }
+  }
+}
+#check the data
+std_absw_matrix2
 
 #Subset the data for realistic ages
 #Subset wealth and AFB for those between 10 years old and 50 years old.
@@ -215,7 +230,7 @@ real_list2 <- list(N = nrow(afrs_restricted), #population size
                    wealth = std_wealth_restricted, #absolute wealth
                    baby = afrs_restricted, #AFR
                    N_miss = sum(miss_wealth_restricted), # number of missing values that need imputation
-                   id_wealth_miss=miss_wealth_restricted) # matrix indicating missing wealth data
+                   wealth_miss=miss_wealth_restricted) # matrix indicating missing wealth data
 #check data
 real_list2
 
