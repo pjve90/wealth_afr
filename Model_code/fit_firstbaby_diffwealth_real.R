@@ -20,7 +20,7 @@ library(scales)
 real_data3 <- read.csv("dataf.csv")[,-1]
 head(real_data3)
 
-# Age at first reproduction 
+# Age at first reproduction ----
 
 #create a matrix to store the age-specific age of censor
 afr_matrix3 <- matrix(nrow=nrow(real_data3),ncol=max(real_data3$aoc)+1)
@@ -42,20 +42,7 @@ apply(afr_matrix3,2,sum,na.rm=T)/apply(afr_matrix3,2,function(x)sum(!is.na(x)))
 #plot it
 plot(cumprod(1-apply(afr_matrix3,2,sum,na.rm=T)/apply(afr_matrix3,2,function(x)sum(!is.na(x))))~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Cumulative probability of first birth",ylim=c(0,1))
 
-#replace NAs with -99
-for(j in 1:ncol(afr_matrix3)){
-  for(i in 1:nrow(afr_matrix3)){
-    if(is.na(afr_matrix3[i,j])){
-      afr_matrix3[i,j] <- -99
-    } else{
-      afr_matrix3[i,j] <- afr_matrix3[i,j]
-    }
-  }
-}
-#check the data
-afr_matrix3
-
-#Age-specific absolute wealth
+#Age-specific absolute wealth ----
 
 #age-specific absolute wealth
 #create matrix to store the age-specific amount of wealth
@@ -180,40 +167,94 @@ apply(std_absw_matrix3,2,mean,na.rm=T)
 #plot it
 plot(apply(std_absw_matrix3,2,mean,na.rm=T)~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
 
-#change NAs for -99
-#replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
-for(j in 1:ncol(std_absw_matrix3)){
-  for(i in 1:nrow(std_absw_matrix3)){
-    if(is.na(std_absw_matrix3[i,j])){
-      std_absw_matrix3[i,j] <- -99
+# Age-specific current wealth change ----
+
+#create a matrix to store the age-specific current wealth change
+diffwealth_matrix3 <- matrix(nrow=nrow(real_data3),ncol=max(real_data3$aoc)+1)
+#set first and column at zero since there is no wealth change at birth, and there is a gap of two years in the data collection
+diffwealth_matrix3[,1:2] <- 0
+diffwealth_matrix3
+#calculate for each age when the woman is censored (1) or not (0)
+for(i in 1:nrow(diffwealth_matrix3)){
+  for(j in 3:ncol(diffwealth_matrix3)){
+    diffwealth_matrix3[i,j] <- std_absw_matrix3[i,j] - std_absw_matrix3[i,j-2] #-2 because there is a gap of two years between data collection
+ }
+}
+#check the data
+diffwealth_matrix3
+#change to absolute values
+abs_diffwealth_matrix3 <- abs(diffwealth_matrix3)
+#check the age-specific average of wealth change
+apply(abs_diffwealth_matrix3,2,mean,na.rm=T)
+#plot it
+plot(apply(abs_diffwealth_matrix3,2,mean,na.rm=T)~c(1:ncol(abs_diffwealth_matrix3)),xlab="Age",ylab="Average absolute wealth change")
+hist(abs_diffwealth_matrix3)
+
+## Fit real data ----
+
+#Age at first birth
+#replace NAs with -99
+for(j in 1:ncol(afr_matrix3)){
+  for(i in 1:nrow(afr_matrix3)){
+    if(is.na(afr_matrix3[i,j])){
+      afr_matrix3[i,j] <- -99
+    } else{
+      afr_matrix3[i,j] <- afr_matrix3[i,j]
     }
   }
 }
 #check the data
-std_absw_matrix3
+afr_matrix3
 
-## Fit real data ----
+#matrix identifying missing wealth data
+#create matrix
+miss_diffw_matrix3 <- abs_diffwealth_matrix3
+#define missing the first two columns (1)
+miss_diffw_matrix3[,1:2] <- 1
+#identify if the individual i at age j has missing data (1) or not (0)
+for (i in 1:nrow(abs_diffwealth_matrix3)){
+  for(j in 3:ncol(std_absw_matrix3)){
+    if(is.na(miss_diffw_matrix3[i,j])){
+      miss_diffw_matrix3[i,j] <- 1 #missing data
+    } else{
+      miss_diffw_matrix3[i,j] <- 0 #not missing data
+    }
+  }
+}
+#check data
+miss_diffw_matrix3
 
-# Only take the years when individuals have a first baby
-#check min and max ages at first reproduction
-#min
-min(real_data3$afr,na.rm=T)
-#13
-#max
-max(real_data3$afr,na.rm=T)
-#32
+#replace NAs with -99
+for(j in 1:ncol(abs_diffwealth_matrix3)){
+  for(i in 1:nrow(abs_diffwealth_matrix3)){
+    if(is.na(abs_diffwealth_matrix3[i,j])){
+      abs_diffwealth_matrix3[i,j] <- -99
+    } else{
+      abs_diffwealth_matrix3[i,j] <- abs_diffwealth_matrix3[i,j]
+    }
+  }
+}
+#check the data
+abs_diffwealth_matrix3
 
-std_wealth_restricted <- std_absw_matrix3[,round(min(real_data3$afr,na.rm=T)):round(max(real_data3$afr,na.rm=T))+1]
-afrs_restricted <- afr_matrix3[,round(min(real_data3$afr,na.rm=T)):round(max(real_data3$afr,na.rm=T))+1]
+#Subset the data for realistic ages
+#Subset wealth and AFB for those between 10 years old and 50 years old.
+#wealth
+std_diffwealth_restricted <- abs_diffwealth_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
+#AFB
+afrs_restricted <- afr_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
+#missing wealth data
+miss_diffwealth_restricted <- miss_diffw_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
+
 
 #put all the data together
 #create dataset
-real_list3 <- list(N = nrow(real_data3), #population size
-                   A = ncol(afr_matrix3), #age
-                   wealth = as.vector(t(std_absw_matrix3)), #absolute wealth
-                   baby = afr_matrix3, #AFR
-                   N_miss = sum((std_absw_matrix3)== -99), # number of missing values that need imputation
-                   id_wealth_miss =which(as.vector(t(std_absw_matrix3))== -99)) # provide the indexes for the missing data
+real_list3 <- list(N = nrow(afrs_restricted), #population size
+                   A = ncol(afrs_restricted), #age
+                   wealth = std_diffwealth_restricted, #absolute current wealth change
+                   baby = afrs_restricted, #AFR
+                   N_miss = sum(miss_diffwealth_restricted), # number of missing values that need imputation
+                   wealth_miss=miss_diffwealth_restricted) # matrix indicating missing wealth data
 #check data
 real_list3
 
