@@ -191,7 +191,7 @@ miss_absw_matrix2 <- std_absw_matrix2
 #identify if the individual i at age j has missing data (1) or not (0)
 for (i in 1:nrow(std_absw_matrix2)){
   for(j in 1:ncol(std_absw_matrix2)){
-    if(is.na(miss_absw_matrix[i,j])){
+    if(is.na(miss_absw_matrix2[i,j])){
       miss_absw_matrix2[i,j] <- 1 #missing data
     } else{
       miss_absw_matrix2[i,j] <- 0 #not missing data
