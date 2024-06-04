@@ -180,41 +180,40 @@ apply(std_absw_matrix2,2,mean,na.rm=T)
 #plot it
 plot(apply(std_absw_matrix2,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
 
-#change NAs for -99
-#replace the wealth of a woman at birth (column 1) by the average of that age, if they do not have wealth at age 1 (column 2)
-for(j in 1:ncol(std_absw_matrix2)){
-  for(i in 1:nrow(std_absw_matrix2)){
-    if(is.na(std_absw_matrix2[i,j])){
-      std_absw_matrix2[i,j] <- -99
+#matrix identifying missing wealth data
+#create matrix
+miss_absw_matrix2 <- std_absw_matrix2
+#identify if the individual i at age j has missing data (1) or not (0)
+for (i in 1:nrow(std_absw_matrix2)){
+  for(j in 1:ncol(std_absw_matrix2)){
+    if(is.na(miss_absw_matrix[i,j])){
+      miss_absw_matrix2[i,j] <- 1 #missing data
+    } else{
+      miss_absw_matrix2[i,j] <- 0 #not missing data
     }
   }
 }
-#check the data
-std_absw_matrix2
+#check data
+miss_absw_matrix2
+
 
 ## Fit real data ----
 
-# Only take the years when individuals have a first baby
-#check min and max ages at first reproduction
-#min
-min(real_data2$afr,na.rm=T)
-#13
-#max
-max(real_data2$afr,na.rm=T)
-#32
-
-#subset wealth and afrs to those ages where women have their first child. Adding one, since first column in the matrix is year 0
-std_wealth_restricted <- std_absw_matrix2[,round(min(real_data2$afr,na.rm=T)):round(max(real_data2$afr,na.rm=T))+1]
-afrs_restricted <- afr_matrix2[,round(min(real_data2$afr,na.rm=T)):round(max(real_data2$afr,na.rm=T))+1]
+#Subset the data for realistic ages
+#Subset wealth and AFB for those between 10 years old and 50 years old.
+#wealth
+std_wealth_restricted <- std_absw_matrix2[,11:51] #Adding 1, since first column in the matrix is year 0
+#AFB
+afrs_restricted <- afr_matrix2[,11:51] #Adding 1, since first column in the matrix is year 0
 
 #put all the data together
 #create dataset
 real_list2 <- list(N = nrow(real_data2), #population size
                    A = ncol(afr_matrix2), #age
-                   wealth = as.vector(t(std_absw_matrix2)), #absolute wealth
+                   wealth = std_absw_matrix2, #absolute wealth
                    baby = afr_matrix2, #AFR
-                   N_miss = sum((std_absw_matrix2)== -99), # number of missing values that need imputation
-                   id_wealth_miss=which(as.vector(t(std_absw_matrix2))== -99)) # provide the indexes for the missing data
+                   N_miss = sum(miss_absw_matrix2), # number of missing values that need imputation
+                   id_wealth_miss=miss_absw_matrix2) # matrix indicating missing wealth data
 #check data
 real_list2
 
