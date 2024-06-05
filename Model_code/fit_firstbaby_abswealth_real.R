@@ -166,7 +166,7 @@ std_absw_matrix2
 apply(std_absw_matrix2,2,mean,na.rm=T)
 #plot it
 plot(apply(std_absw_matrix2,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
-
+hist(std_absw_matrix2)
 
 ## Fit real data ----
 

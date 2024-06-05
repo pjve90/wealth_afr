@@ -177,11 +177,12 @@ diffwealth_matrix3
 #calculate for each age when the woman is censored (1) or not (0)
 for(i in 1:nrow(diffwealth_matrix3)){
   for(j in 3:ncol(diffwealth_matrix3)){
-    diffwealth_matrix3[i,j] <- std_absw_matrix3[i,j] - std_absw_matrix3[i,j-2] #-2 because there is a gap of two years between data collection
+    diffwealth_matrix3[i,j] <- absw_matrix3[i,j] - absw_matrix3[i,j-2] #-2 because there is a gap of two years between data collection
  }
 }
 #check the data
 diffwealth_matrix3
+
 #change to absolute values
 abs_diffwealth_matrix3 <- abs(diffwealth_matrix3)
 #check the age-specific average of wealth change
@@ -189,6 +190,16 @@ apply(abs_diffwealth_matrix3,2,mean,na.rm=T)
 #plot it
 plot(apply(abs_diffwealth_matrix3,2,mean,na.rm=T)~c(1:ncol(abs_diffwealth_matrix3)),xlab="Age",ylab="Average absolute wealth change")
 hist(abs_diffwealth_matrix3)
+
+#standardise absolute wealth change
+std_diffwealth_matrix3 <- matrix(standardize(as.vector(diffwealth_matrix3)),ncol=ncol(diffwealth_matrix3),nrow=nrow(diffwealth_matrix3))
+#check the data
+std_diffwealth_matrix3
+#check the age-specific average of absolute wealth
+apply(std_diffwealth_matrix3,2,mean,na.rm=T)
+#plot it
+plot(apply(std_diffwealth_matrix3,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
+hist(std_diffwealth_matrix3)
 
 ## Fit real data ----
 
