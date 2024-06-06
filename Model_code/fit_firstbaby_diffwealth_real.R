@@ -219,12 +219,12 @@ afr_matrix3
 
 #matrix identifying missing wealth data
 #create matrix
-miss_diffw_matrix3 <- abs_diffwealth_matrix3
+miss_diffw_matrix3 <- std_diffwealth_matrix3
 #define missing the first two columns (1)
 miss_diffw_matrix3[,1:2] <- 1
 #identify if the individual i at age j has missing data (1) or not (0)
-for (i in 1:nrow(abs_diffwealth_matrix3)){
-  for(j in 3:ncol(std_absw_matrix3)){
+for (i in 1:nrow(std_diffwealth_matrix3)){
+  for(j in 3:ncol(std_diffwealth_matrix3)){
     if(is.na(miss_diffw_matrix3[i,j])){
       miss_diffw_matrix3[i,j] <- 1 #missing data
     } else{
@@ -236,22 +236,22 @@ for (i in 1:nrow(abs_diffwealth_matrix3)){
 miss_diffw_matrix3
 
 #replace NAs with -99
-for(j in 1:ncol(abs_diffwealth_matrix3)){
-  for(i in 1:nrow(abs_diffwealth_matrix3)){
-    if(is.na(abs_diffwealth_matrix3[i,j])){
-      abs_diffwealth_matrix3[i,j] <- -99
+for(j in 1:ncol(std_diffwealth_matrix3)){
+  for(i in 1:nrow(std_diffwealth_matrix3)){
+    if(is.na(std_diffwealth_matrix3[i,j])){
+      std_diffwealth_matrix3[i,j] <- -99
     } else{
-      abs_diffwealth_matrix3[i,j] <- abs_diffwealth_matrix3[i,j]
+      std_diffwealth_matrix3[i,j] <- std_diffwealth_matrix3[i,j]
     }
   }
 }
 #check the data
-abs_diffwealth_matrix3
+std_diffwealth_matrix3
 
 #Subset the data for realistic ages
 #Subset wealth and AFB for those between 10 years old and 50 years old.
 #wealth
-std_diffwealth_restricted <- abs_diffwealth_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
+std_diffwealth_restricted <- std_diffwealth_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
 #AFB
 afrs_restricted <- afr_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
 #missing wealth data
