@@ -322,14 +322,12 @@ tab3_add_real
 tab3_add_real_mu <- precis(rds3_add_real,depth=2,pars="mu")
 #check table
 tab3_add_real_mu
-plot(tab3_mu_add_real)
-plot(cumprod(1-tab3_mu_add_real[,1]),ylim=c(0,1))
+plot(tab3_add_real_mu)
 #create summary table for gamma
 tab3_add_real_gamma <- precis(rds3_add_real,depth=2,pars="gamma_wealth")
 #check table
 tab3_add_real_gamma
-plot(tab3_gamma_add_real)
-plot(cumprod(1-tab3_gamma_add_real[,1]),ylim=c(0,1))
+plot(tab3_add_real_gamma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
