@@ -381,7 +381,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post3_add_real$mu)){
       p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                    post3_add_real$mu[i,j] + #age
-                                   post3_add_real$beta_wealth[i,j]*deciles[k]) #wealth
+                                   post3_add_real$gamma_wealth[i,j]*deciles[k]) #wealth change
     }
   }
   #check data
@@ -449,7 +449,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_0_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                    post3_add_real$mu[i,j] + #age
-                                   post3_add_real$beta_wealth[i,j]*deciles[1]) #wealth
+                                   post3_add_real$gamma_wealth[i,j]*deciles[1]) #wealth change
   }
 }
 #check data
@@ -500,7 +500,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_50_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                     post3_add_real$mu[i,j] + #age
-                                    post3_add_real$beta_wealth[i,j]*deciles[2]) #wealth
+                                    post3_add_real$gamma_wealth[i,j]*deciles[2]) #wealth
   }
 }
 #check data
@@ -551,7 +551,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_100_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                      post3_add_real$mu[i,j] + #age
-                                     post3_add_real$beta_wealth[i,j]*deciles[3]) #wealth
+                                     post3_add_real$gamma_wealth[i,j]*deciles[3]) #wealth
   }
 }
 #check data
