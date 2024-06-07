@@ -421,7 +421,11 @@ deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
 deciles
 
 #colour palette
-palette_b<-palette[1:length(deciles)] #darker lines = younger ages, lighter lines = older ages
+#numbers for color palette
+palette <- palette.colors(9,"Okabe-Ito")
+#select the numbers for color palette
+palette_b<-palette[7:9]
+palette_b
 
 #define layout of plots
 par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
