@@ -74,29 +74,6 @@ transformed parameters {
       }
       }
     }
-// //Cumulative moving variance
-//   vector[N*A] cmawealth; // vector to store the cumulative moving averages
-//   vector[N*A] cmvwealth; // vector to store the cumulative moving averages
-//   real sum_squared_diff;      // Sum of squared differences from the mean
-//   
-//   
-//   for (n in 1:N)
-//   {
-//     cmawealth[(n-1)*A+1] = wealth_full[(n-1)*A+1]; // adding in the vector the wealth at birth (column 1 in matrix)
-//     cmvwealth[(n-1)*A+1] = 0.0; // adding in the vector the variability at birth (column 1 in matrix)
-//     sum_squared_diff = 0.0;
-//   }
-//   
-//   for (n in 1:N) {
-//   for (a in 2:A) {
-//     
-//     cmawealth[(n-1)*A+a] = (cmawealth[(n-1)*A+(a-1)] * (a-1) + wealth_full[(n-1)*A+a]) / a; // cumulative moving average
-//     sum_squared_diff += (wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+(a-1)]) * (wealth_full[(n-1)*A+a] - cmawealth[(n-1)*A+a]); // sum of squared differences from the mean
-//     cmvwealth[(n-1)*A+a] = sum_squared_diff / a; // cumulative moving variance
-// 
-//     }
-//     }
-      
 }
 
 model {

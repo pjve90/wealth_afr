@@ -75,44 +75,6 @@ transformed parameters {
       }
       }
     }
-// //reverse standardisation
-//   vector[N*A] rev_wealth_full; // vector containig the reversed standardised wealth data 
-//   real mean_wealth = mean(wealth_full); // mean of imputed wealth
-//   real sd_wealth = sd(wealth_full); // standard deviation of imputed wealth
-//   
-//   for (i in 1:(N*A)){
-//     rev_wealth_full[i] = wealth_full[i]*sd_wealth+mean_wealth; 
-//   }
-//   
-// //reverse log transformation
-//   vector[N*A] og_wealth_full; //vector containing the reversed log transformed wealth data
-//   
-//   for (i in 1:(N*A)){
-//     og_wealth_full[i] = exp(rev_wealth_full[i]); 
-//   }
-// 
-// //current absolute wealth change
-//   vector[N*A] diffwealth; //current absolute wealth change
-// // setting the wealth change as zero at birth
-//   for (n in 1:N)
-//   {
-//     
-//     diffwealth[(n-1)*A+1] = 0;
-//     
-//   }
-// //calculate the current absolute wealth change
-//   for (n in 1:N) {
-//   for (a in 2:A) {
-//     
-//       diffwealth[(n-1)*A+a] = og_wealth_full[(n-1)*A+a] - og_wealth_full[(n-1)*A+(a-1)];
-//       
-//   }
-//   }
-// //absolute value and standardisation of current wealth change
-//   vector[N*A] abs_diffwealth = abs(diffwealth); //vector containing the absolute values
-//   real mean_abs_diffwealth = mean(abs_diffwealth); //mean of absolute values
-//   real sd_abs_diffwealth = sd(abs_diffwealth); // standard deviation of absolute values
-//   vector[N*A] std_diffwealth =  (abs_diffwealth - mean_abs_diffwealth) / sd_abs_diffwealth; // vector containing the standardised absolute wealth change
 }
 
 model {
