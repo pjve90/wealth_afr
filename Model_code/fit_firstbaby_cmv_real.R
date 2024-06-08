@@ -441,7 +441,7 @@ plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      xaxt="n",
      cex.main=1.5
 )
-axis(1,at=seq(0,ncol(post3_real$mu),by=1),labels=10:50)
+axis(1,at=seq(0,ncol(post4_add_real$mu),by=1),labels=10:51)
 
 #create matrix to store the data
 p4_add_real_0_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
@@ -492,7 +492,7 @@ plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      xaxt="n",
      cex.main=1.5
 )
-axis(1,at=seq(0,ncol(post3_real$mu),by=1),labels=10:50)
+axis(1,at=seq(0,ncol(post4_add_real$mu),by=1),labels=10:51)
 
 #create matrix to store the data
 p4_add_real_50_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
@@ -543,7 +543,7 @@ plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      xaxt="n",
      cex.main=1.5
 )
-axis(1,at=seq(0,ncol(post3_real$mu),by=1),labels=10:50)
+axis(1,at=seq(0,ncol(post4_add_real$mu),by=1),labels=10:51)
 
 #create matrix to store the data
 p4_add_real_100_b <- matrix(nrow=nrow(post4_add_real$mu),ncol=ncol(post4_add_real$mu))
@@ -583,5 +583,5 @@ points(cumprod(1-plot_data4_add_real_100_b$mean)~plot_data4_add_real_100_b$age,c
 lines(cumprod(1-plot_data4_add_real_100_b$mean)~plot_data4_add_real_100_b$age,col=palette_b[3],lwd=2)
 polygon(c(plot_data4_add_real_100_b$age,rev(plot_data4_add_real_100_b$age)),c(cumprod(1-plot_data4_add_real_100_b$low),rev(cumprod(1-plot_data4_add_real_100_b$upp))),col=alpha(palette_b[3],0.5),border=NA)
 
-legend(45,1,c("Stable","Mid. unstable", "Unstable"),lty=1,col=palette_b,lwd=2,pch=16)
+legend(45,1,c("No variability","Mid. variability", "Maximum variability"),lty=1,col=palette_b,lwd=2,pch=16)
 

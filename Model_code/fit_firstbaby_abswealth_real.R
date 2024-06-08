@@ -409,7 +409,7 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      xaxt="n",
      cex.main=1.5
      )
-axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=10:50)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=10:51)
 
 #create matrix to store the data
 p2_add_real_0_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -460,7 +460,7 @@ plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      xaxt="n",
      cex.main=1.5
 )
-axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=10:50)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=10:51)
 
 #create matrix to store the data
 p2_add_real_50_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
@@ -503,7 +503,7 @@ polygon(c(plot_data2_add_real_50_b$age,rev(plot_data2_add_real_50_b$age)),c(cump
 #### Maximum wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post2_real$mu)),
+plot(c(0,1)~c(0,ncol(post2_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Rich",
@@ -511,7 +511,7 @@ plot(c(0,1)~c(0,ncol(post2_real$mu)),
      xaxt="n",
      cex.main=1.5
 )
-axis(1,at=seq(0,ncol(post2_real$mu),by=1),labels=10:50)
+axis(1,at=seq(0,ncol(post2_add_real$mu),by=1),labels=10:51)
 
 #create matrix to store the data
 p2_add_real_100_b <- matrix(nrow=nrow(post2_add_real$mu),ncol=ncol(post2_add_real$mu))
