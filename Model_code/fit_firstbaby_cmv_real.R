@@ -436,7 +436,7 @@ par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="No change",
+     main="No variability",
      type="n",
      xaxt="n",
      cex.main=1.5
@@ -487,7 +487,7 @@ polygon(c(plot_data4_add_real_0_b$age,rev(plot_data4_add_real_0_b$age)),c(cumpro
 plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Mid. change",
+     main="Middle variability",
      type="n",
      xaxt="n",
      cex.main=1.5
@@ -538,7 +538,7 @@ polygon(c(plot_data4_add_real_50_b$age,rev(plot_data4_add_real_50_b$age)),c(cump
 plot(c(0,1)~c(0,ncol(post4_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Max. change",
+     main="Maximum variability",
      type="n",
      xaxt="n",
      cex.main=1.5
@@ -583,5 +583,5 @@ points(cumprod(1-plot_data4_add_real_100_b$mean)~plot_data4_add_real_100_b$age,c
 lines(cumprod(1-plot_data4_add_real_100_b$mean)~plot_data4_add_real_100_b$age,col=palette_b[3],lwd=2)
 polygon(c(plot_data4_add_real_100_b$age,rev(plot_data4_add_real_100_b$age)),c(cumprod(1-plot_data4_add_real_100_b$low),rev(cumprod(1-plot_data4_add_real_100_b$upp))),col=alpha(palette_b[3],0.5),border=NA)
 
-legend(45,1,c("No variability","Mid. variability", "Maximum variability"),lty=1,col=palette_b,lwd=2,pch=16)
+legend(45,1,c("No var.","Mid. var.", "Maximum var."),lty=1,col=palette_b,lwd=2,pch=16)
 
