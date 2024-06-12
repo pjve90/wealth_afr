@@ -235,7 +235,7 @@ real_list2 <- list(N = nrow(afrs_restricted), #population size
 real_list2
 
 # compile model
-m2_add <- cmdstan_model("Model_code/firstbaby_abswealth_additive.stan")
+m2_add <- cmdstan_model("Model_code/wealth_predictors.stan")
 
 # fit model
 fit2_add_real <- m2_add$sample(data = real_list2, 
