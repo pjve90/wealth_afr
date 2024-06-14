@@ -211,7 +211,7 @@ std_absw_restricted <- std_absw_matrix5[,1:51] #Adding 1, since first column in 
 #AFB
 afrs_restricted <- afr_matrix5[,1:51] #Adding 1, since first column in the matrix is year 0
 #missing wealth data
-wealth_miss_restricted <- wealth_miss[wealth_miss[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
+wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
 
 #put all the data together
