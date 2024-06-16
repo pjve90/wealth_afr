@@ -281,6 +281,16 @@ tab5_add_real_mu <- precis(rds5_add_real,depth=2,pars="mu")
 #check table
 tab5_add_real_mu
 plot(tab5_add_real_mu)
+#create summary table for beta
+tab5_add_real_beta <- precis(rds5_add_real,depth=2,pars="beta_wealth")
+#check table
+tab5_add_real_beta
+plot(tab5_add_real_beta)
+#create summary table for gamma
+tab5_add_real_gamma <- precis(rds5_add_real,depth=2,pars="gamma_wealth")
+#check table
+tab5_add_real_gamma
+plot(tab5_add_real_gamma)
 #create summary table for delta
 tab5_add_real_delta <- precis(rds5_add_real,depth=2,pars="delta_wealth")
 #check table

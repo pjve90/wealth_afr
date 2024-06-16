@@ -51,7 +51,7 @@ parameters {
 // missing wealth data
   vector[N_miss] wealth_impute;
   real alpha_miss;
-  real nu;
+  real beta_miss;
   real<lower=0> sigma_miss;
 }
 
@@ -79,7 +79,7 @@ transformed parameters {
       wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
     }
     for(a in 3:A){
-      wealth_change[n,a] = wealth_full[n,a] - wealth_full[n,a-2]; //calculating the 2-years lagged wealth change
+      wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]); //calculating the 2-years lagged wealth change
     }
   }
   
@@ -111,14 +111,14 @@ model {
     delta_wealth ~ normal(0, 1); // moving standard deviation
 // missing wealth data
     alpha_miss ~ normal(0, 1);
-    nu ~ normal(0, 1);
+    beta_miss ~ normal(0, 1);
     sigma_miss ~ exponential(1);
 
 //Wealth data imputation
  for(n in 1:N){
-     wealth_full[n,1] ~ normal(alpha_miss*nu,sigma_miss); //not sure about this...
+     wealth_full[n,1] ~ normal(alpha_miss*beta_miss,sigma_miss); //not sure about this...
   for(a in 2:A){
-     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(nu), sigma_miss);
+     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
   }
  }
     
