@@ -44,11 +44,18 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
+  vector[A] mu_z;
 // wealth
-  vector [A] beta_wealth; // absolute wealth
-  vector [A] gamma_wealth; // wealth change
-  vector [A] delta_wealth; // moving standard deviation
-// missing wealth data
+  // absolute wealth
+  vector [A] beta_wealth_z;
+  real <lower = 0> beta_wealth_sigma;
+  // wealth change
+  vector [A] gamma_wealth_z; 
+  real <lower = 0> gamma_wealth_sigma;
+  // moving standard deviation
+  vector [A] delta_wealth_z; 
+  real <lower = 0> delta_wealth_sigma;
+  // missing wealth data
   vector[N_miss] wealth_impute;
   real alpha_miss;
   real beta_miss;
@@ -57,11 +64,22 @@ parameters {
 
 transformed parameters {
 
-//Time-varying Gaussian process of age
+//Non-centered parameterization for Gaussian Process of age
   vector [A] mu; //vector containing mu
   
-    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
+    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_z + mu_raw; // calculating mu from the Gaussian process
     
+// Non-centered parameterization for wealth effects
+  //absolute wealth
+  vector[A] beta_wealth;
+  beta_wealth = beta_wealth_sigma * beta_wealth_z;
+  //wealth change
+  vector[A] gamma_wealth;
+  gamma_wealth = gamma_wealth_sigma * gamma_wealth_z;
+  //moving standard deviation
+  vector[A] delta_wealth;
+  delta_wealth = delta_wealth_sigma * delta_wealth_z;
+  
 //Bayesian data imputation
   matrix[N,A] wealth_full; // full wealth data (original + imputed)
   
@@ -105,10 +123,18 @@ model {
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
+    mu_z ~ normal(0, 1);
 // wealth
-    beta_wealth ~ normal(0, 1); // absolute wealth
-    gamma_wealth ~ normal(0, 1); // wealth change
-    delta_wealth ~ normal(0, 1); // moving standard deviation
+    // absolute wealth
+    beta_wealth_z ~ normal(0, 1); 
+    beta_wealth_sigma ~ exponential(1);
+    // wealth change
+    gamma_wealth ~ normal(0, 1);
+    gamma_wealth_sigma ~ exponential(1);
+    // moving standard deviation
+    delta_wealth ~ normal(0, 1);
+    delta_wealth_sigma ~ exponential(1);
+    
 // missing wealth data
     alpha_miss ~ normal(0, 1);
     beta_miss ~ normal(0, 1);
