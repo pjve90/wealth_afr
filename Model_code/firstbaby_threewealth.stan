@@ -44,7 +44,6 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
-  vector[A] mu_z;
 // wealth
   // absolute wealth
   vector [A] beta_wealth_z;
@@ -64,10 +63,10 @@ parameters {
 
 transformed parameters {
 
-//Non-centered parameterization for Gaussian Process of age
+//Gaussian Process of age
   vector [A] mu; //vector containing mu
   
-    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_z + mu_raw; // calculating mu from the Gaussian process
+    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
     
 // Non-centered parameterization for wealth effects
   //absolute wealth
@@ -123,7 +122,6 @@ model {
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
-    mu_z ~ normal(0, 1);
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 
