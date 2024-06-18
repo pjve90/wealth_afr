@@ -48,7 +48,7 @@ parameters {
   vector[A] beta_wealth;
   // vector [A] beta_wealth_z;
   // real <lower = 0> beta_wealth_sigma;
-  // missing wealth data
+// missing wealth data
   vector[N_miss] wealth_impute;
   real alpha_miss;
   real beta_miss;

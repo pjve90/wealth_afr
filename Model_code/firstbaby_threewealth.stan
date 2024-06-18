@@ -127,10 +127,10 @@ model {
     beta_wealth_z ~ normal(0, 1); 
     beta_wealth_sigma ~ exponential(1);
     // wealth change
-    gamma_wealth ~ normal(0, 1);
+    gamma_wealth_z ~ normal(0, 1);
     gamma_wealth_sigma ~ exponential(1);
     // moving standard deviation
-    delta_wealth ~ normal(0, 1);
+    delta_wealth_z ~ normal(0, 1);
     delta_wealth_sigma ~ exponential(1);
     
 // missing wealth data
@@ -155,9 +155,9 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        beta_wealth[a]*wealth_full[n,a] + // absolute wealth
-        gamma_wealth[a]*wealth_change[n,a] + // 2-years lagged wealth change
-        delta_wealth[a]*wealth_msd[n,a]  // moving standard deviation
+        (beta_wealth_z[a]*beta_wealth_sigma[a])*wealth_full[n,a] + // absolute wealth
+        (gamma_wealth_z[a]*gamma_wealth_sigma[a])*wealth_change[n,a] + // 2-years lagged wealth change
+        (delta_wealth_z[a]*delta_wealth_sigma[a])*wealth_msd[n,a]  // moving standard deviation
         );
           
     }

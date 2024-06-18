@@ -341,7 +341,7 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(45,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
+legend(55,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -565,7 +565,7 @@ points(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,c
 lines(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],lwd=2)
 polygon(c(plot_data5_add_real_100_b$age,rev(plot_data5_add_real_100_b$age)),c(cumprod(1-plot_data5_add_real_100_b$low),rev(cumprod(1-plot_data5_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(45,1,c("Poor","Middle", "Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
+legend(55,1,c("Poor","Middle", "Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
 ### Short-term wealth variability ----
 
@@ -597,7 +597,7 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(45,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -821,7 +821,7 @@ points(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,c
 lines(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],lwd=2)
 polygon(c(plot_data5_add_real_100_b$age,rev(plot_data5_add_real_100_b$age)),c(cumprod(1-plot_data5_add_real_100_b$low),rev(cumprod(1-plot_data5_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(45,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 ### Long-term variability of wealth ----
 
@@ -853,7 +853,7 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(45,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -1077,4 +1077,4 @@ points(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,c
 lines(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],lwd=2)
 polygon(c(plot_data5_add_real_100_b$age,rev(plot_data5_add_real_100_b$age)),c(cumprod(1-plot_data5_add_real_100_b$low),rev(cumprod(1-plot_data5_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(45,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
