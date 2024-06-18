@@ -48,10 +48,11 @@ parameters {
   vector[A] beta_wealth;
   // vector [A] beta_wealth_z;
   // real <lower = 0> beta_wealth_sigma;
-// missing wealth data
-  matrix[N,A] wealth_impute;
-  real nu;
-  real<lower=0> sigma_wealth_miss;
+  // missing wealth data
+  vector[N_miss] wealth_impute;
+  real alpha_miss;
+  real beta_miss;
+  real<lower=0> sigma_miss;
 }
 
 transformed parameters {
