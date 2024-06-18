@@ -170,6 +170,8 @@ hist(std_absw_matrix2)
 
 ## Fit real data ----
 
+###Prepare data ----
+
 #Age at first birth
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
@@ -186,20 +188,9 @@ afr_matrix2
 
 #Wealth
 #matrix identifying missing wealth data
-#create matrix
-miss_absw_matrix2 <- std_absw_matrix2
-#identify if the individual i at age j has missing data (1) or not (0)
-for (i in 1:nrow(std_absw_matrix2)){
-  for(j in 1:ncol(std_absw_matrix2)){
-    if(is.na(miss_absw_matrix2[i,j])){
-      miss_absw_matrix2[i,j] <- 1 #missing data
-    } else{
-      miss_absw_matrix2[i,j] <- 0 #not missing data
-    }
-  }
-}
+wealth_miss5 <- which(is.na(std_absw_matrix2),arr.ind = T)
 #check data
-miss_absw_matrix2
+wealth_miss5
 
 #replace NAs with -99
 for(j in 1:ncol(std_absw_matrix2)){
@@ -215,13 +206,13 @@ for(j in 1:ncol(std_absw_matrix2)){
 std_absw_matrix2
 
 #Subset the data for realistic ages
-#Subset wealth and AFB for those between 10 years old and 50 years old.
+#Subset wealth and AFB for those between zero years old and 50 years old.
 #wealth
-std_wealth_restricted <- std_absw_matrix2[,11:51] #Adding 1, since first column in the matrix is year 0
+std_absw_restricted <- std_absw_matrix2[,1:51] #Adding 1, since first column in the matrix is year 0
 #AFB
-afrs_restricted <- afr_matrix2[,11:51] #Adding 1, since first column in the matrix is year 0
+afrs_restricted <- afr_matrix2[,1:51] #Adding 1, since first column in the matrix is year 0
 #missing wealth data
-miss_wealth_restricted <- miss_absw_matrix2[,11:51] #Adding 1, since first column in the matrix is year 0
+wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
 #put all the data together
 #create dataset
@@ -229,13 +220,13 @@ real_list2 <- list(N = nrow(afrs_restricted), #population size
                    A = ncol(afrs_restricted), #age
                    wealth = std_wealth_restricted, #absolute wealth
                    baby = afrs_restricted, #AFR
-                   N_miss = sum(miss_wealth_restricted), # number of missing values that need imputation
+                   N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
                    wealth_miss=miss_wealth_restricted) # matrix indicating missing wealth data
 #check data
 real_list2
 
 # compile model
-m2_add <- cmdstan_model("Model_code/wealth_predictors.stan")
+m2_add <- cmdstan_model("Model_code/firstbaby_abswealth_additive.stan")
 
 # fit model
 fit2_add_real <- m2_add$sample(data = real_list2, 
