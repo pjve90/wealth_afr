@@ -288,7 +288,7 @@ plot(tab3_add_real_gamma_z)
 tab3_add_real_gamma_sigma <- precis(rds2_add_real,depth=2,pars="gamma_wealth_sigma")
 #check table
 tab3_add_real_gamma_sigma
-plot(tab3_add_real_gamma_sigma)
+#plot(tab3_add_real_gamma_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
@@ -342,7 +342,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post3_add_real$mu)){
       p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                         post3_add_real$mu[i,j] + #age
-                                        (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[k] ) #wealth change
+                                        (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[k] ) #wealth change
     }
   }
   #check data
@@ -414,7 +414,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                       post3_add_real$mu[i,j] + #age
-                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[1] ) #wealth change
+                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[1] ) #wealth change
   }
 }
 #check data
@@ -465,7 +465,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                       post3_add_real$mu[i,j] + #age
-                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[2] ) #wealth change
+                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[2] ) #wealth change
   }
 }
 #check data
@@ -516,7 +516,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                       post3_add_real$mu[i,j] + #age
-                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[3] ) #wealth change
+                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[3] ) #wealth change
   }
 }
 #check data

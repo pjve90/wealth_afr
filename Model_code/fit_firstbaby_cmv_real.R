@@ -288,7 +288,7 @@ plot(tab4_add_real_delta_z)
 tab4_add_real_delta_sigma <- precis(rds2_add_real,depth=2,pars="delta_wealth_sigma")
 #check table
 tab4_add_real_delta_sigma
-plot(tab4_add_real_delta_sigma)
+#plot(tab4_add_real_delta_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
@@ -344,7 +344,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post4_add_real$mu)){
       p4_add_real_b[i,j] <- inv_logit(post4_add_real$alpha[i] + #inv logit because originally is logit
                                         post4_add_real$mu[i,j] + #age
-                                        (post4_add_real$delta_wealth_z[i,j]*post4_add_real$delta_wealth_sigma[i,j])*deciles[k]) #moving variance
+                                        (post4_add_real$delta_wealth_z[i,j]*post4_add_real$delta_wealth_sigma[i])*deciles[k]) #moving variance
     }
   }
   #check data
@@ -467,7 +467,7 @@ for(j in 1:ncol(post4_add_real$mu)){
   for(i in 1:nrow(post4_add_real$mu)){
     p4_add_real_b[i,j] <- inv_logit(post4_add_real$alpha[i] + #inv logit because originally is logit
                                       post4_add_real$mu[i,j] + #age
-                                      (post4_add_real$delta_wealth_z[i,j]*post4_add_real$delta_wealth_sigma[i,j])*deciles[2]) #moving variance
+                                      (post4_add_real$delta_wealth_z[i,j]*post4_add_real$delta_wealth_sigma[i])*deciles[2]) #moving variance
   }
 }
 #check data
@@ -518,7 +518,7 @@ for(j in 1:ncol(post4_add_real$mu)){
   for(i in 1:nrow(post4_add_real$mu)){
     p4_add_real_b[i,j] <- inv_logit(post4_add_real$alpha[i] + #inv logit because originally is logit
                                       post4_add_real$mu[i,j] + #age
-                                      (post4_add_real$delta_wealth_z[i,j]*post4_add_real$delta_wealth_sigma[i,j])*deciles[3]) #moving variance
+                                      (post4_add_real$delta_wealth_z[i,j]*post4_add_real$delta_wealth_sigma[i])*deciles[3]) #moving variance
   }
 }
 #check data

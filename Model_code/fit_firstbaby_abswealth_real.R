@@ -284,7 +284,7 @@ plot(tab2_add_real_beta_z)
 tab2_add_real_beta_sigma <- precis(rds2_add_real,depth=2,pars="beta_wealth_sigma")
 #check table
 tab2_add_real_beta_sigma
-plot(tab2_add_real_beta_sigma)
+#plot(tab2_add_real_beta_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
@@ -340,7 +340,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post2_add_real$mu)){
       p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                         post2_add_real$mu[i,j] + #age
-                                        (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[k] ) #absolute wealth
+                                        (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i])*deciles[k] ) #absolute wealth
     }
   }
   #check data
@@ -412,7 +412,7 @@ for(j in 1:ncol(post2_add_real$mu)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                       post2_add_real$mu[i,j] + #age
-                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[1] ) #absolute wealth
+                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i])*deciles[1] ) #absolute wealth
   }
 }
 #check data
@@ -463,7 +463,7 @@ for(j in 1:ncol(post2_add_real$mu)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                       post2_add_real$mu[i,j] + #age
-                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[2] ) #absolute wealth
+                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i])*deciles[2] ) #absolute wealth
   }
 }
 #check data
@@ -514,7 +514,7 @@ for(j in 1:ncol(post2_add_real$mu)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                       post2_add_real$mu[i,j] + #age
-                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[3] ) #absolute wealth
+                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i])*deciles[3] ) #absolute wealth
   }
 }
 #check data
