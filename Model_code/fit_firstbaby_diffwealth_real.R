@@ -166,42 +166,11 @@ std_absw_matrix3
 apply(std_absw_matrix3,2,mean,na.rm=T)
 #plot it
 plot(apply(std_absw_matrix3,2,mean,na.rm=T)~c(1:(max(real_data3$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
-
-# Age-specific current wealth change ----
-
-#create a matrix to store the age-specific current wealth change
-diffwealth_matrix3 <- matrix(nrow=nrow(real_data3),ncol=max(real_data3$aoc)+1)
-#set first and column at zero since there is no wealth change at birth, and there is a gap of two years in the data collection
-diffwealth_matrix3[,1:2] <- 0
-diffwealth_matrix3
-#calculate for each age when the woman is censored (1) or not (0)
-for(i in 1:nrow(diffwealth_matrix3)){
-  for(j in 3:ncol(diffwealth_matrix3)){
-    diffwealth_matrix3[i,j] <- absw_matrix3[i,j] - absw_matrix3[i,j-2] #-2 because there is a gap of two years between data collection
- }
-}
-#check the data
-diffwealth_matrix3
-
-#change to absolute values
-abs_diffwealth_matrix3 <- abs(diffwealth_matrix3)
-#check the age-specific average of wealth change
-apply(abs_diffwealth_matrix3,2,mean,na.rm=T)
-#plot it
-plot(apply(abs_diffwealth_matrix3,2,mean,na.rm=T)~c(1:ncol(abs_diffwealth_matrix3)),xlab="Age",ylab="Average absolute wealth change")
-hist(abs_diffwealth_matrix3)
-
-#standardise absolute wealth change
-std_diffwealth_matrix3 <- matrix(standardize(as.vector(diffwealth_matrix3)),ncol=ncol(diffwealth_matrix3),nrow=nrow(diffwealth_matrix3))
-#check the data
-std_diffwealth_matrix3
-#check the age-specific average of absolute wealth
-apply(std_diffwealth_matrix3,2,mean,na.rm=T)
-#plot it
-plot(apply(std_diffwealth_matrix3,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
-hist(std_diffwealth_matrix3)
+hist(std_absw_matrix3)
 
 ## Fit real data ----
+
+###Prepare data ----
 
 #Age at first birth
 #replace NAs with -99
@@ -217,55 +186,42 @@ for(j in 1:ncol(afr_matrix3)){
 #check the data
 afr_matrix3
 
+#Wealth
 #matrix identifying missing wealth data
-#create matrix
-miss_diffw_matrix3 <- std_diffwealth_matrix3
-#define missing the first two columns (1)
-miss_diffw_matrix3[,1:2] <- 1
-#identify if the individual i at age j has missing data (1) or not (0)
-for (i in 1:nrow(std_diffwealth_matrix3)){
-  for(j in 3:ncol(std_diffwealth_matrix3)){
-    if(is.na(miss_diffw_matrix3[i,j])){
-      miss_diffw_matrix3[i,j] <- 1 #missing data
-    } else{
-      miss_diffw_matrix3[i,j] <- 0 #not missing data
-    }
-  }
-}
+wealth_miss3 <- which(is.na(std_absw_matrix3),arr.ind = T)
 #check data
-miss_diffw_matrix3
+wealth_miss3
 
 #replace NAs with -99
-for(j in 1:ncol(std_diffwealth_matrix3)){
-  for(i in 1:nrow(std_diffwealth_matrix3)){
-    if(is.na(std_diffwealth_matrix3[i,j])){
-      std_diffwealth_matrix3[i,j] <- -99
+for(j in 1:ncol(std_absw_matrix3)){
+  for(i in 1:nrow(std_absw_matrix3)){
+    if(is.na(std_absw_matrix3[i,j])){
+      std_absw_matrix3[i,j] <- -99
     } else{
-      std_diffwealth_matrix3[i,j] <- std_diffwealth_matrix3[i,j]
+      std_absw_matrix3[i,j] <- std_absw_matrix3[i,j]
     }
   }
 }
 #check the data
-std_diffwealth_matrix3
+std_absw_matrix3
 
 #Subset the data for realistic ages
-#Subset wealth and AFB for those between 10 years old and 50 years old.
+#Subset wealth and AFB for those between zero years old and 50 years old.
 #wealth
-std_diffwealth_restricted <- std_diffwealth_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
+std_absw_restricted <- std_absw_matrix3[,1:51] #Adding 1, since first column in the matrix is year 0
 #AFB
-afrs_restricted <- afr_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
+afrs_restricted <- afr_matrix3[,1:51] #Adding 1, since first column in the matrix is year 0
 #missing wealth data
-miss_diffwealth_restricted <- miss_diffw_matrix3[,11:51] #Adding 1, since first column in the matrix is year 0
-
+wealth_miss_restricted <- wealth_miss3[wealth_miss3[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
 #put all the data together
 #create dataset
 real_list3 <- list(N = nrow(afrs_restricted), #population size
                    A = ncol(afrs_restricted), #age
-                   wealth = std_diffwealth_restricted, #absolute current wealth change
+                   wealth = std_absw_restricted, #absolute wealth
                    baby = afrs_restricted, #AFR
-                   N_miss = sum(miss_diffwealth_restricted), # number of missing values that need imputation
-                   wealth_miss=miss_diffwealth_restricted) # matrix indicating missing wealth data
+                   N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
+                   wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
 #check data
 real_list3
 
@@ -381,7 +337,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post3_add_real$mu)){
       p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                         post3_add_real$mu[i,j] + #age
-                                        post3_add_real$gamma_wealth[i,j]*deciles[k] ) #wealth change
+                                        (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[k] ) #wealth change
     }
   }
   #check data
@@ -453,9 +409,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                       post3_add_real$mu[i,j] + #age
-                                      post3_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post3_add_real$gamma_wealth[i,j]*deciles[1] + #wealth change
-                                      post3_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[1] ) #wealth change
   }
 }
 #check data
@@ -506,9 +460,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                       post3_add_real$mu[i,j] + #age
-                                      post3_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post3_add_real$gamma_wealth[i,j]*deciles[2] + #wealth change
-                                      post3_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[2] ) #wealth change
   }
 }
 #check data
@@ -559,9 +511,7 @@ for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
     p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
                                       post3_add_real$mu[i,j] + #age
-                                      post3_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post3_add_real$gamma_wealth[i,j]*deciles[3] + #wealth change
-                                      post3_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i,j])*deciles[3] ) #wealth change
   }
 }
 #check data

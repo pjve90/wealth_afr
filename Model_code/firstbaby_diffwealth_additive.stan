@@ -45,10 +45,9 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
-// wealth
-  vector[A] gamma_wealth; // current absolute wealth change
-  // vector [A] gamma_wealth_z; 
-  // real <lower = 0> gamma_wealth_sigma;
+// short-term wealth variability
+  vector [A] gamma_wealth_z;
+  real <lower = 0> gamma_wealth_sigma;
 // missing wealth data
   vector[N_miss] wealth_impute;
   real alpha_miss;
@@ -62,11 +61,6 @@ transformed parameters {
   vector [A] mu;
   
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw;
-    
-// // Non-centered parameterization for wealth effects
-//   //wealth change
-//   vector[A] gamma_wealth;
-//   gamma_wealth = gamma_wealth_sigma * gamma_wealth_z;
 
 //Bayesian data imputation
   matrix[N,A] wealth_full; // full wealth data (original + imputed)
@@ -77,7 +71,7 @@ transformed parameters {
         wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];  
       }
 
-//2-year lagged wealth change
+//short-term wealth variability
   matrix[N,A] wealth_change; //matrix containing wealth change
   
   for(n in 1:N){
@@ -100,9 +94,8 @@ model {
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
 // current absolute wealth change
-    gamma_wealth ~ normal(0,1); 
-    // gamma_wealth_z ~ normal(0, 1); 
-    // gamma_wealth_sigma ~ exponential(1);
+    gamma_wealth_z ~ normal(0, 1);
+    gamma_wealth_sigma ~ exponential(1);
 // missing wealth data
     alpha_miss ~ normal(0, 1);
     beta_miss ~ normal(0, 1);
@@ -124,7 +117,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        gamma_wealth[a]*wealth_change[n,a] // current absolute wealth change
+        (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change[n,a] // short-term wealth variability
         );
     }
     }

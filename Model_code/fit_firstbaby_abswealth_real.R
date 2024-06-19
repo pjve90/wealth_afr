@@ -188,9 +188,9 @@ afr_matrix2
 
 #Wealth
 #matrix identifying missing wealth data
-wealth_miss5 <- which(is.na(std_absw_matrix2),arr.ind = T)
+wealth_miss2 <- which(is.na(std_absw_matrix2),arr.ind = T)
 #check data
-wealth_miss5
+wealth_miss2
 
 #replace NAs with -99
 for(j in 1:ncol(std_absw_matrix2)){
@@ -212,16 +212,16 @@ std_absw_restricted <- std_absw_matrix2[,1:51] #Adding 1, since first column in 
 #AFB
 afrs_restricted <- afr_matrix2[,1:51] #Adding 1, since first column in the matrix is year 0
 #missing wealth data
-wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
+wealth_miss_restricted <- wealth_miss2[wealth_miss2[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
 #put all the data together
 #create dataset
 real_list2 <- list(N = nrow(afrs_restricted), #population size
                    A = ncol(afrs_restricted), #age
-                   wealth = std_wealth_restricted, #absolute wealth
+                   wealth = std_absw_restricted, #absolute wealth
                    baby = afrs_restricted, #AFR
                    N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
-                   wealth_miss=miss_wealth_restricted) # matrix indicating missing wealth data
+                   wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
 #check data
 real_list2
 
@@ -335,7 +335,7 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post2_add_real$mu)){
       p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                         post2_add_real$mu[i,j] + #age
-                                        post2_add_real$beta_wealth[i,j]*deciles[k] ) #absolute wealth
+                                        (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[k] ) #absolute wealth
     }
   }
   #check data
@@ -407,9 +407,7 @@ for(j in 1:ncol(post2_add_real$mu)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                       post2_add_real$mu[i,j] + #age
-                                      post2_add_real$beta_wealth[i,j]*deciles[1] + #absolute wealth
-                                      post2_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post2_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[1] ) #absolute wealth
   }
 }
 #check data
@@ -460,9 +458,7 @@ for(j in 1:ncol(post2_add_real$mu)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                       post2_add_real$mu[i,j] + #age
-                                      post2_add_real$beta_wealth[i,j]*deciles[2] + #absolute wealth
-                                      post2_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post2_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[2] ) #absolute wealth
   }
 }
 #check data
@@ -513,9 +509,7 @@ for(j in 1:ncol(post2_add_real$mu)){
   for(i in 1:nrow(post2_add_real$mu)){
     p2_add_real_b[i,j] <- inv_logit(post2_add_real$alpha[i] + #inv logit because originally is logit
                                       post2_add_real$mu[i,j] + #age
-                                      post2_add_real$beta_wealth[i,j]*deciles[3] + #absolute wealth
-                                      post2_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post2_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post2_add_real$beta_wealth_z[i,j]*post2_add_real$beta_wealth_sigma[i,j])*deciles[3] ) #absolute wealth
   }
 }
 #check data
