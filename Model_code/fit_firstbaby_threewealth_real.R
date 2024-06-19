@@ -353,9 +353,9 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add_real$mu)){
       p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                         post5_add_real$mu[i,j] + #age
-                                        post5_add_real$beta_wealth[i,j]*deciles[k] + #absolute wealth
-                                        post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                        post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*deciles[k] + #absolute wealth
+                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
     }
   }
   #check data
@@ -427,9 +427,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*deciles[1] + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*deciles[1] + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
   }
 }
 #check data
@@ -480,9 +480,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*deciles[2] + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*deciles[2] + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
   }
 }
 #check data
@@ -533,9 +533,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*deciles[3] + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*deciles[3] + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
   }
 }
 #check data
@@ -609,9 +609,9 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add_real$mu)){
       p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                         post5_add_real$mu[i,j] + #age
-                                        post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                        post5_add_real$gamma_wealth[i,j]*deciles[k] + #wealth change
-                                        post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[k] + #wealth change
+                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
     }
   }
   #check data
@@ -683,9 +683,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*deciles[1] + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[1] + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
   }
 }
 #check data
@@ -736,9 +736,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*deciles[2] + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[2] + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
   }
 }
 #check data
@@ -789,9 +789,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*deciles[3] + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[3] + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
   }
 }
 #check data
@@ -865,9 +865,9 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add_real$mu)){
       p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                         post5_add_real$mu[i,j] + #age
-                                        post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                        post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                        post5_add_real$delta_wealth[i,j]*deciles[k]) #moving variance
+                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[k]) #moving variance
     }
   }
   #check data
@@ -939,9 +939,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*deciles[1]) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[1]) #moving variance
   }
 }
 #check data
@@ -992,9 +992,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*deciles[2]) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[2]) #moving variance
   }
 }
 #check data
@@ -1045,9 +1045,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      post5_add_real$beta_wealth[i,j]*0 + #absolute wealth
-                                      post5_add_real$gamma_wealth[i,j]*0 + #wealth change
-                                      post5_add_real$delta_wealth[i,j]*deciles[3]) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[3]) #moving variance
   }
 }
 #check data

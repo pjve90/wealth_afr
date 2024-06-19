@@ -279,11 +279,16 @@ tab4_add_real_mu <- precis(rds4_add_real,depth=2,pars="mu")
 #check table
 tab4_add_real_mu
 plot(tab4_add_real_mu)
-#create summary table for delta
-tab4_add_real_delta <- precis(rds4_add_real,depth=2,pars="delta_wealth")
+#create summary table for delta_z
+tab4_add_real_delta_z <- precis(rds2_add_real,depth=2,pars="delta_wealth_z")
 #check table
-tab4_add_real_delta
-plot(tab4_add_real_delta)
+tab4_add_real_delta_z
+plot(tab4_add_real_delta_z)
+#create summary table for delta_sigma
+tab4_add_real_delta_sigma <- precis(rds2_add_real,depth=2,pars="delta_wealth_sigma")
+#check table
+tab4_add_real_delta_sigma
+plot(tab4_add_real_delta_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu

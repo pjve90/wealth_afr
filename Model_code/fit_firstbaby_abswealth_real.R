@@ -275,11 +275,16 @@ tab2_add_real_mu <- precis(rds2_add_real,depth=2,pars="mu")
 #check table
 tab2_add_real_mu
 plot(tab2_add_real_mu)
-#create summary table for beta
-tab2_add_real_beta <- precis(rds2_add_real,depth=2,pars="beta_wealth")
+#create summary table for beta_z
+tab2_add_real_beta_z <- precis(rds2_add_real,depth=2,pars="beta_wealth_z")
 #check table
-tab2_add_real_beta
-plot(tab2_add_real_beta)
+tab2_add_real_beta_z
+plot(tab2_add_real_beta_z)
+#create summary table for beta_sigma
+tab2_add_real_beta_sigma <- precis(rds2_add_real,depth=2,pars="beta_wealth_sigma")
+#check table
+tab2_add_real_beta_sigma
+plot(tab2_add_real_beta_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu

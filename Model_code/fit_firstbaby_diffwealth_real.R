@@ -279,11 +279,16 @@ tab3_add_real_mu <- precis(rds3_add_real,depth=2,pars="mu")
 #check table
 tab3_add_real_mu
 plot(tab3_add_real_mu)
-#create summary table for gamma
-tab3_add_real_gamma <- precis(rds3_add_real,depth=2,pars="gamma_wealth")
+#create summary table for gamma_z
+tab3_add_real_gamma_z <- precis(rds2_add_real,depth=2,pars="gamma_wealth_z")
 #check table
-tab3_add_real_gamma
-plot(tab3_add_real_gamma)
+tab3_add_real_gamma_z
+plot(tab3_add_real_gamma_z)
+#create summary table for gamma_sigma
+tab3_add_real_gamma_sigma <- precis(rds2_add_real,depth=2,pars="gamma_wealth_sigma")
+#check table
+tab3_add_real_gamma_sigma
+plot(tab3_add_real_gamma_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
