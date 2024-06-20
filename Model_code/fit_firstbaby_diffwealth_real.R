@@ -280,12 +280,12 @@ tab3_add_real_mu <- precis(rds3_add_real,depth=2,pars="mu")
 tab3_add_real_mu
 plot(tab3_add_real_mu)
 #create summary table for gamma_z
-tab3_add_real_gamma_z <- precis(rds2_add_real,depth=2,pars="gamma_wealth_z")
+tab3_add_real_gamma_z <- precis(rds3_add_real,depth=2,pars="gamma_wealth_z")
 #check table
 tab3_add_real_gamma_z
 plot(tab3_add_real_gamma_z)
 #create summary table for gamma_sigma
-tab3_add_real_gamma_sigma <- precis(rds2_add_real,depth=2,pars="gamma_wealth_sigma")
+tab3_add_real_gamma_sigma <- precis(rds3_add_real,depth=2,pars="gamma_wealth_sigma")
 #check table
 tab3_add_real_gamma_sigma
 #plot(tab3_add_real_gamma_sigma)

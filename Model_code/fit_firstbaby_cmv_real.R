@@ -280,12 +280,12 @@ tab4_add_real_mu <- precis(rds4_add_real,depth=2,pars="mu")
 tab4_add_real_mu
 plot(tab4_add_real_mu)
 #create summary table for delta_z
-tab4_add_real_delta_z <- precis(rds2_add_real,depth=2,pars="delta_wealth_z")
+tab4_add_real_delta_z <- precis(rds4_add_real,depth=2,pars="delta_wealth_z")
 #check table
 tab4_add_real_delta_z
 plot(tab4_add_real_delta_z)
 #create summary table for delta_sigma
-tab4_add_real_delta_sigma <- precis(rds2_add_real,depth=2,pars="delta_wealth_sigma")
+tab4_add_real_delta_sigma <- precis(rds4_add_real,depth=2,pars="delta_wealth_sigma")
 #check table
 tab4_add_real_delta_sigma
 #plot(tab4_add_real_delta_sigma)
