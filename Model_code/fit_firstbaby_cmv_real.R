@@ -211,6 +211,8 @@ std_absw_matrix4
 std_absw_restricted <- std_absw_matrix4[,1:51] #Adding 1, since first column in the matrix is year 0
 #AFB
 afrs_restricted <- afr_matrix4[,1:51] #Adding 1, since first column in the matrix is year 0
+afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do not need to model such ages for age at first birth
+afrs_restricted
 #missing wealth data
 wealth_miss_restricted <- wealth_miss4[wealth_miss4[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
@@ -224,6 +226,8 @@ real_list4 <- list(N = nrow(afrs_restricted), #population size
                    wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
 #check data
 real_list4
+
+### Compile and fit model ----
 
 # compile model
 
@@ -261,9 +265,9 @@ rstan::traceplot(rds4_add_real,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(rds4_add_real,pars="mu_delta")
 #delta_wealth
-#traceplot(rds4_add_real,pars="delta_wealth") #only run if needed, because they are 91 plots
+traceplot(rds4_add_real,pars="delta_wealth_z") #only run if needed, because they are 91 plots
 #delta_wealth
-#traceplot(rds4_add_real,pars="delta_wealth") #only run if needed, because they are 91 plots
+traceplot(rds4_add_real,pars="delta_wealth_sigma") #only run if needed, because they are 91 plots
 
 #summary of the model
 #create summary table

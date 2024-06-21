@@ -146,10 +146,10 @@ for(i in 1:nrow(absw_matrix2)){
     absw_matrix2[i,age_absw] <- absw
   } else
     if(!is.na(age_absw) & age_absw > (real_data2$aoc[i]+1)){
-    absw_matrix2[i,(real_data2$aoc[i]+1)] <- NA
+      absw_matrix2[i,(real_data2$aoc[i]+1)] <- NA
     } else{
       absw_matrix2[i,age_absw] <- NA
-  }
+    }
 }
 #check data
 absw_matrix2
@@ -168,11 +168,11 @@ apply(std_absw_matrix2,2,mean,na.rm=T)
 plot(apply(std_absw_matrix2,2,mean,na.rm=T)~c(1:(max(real_data2$aoc)+1)),xlab="Age",ylab="Average absolute wealth")
 hist(std_absw_matrix2)
 
-## Fit real data ----
+# Fit real data ----
 
-###Prepare data ----
+##Prepare data ----
 
-#Age at first birth
+###Age at first birth ----
 #replace NAs with -99
 for(j in 1:ncol(afr_matrix2)){
   for(i in 1:nrow(afr_matrix2)){
@@ -186,7 +186,7 @@ for(j in 1:ncol(afr_matrix2)){
 #check the data
 afr_matrix2
 
-#Wealth
+###Wealth ----
 #matrix identifying missing wealth data
 wealth_miss2 <- which(is.na(std_absw_matrix2),arr.ind = T)
 #check data
@@ -211,6 +211,8 @@ std_absw_matrix2
 std_absw_restricted <- std_absw_matrix2[,1:51] #Adding 1, since first column in the matrix is year 0
 #AFB
 afrs_restricted <- afr_matrix2[,1:51] #Adding 1, since first column in the matrix is year 0
+afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do not need to model such ages for age at first birth
+afrs_restricted
 #missing wealth data
 wealth_miss_restricted <- wealth_miss2[wealth_miss2[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
@@ -225,16 +227,18 @@ real_list2 <- list(N = nrow(afrs_restricted), #population size
 #check data
 real_list2
 
+### Compile and fit model ----
+
 # compile model
 m2_add <- cmdstan_model("Model_code/firstbaby_abswealth_additive.stan")
 
 # fit model
 fit2_add_real <- m2_add$sample(data = real_list2, 
-                            chains = 4, 
-                            parallel_chains = 15, 
-                            adapt_delta = 0.95,
-                            max_treedepth = 13,
-                            init = 0)
+                               chains = 4, 
+                               parallel_chains = 15, 
+                               adapt_delta = 0.95,
+                               max_treedepth = 13,
+                               init = 0)
 
 # save fit 
 fit_2_add_real <- rstan::read_stan_csv(fit2_add_real$output_files())
@@ -249,9 +253,9 @@ post2_add_real <- extract.samples(rds2_add_real)
 #alpha
 rstan::traceplot(rds2_add_real,pars="alpha")
 #mu
-#traceplot(rds2_add_real,pars="mu") #only run if needed, because they are 92 plots
+traceplot(rds2_add_real,pars="mu") #only run if needed, because they are 92 plots
 #mu_raw
-#traceplot(rds2_add_real,pars="mu_raw") #only run if needed, because they are 92 plots
+traceplot(rds2_add_real,pars="mu_raw") #only run if needed, because they are 92 plots
 #mu_tau
 rstan::traceplot(rds2_add_real,pars="mu_tau")
 #mu_kappa
@@ -259,15 +263,17 @@ rstan::traceplot(rds2_add_real,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(rds2_add_real,pars="mu_delta")
 #beta_wealth
-#traceplot(rds2_add_real,pars="beta_wealth") #only run if needed, because they are 91 plots
+traceplot(rds2_add_real,pars="beta_wealth_z") #only run if needed, because they are 91 plots
+#beta_wealth
+traceplot(rds2_add_real,pars="beta_wealth_sigma") #only run if needed, because they are 91 plots
 
 #summary of the model
 #create summary table
 #create summary table for alpha and hiper priors of Gaussian process
 tab2_add_real <- precis(rds2_add_real,depth=3,pars=c("alpha",
-                                             "mu_raw",
-                                             "mu_tau",
-                                             "mu_delta"))
+                                                     "mu_raw",
+                                                     "mu_tau",
+                                                     "mu_delta"))
 #check table
 tab2_add_real
 #create summary table for mu

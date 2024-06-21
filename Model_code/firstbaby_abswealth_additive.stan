@@ -90,9 +90,9 @@ model {
 
 //Wealth data imputation
  for(n in 1:N){
-     wealth_full[n,1] ~ normal(0, 1); //not sure about this...
+     wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
   for(a in 2:A){
-     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
+     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss); //data imputation at subsequent years
   }
  }
 

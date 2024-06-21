@@ -211,6 +211,8 @@ std_absw_matrix3
 std_absw_restricted <- std_absw_matrix3[,1:51] #Adding 1, since first column in the matrix is year 0
 #AFB
 afrs_restricted <- afr_matrix3[,1:51] #Adding 1, since first column in the matrix is year 0
+afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do not need to model such ages for age at first birth
+afrs_restricted
 #missing wealth data
 wealth_miss_restricted <- wealth_miss3[wealth_miss3[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
@@ -225,17 +227,19 @@ real_list3 <- list(N = nrow(afrs_restricted), #population size
 #check data
 real_list3
 
+### Compile and fit model ----
+
 # compile model
 
 m3_add <- cmdstan_model("Model_code/firstbaby_diffwealth_additive.stan")
 
 #fit model
 fit3_add_real <- m3_add$sample(data = real_list3, 
-                       chains = 4, 
-                       parallel_chains = 15, 
-                       adapt_delta = 0.95,
-                       max_treedepth = 13,
-                       init = 0)
+                               chains = 4, 
+                               parallel_chains = 15, 
+                               adapt_delta = 0.95,
+                               max_treedepth = 13,
+                               init = 0)
 
 
 # save fit 
@@ -261,17 +265,17 @@ rstan::traceplot(rds3_add_real,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(rds3_add_real,pars="mu_delta")
 #gamma_wealth
-#traceplot(rds3_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
+traceplot(rds3_add_real,pars="gamma_wealth_z") #only run if needed, because they are 91 plots
 #gamma_wealth
-#traceplot(rds3_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
+traceplot(rds3_add_real,pars="gamma_wealth_sigma") #only run if needed, because they are 91 plots
 
 #summary of the model
 #create summary table
 #create summary table for alpha and hiper priors of Gaussian process
 tab3_add_real <- precis(rds3_add_real,depth=2,pars=c("alpha",
-                                             "mu_raw",
-                                             "mu_tau",
-                                             "mu_delta"))
+                                                     "mu_raw",
+                                                     "mu_tau",
+                                                     "mu_delta"))
 #check table
 tab3_add_real
 #create summary table for mu
@@ -299,6 +303,8 @@ tab3_add_real_gamma_sigma
 # tab3_add_real_gamma[,1]<-round(inv_logit(tab3_add_real_gamma[,1]),3)
 # tab3_add_real_gamma[,3]<-round(inv_logit(tab3_add_real_gamma[,3]),3)
 # tab3_add_real_gamma[,4]<-round(inv_logit(tab3_add_real_gamma[,4]),3)
+
+## Plot the fit of the real data ----
 
 ### Short-term wealth variability ----
 
@@ -387,7 +393,7 @@ deciles
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_b<-palette[4:(length(deciles)+2)]
+palette_b<-palette[4:(length(deciles)+3)]
 palette_b
 
 #define layout of plots
@@ -412,9 +418,9 @@ p3_add_real_0_b
 #fill it in with values for age 25
 for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                      post3_add_real$mu[i,j] + #age
-                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[1] ) #wealth change
+    p3_add_real_0_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
+                                        post3_add_real$mu[i,j] + #age
+                                        (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[1] ) #wealth change
   }
 }
 #check data
@@ -463,9 +469,9 @@ p3_add_real_50_b
 #fill it in with values for age 25
 for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                      post3_add_real$mu[i,j] + #age
-                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[2] ) #wealth change
+    p3_add_real_50_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
+                                         post3_add_real$mu[i,j] + #age
+                                         (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[3] ) #wealth change
   }
 }
 #check data
@@ -491,9 +497,9 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=palette_b[2],lwd=2)
-polygon(c(plot_data3_add_real_50_b$age,rev(plot_data3_add_real_50_b$age)),c(cumprod(1-plot_data3_add_real_50_b$low),rev(cumprod(1-plot_data3_add_real_50_b$upp))),col=alpha(palette_b[2],0.25),border=NA)
+points(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=palette_b[3],pch=15)
+lines(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=palette_b[3],lwd=2)
+polygon(c(plot_data3_add_real_50_b$age,rev(plot_data3_add_real_50_b$age)),c(cumprod(1-plot_data3_add_real_50_b$low),rev(cumprod(1-plot_data3_add_real_50_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
 
 #### Maximum short-term variability of wealth ----
 
@@ -514,9 +520,9 @@ p3_add_real_100_b
 #fill it in with values for age 25
 for(j in 1:ncol(post3_add_real$mu)){
   for(i in 1:nrow(post3_add_real$mu)){
-    p3_add_real_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
-                                      post3_add_real$mu[i,j] + #age
-                                      (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[3] ) #wealth change
+    p3_add_real_100_b[i,j] <- inv_logit(post3_add_real$alpha[i] + #inv logit because originally is logit
+                                          post3_add_real$mu[i,j] + #age
+                                          (post3_add_real$gamma_wealth_z[i,j]*post3_add_real$gamma_wealth_sigma[i])*deciles[3] ) #wealth change
   }
 }
 #check data
@@ -547,4 +553,3 @@ lines(cumprod(1-plot_data3_add_real_100_b$mean)~plot_data3_add_real_100_b$age,co
 polygon(c(plot_data3_add_real_100_b$age,rev(plot_data3_add_real_100_b$age)),c(cumprod(1-plot_data3_add_real_100_b$low),rev(cumprod(1-plot_data3_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
 
 legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
-

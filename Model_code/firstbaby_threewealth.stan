@@ -68,17 +68,6 @@ transformed parameters {
   
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
     
-// Non-centered parameterization for wealth effects
-  //absolute wealth
-  vector[A] beta_wealth;
-  beta_wealth = beta_wealth_sigma * beta_wealth_z;
-  //wealth change
-  vector[A] gamma_wealth;
-  gamma_wealth = gamma_wealth_sigma * gamma_wealth_z;
-  //moving standard deviation
-  vector[A] delta_wealth;
-  delta_wealth = delta_wealth_sigma * delta_wealth_z;
-  
 //Bayesian data imputation
   matrix[N,A] wealth_full; // full wealth data (original + imputed)
   
@@ -88,7 +77,7 @@ transformed parameters {
         wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];  
       }
 
-//2-year lagged wealth change
+//short-term wealth variability
   matrix[N,A] wealth_change; //matrix containing wealth change
   
   for(n in 1:N){
@@ -100,7 +89,7 @@ transformed parameters {
     }
   }
   
-//Moving standard deviation
+//long-term variability
   matrix[N,A] wealth_msd; //matrix containing moving standard deviation
   
   for(n in 1:N){
@@ -140,7 +129,7 @@ model {
 
 //Wealth data imputation
  for(n in 1:N){
-     wealth_full[n,1] ~ normal(0, 1); //not sure about this...
+     wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
   for(a in 2:A){
      wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
   }
@@ -155,9 +144,9 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        (beta_wealth_z[a]*beta_wealth_sigma[a])*wealth_full[n,a] + // absolute wealth
-        (gamma_wealth_z[a]*gamma_wealth_sigma[a])*wealth_change[n,a] + // 2-years lagged wealth change
-        (delta_wealth_z[a]*delta_wealth_sigma[a])*wealth_msd[n,a]  // moving standard deviation
+        (beta_wealth_z[a]*beta_wealth_sigma)*wealth_full[n,a] + // absolute wealth
+        (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change[n,a] + // 2-years lagged wealth change
+        (delta_wealth_z[a]*delta_wealth_sigma)*wealth_msd[n,a]  // moving standard deviation
         );
           
     }

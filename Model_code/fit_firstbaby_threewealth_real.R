@@ -210,6 +210,8 @@ std_absw_matrix5
 std_absw_restricted <- std_absw_matrix5[,1:51] #Adding 1, since first column in the matrix is year 0
 #AFB
 afrs_restricted <- afr_matrix5[,1:51] #Adding 1, since first column in the matrix is year 0
+afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do not need to model such ages for age at first birth
+afrs_restricted
 #missing wealth data
 wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
@@ -656,7 +658,7 @@ deciles
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_b<-palette[4:(length(deciles)+2)]
+palette_b<-palette[4:(length(deciles)+3)]
 palette_b
 
 #define layout of plots
