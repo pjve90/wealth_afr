@@ -285,21 +285,36 @@ tab5_add_real_mu <- precis(rds5_add_real,depth=2,pars="mu")
 #check table
 tab5_add_real_mu
 plot(tab5_add_real_mu)
-#create summary table for beta
-tab5_add_real_beta <- precis(rds5_add_real,depth=2,pars="beta_wealth")
+#create summary table for beta_z
+tab5_add_real_beta_z <- precis(rds5_add_real,depth=2,pars="beta_wealth_z")
 #check table
-tab5_add_real_beta
-plot(tab5_add_real_beta)
-#create summary table for gamma
-tab5_add_real_gamma <- precis(rds5_add_real,depth=2,pars="gamma_wealth")
+tab5_add_real_beta_z
+plot(tab5_add_real_beta_z)
+#create summary table for beta_sigma
+tab5_add_real_beta_sigma <- precis(rds5_add_real,depth=2,pars="beta_wealth_sigma")
 #check table
-tab5_add_real_gamma
-plot(tab5_add_real_gamma)
-#create summary table for delta
-tab5_add_real_delta <- precis(rds5_add_real,depth=2,pars="delta_wealth")
+tab5_add_real_beta_sigma
+#plot(tab5_add_real_beta_sigma)
+#create summary table for gamma_z
+tab5_add_real_gamma_z <- precis(rds5_add_real,depth=2,pars="gamma_wealth_z")
 #check table
-tab5_add_real_delta
-plot(tab5_add_real_delta)
+tab5_add_real_gamma_z
+plot(tab5_add_real_gamma_z)
+#create summary table for gamma_sigma
+tab5_add_real_gamma_sigma <- precis(rds5_add_real,depth=2,pars="gamma_wealth_sigma")
+#check table
+tab5_add_real_gamma_sigma
+#plot(tab3_add_real_gamma_sigma)
+#create summary table for delta_z
+tab5_add_real_delta_z <- precis(rds5_add_real,depth=2,pars="delta_wealth_z")
+#check table
+tab5_add_real_delta_z
+plot(tab5_add_real_delta_z)
+#create summary table for delta_sigma
+tab5_add_real_delta_sigma <- precis(rds5_add_real,depth=2,pars="delta_wealth_sigma")
+#check table
+tab5_add_real_delta_sigma
+#plot(tab4_add_real_delta_sigma)
 
 # # To present the results, it will help to convert them to the actual probability scale (estimated mu values are on logit scale)
 # #mu
