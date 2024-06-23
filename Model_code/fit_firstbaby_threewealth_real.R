@@ -430,11 +430,13 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with absolute wealth",
-     cex.axis=1.2,
+     xaxt="n",
+     #cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(55,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
+axis(1,at=c(0:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
+legend(43,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
