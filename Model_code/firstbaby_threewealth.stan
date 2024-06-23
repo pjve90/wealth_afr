@@ -27,9 +27,9 @@ data {
   
   matrix[N,A] wealth; // age-specific absolute wealth
 
-  int N_miss; // number of missing data of absolute wealth
-
-  array[N_miss,2] int wealth_miss; // indicator of position of missing values in the wealth matrix
+  // int N_miss; // number of missing data of absolute wealth
+  // 
+  // array[N_miss,2] int wealth_miss; // indicator of position of missing values in the wealth matrix
 
   array[N,A] int baby; // probability of FR
 
@@ -54,11 +54,11 @@ parameters {
   // moving standard deviation
   vector [A] delta_wealth_z; 
   real <lower = 0> delta_wealth_sigma;
-  // missing wealth data
-  vector[N_miss] wealth_impute;
-  real alpha_miss;
-  real beta_miss;
-  real<lower=0> sigma_miss;
+  // // missing wealth data
+  // vector[N_miss] wealth_impute;
+  // real alpha_miss;
+  // real beta_miss;
+  // real<lower=0> sigma_miss;
 }
 
 transformed parameters {
@@ -68,14 +68,14 @@ transformed parameters {
   
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
     
-//Bayesian data imputation
-  matrix[N,A] wealth_full; // full wealth data (original + imputed)
-  
-  wealth_full = wealth; // making the merged data as the same as the original data
-  
-  for(n in 1:N_miss){ // telling where is the missing data that needs to be imputed
-        wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];  
-      }
+// //Bayesian data imputation
+//   matrix[N,A] wealth_full; // full wealth data (original + imputed)
+//   
+//   wealth_full = wealth; // making the merged data as the same as the original data
+//   
+//   for(n in 1:N_miss){ // telling where is the missing data that needs to be imputed
+//         wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];  
+//       }
 
 //short-term wealth variability
   matrix[N,A] wealth_change; //matrix containing wealth change
@@ -85,7 +85,7 @@ transformed parameters {
       wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
     }
     for(a in 3:A){
-      wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]); //calculating the 2-years lagged wealth change
+      wealth_change[n,a] = abs(wealth[n,a] - wealth[n,a-2]); //calculating the 2-years lagged wealth change
     }
   }
   
@@ -97,7 +97,7 @@ transformed parameters {
       wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
     }
     for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth_full[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
+      wealth_msd[n,a] = sd(segment(wealth[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
     }
   }
 
@@ -122,18 +122,18 @@ model {
     delta_wealth_z ~ normal(0, 1);
     delta_wealth_sigma ~ exponential(1);
     
-// missing wealth data
-    alpha_miss ~ normal(0, 1);
-    beta_miss ~ normal(0, 1);
-    sigma_miss ~ exponential(1);
-
-//Wealth data imputation
- for(n in 1:N){
-     wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
-  for(a in 2:A){
-     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
-  }
- }
+// // missing wealth data
+//     alpha_miss ~ normal(0, 1);
+//     beta_miss ~ normal(0, 1);
+//     sigma_miss ~ exponential(1);
+// 
+// //Wealth data imputation
+//  for(n in 1:N){
+//      wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
+//   for(a in 2:A){
+//      wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
+//   }
+//  }
     
 //Probability of first birth
   for (n in 1:N) {
@@ -144,7 +144,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        (beta_wealth_z[a]*beta_wealth_sigma)*wealth_full[n,a] + // absolute wealth
+        (beta_wealth_z[a]*beta_wealth_sigma)*wealth[n,a] + // absolute wealth
         (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change[n,a] + // 2-years lagged wealth change
         (delta_wealth_z[a]*delta_wealth_sigma)*wealth_msd[n,a]  // moving standard deviation
         );

@@ -207,13 +207,13 @@ std_absw_matrix5
 #Subset the data for realistic ages
 #Subset wealth and AFB for those between zero years old and 50 years old.
 #wealth
-std_absw_restricted <- std_absw_matrix5[,1:51] #Adding 1, since first column in the matrix is year 0
+std_absw_restricted <- wealth_complete[,11:51] #Adding 1, since first column in the matrix is year 0
 #AFB
-afrs_restricted <- afr_matrix5[,1:51] #Adding 1, since first column in the matrix is year 0
-afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do not need to model such ages for age at first birth
-afrs_restricted
-#missing wealth data
-wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
+afrs_restricted <- afr_matrix5[,11:51] #Adding 1, since first column in the matrix is year 0
+# afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do not need to model such ages for age at first birth
+# afrs_restricted
+# #missing wealth data
+# wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
 
 
 #put all the data together
@@ -221,9 +221,9 @@ wealth_miss_restricted <- wealth_miss5[wealth_miss5[,2] <= 51,] #Adding 1, since
 real_list5 <- list(N = nrow(afrs_restricted), #population size
                    A = ncol(afrs_restricted), #age
                    wealth = std_absw_restricted, #absolute current wealth change
-                   baby = afrs_restricted, #AFR
-                   N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
-                   wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
+                   baby = afrs_restricted) #AFR
+                   # N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
+                   # wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
 #check data
 real_list5
 
