@@ -431,11 +431,10 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      xlab="Age",
      main="Model with absolute wealth",
      xaxt="n",
-     #cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(0:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
+axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
 legend(43,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
@@ -448,9 +447,9 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add_real$mu)){
       p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                         post5_add_real$mu[i,j] + #age
-                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*deciles[k] + #absolute wealth
-                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
-                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
+                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*deciles[k] + #absolute wealth
+                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
+                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
@@ -688,11 +687,12 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with short-term wealth variability",
-     cex.axis=1.2,
+     xaxt="n",
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
+legend(43,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -704,9 +704,9 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add_real$mu)){
       p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                         post5_add_real$mu[i,j] + #age
-                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[k] + #wealth change
-                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
+                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[k] + #wealth change
+                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
@@ -944,11 +944,12 @@ plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with long-term variability",
-     cex.axis=1.2,
+     xaxt="n",
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
+legend(43,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -960,9 +961,9 @@ for(k in 1:(length(deciles))){
     for(i in 1:nrow(post5_add_real$mu)){
       p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                         post5_add_real$mu[i,j] + #age
-                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
-                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[k]) #moving variance
+                                        (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                        (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
+                                        (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*deciles[k]) #moving variance
     }
   }
   #check data
