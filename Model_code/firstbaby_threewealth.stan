@@ -26,6 +26,9 @@ data {
   int A; // maximum age of women
   
   matrix[N,A] wealth; // age-specific absolute wealth
+  matrix[N,A] wealth_change; // age-specific short-term variability
+  matrix[N,A] wealth_msd; // age-specific long-term variability
+
 
   // int N_miss; // number of missing data of absolute wealth
   // 
@@ -77,29 +80,29 @@ transformed parameters {
 //         wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];  
 //       }
 
-//short-term wealth variability
-  matrix[N,A] wealth_change; //matrix containing wealth change
-  
-  for(n in 1:N){
-    for(a in 1:2){
-      wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
-    }
-    for(a in 3:A){
-      wealth_change[n,a] = abs(wealth[n,a] - wealth[n,a-2]); //calculating the 2-years lagged wealth change
-    }
-  }
-  
-//long-term variability
-  matrix[N,A] wealth_msd; //matrix containing moving standard deviation
-  
-  for(n in 1:N){
-    for(a in 1:10){
-      wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
-    }
-    for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
-    }
-  }
+// //short-term wealth variability
+//   matrix[N,A] wealth_change; //matrix containing wealth change
+//   
+//   for(n in 1:N){
+//     for(a in 1:2){
+//       wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
+//     }
+//     for(a in 3:A){
+//       wealth_change[n,a] = abs(wealth[n,a] - wealth[n,a-2]); //calculating the 2-years lagged wealth change
+//     }
+//   }
+//   
+// //long-term variability
+//   matrix[N,A] wealth_msd; //matrix containing moving standard deviation
+//   
+//   for(n in 1:N){
+//     for(a in 1:10){
+//       wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
+//     }
+//     for(a in 11:A){
+//       wealth_msd[n,a] = sd(segment(wealth[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
+//     }
+//   }
 
 }
 
