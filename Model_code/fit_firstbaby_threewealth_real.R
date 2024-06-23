@@ -409,7 +409,7 @@ tab5_add_real_delta_sigma
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(post5_add_real$wealth_full),1),to=round(max(post5_add_real$wealth_full),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(absw_restricted),1),to=round(max(absw_restricted),1),length.out=nrow(absw_restricted)) #specify according to range and length related to sample size
 simwealth_add_real
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_add_real,seq(0,1,0.5)))
@@ -482,7 +482,7 @@ for(k in 1:(length(deciles))){
 ### De-couple plot by min, mean, max ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(post5_add_real$wealth_full),1),to=round(max(post5_add_real$wealth_full),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(absw_restricted),1),to=round(max(absw_restricted),1),length.out=nrow(absw_restricted)) #specify according to range and length related to sample size
 simwealth_add_real
 
 #get the deciles
@@ -665,7 +665,7 @@ legend(55,1,c("Poor","Middle", "Rich"),lty=1,col=hcl.colors(length(palette),"tem
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_change_real <- seq(from=round(min(post5_add_real$wealth_change),1),to=round(max(post5_add_real$wealth_change),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
+simwealth_change_real <- seq(from=round(min(wealth_change_restricted),1),to=round(max(wealth_change_restricted),1),length.out=nrow(wealth_change_restricted)) #specify according to range and length related to sample size
 simwealth_change_real
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_change_real,seq(0,1,0.5)))
@@ -738,7 +738,7 @@ for(k in 1:(length(deciles))){
 ### De-couple plot by min, mean, max ----
 
 #simulate wealth values
-simwealth_change_real <- seq(from=round(min(post5_add_real$wealth_change),1),to=round(max(post5_add_real$wealth_change),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
+simwealth_change_real <- seq(from=round(min(wealth_change_restricted),1),to=round(max(wealth_change_restricted),1),length.out=nrow(wealth_change_restricted)) #specify according to range and length related to sample size
 simwealth_change_real
 
 #get the deciles
@@ -921,7 +921,7 @@ legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=
 #### All wealth classes ----
 
 #simulate wealth values
-simwealth_msd_real <- seq(from=round(min(post5_add_real$wealth_msd),1),to=round(max(post5_add_real$wealth_msd),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
+simwealth_msd_real <- seq(from=round(min(wealth_msd_restricted),1),to=round(max(wealth_msd_restricted),1),length.out=nrow(wealth_msd_restricted)) #specify according to range and length related to sample size
 simwealth_msd_real
 #get the deciles
 deciles <- as.numeric(quantile(simwealth_msd_real,seq(0,1,0.5)))
@@ -994,7 +994,7 @@ for(k in 1:(length(deciles))){
 ### De-couple plot by min, mean, max ----
 
 #simulate wealth values
-simwealth_msd_real <- seq(from=round(min(post5_add_real$wealth_msd),1),to=round(max(post5_add_real$wealth_msd),1),length.out=nrow(std_absw_matrix5)) #specify according to range and length related to sample size
+simwealth_msd_real <- seq(from=round(min(wealth_msd_restricted),1),to=round(max(wealth_msd_restricted),1),length.out=nrow(wealth_msd_restricted)) #specify according to range and length related to sample size
 simwealth_msd_real
 
 #get the deciles
