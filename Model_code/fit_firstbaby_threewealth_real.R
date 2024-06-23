@@ -233,7 +233,7 @@ wealth_change <- matrix(nrow = nrow(wealth_complete_mean),ncol=ncol(wealth_compl
 #calculate for each age the short-term variability
 for(i in 1:nrow(wealth_change)){
   for(j in 3:ncol(wealth_change)){
-    wealth_change[n,a] <- abs(wealth_complete_mean[i,j] - wealth_complete_mean[i,j-2]) #calculating the 2-years lagged wealth change
+    wealth_change[i,j] <- abs(wealth_complete_mean[i,j] - wealth_complete_mean[i,j-2]) #calculating the 2-years lagged wealth change
   }
 }
 #check the data
