@@ -265,9 +265,9 @@ rstan::traceplot(rds3_add_real,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(rds3_add_real,pars="mu_delta")
 #gamma_wealth
-traceplot(rds3_add_real,pars="gamma_wealth_z") #only run if needed, because they are 91 plots
+#traceplot(rds3_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
 #gamma_wealth
-traceplot(rds3_add_real,pars="gamma_wealth_sigma") #only run if needed, because they are 91 plots
+#traceplot(rds3_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
 
 #summary of the model
 #create summary table
@@ -328,7 +328,7 @@ palette_b
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post3_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with short-term wealth variability",
@@ -336,7 +336,7 @@ plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -374,9 +374,9 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr3
   
-  points(cumprod(1-plot_data3_add_real_b$mean)~plot_data3_add_real_b$age,col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data3_add_real_b$mean)~plot_data3_add_real_b$age,col=palette_b[k],lwd=2)
-  polygon(c(plot_data3_add_real_b$age,rev(plot_data3_add_real_b$age)),c(cumprod(1-plot_data3_add_real_b$low),rev(cumprod(1-plot_data3_add_real_b$upp))),col=alpha(palette_b[k],0.25),border=NA)
+  points(cumprod(1-plot_data3_add_real_b$mean[11:51])~plot_data3_add_real_b$age[11:51],col=palette_b[k],pch=15)
+  lines(cumprod(1-plot_data3_add_real_b$mean[11:51])~plot_data3_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  polygon(c(plot_data3_add_real_b$age[11:51],rev(plot_data3_add_real_b$age[11:51])),c(cumprod(1-plot_data3_add_real_b$low[11:51]),rev(cumprod(1-plot_data3_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
 ### De-couple plot by min, mean, max ----
@@ -402,7 +402,7 @@ par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 #### No short-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post3_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="No short-term variability of wealth",
@@ -446,22 +446,21 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(cumprod(1-plot_data3_add_real_0_b$mean)~plot_data3_add_real_0_b$age,col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data3_add_real_0_b$mean)~plot_data3_add_real_0_b$age,col=palette_b[1],lwd=2)
-polygon(c(plot_data3_add_real_0_b$age,rev(plot_data3_add_real_0_b$age)),c(cumprod(1-plot_data3_add_real_0_b$low),rev(cumprod(1-plot_data3_add_real_0_b$upp))),col=alpha(palette_b[1],0.25),border=NA)
+points(cumprod(1-plot_data3_add_real_0_b$mean[11:51])~plot_data3_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
+lines(cumprod(1-plot_data3_add_real_0_b$mean[11:51])~plot_data3_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
+polygon(c(plot_data3_add_real_0_b$age[11:51],rev(plot_data3_add_real_0_b$age[11:51])),c(cumprod(1-plot_data3_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data3_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
 
 #### Middle short-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post3_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Middle short-term variability of wealth",
-     yaxt="n",
+     ces.axis=1.2,
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p3_add_real_50_b <- matrix(nrow=nrow(post3_add_real$mu),ncol=ncol(post3_add_real$mu))
@@ -497,9 +496,9 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data3_add_real_50_b$mean)~plot_data3_add_real_50_b$age,col=palette_b[3],lwd=2)
-polygon(c(plot_data3_add_real_50_b$age,rev(plot_data3_add_real_50_b$age)),c(cumprod(1-plot_data3_add_real_50_b$low),rev(cumprod(1-plot_data3_add_real_50_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
+points(cumprod(1-plot_data3_add_real_50_b$mean[11:51])~plot_data3_add_real_50_b$age[11:51],col=palette_b[3],pch=15)
+lines(cumprod(1-plot_data3_add_real_50_b$mean[11:51])~plot_data3_add_real_50_b$age[11:51],col=palette_b[3],lwd=2)
+polygon(c(plot_data3_add_real_50_b$age[11:51],rev(plot_data3_add_real_50_b$age[11:51])),c(cumprod(1-plot_data3_add_real_50_b$low[11:51]),rev(cumprod(1-plot_data3_add_real_50_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
 
 #### Maximum short-term variability of wealth ----
 
@@ -508,11 +507,11 @@ plot(c(0,1)~c(0,ncol(post3_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Maximum short-term variability of wealth",
-     yaxt="n",
      type="n",
      cex.main=1.5,
-     cex.lab=1.5)
-axis(2,cex.axis=1.2)
+     cex.lab=1.5,
+     cex.axis=1.2
+     )
 
 #create matrix to store the data
 p3_add_real_100_b <- matrix(nrow=nrow(post3_add_real$mu),ncol=ncol(post3_add_real$mu))
@@ -548,8 +547,8 @@ for(j in 1:ncol(plot_afr3)){
 #check the data
 plot_afr3
 
-points(cumprod(1-plot_data3_add_real_100_b$mean)~plot_data3_add_real_100_b$age,col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data3_add_real_100_b$mean)~plot_data3_add_real_100_b$age,col=palette_b[3],lwd=2)
-polygon(c(plot_data3_add_real_100_b$age,rev(plot_data3_add_real_100_b$age)),c(cumprod(1-plot_data3_add_real_100_b$low),rev(cumprod(1-plot_data3_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
+points(cumprod(1-plot_data3_add_real_100_b$mean)~[11:51]plot_data3_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
+lines(cumprod(1-plot_data3_add_real_100_b$mean[11:51])~plot_data3_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
+polygon(c(plot_data3_add_real_100_b$age[11:51],rev(plot_data3_add_real_100_b$age[11:51])),c(cumprod(1-plot_data3_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data3_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)

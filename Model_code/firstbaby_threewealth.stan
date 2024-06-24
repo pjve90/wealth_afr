@@ -144,7 +144,7 @@ model {
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        (beta_wealth_z[a]*beta_wealth_sigma)*wealth[n,a] + // absolute wealth
+        (beta_wealth_z[a]*beta_wealth_sigma)*wealth_full[n,a] + // absolute wealth
         (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change[n,a] + // 2-years lagged wealth change
         (delta_wealth_z[a]*delta_wealth_sigma)*wealth_msd[n,a]  // moving standard deviation
         );

@@ -255,21 +255,27 @@ post5_add_real <- extract.samples(rds5_add_real)
 #alpha
 rstan::traceplot(rds5_add_real,pars="alpha")
 #mu
-#traceplot(rds5_add_real,pars="mu") #only run if needed, because they are 91 plots
+traceplot(rds5_add_real,pars="mu") 
 #mu_raw
-#traceplot(rds5_add_real,pars="mu_raw") #only run if needed, because they are 91 plots
+traceplot(rds5_add_real,pars="mu_raw")
 #mu_tau
 rstan::traceplot(rds5_add_real,pars="mu_tau")
 #mu_kappa
 rstan::traceplot(rds5_add_real,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(rds5_add_real,pars="mu_delta")
-#beta_wealth
-#traceplot(rds5_add_real,pars="beta_wealth") #only run if needed, because they are 91 plots
+#beta_wealth_z
+traceplot(rds5_add_real,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(rds5_add_real,pars="beta_wealth_sigma") 
 #gamma_wealth
-#traceplot(rds5_add_real,pars="gamma_wealth") #only run if needed, because they are 91 plots
+traceplot(rds5_add_real,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(rds5_add_real,pars="gamma_wealth_sigma") 
 #delta_wealth
-#traceplot(rds5_add_real,pars="delta_wealth") #only run if needed, because they are 91 plots
+traceplot(rds5_add_real,pars="delta_wealth_z") 
+#delta_wealth
+traceplot(rds5_add_real,pars="delta_wealth_sigma") 
 
 #summary of the model
 #create summary table
@@ -350,16 +356,15 @@ palette_b
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with absolute wealth",
-     xaxt="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
-legend(43,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -399,9 +404,9 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[,11:51])~plot_data5_add_real_b$age[,11:51],col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data5_add_real_b$mean[,11:51])~plot_data5_add_real_b$age[,11:51],col=palette_b[k],lwd=2)
-  polygon(c(plot_data5_add_real_b$age[,11:51],rev(plot_data5_add_real_b$age[,11:51])),c(cumprod(1-plot_data5_add_real_b$low[,11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[,11:51]))),col=alpha(palette_b[k],0.25),border=NA)
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=15)
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[,11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
 ### De-couple plot by min, mean, max ----
@@ -427,15 +432,14 @@ par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 #### Minimum wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Minimum absolute wealth",
-     xaxt="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_0_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -473,22 +477,21 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_0_b$mean)~plot_data5_add_real_0_b$age,col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data5_add_real_0_b$mean)~plot_data5_add_real_0_b$age,col=palette_b[1],lwd=2)
-polygon(c(plot_data5_add_real_0_b$age,rev(plot_data5_add_real_0_b$age)),c(cumprod(1-plot_data5_add_real_0_b$low),rev(cumprod(1-plot_data5_add_real_0_b$upp))),col=alpha(palette_b[1],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
+lines(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
+polygon(c(plot_data5_add_real_0_b$age[11:51],rev(plot_data5_add_real_0_b$age[11:51])),c(cumprod(1-plot_data5_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
 
 #### Median wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Medium absolute wealth",
-     xaxt="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_50_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -526,22 +529,21 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_50_b$mean)~plot_data5_add_real_50_b$age,col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data5_add_real_50_b$mean)~plot_data5_add_real_50_b$age,col=palette_b[2],lwd=2)
-polygon(c(plot_data5_add_real_50_b$age,rev(plot_data5_add_real_50_b$age)),c(cumprod(1-plot_data5_add_real_50_b$low),rev(cumprod(1-plot_data5_add_real_50_b$upp))),col=alpha(palette_b[2],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_50_b$mean[11:51])~plot_data5_add_real_50_b$age[11:51],col=palette_b[2],pch=15)
+lines(cumprod(1-plot_data5_add_real_50_b$mean[11:51])~plot_data5_add_real_50_b$age[11:51],col=palette_b[2],lwd=2)
+polygon(c(plot_data5_add_real_50_b$age[11:51],rev(plot_data5_add_real_50_b$age)),c(cumprod(1-plot_data5_add_real_50_b$low),rev(cumprod(1-plot_data5_add_real_50_b$upp))),col=alpha(palette_b[2],0.25),border=NA)
 
 #### Maximum wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Maximum absolute wealth",
-     xaxt="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_100_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -579,11 +581,11 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],lwd=2)
-polygon(c(plot_data5_add_real_100_b$age,rev(plot_data5_add_real_100_b$age)),c(cumprod(1-plot_data5_add_real_100_b$low),rev(cumprod(1-plot_data5_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
+lines(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
+polygon(c(plot_data5_add_real_100_b$age[11:51],rev(plot_data5_add_real_100_b$age[11:51])),c(cumprod(1-plot_data5_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(55,1,c("Poor","Middle", "Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
+legend(54,1,c("Poor","Middle", "Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
 ### Short-term wealth variability ----
 
@@ -607,16 +609,15 @@ palette_b
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with short-term wealth variability",
-     xaxt="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
-legend(43,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -656,9 +657,9 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean)~plot_data5_add_real_b$age,col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data5_add_real_b$mean)~plot_data5_add_real_b$age,col=palette_b[k],lwd=2)
-  polygon(c(plot_data5_add_real_b$age,rev(plot_data5_add_real_b$age)),c(cumprod(1-plot_data5_add_real_b$low),rev(cumprod(1-plot_data5_add_real_b$upp))),col=alpha(palette_b[k],0.25),border=NA)
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=15)
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
 ### De-couple plot by min, mean, max ----
@@ -684,7 +685,7 @@ par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 #### No short-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="No short-term variability of wealth",
@@ -702,9 +703,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[1] + #wealth change
-                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[1] + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*0) #moving variance
   }
 }
 #check data
@@ -730,22 +731,21 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_0_b$mean)~plot_data5_add_real_0_b$age,col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data5_add_real_0_b$mean)~plot_data5_add_real_0_b$age,col=palette_b[1],lwd=2)
-polygon(c(plot_data5_add_real_0_b$age,rev(plot_data5_add_real_0_b$age)),c(cumprod(1-plot_data5_add_real_0_b$low),rev(cumprod(1-plot_data5_add_real_0_b$upp))),col=alpha(palette_b[1],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
+lines(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
+polygon(c(plot_data5_add_real_0_b$age[11:51],rev(plot_data5_add_real_0_b$age[11:51])),c(cumprod(1-plot_data5_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
 
 #### Middle short-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Middle short-term variability of wealth",
-     yaxt="n",
+     cex.axis=1.2,
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_50_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -755,9 +755,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[2] + #wealth change
-                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[2] + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*0) #moving variance
   }
 }
 #check data
@@ -783,22 +783,21 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_50_b$mean)~plot_data5_add_real_50_b$age,col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data5_add_real_50_b$mean)~plot_data5_add_real_50_b$age,col=palette_b[2],lwd=2)
-polygon(c(plot_data5_add_real_50_b$age,rev(plot_data5_add_real_50_b$age)),c(cumprod(1-plot_data5_add_real_50_b$low),rev(cumprod(1-plot_data5_add_real_50_b$upp))),col=alpha(palette_b[2],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_50_b$mean[11:51])~plot_data5_add_real_50_b$age[11:51],col=palette_b[2],pch=15)
+lines(cumprod(1-plot_data5_add_real_50_b$mean[11:51])~plot_data5_add_real_50_b$age[11:51],col=palette_b[2],lwd=2)
+polygon(c(plot_data5_add_real_50_b$age[11:51],rev(plot_data5_add_real_50_b$age[11:51])),c(cumprod(1-plot_data5_add_real_50_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_50_b$upp[11:51]))),col=alpha(palette_b[2],0.25),border=NA)
 
 #### Maximum short-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Maximum short-term variability of wealth",
-     yaxt="n",
      type="n",
+     cex.axis=1.2,
      cex.main=1.5,
      cex.lab=1.5)
-axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_100_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -808,9 +807,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*deciles[3] + #wealth change
-                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*0) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[3] + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*0) #moving variance
   }
 }
 #check data
@@ -836,11 +835,11 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],lwd=2)
-polygon(c(plot_data5_add_real_100_b$age,rev(plot_data5_add_real_100_b$age)),c(cumprod(1-plot_data5_add_real_100_b$low),rev(cumprod(1-plot_data5_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
+lines(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
+polygon(c(plot_data5_add_real_100_b$age[11:51],rev(plot_data5_add_real_100_b$age[11:51])),c(cumprod(1-plot_data5_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 ### Long-term variability of wealth ----
 
@@ -864,16 +863,15 @@ palette_b
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Model with long-term variability",
-     xaxt="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-axis(1,at=c(1:ncol(post5_add_real$mu)),labels=seq(10,50,by=1),cex.axis=1.2)
-legend(43,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -913,9 +911,9 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean)~plot_data5_add_real_b$age,col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data5_add_real_b$mean)~plot_data5_add_real_b$age,col=palette_b[k],lwd=2)
-  polygon(c(plot_data5_add_real_b$age,rev(plot_data5_add_real_b$age)),c(cumprod(1-plot_data5_add_real_b$low),rev(cumprod(1-plot_data5_add_real_b$upp))),col=alpha(palette_b[k],0.25),border=NA)
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=15)
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
 ### De-couple plot by min, mean, max ----
@@ -941,7 +939,7 @@ par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
 #### No long-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="No long-term variability of wealth",
@@ -959,9 +957,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
-                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[1]) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*deciles[1]) #moving variance
   }
 }
 #check data
@@ -987,22 +985,21 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_0_b$mean)~plot_data5_add_real_0_b$age,col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data5_add_real_0_b$mean)~plot_data5_add_real_0_b$age,col=palette_b[1],lwd=2)
-polygon(c(plot_data5_add_real_0_b$age,rev(plot_data5_add_real_0_b$age)),c(cumprod(1-plot_data5_add_real_0_b$low),rev(cumprod(1-plot_data5_add_real_0_b$upp))),col=alpha(palette_b[1],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
+lines(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
+polygon(c(plot_data5_add_real_0_b$age[11:51],rev(plot_data5_add_real_0_b$age[11:51])),c(cumprod(1-plot_data5_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
 
 #### Middle long-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Middle long-term variability of wealth",
-     yaxt="n",
+     cex.axis=1.2,
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_50_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -1012,9 +1009,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
-                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[2]) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*deciles[2]) #moving variance
   }
 }
 #check data
@@ -1040,22 +1037,21 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_50_b$mean)~plot_data5_add_real_50_b$age,col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data5_add_real_50_b$mean)~plot_data5_add_real_50_b$age,col=palette_b[2],lwd=2)
-polygon(c(plot_data5_add_real_50_b$age,rev(plot_data5_add_real_50_b$age)),c(cumprod(1-plot_data5_add_real_50_b$low),rev(cumprod(1-plot_data5_add_real_50_b$upp))),col=alpha(palette_b[2],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_50_b$mean[11:51])~plot_data5_add_real_50_b$age[11:51],col=palette_b[2],pch=15)
+lines(cumprod(1-plot_data5_add_real_50_b$mean[11:51])~plot_data5_add_real_50_b$age[11:51],col=palette_b[2],lwd=2)
+polygon(c(plot_data5_add_real_50_b$age[11:51],rev(plot_data5_add_real_50_b$age[11:51])),c(cumprod(1-plot_data5_add_real_50_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_50_b$upp[11:51]))),col=alpha(palette_b[2],0.25),border=NA)
 
 #### Maximum long-term variability of wealth ----
 
 #plot empty plot
-plot(c(0,1)~c(0,ncol(post5_add_real$mu)),
+plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Maximum long-term variability of wealth",
-     yaxt="n",
+     cex.axis=1.2,
      type="n",
      cex.main=1.5,
      cex.lab=1.5)
-axis(2,cex.axis=1.2)
 
 #create matrix to store the data
 p5_add_real_100_b <- matrix(nrow=nrow(post5_add_real$mu),ncol=ncol(post5_add_real$mu))
@@ -1065,9 +1061,9 @@ for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
     p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
-                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i,j])*0 + #absolute wealth
-                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i,j])*0 + #wealth change
-                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i,j])*deciles[3]) #moving variance
+                                      (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
+                                      (post5_add_real$delta_wealth_z[i,j]*post5_add_real$delta_wealth_sigma[i])*deciles[3]) #moving variance
   }
 }
 #check data
@@ -1093,8 +1089,8 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data5_add_real_100_b$mean)~plot_data5_add_real_100_b$age,col=palette_b[3],lwd=2)
-polygon(c(plot_data5_add_real_100_b$age,rev(plot_data5_add_real_100_b$age)),c(cumprod(1-plot_data5_add_real_100_b$low),rev(cumprod(1-plot_data5_add_real_100_b$upp))),col=alpha(palette_b[3],0.25),border=NA)
+points(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
+lines(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
+polygon(c(plot_data5_add_real_100_b$age[11:51],rev(plot_data5_add_real_100_b$age[11:51])),c(cumprod(1-plot_data5_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
 
-legend(55,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
