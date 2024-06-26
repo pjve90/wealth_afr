@@ -352,6 +352,11 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_b<-palette[1:length(deciles)]
 palette_b
 
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c("solid","dashed","dotdash")
+
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
@@ -359,7 +364,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Model with absolute wealth",
+     main="Absolute levels\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -404,8 +409,8 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k])
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2,lty=type[k])
   polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
@@ -447,7 +452,7 @@ p5_add_real_0_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_0_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*deciles[1] + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
@@ -499,7 +504,7 @@ p5_add_real_50_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_50_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*deciles[2] + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
@@ -551,7 +556,7 @@ p5_add_real_100_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_100_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*deciles[3] + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
@@ -605,6 +610,11 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_b<-palette[4:(length(deciles)+3)]
 palette_b
 
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c("solid","dashed","dotdash")
+
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
@@ -612,7 +622,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Model with short-term wealth variability",
+     main="Short-term variability\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -657,8 +667,8 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k])
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2,lty=type[k])
   polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
@@ -859,6 +869,11 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_b<-palette[7:(length(deciles)+6)]
 palette_b
 
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c("solid","dashed","dotdash")
+
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
 
@@ -911,8 +926,8 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=15)
-  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2)
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k])
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2,lyt=type[k])
   polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
