@@ -391,7 +391,7 @@ for(k in 1:(length(deciles))){
   #plot it!
   #prepare model prediction data
   plot_data5_add_real_b <- data.frame(age = 1:ncol(p5_add_real_b),
-                                      mean = apply(p5_add_real_b, 2, mean), 
+                                      mean = apply(p5_add_real_b, 2, median), 
                                       upp = apply(p5_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p5_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
@@ -464,7 +464,7 @@ p5_add_real_0_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_0_b <- data.frame(age = 1:ncol(p5_add_real_0_b),
-                                      mean = apply(p5_add_real_0_b, 2, mean), 
+                                      mean = apply(p5_add_real_0_b, 2, median), 
                                       upp = apply(p5_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p5_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -516,7 +516,7 @@ p5_add_real_50_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_50_b <- data.frame(age = 1:ncol(p5_add_real_50_b),
-                                       mean = apply(p5_add_real_50_b, 2, mean), 
+                                       mean = apply(p5_add_real_50_b, 2, median), 
                                        upp = apply(p5_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                        low = apply(p5_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -568,7 +568,7 @@ p5_add_real_100_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_100_b <- data.frame(age = 1:ncol(p5_add_real_100_b),
-                                        mean = apply(p5_add_real_100_b, 2, mean), 
+                                        mean = apply(p5_add_real_100_b, 2, median), 
                                         upp = apply(p5_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                         low = apply(p5_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -649,7 +649,7 @@ for(k in 1:(length(deciles))){
   #plot it!
   #prepare model prediction data
   plot_data5_add_real_b <- data.frame(age = 1:ncol(p5_add_real_b),
-                                      mean = apply(p5_add_real_b, 2, mean), 
+                                      mean = apply(p5_add_real_b, 2, median), 
                                       upp = apply(p5_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p5_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
@@ -723,7 +723,7 @@ p5_add_real_0_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_0_b <- data.frame(age = 1:ncol(p5_add_real_0_b),
-                                      mean = apply(p5_add_real_0_b, 2, mean), 
+                                      mean = apply(p5_add_real_0_b, 2, median), 
                                       upp = apply(p5_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p5_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -775,7 +775,7 @@ p5_add_real_50_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_50_b <- data.frame(age = 1:ncol(p5_add_real_50_b),
-                                       mean = apply(p5_add_real_50_b, 2, mean), 
+                                       mean = apply(p5_add_real_50_b, 2, median), 
                                        upp = apply(p5_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                        low = apply(p5_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -827,7 +827,7 @@ p5_add_real_100_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_100_b <- data.frame(age = 1:ncol(p5_add_real_100_b),
-                                        mean = apply(p5_add_real_100_b, 2, mean), 
+                                        mean = apply(p5_add_real_100_b, 2, median), 
                                         upp = apply(p5_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                         low = apply(p5_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -908,7 +908,7 @@ for(k in 1:(length(deciles))){
   #plot it!
   #prepare model prediction data
   plot_data5_add_real_b <- data.frame(age = 1:ncol(p5_add_real_b),
-                                      mean = apply(p5_add_real_b, 2, mean), 
+                                      mean = apply(p5_add_real_b, 2, median), 
                                       upp = apply(p5_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p5_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
@@ -982,7 +982,7 @@ p5_add_real_0_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_0_b <- data.frame(age = 1:ncol(p5_add_real_0_b),
-                                      mean = apply(p5_add_real_0_b, 2, mean), 
+                                      mean = apply(p5_add_real_0_b, 2, median), 
                                       upp = apply(p5_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p5_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -1034,7 +1034,7 @@ p5_add_real_50_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_50_b <- data.frame(age = 1:ncol(p5_add_real_50_b),
-                                       mean = apply(p5_add_real_50_b, 2, mean), 
+                                       mean = apply(p5_add_real_50_b, 2, median), 
                                        upp = apply(p5_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                        low = apply(p5_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
@@ -1086,7 +1086,7 @@ p5_add_real_100_b
 #plot it!
 #prepare model prediction data
 plot_data5_add_real_100_b <- data.frame(age = 1:ncol(p5_add_real_100_b),
-                                        mean = apply(p5_add_real_100_b, 2, mean), 
+                                        mean = apply(p5_add_real_100_b, 2, median), 
                                         upp = apply(p5_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                         low = apply(p5_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
 ) 
