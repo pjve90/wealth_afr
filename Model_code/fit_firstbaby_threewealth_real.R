@@ -332,7 +332,7 @@ tab5_add_real_delta_sigma
 # tab5_add_real_delta[,3]<-round(inv_logit(tab5_add_real_delta[,3]),3)
 # tab5_add_real_delta[,4]<-round(inv_logit(tab5_add_real_delta[,4]),3)
 
-## Plot the fit of the real data ----
+# Plot the fit of the real data ----
 
 ### Absolute Wealth ----
 
@@ -355,21 +355,21 @@ palette_b
 #shape of points
 shape <- c(15:17)
 #line type
-type <- c("solid","dashed","dotdash")
+type <- c(1:3)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
-     ylab="Cumulative probability of first birth",
+     ylab="CCDF of first birth",
      xlab="Age",
      main="Absolute levels\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(54,1,c("Poor","Middle", "Rich"),lty=1,col=palette_b,lwd=2,pch=16)
+legend(53,1,c("Poor","Middle", "Rich"),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -409,15 +409,15 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k])
-  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2,lty=type[k])
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
   polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
 ### De-couple plot by min, mean, max ----
 
 #simulate wealth values
-simwealth_add_real <- seq(from=round(min(std_absw_restricted[which(std_absw_restricted > -98)]),1),to=round(max(std_absw_restricted[which(std_absw_restricted > -98)]),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_add_real <- seq(from=round(min(post5_add_real$wealth_full),1),to=round(max(post5_add_real$wealth_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
 simwealth_add_real
 
 #get the deciles
@@ -482,8 +482,8 @@ for(j in 1:ncol(plot_afr5)){
 #check the data
 plot_afr5
 
-points(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data5_add_real_0_b$mean[11:51])~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
+points(cumsum(plot_data5_add_real_0_b$mean[11:51]/(sum(plot_data5_add_real_0_b$mean[11:51])))~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
+lines(cumsum(plot_data5_add_real_0_b$mean[11:51]/(sum(plot_data5_add_real_0_b$mean[11:51])))~plot_data5_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
 polygon(c(plot_data5_add_real_0_b$age[11:51],rev(plot_data5_add_real_0_b$age[11:51])),c(cumprod(1-plot_data5_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
 
 #### Median wealth ----
@@ -613,21 +613,21 @@ palette_b
 #shape of points
 shape <- c(15:17)
 #line type
-type <- c("solid","dashed","dotdash")
+type <- c(1:3)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
-     ylab="Cumulative probability of first birth",
+     ylab="CCDF of first birth",
      xlab="Age",
      main="Short-term variability\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(53,1,c("No var.","Mid. var.", "Max. var."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -667,8 +667,8 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k])
-  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2,lty=type[k])
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
   polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
@@ -711,7 +711,7 @@ p5_add_real_0_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_0_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[1] + #wealth change
@@ -763,7 +763,7 @@ p5_add_real_50_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_50_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[2] + #wealth change
@@ -815,7 +815,7 @@ p5_add_real_100_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_100_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*deciles[3] + #wealth change
@@ -872,21 +872,21 @@ palette_b
 #shape of points
 shape <- c(15:17)
 #line type
-type <- c("solid","dashed","dotdash")
+type <- c(1:3)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,8))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post5_add_real$mu)),
-     ylab="Cumulative probability of first birth",
+     ylab="CCDF of first birth",
      xlab="Age",
-     main="Model with long-term variability",
+     main="Long-term variability\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+legend(53,1,c("No var.","Mid. var.", "Max. var."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
 
 #add lines
 for(k in 1:(length(deciles))){
@@ -926,8 +926,8 @@ for(k in 1:(length(deciles))){
   #check the data
   plot_afr5
   
-  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k])
-  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=2,lyt=type[k])
+  points(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
+  lines(cumprod(1-plot_data5_add_real_b$mean[11:51])~plot_data5_add_real_b$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
   polygon(c(plot_data5_add_real_b$age[11:51],rev(plot_data5_add_real_b$age[11:51])),c(cumprod(1-plot_data5_add_real_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
 }
 
@@ -970,7 +970,7 @@ p5_add_real_0_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_0_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
@@ -1022,7 +1022,7 @@ p5_add_real_50_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_50_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
@@ -1074,7 +1074,7 @@ p5_add_real_100_b
 #fill it in with values for age 25
 for(j in 1:ncol(post5_add_real$mu)){
   for(i in 1:nrow(post5_add_real$mu)){
-    p5_add_real_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
+    p5_add_real_100_b[i,j] <- inv_logit(post5_add_real$alpha[i] + #inv logit because originally is logit
                                       post5_add_real$mu[i,j] + #age
                                       (post5_add_real$beta_wealth_z[i,j]*post5_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
                                       (post5_add_real$gamma_wealth_z[i,j]*post5_add_real$gamma_wealth_sigma[i])*0 + #wealth change
@@ -1109,3 +1109,43 @@ lines(cumprod(1-plot_data5_add_real_100_b$mean[11:51])~plot_data5_add_real_100_b
 polygon(c(plot_data5_add_real_100_b$age[11:51],rev(plot_data5_add_real_100_b$age[11:51])),c(cumprod(1-plot_data5_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data5_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
 
 legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
+
+# Relative importance ----
+
+relative <- precis(rds5_add_real,
+                   depth=2,
+                   pars=c("beta_wealth_sigma","gamma_wealth_sigma","delta_wealth_sigma"))
+
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
+
+
+plot(c(0,0.25),c(0,3),
+     main="Relative importance\nof wealth predictors",
+     type="n",
+     xlab="Value",
+     ylab="Wealth predictor",
+     yaxt="n",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5
+     ) 
+axis(2,at=seq(2.5,0.5,by=-1),
+     labels=c(expression(sigma[beta]),
+              expression(sigma[gamma]),
+              expression(sigma[delta])
+              ),
+     las=1,
+     tick=F,
+     cex.axis=1.2
+     )
+segments(0,-0.1,0,3.1,lty="dashed",col="lightgrey")
+segments(-0.01,0.5,0.26,0.5,lty="dashed",col="lightgrey")
+segments(-0.01,1.5,0.26,1.5,lty="dashed",col="lightgrey")
+segments(-0.01,2.5,0.26,2.5,lty="dashed",col="lightgrey")
+points(relative[,1],seq(2.5,0.5,by=-1),cex=2,pch=16,col=hcl.colors(3,"berlin"))
+segments(relative[1,1]-relative[1,2],2.5,relative[1,1]+relative[1,2],2.5,lwd=3,col=hcl.colors(3,"berlin")[1])
+segments(relative[2,1]-relative[2,2],1.5,relative[2,1]+relative[2,2],1.5,lwd=3,col=hcl.colors(3,"berlin")[2])
+segments(relative[3,1]-relative[3,2],0.5,relative[3,1]+relative[3,2],0.5,lwd=3,col=hcl.colors(3,"berlin")[3])
+
+
