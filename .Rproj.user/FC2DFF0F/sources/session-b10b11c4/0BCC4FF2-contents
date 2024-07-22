@@ -1,0 +1,71 @@
+
+data{
+ int N;
+ int A;
+
+ matrix[N,A] Wealth_raw;
+ array[N, A] int Birth;
+
+ int N_miss;
+ array[N_miss, 2] int Loc_miss;
+}
+
+parameters{
+ vector[N_miss] iWealth;	
+ real<lower=0, upper=1> Alpha;
+ real Beta;
+ real<lower=0> Sigma;
+ vector[4] Gamma;
+}
+
+transformed parameters{
+ matrix[N,A] Wealth;
+ matrix[N,A] WealthDiff;	
+ matrix[N,A] WealthSD;		
+ 
+ Wealth = Wealth_raw;
+
+ for(n in 1:N_miss){
+   Wealth[Loc_miss[n,1], Loc_miss[n,2]] = iWealth[n];
+	 }
+
+ for(n in 1:N){
+   wealt;
+
+   for(a in 2:A){
+   WealthDiff[n,a] = Wealth[n, a] - Wealth[n, a-1]; 
+   }
+ }
+
+  for(n in 1:N){
+   for(a in 1:5){
+    WealthSD[n,a] = 0;
+    }
+
+   for(a in 6:A){
+   WealthSD[n,a] = sd(segment(Wealth[n], a-5, 6)); 
+   }
+ }
+
+}
+
+model{
+Alpha ~ beta(2, 2);
+Beta ~ normal(0, 5);
+Gamma ~ normal(0, 5);
+Sigma ~ exponential(0.2);
+ 
+ for(n in 1:N){
+  for(a in 2:A){
+     Wealth[n,a] ~ normal(Alpha*Wealth[n, a-1] + (1-Alpha)*(Beta), Sigma);
+  }
+ }
+
+  for(n in 1:N){
+  for(a in 2:A){
+  if(Birth[n,a] > -1){
+     Birth[n,a] ~ bernoulli_logit( Gamma[1] + Gamma[2]*Wealth[n,a] + Gamma[3]*WealthDiff[n,a] + Gamma[4]*WealthSD[n,a]);
+     }
+  }}
+	
+}
