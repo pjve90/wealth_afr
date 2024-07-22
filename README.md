@@ -2,26 +2,17 @@
 
 Here, you can find all the files related to the data wrangling and statistical analyses that aim to understand the relationship between material wealth with the probability that women have their first child, using data from Pimbwe women from Tanzania.
 
-At the beginning you can find two folders, and some files. The files are:
-- dataf.csv = contains the sample of information from Pimbwe women used for this analyses.
-- firstbaby1.rds = contains the output of the model with only age as predictor, fitting simulated data.
-- firstbaby2.rds = contains the output of the model with age and absolute wealth as predictors, fitting simulated data.
-- firstbaby3.rds = contains the output of the model with age, absolute, and variability of wealth as predictors, fitting simulated data.
-- firstbaby1_real.rds = contains the output of the model with only age as predictor, fitting real data.
-- firstbaby2_real.rds = contains the output of the model with age and absolute wealth as predictors, fitting real data.
-- firstbaby3_real.rds = contains the output of the model with age, absolute, and variability of wealth as predictors, fitting real data.
-- single_abswealth_plot.pdf = plot with all the predictions of the model with absolute wealth in one plot.
-- multiple_abswealth_plot.pdf = plot with all the predictions of the model with absolute wealth in multiple plots.
-- single_diffwealth_plot.pdf = plot with all the predictions of the model with wealth variability in one plot.
-- multiple_diffwealth_plot.pdf = plot with all the predictions of the model with wealth variability in multiple plots.
+At the beginning you can find two folders. One contains the data used for the analyses ("Data"), while the other one contains the code for the statistical analyses ("Model_code").
 
-The folder "Model_code" contains the files related to the data cleaning, wrangling, and analyses. Here, the files are:
-- Wealth_AFR_code.R = contains the code for data cleaning, wrangling, and exploration.
-- firstbaby.R = contains the code for data wrangling, simulation, and analysis of the model with only age as a predictor.
-- firstbaby.stan = contains the code for the Stan model with only age as a predictor.
-- firstbaby_abswealth.R = contains the code for data wrangling, simulation, and analysis of the model with age and absolute wealth as predictors.
-- firstbaby_abswealth.stan = contains the code for the Stan model with age and absolute wealth as predictors.
-- firstbaby_diffwealth.R = contains the code for data wrangling, simulation, and analysis of the model with age, absolute and wealth variability as predictors.
-- firstbaby_diffwealth.stan = contains the code for the Stan model with age, absolute and wealth variability.
+In the folder "Data" you can find the file:
+- "dataf.csv" which contains the data necessary for the analysis in a csv file. The data consists of:
+    - ID and order, which are variables regarding the personal identification of each women.
+    - afr, which is the age at which a woman had her first birth.
+    - dob, which is the year of birth.
+    - aoc, which is the age of censoring.
+    - absw95, absw98, absw00, absw02, absw04,absw06, absw10 are the amount of wealth a woman had for each year of census.
+    - age_absw95, age_absw98, age_absw00, age_absw02, age_absw04, age_absw06, age_absw10, are the ages of each woman at each census.
 
-The folder "Misc" contains files from previous attempts of analyses, and unfinished work. Mainly to keep the files there, until a final clean later on.
+In the folder "Model_code" you can find the files:
+- "fit_firstbaby_threewealth_real.R", which contains the code for all the statistical analyses
+- "firstbaby_threewealth.stan", which contains the code for the Stan model.
