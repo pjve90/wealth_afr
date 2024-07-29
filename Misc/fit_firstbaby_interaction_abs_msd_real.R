@@ -619,35 +619,35 @@ plot(c(0,1)~c(10,ncol(post_int1$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(53,1,c("No var.","Mid. var.", "Max. var."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
+legend(53,1,c("No var.","Mid. var.", "Max. var."),col=palette_d,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
 
 #add lines
 for(k in 1:(length(deciles_absw_int1))){
   #create matrix to store the data
-  p_int1_int1 <- matrix(nrow=nrow(post_int1$mu),ncol=ncol(post_int1$mu))
-  p_int1_int1
+  p_int1_real <- matrix(nrow=nrow(post_int1$mu),ncol=ncol(post_int1$mu))
+  p_int1_real
   #fill it in with values for age 25
   for(j in 1:ncol(post_int1$mu)){
     for(i in 1:nrow(post_int1$mu)){
-      p_int1_int1[i,j] <- inv_logit(post_int1$alpha[i] + #inv logit because originally is logit
+      p_int1_real[i,j] <- inv_logit(post_int1$alpha[i] + #inv logit because originally is logit
                                      post_int1$mu[i,j] + #age
                                      (post_int1$beta_wealth_z[i,j]*post_int1$beta_wealth_sigma[i])*0 + #absolute wealth
                                      (post_int1$delta_wealth_z[i,j]*post_int1$delta_wealth_sigma[i])*0 + #moving variance
-                                     (post_int1$epsilon_wealth_z[i,j]*post_int1$epsilon_wealth_sigma[i])*(deciles_absw_int1[k]*deciles_int1_int1[k]) #interaction
+                                     (post_int1$epsilon_wealth_z[i,j]*post_int1$epsilon_wealth_sigma[i])*(deciles_absw_int1[k]*deciles_msd_int1[k]) #interaction
       )  
     }
   }
   #check data
-  p_int1_int1
+  p_int1_real
   #plot it!
   #prepare model prediction data
-  plot_int1_int1 <- data.frame(age = 1:ncol(p_int1_int1),
-                              mean = apply(p_int1_int1, 2, median), 
-                              upp = apply(p_int1_int1, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                              low = apply(p_int1_int1, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_int1_real <- data.frame(age = 1:ncol(p_int1_real),
+                              median = apply(p_int1_real, 2, median), 
+                              upp = apply(p_int1_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                              low = apply(p_int1_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("int1w_",i),plot_int1_int1)
+  assign(paste0("int1w_",i),plot_int1_real)
   
   # Calculate cumulative probabilities
   #create vectors
@@ -671,11 +671,11 @@ for(k in 1:(length(deciles_absw_int1))){
   
   #add median
   #add points
-  points(cumulative_median_int1[11:51] ~ plot_int1_real$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_int1[11:51] ~ plot_int1_real$age[11:51], col=palette_d[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_int1[11:51] ~ plot_int1_real$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_int1[11:51] ~ plot_int1_real$age[11:51], col=palette_d[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
+  polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_d[k], 0.25), border=NA)
 }
 
 # Expected median age ----
