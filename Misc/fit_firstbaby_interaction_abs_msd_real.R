@@ -277,14 +277,14 @@ rstan::traceplot(rds_int1,pars="mu_delta")
 traceplot(rds_int1,pars="beta_wealth_z") 
 #beta_wealth_sigma
 traceplot(rds_int1,pars="beta_wealth_sigma") 
-#gamma_wealth
-traceplot(rds_int1,pars="gamma_wealth_z") 
-#gamma_wealth
-traceplot(rds_int1,pars="gamma_wealth_sigma") 
 #delta_wealth
 traceplot(rds_int1,pars="delta_wealth_z") 
 #delta_wealth
 traceplot(rds_int1,pars="delta_wealth_sigma") 
+#epsilon_wealth
+traceplot(rds_int1,pars="epsilon_wealth_z") 
+#epsilon_wealth
+traceplot(rds_int1,pars="epsilon_wealth_sigma") 
 
 #summary of the model
 #create summary tables of the different parameters
@@ -320,20 +320,6 @@ tab_int1_beta_sigma <- precis(rds_int1,depth=2,pars="beta_wealth_sigma")
 #check table
 tab_int1_beta_sigma
 
-#gamma z
-#create summary table for gamma_z
-tab_int1_gamma_z <- precis(rds_int1,depth=2,pars="gamma_wealth_z")
-#check table
-tab_int1_gamma_z
-#plot it!
-plot(tab_int1_gamma_z)
-
-#gamma sigma
-#create summary table for gamma_sigma
-tab_int1_gamma_sigma <- precis(rds_int1,depth=2,pars="gamma_wealth_sigma")
-#check table
-tab_int1_gamma_sigma
-
 #delta z
 #create summary table for delta_z
 tab_int1_delta_z <- precis(rds_int1,depth=2,pars="delta_wealth_z")
@@ -348,23 +334,37 @@ tab_int1_delta_sigma <- precis(rds_int1,depth=2,pars="delta_wealth_sigma")
 #check table
 tab_int1_delta_sigma
 
-#Check correlation between wealth predictors
-
-#beta versus gamma
-#create correlation matrix
-cor1 <- round(cor(post_int1$beta_wealth_z,post_int1$gamma_wealth_z),3)
+#epsilon z
+#create summary table for epsilon_z
+tab_int1_epsilon_z <- precis(rds_int1,depth=2,pars="epsilon_wealth_z")
+#check table
+tab_int1_epsilon_z
 #plot it!
-corrplot(cor1, "color", tl.col="black")
+plot(tab_int1_epsilon_z)
+
+#epsilon sigma
+#create summary table for epsilon_sigma
+tab_int1_epsilon_sigma <- precis(rds_int1,depth=2,pars="epsilon_wealth_sigma")
+#check table
+tab_int1_epsilon_sigma
+
+#Check correlation between wealth predictors
 
 #beta versus delta
 #create correlation matrix
-cor2 <- round(cor(post_int1$beta_wealth_z,post_int1$delta_wealth_z),3)
+cor1 <- round(cor(post_int1$beta_wealth_z,post_int1$delta_wealth_z),3)
+#plot it!
+corrplot(cor1, "color", tl.col="black")
+
+#beta versus epsion
+#create correlation matrix
+cor2 <- round(cor(post_int1$beta_wealth_z,post_int1$epsilon_wealth_z),3)
 #plot it!
 corrplot(cor2, "color", tl.col="black")
 
-#gamma versus delta
+#delta versus epsilon
 #create correlation matrix
-cor3 <- round(cor(post_int1$gamma_wealth_z,post_int1$delta_wealth_z),3)
+cor3 <- round(cor(post_int1$delta_wealth_z,post_int1$epsilon_wealth_z),3)
 #plot it!
 corrplot(cor3, "color", tl.col="black")
 
