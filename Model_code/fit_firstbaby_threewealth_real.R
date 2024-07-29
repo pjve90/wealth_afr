@@ -431,13 +431,34 @@ for(k in 1:(length(deciles_absw))){
   ) 
   #store data per decile
   assign(paste0("absw_",i),plot_absw_real)
+  
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_absw <- numeric(length(plot_absw_real$median))
+  cumulative_low_absw <- numeric(length(plot_absw_real$low))
+  cumulative_upp_absw <- numeric(length(plot_absw_real$upp))
+  #set the first probability
+  cumulative_median_absw[1] <- plot_absw_real$median[1]
+  cumulative_low_absw[1] <- plot_absw_real$low[1]
+  cumulative_upp_absw[1] <- plot_absw_real$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_absw_real$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_absw_real$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_absw_real$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_absw_real$upp[a]
+  }
+  #store data per decile
+  assign(paste0("cumulative_median_absw_",i),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",i),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",i),cumulative_upp_absw)
+    
   #add median
   #add points
-  points(cumprod(1-plot_absw_real$median[11:51])~plot_absw_real$age[11:51],col=palette_a[k],pch=shape[k],cex=1.5)
+  points(cumulative_median_absw[11:51] ~ plot_absw_real$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumprod(1-plot_absw_real$median[11:51])~plot_absw_real$age[11:51],col=palette_a[k],lwd=3,lty=type[k])
+  lines(cumulative_median_absw[11:51] ~ plot_absw_real$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_absw_real$age[11:51],rev(plot_absw_real$age[11:51])),c(cumprod(1-plot_absw_real$low[11:51]),rev(cumprod(1-plot_absw_real$upp[11:51]))),col=alpha(palette_a[k],0.25),border=NA)
+  polygon(c(plot_absw_real$age[11:51], rev(plot_absw_real$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
 }
 
 ## Short-term wealth variability ----
@@ -501,13 +522,34 @@ for(k in 1:(length(deciles_diffw))){
   ) 
   #store data per decile
   assign(paste0("diffw_",i),plot_diffw_real)
+  
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_diffw <- numeric(length(plot_diffw_real$median))
+  cumulative_low_diffw <- numeric(length(plot_diffw_real$low))
+  cumulative_upp_diffw <- numeric(length(plot_diffw_real$upp))
+  #set the first probability
+  cumulative_median_diffw[1] <- plot_diffw_real$median[1]
+  cumulative_low_diffw[1] <- plot_diffw_real$low[1]
+  cumulative_upp_diffw[1] <- plot_diffw_real$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_diffw_real$median)) {
+    cumulative_median_diffw[a] <- cumulative_median_diffw[a-1] + (1 - cumulative_median_diffw[a-1]) * plot_diffw_real$median[a]
+    cumulative_low_diffw[a] <- cumulative_low_diffw[a-1] + (1 - cumulative_low_diffw[a-1]) * plot_diffw_real$low[a]
+    cumulative_upp_diffw[a] <- cumulative_upp_diffw[a-1] + (1 - cumulative_upp_diffw[a-1]) * plot_diffw_real$upp[a]
+  }
+  #store data per decile
+  assign(paste0("cumulative_median_diffw_",i),cumulative_median_diffw)
+  assign(paste0("cumulative_low_diffw_",i),cumulative_low_diffw)
+  assign(paste0("cumulative_upp_diffw_",i),cumulative_upp_diffw)
+  
   #add median
   #add points
-  points(cumprod(1-plot_diffw_real$mean[11:51])~plot_diffw_real$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
+  points(cumulative_median_diffw[11:51] ~ plot_diffw_real$age[11:51], col=palette_b[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumprod(1-plot_diffw_real$mean[11:51])~plot_diffw_real$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
+  lines(cumulative_median_diffw[11:51] ~ plot_diffw_real$age[11:51], col=palette_b[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_diffw_real$age[11:51],rev(plot_diffw_real$age[11:51])),c(cumprod(1-plot_diffw_real$low[11:51]),rev(cumprod(1-plot_diffw_real$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
+  polygon(c(plot_diffw_real$age[11:51], rev(plot_diffw_real$age[11:51])), c(cumulative_low_diffw[11:51], rev(cumulative_upp_diffw[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
 }
 
 ## Long-term variability of wealth ----
@@ -571,13 +613,34 @@ for(k in 1:(length(deciles_msd))){
   ) 
   #store data per decile
   assign(paste0("msdw_",i),plot_msd_real)
+  
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_msdw <- numeric(length(plot_msdw_real$median))
+  cumulative_low_msdw <- numeric(length(plot_msdw_real$low))
+  cumulative_upp_msdw <- numeric(length(plot_msdw_real$upp))
+  #set the first probability
+  cumulative_median_msdw[1] <- plot_msdw_real$median[1]
+  cumulative_low_msdw[1] <- plot_msdw_real$low[1]
+  cumulative_upp_msdw[1] <- plot_msdw_real$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_msdw_real$median)) {
+    cumulative_median_msdw[a] <- cumulative_median_msdw[a-1] + (1 - cumulative_median_msdw[a-1]) * plot_msdw_real$median[a]
+    cumulative_low_msdw[a] <- cumulative_low_msdw[a-1] + (1 - cumulative_low_msdw[a-1]) * plot_msdw_real$low[a]
+    cumulative_upp_msdw[a] <- cumulative_upp_msdw[a-1] + (1 - cumulative_upp_msdw[a-1]) * plot_msdw_real$upp[a]
+  }
+  #store data per decile
+  assign(paste0("cumulative_median_msdw_",i),cumulative_median_msdw)
+  assign(paste0("cumulative_low_msdw_",i),cumulative_low_msdw)
+  assign(paste0("cumulative_upp_msdw_",i),cumulative_upp_msdw)
+  
   #add median
   #add points
-  points(cumprod(1-plot_msd_real$mean[11:51])~plot_msd_real$age[11:51],col=palette_c[k],pch=shape[k],cex=1.5)
+  points(cumulative_median_msdw[11:51] ~ plot_msdw_real$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumprod(1-plot_msd_real$mean[11:51])~plot_msd_real$age[11:51],col=palette_c[k],lwd=3,lty=type[k])
+  lines(cumulative_median_msdw[11:51] ~ plot_msdw_real$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_msd_real$age[11:51],rev(plot_msd_real$age[11:51])),c(cumprod(1-plot_msd_real$low[11:51]),rev(cumprod(1-plot_msd_real$upp[11:51]))),col=alpha(palette_c[k],0.25),border=NA)
+  polygon(c(plot_msdw_real$age[11:51], rev(plot_msdw_real$age[11:51])), c(cumulative_low_msdw[11:51], rev(cumulative_upp_msdw[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
 }
 
 # Expected median age ----
@@ -586,89 +649,85 @@ for(k in 1:(length(deciles_msd))){
 
 #Minimum current absolute wealth
 #check which cumulative probability of 0.5
-which(round(cumsum(absw_1$median),1) == 0.5)
+which(round(cumulative_median_absw_1,1) == 0.5)
 #check specific age, since columns are age+1
-which(round(cumsum(absw_1$median),1) == 0.5) - 1
+which(round(cumulative_median_absw_1,1) == 0.5) - 1
 #median probability and hpdi
-absw_1[which(round(cumsum(absw_1$median),1) == 0.5),]
+cumulative_median_absw_1[which(round(cumulative_median_absw_1,1) == 0.5),]
 
 #Median current absolute wealth
 #check which cumulative probability of 0.5
-which(round(cumsum(absw_2$median),1) == 0.5)
+which(round(cumulative_median_absw_2,1) == 0.5)
 #check which cumulative probability between 0.4 and 0.6
-which(round(cumsum(absw_2$median),1) >= 0.4 & round(cumsum(absw_2$median),1) <= 0.6)
+which(round(cumulative_median_absw_2,1) >= 0.4 & round(cumulative_median_absw_2,1) <= 0.6)
 #check specific age, since columns are age+1
-which(round(cumsum(absw_2$median),1) >= 0.4 & round(cumsum(absw_2$median),1) <= 0.6) - 1
+which(round(cumulative_median_absw_2,1) >= 0.4 & round(cumulative_median_absw_2,1) <= 0.6) - 1
 #median probability and hpdi
-absw_2[which(round(cumsum(absw_2$median),1) >= 0.4 & round(cumsum(absw_2$median),1) <= 0.6),]
+cumulative_median_absw_2[which(round(cumulative_median_absw_2,1) >= 0.4 & round(cumulative_median_absw_2,1) <= 0.6),]
 
 #Maximum current absolute wealth
 #check which cumulative probability of 0.5
-which(round(cumsum(absw_3$median),1) == 0.5)
+which(round(cumulative_median_absw_3,1) == 0.5)
 #check specific age, since columns are age+1
-which(round(cumsum(absw_3$median),1) == 0.5) - 1
+which(round(cumulative_median_absw_3,1) == 0.5) - 1
 #median probability and hpdi
-absw_3[which(round(cumsum(absw_3$median),1) == 0.5),]
+cumulative_median_absw_3[which(round(cumulative_median_absw_3,1) == 0.5),]
 
 ### Short-term variability ----
 
 #Minimum short-term variability
 #check which cumulative probability of 0.5
-which(round(cumsum(diffw_1$median),1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumsum(diffw_1$median),1) >= 0.4 & round(cumsum(diffw_1$median),1) <= 0.6)
+which(round(cumulative_median_diffw_1,1) == 0.5)
 #check specific age, since columns are age+1
-which(round(cumsum(diffw_1$median),1) >= 0.4 & round(cumsum(diffw_1$median),1) <= 0.6) - 1
+which(round(cumulative_median_diffw_1,1) == 0.5) - 1
 #median probability and hpdi
-diffw_1[which(round(cumsum(diffw_1$median),1) >= 0.4 & round(cumsum(diffw_1$median),1) <= 0.6),]
+cumulative_median_diffw_1[which(round(cumulative_median_diffw_1,1) == 0.5),]
 
 #Median short-term variability
 #check which cumulative probability of 0.5
-which(round(cumsum(diffw_2$median),1) == 0.5)
+which(round(cumulative_median_diffw_2,1) == 0.5)
 #check which cumulative probability between 0.4 and 0.6
-which(round(cumsum(diffw_2$median),1) >= 0.4 & round(cumsum(diffw_2$median),1) <= 0.6)
+which(round(cumulative_median_diffw_2,1) >= 0.4 & round(cumulative_median_diffw_2,1) <= 0.6)
 #check specific age, since columns are age+1
-which(round(cumsum(diffw_2$median),1) >= 0.4 & round(cumsum(diffw_2$median),1) <= 0.6) - 1
+which(round(cumulative_median_diffw_2,1) >= 0.4 & round(cumulative_median_diffw_2,1) <= 0.6) - 1
 #median probability and hpdi
-diffw_2[which(round(cumsum(diffw_2$median),1) >= 0.4 & round(cumsum(diffw_2$median),1) <= 0.6),]
+cumulative_median_diffw_2[which(round(cumulative_median_diffw_2,1) >= 0.4 & round(cumulative_median_diffw_2,1) <= 0.6),]
 
 #Maximum short-term variability
 #check which cumulative probability of 0.5
-which(round(cumsum(diffw_3$median),1) == 0.5)
+which(round(cumulative_median_diffw_3,1) == 0.5)
 #check specific age, since columns are age+1
-which(round(cumsum(diffw_3$median),1) == 0.5) - 1
+which(round(cumulative_median_diffw_3,1) == 0.5) - 1
 #median probability and hpdi
-diffw_3[which(round(cumsum(diffw_3$median),1) == 0.5),]
+cumulative_median_diffw_3[which(round(cumulative_median_diffw_3,1) == 0.5),]
 
 ### Long-term variability ----
 
 #Minimum long-term variability
 #check which cumulative probability of 0.5
-which(round(cumsum(msdw_1$median),1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumsum(msdw_1$median),1) >= 0.4 & round(cumsum(msdw_1$median),1) <= 0.6)
+which(round(cumulative_median_msdw_1,1) == 0.5)
 #check specific age, since columns are age+1
-which(round(cumsum(msdw_1$median),1) >= 0.4 & round(cumsum(msdw_1$median),1) <= 0.6) - 1
+which(round(cumulative_median_msdw_1,1) == 0.5) - 1
 #median probability and hpdi
-msdw_1[which(round(cumsum(msdw_1$median),1) >= 0.4 & round(cumsum(msdw_1$median),1) <= 0.6),]
+cumulative_median_msdw_1[which(round(cumulative_median_msdw_1,1) == 0.5),]
 
 #Median long-term variability
 #check which cumulative probability of 0.5
-which(round(cumsum(msdw_2$median),1) == 0.5)
+which(round(cumulative_median_msdw_2,1) == 0.5)
 #check which cumulative probability between 0.4 and 0.6
-which(round(cumsum(msdw_2$median),1) >= 0.4 & round(cumsum(msdw_2$median),1) <= 0.6)
+which(round(cumulative_median_msdw_2,1) >= 0.4 & round(cumulative_median_msdw_2,1) <= 0.6)
 #check specific age, since columns are age+1
-which(round(cumsum(msdw_2$median),1) >= 0.4 & round(cumsum(msdw_2$median),1) <= 0.6) - 1
+which(round(cumulative_median_msdw_2,1) >= 0.4 & round(cumulative_median_msdw_2,1) <= 0.6) - 1
 #median probability and hpdi
-msdw_2[which(round(cumsum(msdw_2$median),1) >= 0.4 & round(cumsum(msdw_2$median),1) <= 0.6),]
+cumulative_median_msdw_2[which(round(cumulative_median_msdw_2,1) >= 0.4 & round(cumulative_median_msdw_2,1) <= 0.6),]
 
 #Maximum long-term variability
 #check which cumulative probability of 0.5
-which(round(cumsum(msdw_3$median),1) == 0.5)
+which(round(cumulative_median_msdw_3,1) == 0.5)
 #check specific age, since columns are age+1
-which(round(cumsum(msdw_3$median),1) == 0.5) - 1
+which(round(cumulative_median_msdw_3,1) == 0.5) - 1
 #median probability and hpdi
-msdw_3[which(round(cumsum(msdw_3$median),1) == 0.5),]
+cumulative_median_msdw_3[which(round(cumulative_median_msdw_3,1) == 0.5),]
 
 # Differences within wealth classes ----
 
@@ -676,117 +735,117 @@ msdw_3[which(round(cumsum(msdw_3$median),1) == 0.5),]
 
 #Minimum current absolute wealth 
 #largest absolute difference
-max(abs(diff(cumprod(1-absw_1$median[11:51]))))
+max(abs(diff(cumulative_median_absw_1[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-absw_1$median[11:51]))) == max(abs(diff(cumprod(1-absw_1$median[11:51])))))
-#age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-absw_1$median[11:51]))) == max(abs(diff(cumprod(1-absw_1$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_absw_1[11:51])) == max(abs(diff(cumulative_median_absw_1[11:51]))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(cumulative_median_absw_1[11:51])) == max(abs(diff(cumulative_median_absw_1[11:51])))) + 10
 
 #Median current absolute wealth 
 #largest absolute difference
-max(abs(diff(cumprod(1-absw_2$median[11:51]))))
+max(abs(diff(cumulative_median_absw_2[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-absw_2$median[11:51]))) == max(abs(diff(cumprod(1-absw_2$median[11:51])))))
-#age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-absw_2$median[11:51]))) == max(abs(diff(cumprod(1-absw_2$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_absw_2[11:51])) == max(abs(diff(cumulative_median_absw_2[11:51]))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(cumulative_median_absw_2[11:51])) == max(abs(diff(cumulative_median_absw_2[11:51])))) + 10
 
 #Maximum current absolute wealth 
 #largest absolute difference
-max(abs(diff(cumprod(1-absw_3$median[11:51]))))
+max(abs(diff(cumulative_median_absw_3[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-absw_3$median[11:51]))) == max(abs(diff(cumprod(1-absw_3$median[11:51])))))
+which(abs(diff(cumulative_median_absw_3[11:51])) == max(abs(diff(cumulative_median_absw_3[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-absw_3$median[11:51]))) == max(abs(diff(cumprod(1-absw_3$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_absw_3[11:51])) == max(abs(diff(cumulative_median_absw_3[11:51])))) + 9
 
 ## Short-term wealth variability -----
 
 #Minimum short-term variability 
 #largest absolute difference
-max(abs(diff(cumprod(1-diffw_1$median[11:51]))))
+max(abs(diff(cumulative_median_diffw_1[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-diffw_1$median[11:51]))) == max(abs(diff(cumprod(1-diffw_1$median[11:51])))))
+which(abs(diff(cumulative_median_diffw_1[11:51])) == max(abs(diff(cumulative_median_diffw_1[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-diffw_1$median[11:51]))) == max(abs(diff(cumprod(1-diffw_1$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_diffw_1[11:51])) == max(abs(diff(cumulative_median_diffw_1[11:51])))) + 9
 
 #Median short-term variability 
 #largest absolute difference
-max(abs(diff(cumprod(1-diffw_2$median[11:51]))))
+max(abs(diff(cumulative_median_diffw_2[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-diffw_2$median[11:51]))) == max(abs(diff(cumprod(1-diffw_2$median[11:51])))))
+which(abs(diff(cumulative_median_diffw_2[11:51])) == max(abs(diff(cumulative_median_diffw_2[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-diffw_2$median[11:51]))) == max(abs(diff(cumprod(1-diffw_2$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_diffw_2[11:51])) == max(abs(diff(cumulative_median_diffw_2[11:51])))) + 9
 
 #Maximum short-term variability 
 #largest absolute difference
-max(abs(diff(cumprod(1-diffw_3$median[11:51]))))
+max(abs(diff(cumulative_median_diffw_3[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-diffw_3$median[11:51]))) == max(abs(diff(cumprod(1-diffw_3$median[11:51])))))
+which(abs(diff(cumulative_median_diffw_3[11:51])) == max(abs(diff(cumulative_median_diffw_3[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-diffw_3$median[11:51]))) == max(abs(diff(cumprod(1-diffw_3$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_diffw_3[11:51])) == max(abs(diff(cumulative_median_diffw_3[11:51])))) + 9
 
 ## Long-term wealth variability -----
 
 #Minimum long-term variability 
 #largest absolute difference
-max(abs(diff(cumprod(1-msdw_1$median[11:51]))))
+max(abs(diff(cumulative_median_msdw_1[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-msdw_1$median[11:51]))) == max(abs(diff(cumprod(1-msdw_1$median[11:51])))))
+which(abs(diff(cumulative_median_msdw_1[11:51])) == max(abs(diff(cumulative_median_msdw_1[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-msdw_1$median[11:51]))) == max(abs(diff(cumprod(1-msdw_1$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_msdw_1[11:51])) == max(abs(diff(cumulative_median_msdw_1[11:51])))) + 9
 
 #Median long-term variability 
 #largest absolute difference
-max(abs(diff(cumprod(1-msdw_2$median[11:51]))))
+max(abs(diff(cumulative_median_msdw_2[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-msdw_2$median[11:51]))) == max(abs(diff(cumprod(1-msdw_2$median[11:51])))))
+which(abs(diff(cumulative_median_msdw_2[11:51])) == max(abs(diff(cumulative_median_msdw_2[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-msdw_2$median[11:51]))) == max(abs(diff(cumprod(1-msdw_2$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_msdw_2[11:51])) == max(abs(diff(cumulative_median_msdw_2[11:51])))) + 9
 
 #Maximum long-term variability
 #largest absolute difference
-max(abs(diff(cumprod(1-msdw_3$median[11:51]))))
+max(abs(diff(cumulative_median_msdw_3[11:51])))
 #position of largest absolute difference
-which(abs(diff(cumprod(1-msdw_3$median[11:51]))) == max(abs(diff(cumprod(1-msdw_3$median[11:51])))))
+which(abs(diff(cumulative_median_msdw_3[11:51])) == max(abs(diff(cumulative_median_msdw_3[11:51]))))
 #age of largest absolute difference (10 (columns) - 1 (age) = 9)
-which(abs(diff(cumprod(1-msdw_3$median[11:51]))) == max(abs(diff(cumprod(1-msdw_3$median[11:51]))))) + 9
+which(abs(diff(cumulative_median_msdw_3[11:51])) == max(abs(diff(cumulative_median_msdw_3[11:51])))) + 9
 
 #Differences between wealth classes ----
 
 ## Current absolute wealth ----
 
 #Minimum versus median
-which(abs(diff(rbind(cumprod(1-absw_1$median[11:51]),cumprod(1-absw_2$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-absw_1$median[11:51]),cumprod(1-absw_2$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))))) + 10
 #Median versus maximum
-which(abs(diff(rbind(cumprod(1-absw_2$median[11:51]),cumprod(1-absw_3$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-absw_2$median[11:51]),cumprod(1-absw_3$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))))) + 10
 #Minimum versus maximum
-which(abs(diff(rbind(cumprod(1-absw_1$median[11:51]),cumprod(1-absw_3$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-absw_1$median[11:51]),cumprod(1-absw_3$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))))) + 10
 
 ## Short-term variability ----
 
 #Minimum versus Median
-which(abs(diff(rbind(cumprod(1-diffw_1$median[11:51]),cumprod(1-diffw_2$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-diffw_1$median[11:51]),cumprod(1-diffw_2$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))))) + 10
 #Median versus Maximum
-which(abs(diff(rbind(cumprod(1-diffw_2$median[11:51]),cumprod(1-diffw_3$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-diffw_2$median[11:51]),cumprod(1-diffw_3$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))))) + 10
 #Minimum versus Maximum
-which(abs(diff(rbind(cumprod(1-diffw_1$median[11:51]),cumprod(1-diffw_3$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-diffw_1$median[11:51]),cumprod(1-diffw_3$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))))) + 10
 
 #Long-term variability ----
 
 #Minimum versus Median
-which(abs(diff(rbind(cumprod(1-msdw_1$median[11:51]),cumprod(1-msdw_2$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-msdw_1$median[11:51]),cumprod(1-msdw_2$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_2[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_2[11:51]))))) + 10
 #Median versus Maximum
-which(abs(diff(rbind(cumprod(1-msdw_2$median[11:51]),cumprod(1-msdw_3$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-msdw_2$median[11:51]),cumprod(1-msdw_3$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_msdw_2[11:51],cumulative_median_msdw_3[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_msdw_2[11:51],cumulative_median_msdw_3[11:51]))))) + 10
 #Minimum versus Maximum
-which(abs(diff(rbind(cumprod(1-msdw_1$median[11:51]),cumprod(1-msdw_3$median[11:51])))) 
-      == max(abs(diff(rbind(cumprod(1-msdw_1$median[11:51]),cumprod(1-msdw_3$median[11:51])))))) + 10
+which(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_3[11:51]))) 
+      == max(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_3[11:51]))))) + 10
 
 # Relative importance ----
 
