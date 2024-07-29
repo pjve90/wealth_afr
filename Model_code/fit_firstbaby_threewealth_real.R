@@ -12,7 +12,7 @@ library(scales)
 #install.packages("corrplot")
 library(corrplot)
 
-## Data wrangling of real data ----
+# Data wrangling of real data ----
 
 #Load data
 real_data <- read.csv("dataf.csv")[,-1]
@@ -37,11 +37,26 @@ for(i in 1:nrow(afr_matrix)){
 afr_matrix
 #check the age-specific probability of FR
 apply(afr_matrix,2,sum,na.rm=T)/apply(afr_matrix,2,function(x)sum(!is.na(x)))
+# Calculate the cumulative probabilities of first birth
+cumulative_probs <- rep(NA,length.out=ncol(afr_matrix))
+for (j in 1:ncol(afr_matrix)) {
+  if (j == 1) {
+    cumulative_probs[j] <- sum(afr_matrix[, j], na.rm = TRUE) / colSums(!is.na(afr_matrix))[j]
+  } else {
+    cumulative_probs[j] <- cumulative_probs[j - 1] + (sum(afr_matrix[, j], na.rm = TRUE) / colSums(!is.na(afr_matrix))[j]) * (1 - cumulative_probs[j - 1])
+  }
+}
+#check data
+cumulative_probs
 #plot the CCDF of first birth
-plot(cumprod(1-apply(afr_matrix,2,sum,na.rm=T)/apply(afr_matrix,2,function(x)sum(!is.na(x))))~c(1:(max(real_data$aoc)+1)),
+plot(cumulative_probs~c(1:length(cumulative_probs)),
      xlab="Age",
-     ylab="CCDF of first birth",
-     ylim=c(0,1))
+     ylab="Cumulative probability of first birth",
+     ylim=c(0,1),
+     type="b",
+     col="black",
+     pch=16
+     )
 
 #Current absolute wealth ----
 
@@ -157,11 +172,17 @@ absw_matrix
 #check the average of current absolute wealth at each age
 apply(absw_matrix,2,mean,na.rm=T)
 #plot it
-plot(apply(absw_matrix,2,mean,na.rm=T)~c(1:ncol(absw_matrix)),
+plot(NA,
+     xlim=c(1,ncol(absw_matrix)),
+     ylim=range(absw_matrix,na.rm=T),
      xlab="Age",
-     ylab="Average current absolute wealth",
-     type="b"
-     )
+     ylab="Current absolute wealth"
+)
+for(i in 1:nrow(absw_matrix)){
+  row_data <- absw_matrix[i, ]
+  col_indices <- which(!is.na(row_data))
+  points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
+}
 
 #standardise the log-transformed current absolute wealth
 std_absw_matrix <- matrix(standardize(log(as.vector(absw_matrix))),ncol=ncol(absw_matrix),nrow=nrow(absw_matrix))
@@ -170,11 +191,81 @@ std_absw_matrix
 #check the age-specific average of standardised current absolute wealth
 apply(std_absw_matrix,2,mean,na.rm=T)
 #plot it
-plot(apply(std_absw_matrix,2,mean,na.rm=T)~c(1:(max(real_data$aoc)+1)),
+plot(NA,
+     xlim=c(1,ncol(std_absw_matrix)),
+     ylim=range(std_absw_matrix,na.rm=T),
      xlab="Age",
-     ylab="Average absolute wealth",
-     type="b"
+     ylab="Std. current absolute wealth"
      )
+for(i in 1:nrow(std_absw_matrix)){
+  row_data <- std_absw_matrix[i, ]
+  col_indices <- which(!is.na(row_data))
+  points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
+}
+
+#Calculate the short-term and long-term wealth variability from the data ----
+
+#short-term wealth variability
+#create matrix
+change_matrix <-  matrix(nrow = nrow(std_absw_matrix),ncol=ncol(std_absw_matrix))
+#check matrix
+change_matrix
+#calculate the short-term wealth variability
+for(i in 1:nrow(change_matrix)){
+  for(j in 1:2){
+    change_matrix[i,j] <- 0 #setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
+  }
+  for(j in 3:ncol(change_matrix)){
+    change_matrix[i,j] = abs(std_absw_matrix[i,j] - std_absw_matrix[i,j-2]) #calculating the 2-years lagged wealth change
+  }
+}
+#check matrix
+change_matrix
+#check the age-specific average of standardised short-term wealth variability
+apply(change_matrix,2,mean,na.rm=T)
+#plot it
+plot(NA,
+     xlim=c(1,ncol(change_matrix)),
+     ylim=range(change_matrix,na.rm=T),
+     xlab="Age",
+     ylab="Absolute 2-year lagged wealth change"
+)
+for(i in 1:nrow(change_matrix)){
+  row_data <- change_matrix[i, ]
+  col_indices <- which(!is.na(row_data))
+  points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
+}
+
+#long-term wealth variability
+#create matrix
+msdw_matrix <-  matrix(nrow = nrow(std_absw_matrix),ncol=ncol(std_absw_matrix))
+#check matrix
+msdw_matrix
+#calculate the long-term wealth variability
+for(i in 1:nrow(msdw_matrix)){
+  for(j in 1:10){
+    msdw_matrix[i,j] <- 0 #setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
+  }
+  for(j in 11:ncol(msdw_matrix)){
+    msdw_matrix[i,j] = sd(std_absw_matrix[i,(j-10):j],na.rm=T) #calculating the moving standard deviation with a 10-years window
+  }
+}
+#check matrix
+msdw_matrix
+#check the age-specific average of standardised long-term wealth variability
+apply(msdw_matrix,2,mean,na.rm=T)
+#plot it
+plot(NA,
+     xlim=c(1,ncol(msdw_matrix)),
+     ylim=range(msdw_matrix,na.rm=T),
+     xlab="Age",
+     ylab="Long-term wealth variability"
+)
+for(i in 1:nrow(msdw_matrix)){
+  row_data <- msdw_matrix[i, ]
+  col_indices <- which(!is.na(row_data))
+  points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
+}
 
 # Fit real data ----
 
@@ -835,7 +926,7 @@ which(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[
 which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))) 
       == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))))) + 10
 
-#Long-term variability ----
+##Long-term variability ----
 
 #Minimum versus Median
 which(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_2[11:51]))) 
