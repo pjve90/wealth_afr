@@ -336,8 +336,6 @@ tab6_add_real_delta_sigma
 
 ### Absolute Wealth ----
 
-#### All wealth classes ----
-
 #simulate wealth values
 simwealth_add_real_b <- seq(from=round(min(post6_add_real$wealth_full),1),to=round(max(post6_add_real$wealth_full),1),length.out=nrow(std_absw_restricted_b)) #specify according to range and length related to sample size
 simwealth_add_real_b
@@ -349,8 +347,8 @@ deciles_b
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_b<-palette[1:length(deciles_b)]
-palette_b
+palette_a<-palette[1:length(deciles_b)]
+palette_a
 
 #shape of points
 shape <- c(15:17)
@@ -362,7 +360,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Absolute levels\nof material wealth",
      cex.axis=1.2,
@@ -391,210 +389,38 @@ for(k in 1:(length(deciles_b))){
   #plot it!
   #prepare model prediction data
   plot_data6_add_real_b <- data.frame(age = 1:ncol(p6_add_real_b),
-                                      mean = apply(p6_add_real_b, 2, mean), 
+                                      median = apply(p6_add_real_b, 2, median), 
                                       upp = apply(p6_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p6_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr6 <- afr_matrix6
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr6)){
-    for(i in 1:nrow(plot_afr6)){
-      if(plot_afr6[i,j]==-99){
-        plot_afr6[i,j] <- NA
-      }
-    }
-  }
-  #check the data
-  plot_afr6
   
-  points(cumprod(1-plot_data6_add_real_b$mean[11:51])~plot_data6_add_real_b$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
-  lines(cumprod(1-plot_data6_add_real_b$mean[11:51])~plot_data6_add_real_b$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
-  polygon(c(plot_data6_add_real_b$age[11:51],rev(plot_data6_add_real_b$age[11:51])),c(cumprod(1-plot_data6_add_real_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
-}
-
-### De-couple plot by min, mean, max ----
-
-#simulate wealth values
-simwealth_add_real_b <- seq(from=round(min(post6_add_real$wealth_full),1),to=round(max(post6_add_real$wealth_full),1),length.out=nrow(std_absw_restricted_b)) #specify according to range and length related to sample size
-simwealth_add_real_b
-
-#get the deciles_b
-deciles_b <- as.numeric(quantile(simwealth_add_real_b,seq(0,1,0.5)))
-deciles_b
-
-#colour palette
-#numbers for color palette
-palette <- palette.colors(9,"Okabe-Ito")
-#select the numbers for color palette
-palette_b<-palette[1:length(deciles_b)]
-palette_b
-
-#define layout of plots
-par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
-
-#### Minimum wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Minimum absolute wealth",
-     cex.axis=1.2,
-     cex.lab=1.5,
-     cex.main=1.5,
-     type="n")
-
-#create matrix to store the data
-p6_add_real_0_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_0_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_0_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                        post6_add_real$mu[i,j] + #age
-                                        (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*deciles_b[1] + #absolute wealth
-                                        (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                        (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*0) #moving variance
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_absw_b <- numeric(length(plot_data6_add_real_b$median))
+  cumulative_low_absw_b <- numeric(length(plot_data6_add_real_b$low))
+  cumulative_upp_absw_b <- numeric(length(plot_data6_add_real_b$upp))
+  #set the first probability
+  cumulative_median_absw_b[1] <- plot_data6_add_real_b$median[1]
+  cumulative_low_absw_b[1] <- plot_data6_add_real_b$low[1]
+  cumulative_upp_absw_b[1] <- plot_data6_add_real_b$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_data6_add_real_b$median)) {
+    cumulative_median_absw_b[a] <- cumulative_median_absw_b[a-1] + (1 - cumulative_median_absw_b[a-1]) * plot_data6_add_real_b$median[a]
+    cumulative_low_absw_b[a] <- cumulative_low_absw_b[a-1] + (1 - cumulative_low_absw_b[a-1]) * plot_data6_add_real_b$low[a]
+    cumulative_upp_absw_b[a] <- cumulative_upp_absw_b[a-1] + (1 - cumulative_upp_absw_b[a-1]) * plot_data6_add_real_b$upp[a]
   }
+  
+  #add median
+  #add points
+  points(cumulative_median_absw_b[11:51] ~ plot_data6_add_real_b$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_absw_b[11:51] ~ plot_data6_add_real_b$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_data6_add_real_b$age[11:51], rev(plot_data6_add_real_b$age[11:51])), c(cumulative_low_absw_b[11:51], rev(cumulative_upp_absw_b[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
+  
 }
-#check data
-p6_add_real_0_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_0_b <- data.frame(age = 1:ncol(p6_add_real_0_b),
-                                      mean = apply(p6_add_real_0_b, 2, mean), 
-                                      upp = apply(p6_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p6_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumsum(plot_data6_add_real_0_b$mean[11:51]/(sum(plot_data6_add_real_0_b$mean[11:51])))~plot_data6_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
-lines(cumsum(plot_data6_add_real_0_b$mean[11:51]/(sum(plot_data6_add_real_0_b$mean[11:51])))~plot_data6_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
-polygon(c(plot_data6_add_real_0_b$age[11:51],rev(plot_data6_add_real_0_b$age[11:51])),c(cumprod(1-plot_data6_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
-
-#### Median wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Medium absolute wealth",
-     cex.axis=1.2,
-     cex.lab=1.5,
-     cex.main=1.5,
-     type="n")
-
-#create matrix to store the data
-p6_add_real_50_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_50_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_50_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                         post6_add_real$mu[i,j] + #age
-                                         (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*deciles_b[2] + #absolute wealth
-                                         (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                         (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*0) #moving variance
-  }
-}
-#check data
-p6_add_real_50_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_50_b <- data.frame(age = 1:ncol(p6_add_real_50_b),
-                                       mean = apply(p6_add_real_50_b, 2, mean), 
-                                       upp = apply(p6_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                       low = apply(p6_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_50_b$mean[11:51])~plot_data6_add_real_50_b$age[11:51],col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data6_add_real_50_b$mean[11:51])~plot_data6_add_real_50_b$age[11:51],col=palette_b[2],lwd=2)
-polygon(c(plot_data6_add_real_50_b$age[11:51],rev(plot_data6_add_real_50_b$age)),c(cumprod(1-plot_data6_add_real_50_b$low),rev(cumprod(1-plot_data6_add_real_50_b$upp))),col=alpha(palette_b[2],0.25),border=NA)
-
-#### Maximum wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Maximum absolute wealth",
-     cex.axis=1.2,
-     cex.lab=1.5,
-     cex.main=1.5,
-     type="n")
-
-#create matrix to store the data
-p6_add_real_100_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_100_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_100_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                          post6_add_real$mu[i,j] + #age
-                                          (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*deciles_b[3] + #absolute wealth
-                                          (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                          (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*0) #moving variance
-  }
-}
-#check data
-p6_add_real_100_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_100_b <- data.frame(age = 1:ncol(p6_add_real_100_b),
-                                        mean = apply(p6_add_real_100_b, 2, mean), 
-                                        upp = apply(p6_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                        low = apply(p6_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_100_b$mean[11:51])~plot_data6_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data6_add_real_100_b$mean[11:51])~plot_data6_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
-polygon(c(plot_data6_add_real_100_b$age[11:51],rev(plot_data6_add_real_100_b$age[11:51])),c(cumprod(1-plot_data6_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
-
-legend(54,1,c("Poor","Middle", "Rich"),lty=1,col=hcl.colors(length(palette),"temps")[palette_b],lwd=2,pch=16)
 
 ### Short-term wealth variability ----
-
-#### All wealth classes ----
 
 #simulate wealth values
 simwealth_change_real <- seq(from=round(min(post6_add_real$wealth_change),1),to=round(max(post6_add_real$wealth_change),1),length.out=nrow(std_absw_restricted_b)) #specify according to range and length related to sample size
@@ -620,7 +446,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Short-term variability\nof material wealth",
      cex.axis=1.2,
@@ -649,211 +475,37 @@ for(k in 1:(length(deciles_b))){
   #plot it!
   #prepare model prediction data
   plot_data6_add_real_b <- data.frame(age = 1:ncol(p6_add_real_b),
-                                      mean = apply(p6_add_real_b, 2, mean), 
+                                      median = apply(p6_add_real_b, 2, median), 
                                       upp = apply(p6_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p6_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr6 <- afr_matrix6
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr6)){
-    for(i in 1:nrow(plot_afr6)){
-      if(plot_afr6[i,j]==-99){
-        plot_afr6[i,j] <- NA
-      }
-    }
-  }
-  #check the data
-  plot_afr6
   
-  points(cumprod(1-plot_data6_add_real_b$mean[11:51])~plot_data6_add_real_b$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
-  lines(cumprod(1-plot_data6_add_real_b$mean[11:51])~plot_data6_add_real_b$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
-  polygon(c(plot_data6_add_real_b$age[11:51],rev(plot_data6_add_real_b$age[11:51])),c(cumprod(1-plot_data6_add_real_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
-}
-
-### De-couple plot by min, mean, max ----
-
-#simulate wealth values
-simwealth_change_real <- seq(from=round(min(wealth_change_restricted_b),1),to=round(max(wealth_change_restricted_b),1),length.out=nrow(wealth_change_restricted_b)) #specify according to range and length related to sample size
-simwealth_change_real
-
-#get the deciles_b
-deciles_b <- as.numeric(quantile(simwealth_change_real,seq(0,1,0.5)))
-deciles_b
-
-#colour palette
-#numbers for color palette
-palette <- palette.colors(9,"Okabe-Ito")
-#select the numbers for color palette
-palette_b<-palette[4:(length(deciles_b)+3)]
-palette_b
-
-#define layout of plots
-par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
-
-#### No short-term variability of wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="No short-term variability of wealth",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5,
-     cex.axis=1.2
-)
-
-#create matrix to store the data
-p6_add_real_0_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_0_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_0_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                        post6_add_real$mu[i,j] + #age
-                                        (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                        (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*deciles_b[1] + #wealth change
-                                        (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*0) #moving variance
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_diffw_b <- numeric(length(plot_data6_add_real_b$median))
+  cumulative_low_diffw_b <- numeric(length(plot_data6_add_real_b$low))
+  cumulative_upp_diffw_b <- numeric(length(plot_data6_add_real_b$upp))
+  #set the first probability
+  cumulative_median_diffw_b[1] <- plot_data6_add_real_b$median[1]
+  cumulative_low_diffw_b[1] <- plot_data6_add_real_b$low[1]
+  cumulative_upp_diffw_b[1] <- plot_data6_add_real_b$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_data6_add_real_b$median)) {
+    cumulative_median_diffw_b[a] <- cumulative_median_diffw_b[a-1] + (1 - cumulative_median_diffw_b[a-1]) * plot_data6_add_real_b$median[a]
+    cumulative_low_diffw_b[a] <- cumulative_low_diffw_b[a-1] + (1 - cumulative_low_diffw_b[a-1]) * plot_data6_add_real_b$low[a]
+    cumulative_upp_diffw_b[a] <- cumulative_upp_diffw_b[a-1] + (1 - cumulative_upp_diffw_b[a-1]) * plot_data6_add_real_b$upp[a]
   }
+  
+  #add median
+  #add points
+  points(cumulative_median_diffw_b[11:51] ~ plot_data6_add_real_b$age[11:51], col=palette_b[k], pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_diffw_b[11:51] ~ plot_data6_add_real_b$age[11:51], col=palette_b[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_data6_add_real_b$age[11:51], rev(plot_data6_add_real_b$age[11:51])), c(cumulative_low_diffw_b[11:51], rev(cumulative_upp_diffw_b[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
 }
-#check data
-p6_add_real_0_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_0_b <- data.frame(age = 1:ncol(p6_add_real_0_b),
-                                      mean = apply(p6_add_real_0_b, 2, mean), 
-                                      upp = apply(p6_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p6_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_0_b$mean[11:51])~plot_data6_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data6_add_real_0_b$mean[11:51])~plot_data6_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
-polygon(c(plot_data6_add_real_0_b$age[11:51],rev(plot_data6_add_real_0_b$age[11:51])),c(cumprod(1-plot_data6_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
-
-#### Middle short-term variability of wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Middle short-term variability of wealth",
-     cex.axis=1.2,
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-
-#create matrix to store the data
-p6_add_real_50_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_50_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_50_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                         post6_add_real$mu[i,j] + #age
-                                         (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                         (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*deciles_b[2] + #wealth change
-                                         (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*0) #moving variance
-  }
-}
-#check data
-p6_add_real_50_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_50_b <- data.frame(age = 1:ncol(p6_add_real_50_b),
-                                       mean = apply(p6_add_real_50_b, 2, mean), 
-                                       upp = apply(p6_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                       low = apply(p6_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_50_b$mean[11:51])~plot_data6_add_real_50_b$age[11:51],col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data6_add_real_50_b$mean[11:51])~plot_data6_add_real_50_b$age[11:51],col=palette_b[2],lwd=2)
-polygon(c(plot_data6_add_real_50_b$age[11:51],rev(plot_data6_add_real_50_b$age[11:51])),c(cumprod(1-plot_data6_add_real_50_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_50_b$upp[11:51]))),col=alpha(palette_b[2],0.25),border=NA)
-
-#### Maximum short-term variability of wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Maximum short-term variability of wealth",
-     type="n",
-     cex.axis=1.2,
-     cex.main=1.5,
-     cex.lab=1.5)
-
-#create matrix to store the data
-p6_add_real_100_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_100_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_100_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                          post6_add_real$mu[i,j] + #age
-                                          (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                          (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*deciles_b[3] + #wealth change
-                                          (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*0) #moving variance
-  }
-}
-#check data
-p6_add_real_100_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_100_b <- data.frame(age = 1:ncol(p6_add_real_100_b),
-                                        mean = apply(p6_add_real_100_b, 2, mean), 
-                                        upp = apply(p6_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                        low = apply(p6_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_100_b$mean[11:51])~plot_data6_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data6_add_real_100_b$mean[11:51])~plot_data6_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
-polygon(c(plot_data6_add_real_100_b$age[11:51],rev(plot_data6_add_real_100_b$age[11:51])),c(cumprod(1-plot_data6_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
-
-legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 ### Long-term variability of wealth ----
-
-#### All wealth classes ----
 
 #simulate wealth values
 simwealth_msd_real <- seq(from=round(min(post6_add_real$wealth_msd),1),to=round(max(post6_add_real$wealth_msd),1),length.out=nrow(std_absw_restricted_b)) #specify according to range and length related to sample size
@@ -866,8 +518,8 @@ deciles_b
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_b<-palette[7:(length(deciles_b)+6)]
-palette_b
+palette_c<-palette[7:(length(deciles_b)+6)]
+palette_c
 
 #shape of points
 shape <- c(15:17)
@@ -879,7 +531,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Long-term variability\nof material wealth",
      cex.axis=1.2,
@@ -908,207 +560,35 @@ for(k in 1:(length(deciles_b))){
   #plot it!
   #prepare model prediction data
   plot_data6_add_real_b <- data.frame(age = 1:ncol(p6_add_real_b),
-                                      mean = apply(p6_add_real_b, 2, mean), 
+                                      median = apply(p6_add_real_b, 2, median), 
                                       upp = apply(p6_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p6_add_real_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
-  #prepare afr probabilities from real data
-  #create a matrix
-  plot_afr6 <- afr_matrix6
-  #change -99 to NAs
-  for(j in 1:ncol(plot_afr6)){
-    for(i in 1:nrow(plot_afr6)){
-      if(plot_afr6[i,j]==-99){
-        plot_afr6[i,j] <- NA
-      }
-    }
-  }
-  #check the data
-  plot_afr6
   
-  points(cumprod(1-plot_data6_add_real_b$mean[11:51])~plot_data6_add_real_b$age[11:51],col=palette_b[k],pch=shape[k],cex=1.5)
-  lines(cumprod(1-plot_data6_add_real_b$mean[11:51])~plot_data6_add_real_b$age[11:51],col=palette_b[k],lwd=3,lty=type[k])
-  polygon(c(plot_data6_add_real_b$age[11:51],rev(plot_data6_add_real_b$age[11:51])),c(cumprod(1-plot_data6_add_real_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_b$upp[11:51]))),col=alpha(palette_b[k],0.25),border=NA)
-}
-
-### De-couple plot by min, mean, max ----
-
-#simulate wealth values
-simwealth_msd_real <- seq(from=round(min(wealth_msd_restricted_b),1),to=round(max(wealth_msd_restricted_b),1),length.out=nrow(wealth_msd_restricted_b)) #specify according to range and length related to sample size
-simwealth_msd_real
-
-#get the deciles_b
-deciles_b <- as.numeric(quantile(simwealth_msd_real,seq(0,1,0.5)))
-deciles_b
-
-#colour palette
-#numbers for color palette
-palette <- palette.colors(9,"Okabe-Ito")
-#select the numbers for color palette
-palette_b<-palette[7:(length(deciles_b)+6)]
-palette_b
-
-#define layout of plots
-par(mfrow=c(1,3),xpd=T,mar=c(5,5,4,8))
-
-#### No long-term variability of wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="No long-term variability of wealth",
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5,
-     cex.axis=1.2
-)
-
-#create matrix to store the data
-p6_add_real_0_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_0_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_0_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                        post6_add_real$mu[i,j] + #age
-                                        (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                        (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                        (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*deciles_b[1]) #moving variance
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_msdw_b <- numeric(length(plot_data6_add_real_b$median))
+  cumulative_low_msdw_b <- numeric(length(plot_data6_add_real_b$low))
+  cumulative_upp_msdw_b <- numeric(length(plot_data6_add_real_b$upp))
+  #set the first probability
+  cumulative_median_msdw_b[1] <- plot_data6_add_real_b$median[1]
+  cumulative_low_msdw_b[1] <- plot_data6_add_real_b$low[1]
+  cumulative_upp_msdw_b[1] <- plot_data6_add_real_b$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_data6_add_real_b$median)) {
+    cumulative_median_msdw_b[a] <- cumulative_median_msdw_b[a-1] + (1 - cumulative_median_msdw_b[a-1]) * plot_data6_add_real_b$median[a]
+    cumulative_low_msdw_b[a] <- cumulative_low_msdw_b[a-1] + (1 - cumulative_low_msdw_b[a-1]) * plot_data6_add_real_b$low[a]
+    cumulative_upp_msdw_b[a] <- cumulative_upp_msdw_b[a-1] + (1 - cumulative_upp_msdw_b[a-1]) * plot_data6_add_real_b$upp[a]
   }
+  
+  #add median
+  #add points
+  points(cumulative_median_msdw_b[11:51] ~ plot_data6_add_real_b$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_msdw_b[11:51] ~ plot_data6_add_real_b$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_data6_add_real_b$age[11:51], rev(plot_data6_add_real_b$age[11:51])), c(cumulative_low_msdw_b[11:51], rev(cumulative_upp_msdw_b[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
 }
-#check data
-p6_add_real_0_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_0_b <- data.frame(age = 1:ncol(p6_add_real_0_b),
-                                      mean = apply(p6_add_real_0_b, 2, mean), 
-                                      upp = apply(p6_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p6_add_real_0_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_0_b$mean[11:51])~plot_data6_add_real_0_b$age[11:51],col=palette_b[1],pch=15)
-lines(cumprod(1-plot_data6_add_real_0_b$mean[11:51])~plot_data6_add_real_0_b$age[11:51],col=palette_b[1],lwd=2)
-polygon(c(plot_data6_add_real_0_b$age[11:51],rev(plot_data6_add_real_0_b$age[11:51])),c(cumprod(1-plot_data6_add_real_0_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_0_b$upp[11:51]))),col=alpha(palette_b[1],0.25),border=NA)
-
-#### Middle long-term variability of wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Middle long-term variability of wealth",
-     cex.axis=1.2,
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-
-#create matrix to store the data
-p6_add_real_50_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_50_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_50_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                         post6_add_real$mu[i,j] + #age
-                                         (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                         (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                         (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*deciles_b[2]) #moving variance
-  }
-}
-#check data
-p6_add_real_50_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_50_b <- data.frame(age = 1:ncol(p6_add_real_50_b),
-                                       mean = apply(p6_add_real_50_b, 2, mean), 
-                                       upp = apply(p6_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                       low = apply(p6_add_real_50_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_50_b$mean[11:51])~plot_data6_add_real_50_b$age[11:51],col=palette_b[2],pch=15)
-lines(cumprod(1-plot_data6_add_real_50_b$mean[11:51])~plot_data6_add_real_50_b$age[11:51],col=palette_b[2],lwd=2)
-polygon(c(plot_data6_add_real_50_b$age[11:51],rev(plot_data6_add_real_50_b$age[11:51])),c(cumprod(1-plot_data6_add_real_50_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_50_b$upp[11:51]))),col=alpha(palette_b[2],0.25),border=NA)
-
-#### Maximum long-term variability of wealth ----
-
-#plot empty plot
-plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
-     ylab="Cumulative probability of first birth",
-     xlab="Age",
-     main="Maximum long-term variability of wealth",
-     cex.axis=1.2,
-     type="n",
-     cex.main=1.5,
-     cex.lab=1.5)
-
-#create matrix to store the data
-p6_add_real_100_b <- matrix(nrow=nrow(post6_add_real$mu),ncol=ncol(post6_add_real$mu))
-p6_add_real_100_b
-#fill it in with values for age 25
-for(j in 1:ncol(post6_add_real$mu)){
-  for(i in 1:nrow(post6_add_real$mu)){
-    p6_add_real_100_b[i,j] <- inv_logit(post6_add_real$alpha[i] + #inv logit because originally is logit
-                                          post6_add_real$mu[i,j] + #age
-                                          (post6_add_real$beta_wealth_z[i,j]*post6_add_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                          (post6_add_real$gamma_wealth_z[i,j]*post6_add_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                          (post6_add_real$delta_wealth_z[i,j]*post6_add_real$delta_wealth_sigma[i])*deciles_b[3]) #moving variance
-  }
-}
-#check data
-p6_add_real_100_b
-#plot it!
-#prepare model prediction data
-plot_data6_add_real_100_b <- data.frame(age = 1:ncol(p6_add_real_100_b),
-                                        mean = apply(p6_add_real_100_b, 2, mean), 
-                                        upp = apply(p6_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                        low = apply(p6_add_real_100_b, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-) 
-#prepare afr probabilities from real data
-#create a matrix
-plot_afr6 <- afr_matrix6
-#change -99 to NAs
-for(j in 1:ncol(plot_afr6)){
-  for(i in 1:nrow(plot_afr6)){
-    if(plot_afr6[i,j]==-99){
-      plot_afr6[i,j] <- NA
-    }
-  }
-}
-#check the data
-plot_afr6
-
-points(cumprod(1-plot_data6_add_real_100_b$mean[11:51])~plot_data6_add_real_100_b$age[11:51],col=palette_b[3],pch=15)
-lines(cumprod(1-plot_data6_add_real_100_b$mean[11:51])~plot_data6_add_real_100_b$age[11:51],col=palette_b[3],lwd=2)
-polygon(c(plot_data6_add_real_100_b$age[11:51],rev(plot_data6_add_real_100_b$age[11:51])),c(cumprod(1-plot_data6_add_real_100_b$low[11:51]),rev(cumprod(1-plot_data6_add_real_100_b$upp[11:51]))),col=alpha(palette_b[3],0.25),border=NA)
-
-legend(54,1,c("No var.","Mid. var.", "Max. var."),lty=1,col=palette_b,lwd=2,pch=16)
 
 # Relative importance ----
 
@@ -1147,5 +627,3 @@ points(relative[,1],seq(2.5,0.5,by=-1),cex=2,pch=16,col=hcl.colors(3,"berlin"))
 segments(relative[1,1]-relative[1,2],2.5,relative[1,1]+relative[1,2],2.5,lwd=3,col=hcl.colors(3,"berlin")[1])
 segments(relative[2,1]-relative[2,2],1.5,relative[2,1]+relative[2,2],1.5,lwd=3,col=hcl.colors(3,"berlin")[2])
 segments(relative[3,1]-relative[3,2],0.5,relative[3,1]+relative[3,2],0.5,lwd=3,col=hcl.colors(3,"berlin")[3])
-
-
