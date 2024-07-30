@@ -239,7 +239,7 @@ real_list
 
 # compile model
 
-model_int2 <- cmdstan_model("Misc/firstbaby_interaction_abs_diffw.stan")
+model_int2 <- cmdstan_model("Misc/firstbaby_interaction_abs_diff.stan")
 
 #fit model
 fit_int2 <- model_int2$sample(data = real_list, 
