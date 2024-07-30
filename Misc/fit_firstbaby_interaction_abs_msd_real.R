@@ -580,12 +580,6 @@ for(k in 1:(length(deciles_msd))){
   polygon(c(plot_msd_int1$age[11:51],rev(plot_msd_int1$age[11:51])),c(cumprod(1-plot_msd_int1$low[11:51]),rev(cumprod(1-plot_msd_int1$upp[11:51]))),col=alpha(palette_c[k],0.25),border=NA)
 }
 
-#add legend
-# Add the legend in the last row
-par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
-plot.new()  # Create a new empty plot for the legend
-legend("center",c("Null","Mid. var.", "Max. var."),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
-
 ## Interaction absolute and long-term ----
 
 #simulate wealth values
@@ -626,7 +620,7 @@ par(mar = c(5.1, 4.1, 4.1, 2.1))
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Minimum absolute wealth",
+     main="Long-term wealth variability with\nMinimum absolute wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -697,7 +691,7 @@ par(mar = c(5.1, 4.1, 4.1, 2.1))
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Middle absolute wealth",
+     main="Long-term wealth variability with\nMiddle absolute wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -768,7 +762,7 @@ par(mar = c(5.1, 4.1, 4.1, 2.1))
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Maximum absolute wealth",
+     main="Long-term wealth variability with\nMaximum absolute wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -831,6 +825,11 @@ for(k in 1:(length(deciles_msd_int1))){
   polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_d[k], 0.25), border=NA)
 }
 
+#add legend
+# Add the legend in the last row
+par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
+plot.new()  # Create a new empty plot for the legend
+legend("center",c("Null","Mid. var.", "Max. var."),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
 
 ### Long-term wealth variability ----
 
@@ -856,7 +855,7 @@ par(mar = c(5.1, 4.1, 4.1, 2.1))
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Minimum long-term variability",
+     main="Current absolute wealth with\nMinimum long-term variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -927,7 +926,7 @@ par(mar = c(5.1, 4.1, 4.1, 2.1))
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Middle long-term variability",
+     main="Current absolute wealth with\nMiddle long-term variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -998,7 +997,7 @@ par(mar = c(5.1, 4.1, 4.1, 2.1))
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Maximum long-term variability",
+     main="Current absolute wealth with\nMaximum long-term variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
