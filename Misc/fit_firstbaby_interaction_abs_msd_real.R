@@ -598,7 +598,7 @@ deciles_msd_int1
 
 ### Absolute wealth ----
 
-layout(matrix(c(1,2,3,4), nrow=2),heights=c(4,1))
+layout(matrix(c(1,2,3,4,4,4), ncol=3,byrow=T),heights=c(4,0.175))
 
 #colour palette
 #numbers for color palette
@@ -618,9 +618,9 @@ type <- c(1:3)
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Minimum absolute wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -689,9 +689,9 @@ for(k in 1:(length(deciles_msd_int1))){
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Middle absolute wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -760,9 +760,9 @@ for(k in 1:(length(deciles_msd_int1))){
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Maximum absolute wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -853,9 +853,9 @@ type <- c(1:3)
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Minimum long-term variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -924,9 +924,9 @@ for(k in 1:(length(deciles_msd_int1))){
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Middle long-term variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
@@ -995,9 +995,9 @@ for(k in 1:(length(deciles_msd_int1))){
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int1$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Maximum long-term variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
