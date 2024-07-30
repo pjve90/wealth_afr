@@ -580,6 +580,12 @@ for(k in 1:(length(deciles_msd))){
   polygon(c(plot_msd_int1$age[11:51],rev(plot_msd_int1$age[11:51])),c(cumprod(1-plot_msd_int1$low[11:51]),rev(cumprod(1-plot_msd_int1$upp[11:51]))),col=alpha(palette_c[k],0.25),border=NA)
 }
 
+#add legend
+# Add the legend in the last row
+par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
+plot.new()  # Create a new empty plot for the legend
+legend("center",c("Null","Mid. var.", "Max. var."),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
+
 ## Interaction absolute and long-term ----
 
 #simulate wealth values
@@ -604,7 +610,7 @@ layout(matrix(c(1,2,3,4,4,4), ncol=3,byrow=T),heights=c(4,0.175))
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_d<-palette[1:length(deciles_absw_int1)]
+palette_d<-palette[7:(length(deciles_msd)+6)]
 palette_d
 
 #shape of points
@@ -825,11 +831,6 @@ for(k in 1:(length(deciles_msd_int1))){
   polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_d[k], 0.25), border=NA)
 }
 
-#add legend
-# Add the legend in the last row
-par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
-plot.new()  # Create a new empty plot for the legend
-legend("center",c("Poor","Middle", "Rich"),col=palette_d,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
 
 ### Long-term wealth variability ----
 
@@ -839,7 +840,7 @@ layout(matrix(c(1,2,3,4), nrow=2),heights=c(4,1))
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_e<-palette[7:(length(deciles_msd)+6)]
+palette_e<-palette[1:length(deciles_absw_int1)]
 palette_e
 
 #shape of points
@@ -1064,7 +1065,7 @@ for(k in 1:(length(deciles_msd_int1))){
 # Add the legend in the last row
 par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
 plot.new()  # Create a new empty plot for the legend
-legend("center",c("Null","Mid. var.", "Max. var."),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
+legend("center",c("Poor","Middle", "Rich"),col=palette_d,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
 
 # Expected median age ----
 
