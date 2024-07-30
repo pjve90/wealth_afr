@@ -683,6 +683,62 @@ for(k in 1:(length(deciles_msd_int1))){
   polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_d[k], 0.25), border=NA)
 }
 
+#add lines of direct effect of absolute wealth
+for(k in 1:(length(deciles_absw))){
+  #create matrix to store the data
+  p_absw_int1 <- matrix(nrow=nrow(post_int1$mu),ncol=ncol(post_int1$mu))
+  p_absw_int1
+  #fill it in with values for age 25
+  for(j in 1:ncol(post_int1$mu)){
+    for(i in 1:nrow(post_int1$mu)){
+      p_absw_int1[i,j] <- inv_logit(post_int1$alpha[i] + #inv logit because originally is logit
+                                      post_int1$mu[i,j] + #age
+                                      (post_int1$beta_wealth_z[i,j]*post_int1$beta_wealth_sigma[i])*deciles_absw_int1[k] + #absolute wealth
+                                      (post_int1$delta_wealth_z[i,j]*post_int1$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int1$epsilon_wealth_z[i,j]*post_int1$epsilon_wealth_sigma[i])*0) #interaction
+    }
+  }
+  #check data
+  p_absw_int1
+  #plot it!
+  #prepare model prediction data
+  plot_absw_int1 <- data.frame(age = 1:ncol(p_absw_int1),
+                               median = apply(p_absw_int1, 2, median), 
+                               upp = apply(p_absw_int1, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                               low = apply(p_absw_int1, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #store data per decile
+  #assign(paste0("absw_",i),plot_absw_int1)
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_absw <- numeric(length(plot_absw_int1$median))
+  cumulative_low_absw <- numeric(length(plot_absw_int1$low))
+  cumulative_upp_absw <- numeric(length(plot_absw_int1$upp))
+  #set the first probability
+  cumulative_median_absw[1] <- plot_absw_int1$median[1]
+  cumulative_low_absw[1] <- plot_absw_int1$low[1]
+  cumulative_upp_absw[1] <- plot_absw_int1$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_absw_int1$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_absw_int1$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_absw_int1$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_absw_int1$upp[a]
+  }
+  #store data per decile
+  # assign(paste0("cumulative_median_absw_",i),cumulative_median_absw)
+  # assign(paste0("cumulative_low_absw_",i),cumulative_low_absw)
+  # assign(paste0("cumulative_upp_absw_",i),cumulative_upp_absw)
+  
+  #add median
+  #add points
+  points(cumulative_median_absw[11:51] ~ plot_absw_int1$age[11:51], col=alpha(palette_d[k], 0.25), pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_absw[11:51] ~ plot_absw_int1$age[11:51], col=alpha(palette_d[k], 0.25), lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_absw_int1$age[11:51], rev(plot_absw_int1$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_d[k], 0.1), border=NA)
+}
+
+
 #### Mid. absolute wealth ----
 
 #set parameters for a legend outside of the plot
@@ -752,6 +808,61 @@ for(k in 1:(length(deciles_msd_int1))){
   lines(cumulative_median_int1[11:51] ~ plot_int1_real$age[11:51], col=palette_d[k], lwd=3, lty=type[k])
   #add confidence intervals
   polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_d[k], 0.25), border=NA)
+}
+
+#add lines of direct effect of absolute wealth
+for(k in 1:(length(deciles_absw))){
+  #create matrix to store the data
+  p_absw_int1 <- matrix(nrow=nrow(post_int1$mu),ncol=ncol(post_int1$mu))
+  p_absw_int1
+  #fill it in with values for age 25
+  for(j in 1:ncol(post_int1$mu)){
+    for(i in 1:nrow(post_int1$mu)){
+      p_absw_int1[i,j] <- inv_logit(post_int1$alpha[i] + #inv logit because originally is logit
+                                      post_int1$mu[i,j] + #age
+                                      (post_int1$beta_wealth_z[i,j]*post_int1$beta_wealth_sigma[i])*deciles_absw_int1[k] + #absolute wealth
+                                      (post_int1$delta_wealth_z[i,j]*post_int1$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int1$epsilon_wealth_z[i,j]*post_int1$epsilon_wealth_sigma[i])*0) #interaction
+    }
+  }
+  #check data
+  p_absw_int1
+  #plot it!
+  #prepare model prediction data
+  plot_absw_int1 <- data.frame(age = 1:ncol(p_absw_int1),
+                               median = apply(p_absw_int1, 2, median), 
+                               upp = apply(p_absw_int1, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                               low = apply(p_absw_int1, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #store data per decile
+  #assign(paste0("absw_",i),plot_absw_int1)
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_absw <- numeric(length(plot_absw_int1$median))
+  cumulative_low_absw <- numeric(length(plot_absw_int1$low))
+  cumulative_upp_absw <- numeric(length(plot_absw_int1$upp))
+  #set the first probability
+  cumulative_median_absw[1] <- plot_absw_int1$median[1]
+  cumulative_low_absw[1] <- plot_absw_int1$low[1]
+  cumulative_upp_absw[1] <- plot_absw_int1$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_absw_int1$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_absw_int1$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_absw_int1$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_absw_int1$upp[a]
+  }
+  #store data per decile
+  # assign(paste0("cumulative_median_absw_",i),cumulative_median_absw)
+  # assign(paste0("cumulative_low_absw_",i),cumulative_low_absw)
+  # assign(paste0("cumulative_upp_absw_",i),cumulative_upp_absw)
+  
+  #add median
+  #add points
+  points(cumulative_median_absw[11:51] ~ plot_absw_int1$age[11:51], col=alpha(palette_d[k], 0.25), pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_absw[11:51] ~ plot_absw_int1$age[11:51], col=alpha(palette_d[k], 0.25), lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_absw_int1$age[11:51], rev(plot_absw_int1$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_d[k], 0.1), border=NA)
 }
 
 #### Max. absolute wealth ----
@@ -825,6 +936,63 @@ for(k in 1:(length(deciles_msd_int1))){
   polygon(c(plot_int1_real$age[11:51], rev(plot_int1_real$age[11:51])), c(cumulative_low_int1[11:51], rev(cumulative_upp_int1[11:51])), col=alpha(palette_d[k], 0.25), border=NA)
 }
 
+
+#add lines of direct effect of absolute wealth
+for(k in 1:(length(deciles_absw))){
+  #create matrix to store the data
+  p_absw_int1 <- matrix(nrow=nrow(post_int1$mu),ncol=ncol(post_int1$mu))
+  p_absw_int1
+  #fill it in with values for age 25
+  for(j in 1:ncol(post_int1$mu)){
+    for(i in 1:nrow(post_int1$mu)){
+      p_absw_int1[i,j] <- inv_logit(post_int1$alpha[i] + #inv logit because originally is logit
+                                      post_int1$mu[i,j] + #age
+                                      (post_int1$beta_wealth_z[i,j]*post_int1$beta_wealth_sigma[i])*deciles_absw_int1[k] + #absolute wealth
+                                      (post_int1$delta_wealth_z[i,j]*post_int1$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int1$epsilon_wealth_z[i,j]*post_int1$epsilon_wealth_sigma[i])*0) #interaction
+    }
+  }
+  #check data
+  p_absw_int1
+  #plot it!
+  #prepare model prediction data
+  plot_absw_int1 <- data.frame(age = 1:ncol(p_absw_int1),
+                               median = apply(p_absw_int1, 2, median), 
+                               upp = apply(p_absw_int1, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                               low = apply(p_absw_int1, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #store data per decile
+  #assign(paste0("absw_",i),plot_absw_int1)
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_absw <- numeric(length(plot_absw_int1$median))
+  cumulative_low_absw <- numeric(length(plot_absw_int1$low))
+  cumulative_upp_absw <- numeric(length(plot_absw_int1$upp))
+  #set the first probability
+  cumulative_median_absw[1] <- plot_absw_int1$median[1]
+  cumulative_low_absw[1] <- plot_absw_int1$low[1]
+  cumulative_upp_absw[1] <- plot_absw_int1$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_absw_int1$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_absw_int1$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_absw_int1$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_absw_int1$upp[a]
+  }
+  #store data per decile
+  # assign(paste0("cumulative_median_absw_",i),cumulative_median_absw)
+  # assign(paste0("cumulative_low_absw_",i),cumulative_low_absw)
+  # assign(paste0("cumulative_upp_absw_",i),cumulative_upp_absw)
+  
+  #add median
+  #add points
+  points(cumulative_median_absw[11:51] ~ plot_absw_int1$age[11:51], col=alpha(palette_d[k], 0.25), pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_absw[11:51] ~ plot_absw_int1$age[11:51], col=alpha(palette_d[k], 0.25), lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_absw_int1$age[11:51], rev(plot_absw_int1$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_d[k], 0.1), border=NA)
+}
+
+
 #add legend
 # Add the legend in the last row
 par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
@@ -833,7 +1001,7 @@ legend("center",c("Null","Mid. var.", "Max. var."),col=palette_d,lwd=3,pch=shape
 
 ### Long-term wealth variability ----
 
-layout(matrix(c(1,2,3,4), nrow=2),heights=c(4,1))
+layout(matrix(c(1,2,3,4,4,4), ncol=3,byrow=T),heights=c(4,0.175))
 
 #colour palette
 #numbers for color palette
