@@ -996,3 +996,41 @@ for(k in 1:(length(deciles_diffw_int2))){
 par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
 plot.new()  # Create a new empty plot for the legend
 legend("center",c("Poor","Middle", "Rich"),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
+
+# Relative importance ----
+
+#prepare data
+relative_int2 <- precis(rds_int2,
+                        depth=2,
+                        pars=c("beta_wealth_sigma","gamma_wealth_sigma","delta_wealth_sigma"))
+
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
+#plot it!
+plot(c(0,0.25),c(0,3),
+     main="relative_int2 importance\nof wealth predictors",
+     type="n",
+     xlab="Value",
+     ylab="Wealth predictor",
+     yaxt="n",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5
+) 
+axis(2,at=seq(2.5,0.5,by=-1),
+     labels=c(expression(sigma[beta]),
+              expression(sigma[gamma]),
+              expression(sigma[delta])
+     ),
+     las=1,
+     tick=F,
+     cex.axis=1.2
+)
+segments(0,-0.1,0,3.1,lty="dashed",col="lightgrey")
+segments(-0.01,0.5,0.26,0.5,lty="dashed",col="lightgrey")
+segments(-0.01,1.5,0.26,1.5,lty="dashed",col="lightgrey")
+segments(-0.01,2.5,0.26,2.5,lty="dashed",col="lightgrey")
+points(relative_int2[,1],seq(2.5,0.5,by=-1),cex=2,pch=16,col=hcl.colors(3,"berlin"))
+segments(relative_int2[1,1]-relative_int2[1,2],2.5,relative_int2[1,1]+relative_int2[1,2],2.5,lwd=3,col=hcl.colors(3,"berlin")[1])
+segments(relative_int2[2,1]-relative_int2[2,2],1.5,relative_int2[2,1]+relative_int2[2,2],1.5,lwd=3,col=hcl.colors(3,"berlin")[2])
+segments(relative_int2[3,1]-relative_int2[3,2],0.5,relative_int2[3,1]+relative_int2[3,2],0.5,lwd=3,col=hcl.colors(3,"berlin")[3])
