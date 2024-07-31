@@ -43,7 +43,7 @@ parameters {
   vector [A] mu_raw;
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
-  real <lower = 0> mu_gamma;
+  real <lower = 0> mu_delta;
 // wealth
   // absolute wealth
   vector [A] beta_wealth_z;
@@ -66,7 +66,7 @@ transformed parameters {
 //Gaussian Process of age
   vector [A] mu; //vector containing mu
   
-    mu = GP(A, mu_kappa, mu_tau, mu_gamma) * mu_raw; // calculating mu from the Gaussian process
+    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
     
 //Bayesian data imputation
   matrix[N,A] wealth_full; // full wealth data (original + imputed)
@@ -99,7 +99,7 @@ model {
     mu_raw ~ normal(0, 1);
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
-    mu_gamma ~ exponential(1);
+    mu_delta ~ exponential(1);
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 

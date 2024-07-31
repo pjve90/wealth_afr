@@ -277,10 +277,10 @@ rstan::traceplot(rds_int2,pars="mu_delta")
 traceplot(rds_int2,pars="beta_wealth_z") 
 #beta_wealth_sigma
 traceplot(rds_int2,pars="beta_wealth_sigma") 
-#delta_wealth
-traceplot(rds_int2,pars="delta_wealth_z") 
-#delta_wealth
-traceplot(rds_int2,pars="delta_wealth_sigma") 
+#gamma_wealth
+traceplot(rds_int2,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(rds_int2,pars="gamma_wealth_sigma") 
 #zeta_wealth
 traceplot(rds_int2,pars="zeta_wealth_z") 
 #zeta_wealth
@@ -322,15 +322,15 @@ tab_int2_beta_sigma
 
 #gamma z
 #create summary table for gamma_z
-tab_int2_gamma_z <- precis(rds_int2,depth=2,pars="delta_wealth_z")
+tab_int2_gamma_z <- precis(rds_int2,depth=2,pars="gamma_wealth_z")
 #check table
 tab_int2_gamma_z
 #plot it!
 plot(tab_int2_gamma_z)
 
-#delta sigma
+#gamma sigma
 #create summary table for gamma_sigma
-tab_int2_gamma_sigma <- precis(rds_int2,depth=2,pars="delta_wealth_sigma")
+tab_int2_gamma_sigma <- precis(rds_int2,depth=2,pars="gamma_wealth_sigma")
 #check table
 tab_int2_gamma_sigma
 
@@ -352,7 +352,7 @@ tab_int2_zeta_sigma
 
 #beta versus delta
 #create correlation matrix
-cor1 <- round(cor(post_int2$beta_wealth_z,post_int2$delta_wealth_z),3)
+cor1 <- round(cor(post_int2$beta_wealth_z,post_int2$gamma_wealth_z),3)
 #plot it!
 corrplot(cor1, "color", tl.col="black")
 
@@ -364,7 +364,7 @@ corrplot(cor2, "color", tl.col="black")
 
 #delta versus zeta
 #create correlation matrix
-cor3 <- round(cor(post_int2$delta_wealth_z,post_int2$zeta_wealth_z),3)
+cor3 <- round(cor(post_int2$gamma_wealth_z,post_int2$zeta_wealth_z),3)
 #plot it!
 corrplot(cor3, "color", tl.col="black")
 
@@ -417,7 +417,7 @@ for(k in 1:(length(deciles_absw))){
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*deciles_absw[k] + #absolute wealth
                                       (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #wealth change
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0) #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
@@ -487,7 +487,7 @@ for(k in 1:(length(deciles_diffw))){
                                        post_int2$mu[i,j] + #age
                                        (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
                                        (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*deciles_diffw[k] + #wealth change
-                                       (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0) #moving variance
+                                       (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
@@ -568,7 +568,7 @@ for(k in 1:(length(deciles_diffw_int2))){
       p_int2_real[i,j] <- inv_logit(post_int2$alpha[i] + #inv logit because originally is logit
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #moving variance
                                       (post_int2$zeta_wealth_z[i,j]*post_int2$zeta_wealth_sigma[i])*(deciles_absw_int2[1]*deciles_diffw_int2[k]) #interaction
       )  
     }
@@ -639,7 +639,7 @@ for(k in 1:(length(deciles_diffw_int2))){
       p_int2_real[i,j] <- inv_logit(post_int2$alpha[i] + #inv logit because originally is logit
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #moving variance
                                       (post_int2$zeta_wealth_z[i,j]*post_int2$zeta_wealth_sigma[i])*(deciles_absw_int2[2]*deciles_diffw_int2[k]) #interaction
       )  
     }
@@ -710,7 +710,7 @@ for(k in 1:(length(deciles_diffw_int2))){
       p_int2_real[i,j] <- inv_logit(post_int2$alpha[i] + #inv logit because originally is logit
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #moving variance
                                       (post_int2$zeta_wealth_z[i,j]*post_int2$zeta_wealth_sigma[i])*(deciles_absw_int2[3]*deciles_diffw_int2[k]) #interaction
       )  
     }
@@ -803,7 +803,7 @@ for(k in 1:(length(deciles_diffw_int2))){
       p_int2_real[i,j] <- inv_logit(post_int2$alpha[i] + #inv logit because originally is logit
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #moving variance
                                       (post_int2$zeta_wealth_z[i,j]*post_int2$zeta_wealth_sigma[i])*(deciles_absw_int2[k]*deciles_diffw_int2[1]) #interaction
       )  
     }
@@ -874,7 +874,7 @@ for(k in 1:(length(deciles_diffw_int2))){
       p_int2_real[i,j] <- inv_logit(post_int2$alpha[i] + #inv logit because originally is logit
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #moving variance
                                       (post_int2$zeta_wealth_z[i,j]*post_int2$zeta_wealth_sigma[i])*(deciles_absw_int2[k]*deciles_diffw_int2[2]) #interaction
       )  
     }
@@ -945,7 +945,7 @@ for(k in 1:(length(deciles_diffw_int2))){
       p_int2_real[i,j] <- inv_logit(post_int2$alpha[i] + #inv logit because originally is logit
                                       post_int2$mu[i,j] + #age
                                       (post_int2$beta_wealth_z[i,j]*post_int2$beta_wealth_sigma[i])*0 + #absolute wealth
-                                      (post_int2$delta_wealth_z[i,j]*post_int2$delta_wealth_sigma[i])*0 + #moving variance
+                                      (post_int2$gamma_wealth_z[i,j]*post_int2$gamma_wealth_sigma[i])*0 + #moving variance
                                       (post_int2$zeta_wealth_z[i,j]*post_int2$zeta_wealth_sigma[i])*(deciles_absw_int2[k]*deciles_diffw_int2[3]) #interaction
       )  
     }
