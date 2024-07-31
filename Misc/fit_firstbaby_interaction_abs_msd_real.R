@@ -1071,7 +1071,7 @@ legend("center",c("Poor","Middle", "Rich"),col=palette_e,lwd=3,pch=shape,lty=typ
 #prepare data
 relative_int1 <- precis(rds_int1,
                    depth=2,
-                   pars=c("beta_wealth_sigma","gamma_wealth_sigma","delta_wealth_sigma"))
+                   pars=c("beta_wealth_sigma","delta_wealth_sigma","epsilon_wealth_sigma"))
 
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
@@ -1088,8 +1088,8 @@ plot(c(0,0.25),c(0,3),
 ) 
 axis(2,at=seq(2.5,0.5,by=-1),
      labels=c(expression(sigma[beta]),
-              expression(sigma[gamma]),
-              expression(sigma[delta])
+              expression(sigma[delta]),
+              expression(sigma[epsilon])
      ),
      las=1,
      tick=F,
