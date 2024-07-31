@@ -1008,7 +1008,7 @@ relative_int2 <- precis(rds_int2,
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
 #plot it!
 plot(c(0,0.25),c(0,3),
-     main="relative_int2 importance\nof wealth predictors",
+     main="Relative importance\nof wealth predictors",
      type="n",
      xlab="Value",
      ylab="Wealth predictor",
