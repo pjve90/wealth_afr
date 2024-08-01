@@ -1,6 +1,6 @@
 # Model with current absolute levels, wealth change, and moving variance ----
 
-#The code in this script is meant to fit a Bayesian model that aims to predict the probability of first birth by the amount of wealth a woman has, together with short-term and long-term wealth variability.
+#The code in this script is meant to fit a Bayesian model that aims to predict the probability of first birth by the the interaction between absolute wealth and long-term wealth variability.
 
 #Load packages
 #install.packages("cmdstanr")

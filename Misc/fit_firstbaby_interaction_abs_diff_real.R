@@ -1,6 +1,6 @@
 # Model with current absolute levels, wealth change, and moving variance ----
 
-#The code in this script is meant to fit a Bayesian model that aims to predict the probability of first birth by the amount of wealth a woman has, together with short-term and short-term wealth variability.
+#The code in this script is meant to fit a Bayesian model that aims to predict the probability of first birth by the interaction between absolute levels of wealth and short-term wealth variability.
 
 #Load packages
 #install.packages("cmdstanr")
@@ -37,10 +37,10 @@ for(i in 1:nrow(afr_matrix)){
 afr_matrix
 #check the age-specific probability of FR
 apply(afr_matrix,2,sum,na.rm=T)/apply(afr_matrix,2,function(x)sum(!is.na(x)))
-#plot the CCDF of first birth
+#plot the Cumulative probability of first birth
 plot(cumprod(1-apply(afr_matrix,2,sum,na.rm=T)/apply(afr_matrix,2,function(x)sum(!is.na(x))))~c(1:(max(real_data$aoc)+1)),
      xlab="Age",
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      ylim=c(0,1))
 
 #Current absolute wealth ----
@@ -396,7 +396,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int2$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Current absolute levels\nof material wealth",
      cex.axis=1.2,
@@ -466,7 +466,7 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_int2$mu)),
-     ylab="CCDF of first birth",
+     ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Short-term variability\nof material wealth",
      cex.axis=1.2,
