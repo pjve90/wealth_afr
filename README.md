@@ -6,7 +6,7 @@ At the beginning you can find two folders. One contains the data used for the an
 
 In the folder "Data" you can find the file:
 - "dataf.csv" which contains the data necessary for the analysis in a csv file. The data consists of:
-    - ID and order, which are variables regarding the personal identification of each women.
+    - ID, which is the number to identify a woman in the sample.
     - afr, which is the age at which a woman had her first birth.
     - dob, which is the year of birth.
     - aoc, which is the age of censoring.
@@ -14,5 +14,15 @@ In the folder "Data" you can find the file:
     - age_absw95, age_absw98, age_absw00, age_absw02, age_absw04, age_absw06, age_absw10, are the ages of each woman at each census.
 
 In the folder "Model_code" you can find the files:
-- "fit_firstbaby_threewealth_real.R", which contains the code for all the statistical analyses
-- "firstbaby_threewealth.stan", which contains the code for the Stan model.
+- "fit_firstbaby_threewealth_real.R", which contains the code for all the statistical analyses of the results in the manuscript.
+- "firstbaby_threewealth.stan", which contains the code for the Stan model for the results in the manuscript.
+
+In the folder "Offset" you can find the files:
+- "fit_firstbaby_offset.R", which contains the code for all the statistical analyses with the wealth predictors one year before age at first birth.
+- "firstbaby_offset.stan", which contains the code for the Stan model with the wealth predictors one year before age at first birth.
+
+In the folder "Interaction" you can find the files:
+- "fit_firstbaby_interaction_abs_diff_real.R", which contains the code for all the statistical analyses with interaction between absolute wealth and short-term wealth variability.
+- "firstbaby_interaction_abs_diff.stan", which contains the code for the Stan model with interaction between absolute wealth and short-term wealth variability.
+- "fit_firstbaby_interaction_abs_msd_real.R", which contains the code for all the statistical analyses with interaction between absolute wealth and long-term wealth variability.
+- "firstbaby_interaction_abs_msd.stan", which contains the code for the Stan model with interaction between absolute wealth and long-term wealth variability.
