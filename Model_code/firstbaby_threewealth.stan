@@ -27,9 +27,9 @@ data {
   
   matrix[N,A] wealth; // age-specific absolute wealth [raw data with missing values coded -99]
 
-  int N_miss; // number of missing data of absolute wealth
+  int N_miss; // number of missing data points for wealth at time t
 
-  array[N_miss,2] int wealth_miss; // indicator of position [row,column] of missing values in the wealth matrix
+  array[N_miss,2] int wealth_miss; // indicator of position [row,column] of missing values in the wealth matrix [id, age]
 
   array[N,A] int baby; // 0/1 gives birth
 
