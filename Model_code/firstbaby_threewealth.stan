@@ -138,8 +138,7 @@ model {
   if (wealth_miss[n, 2] == 1) {  
      wealth_impute[n] ~ normal(0, 1); //data imputation at birth
   } else {  
-  for (a in 2:A) {
-     wealth_impute[n] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
+     wealth_impute[n] ~ normal(alpha_miss*wealth_full[wealth_miss[n], wealth_miss[n]-1]] + (1-alpha_miss)*(beta_miss), sigma_miss);
   }
  }
 
