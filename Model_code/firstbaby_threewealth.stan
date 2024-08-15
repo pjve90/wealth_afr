@@ -87,7 +87,7 @@ transformed parameters {
       wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
     }
     for(a in 3:A){
-      wealth_change[n,a] = abs(wealth[n,a] - wealth[n,a-2]); //calculating the 2-years lagged wealth change
+      wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]); //calculating the 2-years lagged wealth change
     }
   }
 
@@ -99,7 +99,7 @@ transformed parameters {
       wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
     }
     for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
+      wealth_msd[n,a] = sd(segment(wealth_full[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
     }
   }
 

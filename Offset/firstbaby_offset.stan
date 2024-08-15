@@ -25,13 +25,13 @@ data {
   int N; // sample size of women
   int A; // maximum age of women
   
-  matrix[N,A] wealth; // age-specific absolute wealth
+  matrix[N,A] wealth; // age-specific absolute wealth [raw data with missing values coded -99]
 
-  int N_miss; // number of missing data of absolute wealth
+  int N_miss; // number of missing data points for wealth at time t
 
-  array[N_miss,2] int wealth_miss; // indicator of position of missing values in the wealth matrix
+  array[N_miss,2] int wealth_miss; // indicator of position [row,column] of missing values in the wealth matrix [id, age]
 
-  array[N,A] int baby; // probability of FR
+  array[N,A] int baby; // 0/1 gives birth
 
 }
 
@@ -85,7 +85,7 @@ transformed parameters {
       wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
     }
     for(a in 3:A){
-      wealth_change[n,a] = abs(wealth[n,a] - wealth[n,a-2]); //calculating the 2-years lagged wealth change
+      wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]); //calculating the 2-years lagged wealth change
     }
   }
 
@@ -97,7 +97,7 @@ transformed parameters {
       wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
     }
     for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
+      wealth_msd[n,a] = sd(segment(wealth_full[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
     }
   }
 
@@ -128,10 +128,12 @@ model {
     sigma_miss ~ exponential(1);
 
 //Wealth data imputation
- for(n in 1:N){
-     wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
-  for(a in 2:A){
-     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
+ for (n in 1:N_miss) {
+
+  if (wealth_miss[n, 2] == 1) {  
+     wealth_impute[n] ~ normal(0, 1); //data imputation at birth
+  } else {  
+     wealth_impute[n] ~ normal(alpha_miss*wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
   }
  }
 
