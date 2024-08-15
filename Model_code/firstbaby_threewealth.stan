@@ -25,13 +25,13 @@ data {
   int N; // sample size of women
   int A; // maximum age of women
   
-  matrix[N,A] wealth; // age-specific absolute wealth
+  matrix[N,A] wealth; // age-specific absolute wealth [raw data with missing values coded -99]
 
   int N_miss; // number of missing data of absolute wealth
 
-  array[N_miss,2] int wealth_miss; // indicator of position of missing values in the wealth matrix
+  array[N_miss,2] int wealth_miss; // indicator of position [row,column] of missing values in the wealth matrix
 
-  array[N,A] int baby; // probability of FR
+  array[N,A] int baby; // 0/1 gives birth
 
 }
 
@@ -44,6 +44,7 @@ parameters {
   real <lower = 0, upper = 1> mu_kappa;
   real <lower = 0> mu_tau;
   real <lower = 0> mu_delta;
+
 // wealth
   // absolute wealth
   vector [A] beta_wealth_z;
@@ -54,8 +55,9 @@ parameters {
   // moving standard deviation
   vector [A] delta_wealth_z; 
   real <lower = 0> delta_wealth_sigma;
+
   // missing wealth data
-  vector[N_miss] wealth_impute;
+  vector[N_miss] wealth_impute; // imputed values for each missing wealth 
   real alpha_miss;
   real beta_miss;
   real<lower=0> sigma_miss;
@@ -69,11 +71,11 @@ transformed parameters {
     mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
     
 //Bayesian data imputation
-  matrix[N,A] wealth_full; // full wealth data (original + imputed)
+  matrix[N,A] wealth_full; // full wealth data (raw with missing + imputed)
 
-  wealth_full = wealth; // making the merged data as the same as the original data
+  wealth_full = wealth; // initialize wealth full with wealth (raw)
 
-  for(n in 1:N_miss){ // telling where is the missing data that needs to be imputed
+  for(n in 1:N_miss){ // here we fill in missing spots with imputed values
         wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];
       }
 
@@ -104,13 +106,16 @@ transformed parameters {
 }
 
 model {
+
 // global intercept
     alpha ~ normal(0, 1);
+
 // Gaussian process of age    
     mu_raw ~ normal(0, 1);
     mu_kappa ~ beta(12, 2);
     mu_tau ~ exponential(1);
     mu_delta ~ exponential(1);
+
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 
@@ -122,16 +127,19 @@ model {
     delta_wealth_z ~ normal(0, 1);
     delta_wealth_sigma ~ exponential(1);
     
-// missing wealth data
+// missing wealth parameters
     alpha_miss ~ normal(0, 1);
     beta_miss ~ normal(0, 1);
     sigma_miss ~ exponential(1);
 
 //Wealth data imputation
- for(n in 1:N){
-     wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
-  for(a in 2:A){
-     wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
+ for (n in 1:N_miss) {
+
+  if (wealth_miss[n, 2] == 1) {  
+     wealth_impute[n] ~ normal(0, 1); //data imputation at birth
+  } else {  
+  for (a in 2:A) {
+     wealth_impute[n] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
   }
  }
 
