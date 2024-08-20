@@ -17,7 +17,7 @@ library(scales)
 ## Data wrangling of real data ----
 
 #Load data
-real_data6 <- read.csv("dataf.csv")[,-1]
+real_data6 <- read.csv("Data/dataf.csv")[,-1]
 head(real_data6)
 
 # Age at first reproduction ----
@@ -231,7 +231,7 @@ real_list6
 
 # compile model
 
-m6_add <- cmdstan_model("Model_code/firstbaby_offset.stan")
+m6_add <- cmdstan_model("Offset/firstbaby_offset.stan")
 
 #fit model
 fit6_add_real <- m6_add$sample(data = real_list6, 
@@ -362,12 +362,12 @@ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Absolute levels\nof material wealth",
+     main="Current levels\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(53,1,c("Poor","Middle", "Rich"),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
+legend(53,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
 
 #add lines
 for(k in 1:(length(deciles_b))){
@@ -453,7 +453,7 @@ plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(53,1,c("No var.","Mid. var.", "Max. var."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
+legend(53,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
 
 #add lines
 for(k in 1:(length(deciles_b))){
@@ -538,7 +538,7 @@ plot(c(0,1)~c(10,ncol(post6_add_real$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(53,1,c("No var.","Mid. var.", "Max. var."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2)
+legend(53,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
 
 #add lines
 for(k in 1:(length(deciles_b))){
@@ -600,7 +600,7 @@ relative <- precis(rds6_add_real,
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
 
 
-plot(c(0,0.25),c(0,3),
+plot(c(0,2),c(0,3),
      main="Relative importance\nof wealth predictors",
      type="n",
      xlab="Value",
@@ -620,9 +620,9 @@ axis(2,at=seq(2.5,0.5,by=-1),
      cex.axis=1.2
 )
 segments(0,-0.1,0,3.1,lty="dashed",col="lightgrey")
-segments(-0.01,0.5,0.26,0.5,lty="dashed",col="lightgrey")
-segments(-0.01,1.5,0.26,1.5,lty="dashed",col="lightgrey")
-segments(-0.01,2.5,0.26,2.5,lty="dashed",col="lightgrey")
+segments(-0.01,0.5,2,0.5,lty="dashed",col="lightgrey")
+segments(-0.01,1.5,2,1.5,lty="dashed",col="lightgrey")
+segments(-0.01,2.5,2,2.5,lty="dashed",col="lightgrey")
 points(relative[,1],seq(2.5,0.5,by=-1),cex=2,pch=16,col=hcl.colors(3,"berlin"))
 segments(relative[1,1]-relative[1,2],2.5,relative[1,1]+relative[1,2],2.5,lwd=3,col=hcl.colors(3,"berlin")[1])
 segments(relative[2,1]-relative[2,2],1.5,relative[2,1]+relative[2,2],1.5,lwd=3,col=hcl.colors(3,"berlin")[2])

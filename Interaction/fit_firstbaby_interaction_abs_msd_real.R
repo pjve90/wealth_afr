@@ -15,7 +15,7 @@ library(corrplot)
 ## Data wrangling of real data ----
 
 #Load data
-real_data <- read.csv("dataf.csv")[,-1]
+real_data <- read.csv("Data/dataf.csv")[,-1]
 head(real_data)
 
 # Age at first reproduction ----
@@ -239,7 +239,7 @@ real_list
 
 # compile model
 
-model_int1 <- cmdstan_model("Misc/firstbaby_interaction_abs_msd.stan")
+model_int1 <- cmdstan_model("Interaction/firstbaby_interaction_abs_msd.stan")
 
 #fit model
 fit_int1 <- model_int1$sample(data = real_list, 
