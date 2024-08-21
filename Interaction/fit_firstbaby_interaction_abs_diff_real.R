@@ -804,7 +804,7 @@ for(k in 1:(length(deciles_diffw_int2))){
 # Add the legend in the last row
 par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
 plot.new()  # Create a new empty plot for the legend
-legend("center",c("Null","Mid. var.", "Max. var."),col=palette_d,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
+legend("center",c("Min.","Med.", "Max."),col=palette_d,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
 
 ### Current absolute wealth ----
 
@@ -1039,7 +1039,7 @@ for(k in 1:(length(deciles_diffw_int2))){
 # Add the legend in the last row
 par(mar = c(0, 0, 0, 0))  # Remove margins for the legend plot
 plot.new()  # Create a new empty plot for the legend
-legend("center",c("Poor","Middle", "Rich"),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
+legend("center",c("Min.","Med.", "Max."),col=palette_e,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,horiz=T)
 
 # Relative importance ----
 
