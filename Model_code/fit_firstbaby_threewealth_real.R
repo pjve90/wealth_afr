@@ -761,92 +761,80 @@ for(k in 1:(length(deciles_msd))){
 ### Current absolute wealth ----
 
 #Minimum current absolute wealth
-#check which cumulative probability of 0.5
-which(round(cumulative_median_absw_1,1) == 0.5)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_absw_1 >= tail(cumulative_median_absw_1,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_absw_1,1) == 0.5) - 1
+which(cumulative_median_absw_1 >= tail(cumulative_median_absw_1,1)*0.5)[1] - 1
 #median probability and hpdi
-absw_1[which(round(cumulative_median_absw_1,1) == 0.5),]
+absw_1[which(cumulative_median_absw_1 >= tail(cumulative_median_absw_1,1)*0.5)[1],]
 
 #Median current absolute wealth
-#check which cumulative probability of 0.5
-which(round(cumulative_median_absw_2,1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumulative_median_absw_2,1) >= 0.4 & round(cumulative_median_absw_2,1) <= 0.6)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_absw_2 >= tail(cumulative_median_absw_2,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_absw_2,1) >= 0.4 & round(cumulative_median_absw_2,1) <= 0.6) - 1
+which(cumulative_median_absw_2 >= tail(cumulative_median_absw_2,1)*0.5)[1] - 1
 #median probability and hpdi
-absw_2[which(round(cumulative_median_absw_2,1) >= 0.4 & round(cumulative_median_absw_2,1) <= 0.6),]
+absw_2[which(cumulative_median_absw_2 >= tail(cumulative_median_absw_2,1)*0.5)[1],]
 
 #Maximum current absolute wealth
-#check which cumulative probability of 0.5
-which(round(cumulative_median_absw_3,1) == 0.5)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_absw_3 >= tail(cumulative_median_absw_3,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_absw_3,1) == 0.5) - 1
+which(cumulative_median_absw_3 >= tail(cumulative_median_absw_3,1)*0.5)[1] - 1
 #median probability and hpdi
-absw_3[which(round(cumulative_median_absw_3,1) == 0.5),]
+absw_3[which(cumulative_median_absw_3 >= tail(cumulative_median_absw_3,1)*0.5)[1],]
 
 ### Short-term variability ----
 
 #Minimum short-term variability
-#check which cumulative probability of 0.5
-which(round(cumulative_median_diffw_1,1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumulative_median_diffw_1,1) >= 0.4 & round(cumulative_median_diffw_1,1) <= 0.6)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_diffw_1 >= tail(cumulative_median_diffw_1,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_diffw_1,1) >= 0.4 & round(cumulative_median_diffw_1,1) <= 0.6) - 1
+which(cumulative_median_diffw_1 >= tail(cumulative_median_diffw_1,1)*0.5)[1] - 1
 #median probability and hpdi
-diffw_1[which(round(cumulative_median_diffw_1,1) >= 0.4 & round(cumulative_median_diffw_1,1) <= 0.6),]
+diffw_1[which(cumulative_median_diffw_1 >= tail(cumulative_median_diffw_1,1)*0.5)[1],]
 
 #Median short-term variability
-#check which cumulative probability of 0.5
-which(round(cumulative_median_diffw_2,1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumulative_median_diffw_2,1) >= 0.4 & round(cumulative_median_diffw_2,1) <= 0.6)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_diffw_2 >= tail(cumulative_median_diffw_2,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_diffw_2,1) >= 0.4 & round(cumulative_median_diffw_2,1) <= 0.6) - 1
+which(cumulative_median_diffw_2 >= tail(cumulative_median_diffw_2,1)*0.5)[1] - 1
 #median probability and hpdi
-diffw_2[which(round(cumulative_median_diffw_2,1) >= 0.4 & round(cumulative_median_diffw_2,1) <= 0.6),]
+diffw_2[which(cumulative_median_diffw_2 >= tail(cumulative_median_diffw_2,1)*0.5)[1],]
 
 #Maximum short-term variability
-#check which cumulative probability of 0.5
-which(round(cumulative_median_diffw_3,1) == 0.5)
-#check which cumulative probability between 0.3 and 0.7
-which(round(cumulative_median_diffw_3,1) >= 0.3 & round(cumulative_median_diffw_3,1) <= 0.7)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_diffw_3 >= tail(cumulative_median_diffw_3,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_diffw_3,1) >= 0.3 & round(cumulative_median_diffw_3,1) <= 0.7) - 1
+which(cumulative_median_diffw_3 >= tail(cumulative_median_diffw_3,1)*0.5)[1] - 1
 #median probability and hpdi
-diffw_3[which(round(cumulative_median_diffw_3,1) >= 0.3 & round(cumulative_median_diffw_3,1) <= 0.7),]
+diffw_3[which(cumulative_median_diffw_3 >= tail(cumulative_median_diffw_3,1)*0.5)[1],]
 
 ### Long-term variability ----
 
 #Minimum long-term variability
-#check which cumulative probability of 0.5
-which(round(cumulative_median_msdw_1,1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumulative_median_msdw_1,1) >= 0.4 & round(cumulative_median_msdw_1,1) <= 0.6)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_msdw_1 >= tail(cumulative_median_msdw_1,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_msdw_1,1) >= 0.4 & round(cumulative_median_msdw_1,1) <= 0.6) - 1
+which(cumulative_median_msdw_1 >= tail(cumulative_median_msdw_1,1)*0.5)[1] - 1
 #median probability and hpdi
-msdw_1[which(round(cumulative_median_msdw_1,1) >= 0.4 & round(cumulative_median_msdw_1,1) <= 0.6),]
+msdw_1[which(cumulative_median_msdw_1 >= tail(cumulative_median_msdw_1,1)*0.5)[1],]
 
 #Median long-term variability
-#check which cumulative probability of 0.5
-which(round(cumulative_median_msdw_2,1) == 0.5)
-#check which cumulative probability between 0.4 and 0.6
-which(round(cumulative_median_msdw_2,1) >= 0.4 & round(cumulative_median_msdw_2,1) <= 0.6)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_msdw_2 >= tail(cumulative_median_msdw_2,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_msdw_2,1) >= 0.4 & round(cumulative_median_msdw_2,1) <= 0.6) - 1
+which(cumulative_median_msdw_2 >= tail(cumulative_median_msdw_2,1)*0.5)[1] - 1
 #median probability and hpdi
-msdw_2[which(round(cumulative_median_msdw_2,1) >= 0.4 & round(cumulative_median_msdw_2,1) <= 0.6),]
+msdw_2[which(cumulative_median_msdw_2 >= tail(cumulative_median_msdw_2,1)*0.5)[1],]
 
 #Maximum long-term variability
-#check which cumulative probability of 0.5
-which(round(cumulative_median_msdw_3,1) == 0.5)
+#check which cumulative probability of 0.5 while adjusting for childlessness
+which(cumulative_median_msdw_3 >= tail(cumulative_median_msdw_3,1)*0.5)[1]
 #check specific age, since columns are age+1
-which(round(cumulative_median_msdw_3,1) == 0.5) - 1
+which(cumulative_median_msdw_3 >= tail(cumulative_median_msdw_3,1)*0.5)[1] - 1
 #median probability and hpdi
-msdw_3[which(round(cumulative_median_msdw_3,1) == 0.5),]
+msdw_3[which(cumulative_median_msdw_3 >= tail(cumulative_median_msdw_3,1)*0.5)[1],]
 
 # Differences within wealth classes ----
 
