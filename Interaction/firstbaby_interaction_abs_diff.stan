@@ -116,14 +116,12 @@ model {
     sigma_miss ~ exponential(1);
 
 //Wealth data imputation
- for (n in 1:N_miss) {
-
-  if (wealth_miss[n, 2] == 1) {  
-     wealth_impute[n] ~ normal(0, 1); //data imputation at birth
-  } else {  
-     wealth_impute[n] ~ normal(alpha_miss*wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]-1] + (1-alpha_miss)*(beta_miss), sigma_miss);
+for (n in 1:N){
+  wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
+  for(a in 2:A){
+    wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss); //autoregressive data imputation
   }
- }
+}
 
 //Probability of first birth
   for (n in 1:N) {

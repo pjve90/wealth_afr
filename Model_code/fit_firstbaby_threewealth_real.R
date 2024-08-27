@@ -334,13 +334,11 @@ model_3w <- cmdstan_model("Model_code/firstbaby_threewealth.stan")
 
 #fit model
 fit_real <- model_3w$sample(data = real_list, 
-                               chains = 4, 
-                               parallel_chains = 15, 
-                               adapt_delta = 0.95,
-                               max_treedepth = 13,
-                               init = 0)
-
-
+                            chains = 4, 
+                            parallel_chains = 15, 
+                            adapt_delta = 0.95,
+                            max_treedepth = 13,
+                            init = 0)
 # save fit 
 fit_real_csv <- rstan::read_stan_csv(fit_real$output_files())
 saveRDS(fit_real_csv, "fit_real_output.rds")
@@ -964,7 +962,7 @@ relative <- precis(rds_real,
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
 #plot it!
-plot(c(0,2),c(0,3),
+plot(c(0,1),c(0,3),
      main="Relative importance\nof wealth predictors",
      type="n",
      xlab="Value",
@@ -984,9 +982,9 @@ axis(2,at=seq(2.5,0.5,by=-1),
      cex.axis=1.2
 )
 segments(0,-0.1,0,3.1,lty="dashed",col="lightgrey")
-segments(-0.01,0.5,2,0.5,lty="dashed",col="lightgrey")
-segments(-0.01,1.5,2,1.5,lty="dashed",col="lightgrey")
-segments(-0.01,2.5,2,2.5,lty="dashed",col="lightgrey")
+segments(-0.01,0.5,1,0.5,lty="dashed",col="lightgrey")
+segments(-0.01,1.5,1,1.5,lty="dashed",col="lightgrey")
+segments(-0.01,2.5,1,2.5,lty="dashed",col="lightgrey")
 points(relative[,1],seq(2.5,0.5,by=-1),cex=2,pch=16,col=hcl.colors(3,"berlin"))
 segments(relative[1,1]-relative[1,2],2.5,relative[1,1]+relative[1,2],2.5,lwd=3,col=hcl.colors(3,"berlin")[1])
 segments(relative[2,1]-relative[2,2],1.5,relative[2,1]+relative[2,2],1.5,lwd=3,col=hcl.colors(3,"berlin")[2])
