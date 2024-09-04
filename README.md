@@ -2,8 +2,6 @@
 
 Here, you can find all the files related to the data wrangling and statistical analyses that aim to understand the relationship between material wealth age at first birth, using data from Pimbwe women from Tanzania.
 
-Code version (e.g., Git fingerprint, manual version number)
-
 ## Overview
 
 At the beginning you can find five folders. One contains the data used for the analyses ("Data"), while the other one contains the code for the statistical analyses  of the main results ("Model_code"), together with the robusticity check ("OFfset"), the interaction between wealth predictors ("Interaction"), and the univariate models ("Univariate").
