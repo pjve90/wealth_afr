@@ -1,8 +1,12 @@
-# Influence of material wealth on age at first reproduction
+# How material wealth influences age at first birth among Pimbwe women from Tanzania.
 
-Here, you can find all the files related to the data wrangling and statistical analyses that aim to understand the relationship between material wealth with the probability that women have their first child, using data from Pimbwe women from Tanzania.
+Here, you can find all the files related to the data wrangling and statistical analyses that aim to understand the relationship between material wealth age at first birth, using data from Pimbwe women from Tanzania.
 
-At the beginning you can find two folders. One contains the data used for the analyses ("Data"), while the other one contains the code for the statistical analyses ("Model_code").
+Code version (e.g., Git fingerprint, manual version number)
+
+## Overview
+
+At the beginning you can find five folders. One contains the data used for the analyses ("Data"), while the other one contains the code for the statistical analyses  of the main results ("Model_code"), together with the robusticity check ("OFfset"), the interaction between wealth predictors ("Interaction"), and the univariate models ("Univariate").
 
 In the folder "Data" you can find the file:
 - "dataf.csv" which contains the data necessary for the analysis in a csv file. The data consists of:
@@ -26,3 +30,18 @@ In the folder "Interaction" you can find the files:
 - "firstbaby_interaction_abs_diff.stan", which contains the code for the Stan model with interaction between absolute wealth and short-term wealth variability.
 - "fit_firstbaby_interaction_abs_msd_real.R", which contains the code for all the statistical analyses with interaction between absolute wealth and long-term wealth variability.
 - "firstbaby_interaction_abs_msd.stan", which contains the code for the Stan model with interaction between absolute wealth and long-term wealth variability.
+
+In the folder "Univariate" you can find the files:
+- "fit_firstbaby_absonly.R", which contains the code for all the statistical analyses with only current wealth as a predictor.
+- "firstbaby_absonly.stan", which contains the code for the Stan model with only current wealth as a predictor.
+- "fit_firstbaby_diffonly.R", which contains the code for all the statistical analyses with only short-term wealth variability as a predictor.
+- "firstbaby_diffonly.stan", which contains the code for the Stan model with with only short-term wealth variability as a predictor.
+- "fit_firstbaby_msdonly.R", which contains the code for all the statistical analyses with with only long-term wealth variability as a predictor.
+- "firstbaby_msdonly.stan", which contains the code for the Stan model with only long-term wealth variability as a predictor.
+
+## How to Run
+
+In every R file it is included the different packages needed to perform the analyses, just make sure to change the work directory if needed so uploading the data and/or Stan models work properly. Once you have done the appropiate changes, you can run each R script separately for the specific analyses.
+
+## OSF Repository
+Link to the OSF repository with other documents related to this project (https://osf.io/rcn24/?view_only=acbbb46804224203a2f2c85555a3e21d)
