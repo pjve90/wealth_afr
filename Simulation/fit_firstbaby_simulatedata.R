@@ -252,6 +252,9 @@ simwealth<-as.data.frame(matrix(NA,ncol=61,nrow=495))
 # We start at the youngest age. To create variation among individuals, we assign them the median of each individual observed in the original data.
   simwealth[,1]<-medianwealthperindividual 
 
+### SUGGEST remove parameter initiation from inside loop and also not necessary to split up the data, maybe if you want to adjust the parameter values run the whole sim again
+                                                          
+                                                                 
 # We now simulate the change each year of age. For 1/3 of individuals, there is little change from one year to the next, for 1/3 there is an intermediate level of variation, and for 1/3 there is larger variation. 
   # The process we use to reflect the change in absolute wealth from one year to the next matches the process in the imputation of missing data in the analyses. That means that the value of absolute wealth of the following year is similar to the previous year with probability alpha_miss, if it is dissimilar change to be close to value beta_miss, with some noise around these two values indicated by sigma_miss
   for(individual in 1:165){   # 1/3 individuals with little variation
