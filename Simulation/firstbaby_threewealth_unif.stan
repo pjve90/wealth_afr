@@ -27,7 +27,7 @@ data {
   
   matrix[N,A] wealth; // age-specific absolute wealth [raw data with missing values coded -99]
   
-  vector[N] mean_wealth; // individual average wealth for data imputation at birth
+  vector[N] median_wealth; // individual median wealth for data imputation at birth
 
   array[N,A] int baby; // 0/1 gives birth
 
@@ -92,7 +92,7 @@ transformed parameters {
       wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
     }
     for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth_full[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
+      wealth_msd[n,a] = sd(segment(wealth_full[n],a-9,10)); //calculating the moving standard deviation with a 10-years window
     }
   }
 
@@ -129,7 +129,7 @@ model {
 //Data imputation at birth
 for (n in 1:N){
   if(wealth[n,1] == -99){
-    wealth_full[n,1] ~ normal(mean_wealth[n], 0.5); //data imputation at birth
+    wealth_full[n,1] ~ normal(median_wealth[n], 1); //data imputation at birth
   }
 
 //Data imputation in later ages
@@ -158,4 +158,18 @@ for (n in 1:N){
     }
     }
 
+}
+
+generated quantities {
+  matrix[N, A] imputed_wealth;
+
+  for (n in 1:N) {
+    for (a in 1:A) {
+      if (wealth[n, a] == -99) {
+        imputed_wealth[n, a] = wealth_full[n, a];
+      } else {
+        imputed_wealth[n, a] = -999; // signal that the value was not imputed
+      }
+    }
+  }
 }
