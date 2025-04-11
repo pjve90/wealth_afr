@@ -447,7 +447,6 @@ simbirth
 #counts per column
 apply(simbirth,2,sum,na.rm=T)
 
-
 ### #Centered age approach ----
 # 
 # # Alternative approach to link wealth variables to afr
