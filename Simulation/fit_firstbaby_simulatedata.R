@@ -242,10 +242,10 @@ set.seed(1934)
 #define the priors in the autorregresive dynamic
 for(individual in 1:nrow(simwealth)){
   for(ages in 2:ncol(simwealth)){
-    alpha_miss<-runif(1,min=0.75,max=1)
-    beta_miss<-rnorm(1,-0.25,0.4)
-    sigma_miss<-rexp(1,3)
-    if(rbinom(1,1,alpha_miss)==1){simwealth[individual,ages]<-rnorm(1,simwealth[individual,ages-1],sigma_miss) }else{ simwealth[individual,ages]<-rnorm(1,beta_miss,sigma_miss)}
+    alpha_miss<-runif(1,min=0.75,max=1) #probability of staying similar to previous year, where 1-alpha_miss we change to a random value
+#    beta_miss<-rnorm(1,-0.25,0.4)
+#    sigma_miss<-rexp(1,3)
+    if(rbinom(1,1,alpha_miss)==1){simwealth[individual,ages]<-rnorm(1,simwealth[individual,ages-1],1) }else{ simwealth[individual,ages]<-rnorm(1,-0.25,1)}
   }
 }
 #check the data
