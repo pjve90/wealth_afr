@@ -242,14 +242,19 @@ set.seed(1934)
 #define the priors in the autorregresive dynamic
 for(individual in 1:nrow(simwealth)){
   for(ages in 2:ncol(simwealth)){
-    alpha_miss<-runif(1,min=0.75,max=1) #probability of staying similar to previous year, where 1-alpha_miss we change to a random value
-#    beta_miss<-rnorm(1,-0.25,0.4)
-#    sigma_miss<-rexp(1,3)
-    if(rbinom(1,1,alpha_miss)==1){simwealth[individual,ages]<-rnorm(1,simwealth[individual,ages-1],1) }else{ simwealth[individual,ages]<-rnorm(1,-0.25,1)}
+    prob_change<-runif(1,min=0.75,max=1) #probability of staying similar to previous year, and in the other 1-prop_change instances we change to a random value close to the mean of the population
+    if(rbinom(1,1,prob_change)==1){simwealth[individual,ages]<-rnorm(1,simwealth[individual,ages-1],0.25) }else{ simwealth[individual,ages]<-rnorm(1,-0.25,1)}
   }
 }
 #check the data
 simwealth
+
+# We can then check the overall distribution of the three predictor values in the simulated data, and compare it to their distribution in the real data
+plot(density(simwealth),ylim=c(0,0.45)) # simulated data is the black line
+lines(density(std_absw_matrix,na.rm=T),col="red") # observed data is the red line
+
+# We can also check whether wealth within individuals wealth is correlated from one year to the next
+plot(simwealth[,14]~simwealth[,13])
 
 ###Short-term wealth variability ----
 
@@ -285,16 +290,6 @@ simlongtermwealth
 # We now simulate all ages, so we add values for the first ten years. These will not affect the simulation because the age-specific probability to have a first child at these ages is zero
 simlongtermwealth[,c(1:10)]<-rnorm(10*nrow(simlongtermwealth),mean=mean(simlongtermwealth,na.rm=T),sd=0.2)
 
-# We now restrict the absolute wealth data frame to the relevant ages
-simwealth_restricted<-simwealth[,11:51]
-
-# We can check whether wealth within individuals wealth is correlated from one year to the next
-plot(simwealth[,14]~simwealth[,13])
-
-# We can then check the overall distribution of the three predictor values in the simulated data, and compare it to their distribution in the real data
-plot(density(simwealth),ylim=c(0,0.45)) # simulated data is the black line
-lines(density(std_absw_matrix,na.rm=T),col="red") # observed data is the red line
-
 
 ## Simulate age-specific probabilities of first birth ----
 
@@ -317,6 +312,8 @@ afr_age<-agespecific_probabilities_rounded
 # plot the age-specific probabilities to give birth
 plot(afr_age~c(1:74))
 
+# These are the raw probabilities from the data. In the data, these raw probabilities already include the potential wealth effects. Because here we want to specifically later model the wealth effects, we need to reduce these probabilities are bit so that when we later add the wealth effects, the overall probabilities are again closer to the observed ones - they probably won't perfectly match because the actual wealth effects might be different from what we are simulating here
+afr_age_baseline<-afr_age*0.9
 
 ##Simulate first birth based on the wealth predictors ----
 
@@ -324,10 +321,7 @@ plot(afr_age~c(1:74))
 
 # Link wealth variables to afr with independent effects at each age - exactly what we are doing in the STAN model
 
-set.seed(1578)
-
-# Logistic function to keep probabilities in (0, 1)
-logit <- function(x) { 1 / (1 + exp(-x)) }
+set.seed(1578) 
 
 
 # We specifically want to assess whether our model can detect instances where one of the wealth variables shifts the age of first birth to be earlier or later. For the shift toward earlier or later, we introduce another predictor, mean-centered age: the median age at first birth is set to 0, ages younger than he median get negative values, ages older than the median positive values (calculated simply as age - median(age). Later births now means that probabilities to have the first birth would be higher at ages older than the median age, earlier birth means that probabilities to have the first birth would be higher at ages younter than the median age. We use this together with the wealth predictors.
@@ -344,20 +338,13 @@ which(afr_age==max(afr_age)) # 19
  
  
  # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is for ages younger than the median are negative, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age)
- # We could also change the intercept, the overall probability to have a first baby, according to wealth. For his example we keep the intercepts at zero though, to only look at shifts in reproduction in relation to wealth
  
  # We perform the three simulations - 1) absolute wealth has a 10x larger effect, 2) short term wealth change has a 10x larger effect, 3) long term wealth variability has a 10x larger effect
  
-# 1) absolute wealth has the largest effect 
- aw_intercept_beta <- 0 # negative values would mean that poor are more likely to have babies
- aw_slope_beta <- 0.1 # positive slope means wealthy have afr later
-
- aw_intercept_gamma <- 0
- aw_slope_gamma <- 0.01 # positive slope means individuals with higher short-term wealth variability have afr later
- 
- aw_intercept_delta <- 0
- aw_slope_delta <- 0.01 # positive slope means individuals with higher long-term wealth variability have afr later
- 
+# 1) absolute wealth has the largest effect, this creates the age-specific effects for the three wealth predictors
+ aw_beta <- 0.1*centeredage # positive slope means wealthy have afr later
+ aw_gamma <- -0.01*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 10x lower than for absolute wealth
+  aw_delta <- -0.01*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 10x lower than for absolute wealth
  
 # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  aw_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -366,10 +353,7 @@ which(afr_age==max(afr_age)) # 19
    aw_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(aw_simbirth)){
-     beta_z<-aw_intercept_beta+aw_slope_beta*centeredage[ages]
-     delta_z<-aw_intercept_delta+aw_slope_delta*centeredage[ages]
-     gamma_z<-aw_intercept_gamma+aw_slope_gamma*centeredage[ages]
-     ageprob<-afr_age[ages]+simwealth[individual,ages]*beta_z+simshorttermwealth[individual,ages]*gamma_z+simlongtermwealth[individual,ages]*delta_z
+     ageprob<-afr_age_baseline[ages]+simwealth[individual,ages]*aw_beta[ages]+simshorttermwealth[individual,ages]*aw_gamma[ages]+simlongtermwealth[individual,ages]*aw_delta[ages]
      if(ageprob<0){ageprob<-0}
      ifelse(aw_simbirth[individual,(ages-1)]==1,aw_simbirth[individual,ages]<-NA,aw_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
@@ -380,16 +364,12 @@ which(afr_age==max(afr_age)) # 19
  aw_simbirth
  #counts per column
  apply(aw_simbirth,2,sum,na.rm=T)
+
  
  # 2) short term wealth change has the largest effect
- sc_intercept_beta <- 0 # negative values would mean that poor are more likely to have babies
- sc_slope_beta <- 0.01 # positive slope means wealthy have afr later
- 
- sc_intercept_gamma <- 0
- sc_slope_gamma <- 0.1 # positive slope means individuals with higher short-term wealth variability have afr later
- 
- sc_intercept_delta <- 0
- sc_slope_delta <- 0.01 # positive slope means individuals with higher long-term wealth variability have afr later
+ sc_beta <- 0.01*centeredage # positive slope means wealthy have afr later, effect is 10x less than for short term wealth changes
+ sc_gamma <- -0.1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier
+ sc_delta <- -0.01*centeredage # negative slope means individuals with higher long-term wealth variability have afr later, effect is 10x less than for short term wealth changes
  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  sc_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -398,28 +378,17 @@ which(afr_age==max(afr_age)) # 19
      sc_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(sc_simbirth)){
-     beta_z<-sc_intercept_beta+sc_slope_beta*centeredage[ages]
-     delta_z<-sc_intercept_delta+sc_slope_delta*centeredage[ages]
-     gamma_z<-sc_intercept_gamma+sc_slope_gamma*centeredage[ages]
-     ageprob<-afr_age[ages]+simwealth[individual,ages]*beta_z+simshorttermwealth[individual,ages]*gamma_z+simlongtermwealth[individual,ages]*delta_z
+     ageprob<-afr_age_baseline[ages]+simwealth[individual,ages]*sc_beta[ages]+simshorttermwealth[individual,ages]*sc_gamma[ages]+simlongtermwealth[individual,ages]*sc_delta[ages]
      if(ageprob<0){ageprob<-0}
      ifelse(sc_simbirth[individual,(ages-1)]==1,sc_simbirth[individual,ages]<-NA,sc_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
  
  
- 
- 
- 
  # 3) long term wealth variability has the largest effect
- lv_intercept_beta <- 0 # negative values would mean that poor are more likely to have babies
- lv_slope_beta <- 0.01 # positive slope means wealthy have afr later
- 
- lv_intercept_gamma <- 0
- lv_slope_gamma <- 0.01 # positive slope means individuals with higher short-term wealth variability have afr later
- 
- lv_intercept_delta <- 0
- lv_slope_delta <- 0.1 # positive slope means individuals with higher long-term wealth variability have afr later
+ lv_beta <- 0.01*centeredage # positive slope means wealthy have afr later, effect is 10x less than for long term variability in wealth
+  lv_gamma <- -0.01*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 10x less than for the long term variability in wealth
+  lv_delta <- -0.1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  lv_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -428,10 +397,7 @@ which(afr_age==max(afr_age)) # 19
      lv_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(lv_simbirth)){
-     beta_z<-lv_intercept_beta+lv_slope_beta*centeredage[ages]
-     delta_z<-lv_intercept_delta+lv_slope_delta*centeredage[ages]
-     gamma_z<-lv_intercept_gamma+lv_slope_gamma*centeredage[ages]
-     ageprob<-afr_age[ages]+simwealth[individual,ages]*beta_z+simshorttermwealth[individual,ages]*gamma_z+simlongtermwealth[individual,ages]*delta_z
+     ageprob<-afr_age_baseline[ages]+simwealth[individual,ages]*lv_beta[ages]+simshorttermwealth[individual,ages]*lv_gamma[ages]+simlongtermwealth[individual,ages]*lv_delta[ages]
      if(ageprob<0){ageprob<-0}
      ifelse(lv_simbirth[individual,(ages-1)]==1,lv_simbirth[individual,ages]<-NA,lv_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
@@ -439,9 +405,8 @@ which(afr_age==max(afr_age)) # 19
  
  
 # # We now have all the data in the same format as in the original data. That means we can perform the same data checks, plus run the inference model, to assess our aim 1.
-# 
 
- 
+
 
  # For aim 2, we introduce missing observations in the wealth data  ----
 # The simulated wealth matrix has a complete history of wealth for each individual for each age - which is what must have happened
@@ -449,27 +414,27 @@ which(afr_age==max(afr_age)) # 19
 # We can reproduce this by varying how much of the simulated wealth data would have been observed
 
 # Create a coyp of the wealth dataset which we will use in the analyses
-sim_std_absw_restricted<-simwealth
+sim_wealth_imputation<-simwealth
  
-# introduce missing data - assume that 50% of wealth data are missing
-for(j in 1:ncol(sim_std_absw_restricted)){
-  for(i in 1:nrow(sim_std_absw_restricted)){
-    if(rbinom(1,1,0.5)==1){
-       sim_std_absw_restricted[i,j] <- NA
+# introduce missing data - assume that 70% of wealth data are missing
+for(j in 1:ncol(sim_wealth_imputation)){
+  for(i in 1:nrow(sim_wealth_imputation)){
+    if(rbinom(1,1,0.7)==1){
+      sim_wealth_imputation[i,j] <- NA
      } else{
-       sim_std_absw_restricted[i,j] <- sim_std_absw_restricted[i,j]
+       sim_wealth_imputation[i,j] <- sim_wealth_imputation[i,j]
      }
    }
  }
  
-
- #replace NAs with -99
- for(j in 1:ncol(sim_std_absw_restricted)){
-   for(i in 1:nrow(sim_std_absw_restricted)){
-     if(is.na(sim_std_absw_restricted[i,j])){
-       sim_std_absw_restricted[i,j] <- -99
+# The matrices recording the simulated births and the simulated wealth contain missing values. 
+ #replace NAs with -99 for this to be correctly recognized in the stan models
+ for(j in 1:ncol(sim_wealth_imputation)){
+   for(i in 1:nrow(sim_wealth_imputation)){
+     if(is.na(sim_wealth_imputation[i,j])){
+       sim_wealth_imputation[i,j] <- -99
      } else{
-       sim_std_absw_restricted[i,j] <- sim_std_absw_restricted[i,j]
+       sim_wealth_imputation[i,j] <- sim_wealth_imputation[i,j]
      }
    }
  }
@@ -504,18 +469,26 @@ for(j in 1:ncol(sim_std_absw_restricted)){
    }
  }
  
-  #------------------------------------------------------------------------------------------------
+
+# To speed up the analyses, we restrict the matrices to only those columns with the ages where women could have had their first child, we do not need to estimate associations at other ages.  
+ aw_simbirth_res<-aw_simbirth[,11:40] 
+ sc_simbirth_res<-sc_simbirth[,11:40] 
+ lv_simbirth_res<-lv_simbirth[,11:40] 
+ simwealth_res<-simwealth[,11:40]
+ sim_wealth_imputation_res<-sim_wealth_imputation[,11:40]
+ 
+#------------------------------------------------------------------------------------------------
  # We can now prepare all the data to be analysed in the STAN model  ----
  # We will run six analyses: three with the full wealth dataset, and three with the wealth dataset which has missing values
  
  
  # 1) full wealth data, absolute wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- aw_full_simulated_list <- list(N = nrow(aw_simbirth), #population size
-                        A = ncol(aw_simbirth), #age
-                        wealth = as.matrix(simwealth), #current absolute wealth
-                        baby = as.matrix(aw_simbirth), #AFR
-                        mean_wealth = medianwealthperindividual # median wealth of each individual
+ aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
+                        A = ncol(aw_simbirth_res), #age
+                        wealth = as.matrix(simwealth_res), #current absolute wealth
+                        baby = as.matrix(aw_simbirth_res), #AFR
+                        median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
  aw_full_simulated_list
@@ -541,11 +514,11 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  
  # 2) full wealth data, short term wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- sc_full_simulated_list <- list(N = nrow(sc_simbirth), #population size
-                                A = ncol(sc_simbirth), #age
-                                wealth = as.matrix(simwealth), #current absolute wealth
-                                baby = as.matrix(sc_simbirth), #AFR
-                                mean_wealth = medianwealthperindividual # median wealth of each individual
+ sc_full_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
+                                A = ncol(sc_simbirth_res), #age
+                                wealth = as.matrix(simwealth_res), #current absolute wealth
+                                baby = as.matrix(sc_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
  simulated_list
@@ -568,11 +541,11 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  
  # 3) full wealth data, long term wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- lv_full_simulated_list <- list(N = nrow(lv_simbirth), #population size
-                                A = ncol(lv_simbirth), #age
-                                wealth = as.matrix(simwealth), #current absolute wealth
-                                baby = as.matrix(lv_simbirth), #AFR
-                                mean_wealth = medianwealthperindividual # median wealth of each individual
+ lv_full_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
+                                A = ncol(lv_simbirth_res), #age
+                                wealth = as.matrix(simwealth_res), #current absolute wealth
+                                baby = as.matrix(lv_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
  simulated_list
@@ -596,11 +569,11 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  
  # 4) incomplete wealth data, absolute wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- aw_imputed_simulated_list <- list(N = nrow(aw_simbirth), #population size
-                                A = ncol(aw_simbirth), #age
-                                wealth = as.matrix(sim_std_absw_restricted), #current absolute wealth
-                                baby = as.matrix(aw_simbirth), #AFR
-                                mean_wealth = medianwealthperindividual # median wealth of each individual
+ aw_imputed_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
+                                A = ncol(aw_simbirth_res), #age
+                                wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                baby = as.matrix(aw_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
  )
  
  ## Compile and fit model ----
@@ -621,11 +594,11 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  
  # 5) imputed wealth data, short term wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- sc_imputed_simulated_list <- list(N = nrow(sc_simbirth), #population size
-                                A = ncol(sc_simbirth), #age
-                                wealth = as.matrix(sim_std_absw_restricted), #current absolute wealth
-                                baby = as.matrix(sc_simbirth), #AFR
-                                mean_wealth = medianwealthperindividual # median wealth of each individual
+ sc_imputed_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
+                                A = ncol(sc_simbirth_res), #age
+                                wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                baby = as.matrix(sc_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
  simulated_list
@@ -648,11 +621,11 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  
  # 6) imputed wealth data, long term wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- lv_imputed_simulated_list <- list(N = nrow(lv_simbirth), #population size
-                                A = ncol(lv_simbirth), #age
-                                wealth = as.matrix(sim_std_absw_restricted), #current absolute wealth
-                                baby = as.matrix(lv_simbirth), #AFR
-                                mean_wealth = medianwealthperindividual # median wealth of each individual
+ lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
+                                A = ncol(lv_simbirth_res), #age
+                                wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                baby = as.matrix(lv_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
  simulated_list
@@ -713,22 +686,18 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  #check table
  aw_full_tab_sim_delta_sigma
  
- # create a vector with the simulated betas, gammas, and deltas
- aw_simulated_beta_z<-aw_intercept_beta+centeredage*aw_slope_beta
- aw_simulated_gamma_z<-aw_intercept_gamma+centeredage*aw_slope_gamma
- aw_simulated_delta_z<-aw_intercept_delta+centeredage*aw_slope_delta
  
  pdf("aw_full_plot.pdf")
  par(mfrow=c(1,3))
- plot(aw_full_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~aw_simulated_beta_z,xlab="simulated beta z",ylab="estimated beta z")
+ plot(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(aw_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_simulated_gamma_z,xlab="simulated gamma z",ylab="estimated gamma z")
+ plot(aw_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(aw_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~aw_simulated_delta_z,xlab="simulated delta z",ylab="estimated delta z")
+ plot(aw_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- aw_full_correlations<-rbind(summary(lm(aw_full_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~aw_simulated_beta_z)),summary(lm(aw_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_simulated_gamma_z)),summary(lm(aw_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~aw_simulated_delta_z)))
+ aw_full_correlations<-rbind(summary(lm(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
  
  write.csv(aw_full_correlations,file="aw_full_correlations.csv")
  
@@ -770,22 +739,17 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  #check table
  sc_full_tab_sim_delta_sigma
  
- # create a vector with the simulated betas, gammas, and deltas
- sc_simulated_beta_z<-sc_intercept_beta+centeredage*sc_slope_beta
- sc_simulated_gamma_z<-sc_intercept_gamma+centeredage*sc_slope_gamma
- sc_simulated_delta_z<-sc_intercept_delta+centeredage*sc_slope_delta
- 
  pdf("sc_full_plot.pdf")
  par(mfrow=c(1,3))
- plot(sc_full_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~sc_simulated_beta_z,xlab="simulated beta z",ylab="estimated beta z")
+ plot(sc_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(sc_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~sc_simulated_gamma_z,xlab="simulated gamma z",ylab="estimated gamma z")
+ plot(sc_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(sc_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~sc_simulated_delta_z,xlab="simulated delta z",ylab="estimated delta z")
+ plot(sc_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- sc_full_correlations<-rbind(summary(lm(sc_full_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~sc_simulated_beta_z)),summary(lm(sc_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~sc_simulated_gamma_z)),summary(lm(sc_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~sc_simulated_delta_z)))
+ sc_full_correlations<-rbind(summary(lm(sc_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40])),summary(lm(sc_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40])),summary(lm(sc_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40])))
  
  write.csv(sc_full_correlations,file="sc_full_correlations.csv")
  
@@ -827,22 +791,17 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  #check table
  lv_full_tab_sim_delta_sigma
  
- # create a vector with the simulated betas, gammas, and deltas
- lv_simulated_beta_z<-lv_intercept_beta+centeredage*lv_slope_beta
- lv_simulated_gamma_z<-lv_intercept_gamma+centeredage*lv_slope_gamma
- lv_simulated_delta_z<-lv_intercept_delta+centeredage*lv_slope_delta
- 
  pdf("lv_full_plot.pdf")
  par(mfrow=c(1,3))
- plot(lv_full_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~lv_simulated_beta_z,xlab="simulated beta z",ylab="estimated beta z")
+ plot(lv_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~lv_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(lv_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~lv_simulated_gamma_z,xlab="simulated gamma z",ylab="estimated gamma z")
+ plot(lv_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(lv_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~lv_simulated_delta_z,xlab="simulated delta z",ylab="estimated delta z")
+ plot(lv_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- lv_full_correlations<-rbind(summary(lm(lv_full_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~lv_simulated_beta_z)),summary(lm(lv_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~lv_simulated_gamma_z)),summary(lm(lv_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~lv_simulated_delta_z)))
+ lv_full_correlations<-rbind(summary(lm(lv_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~lv_beta[11:40])),summary(lm(lv_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40])),summary(lm(lv_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40])))
  
  write.csv(lv_full_correlations,file="lv_full_correlations.csv")
  
@@ -886,22 +845,17 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  #check table
  aw_imputed_tab_sim_delta_sigma
  
- # create a vector with the simulated betas, gammas, and deltas
- aw_simulated_beta_z<-aw_intercept_beta+centeredage*aw_slope_beta
- aw_simulated_gamma_z<-aw_intercept_gamma+centeredage*aw_slope_gamma
- aw_simulated_delta_z<-aw_intercept_delta+centeredage*aw_slope_delta
- 
  pdf("aw_imputed_plot.pdf")
  par(mfrow=c(1,3))
- plot(aw_imputed_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~aw_simulated_beta_z,xlab="simulated beta z",ylab="estimated beta z")
+ plot(aw_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(aw_imputed_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_simulated_gamma_z,xlab="simulated gamma z",ylab="estimated gamma z")
+ plot(aw_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(aw_imputed_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~aw_simulated_delta_z,xlab="simulated delta z",ylab="estimated delta z")
+ plot(aw_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- aw_imputed_correlations<-rbind(summary(lm(aw_imputed_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~aw_simulated_beta_z)),summary(lm(aw_imputed_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_simulated_gamma_z)),summary(lm(aw_imputed_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~aw_simulated_delta_z)))
+ aw_imputed_correlations<-rbind(summary(lm(aw_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
  
  write.csv(aw_imputed_correlations,file="aw_imputed_correlations.csv")
  
@@ -945,22 +899,18 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  #check table
  sc_imputed_tab_sim_delta_sigma
  
- # create a vector with the simulated betas, gammas, and deltas
- sc_simulated_beta_z<-sc_intercept_beta+centeredage*sc_slope_beta
- sc_simulated_gamma_z<-sc_intercept_gamma+centeredage*sc_slope_gamma
- sc_simulated_delta_z<-sc_intercept_delta+centeredage*sc_slope_delta
  
  pdf("sc_imputed_plot.pdf")
  par(mfrow=c(1,3))
- plot(sc_imputed_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~sc_simulated_beta_z,xlab="simulated beta z",ylab="estimated beta z")
+ plot(sc_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(sc_imputed_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~sc_simulated_gamma_z,xlab="simulated gamma z",ylab="estimated gamma z")
+ plot(sc_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(sc_imputed_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~sc_simulated_delta_z,xlab="simulated delta z",ylab="estimated delta z")
+ plot(sc_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- sc_imputed_correlations<-rbind(summary(lm(sc_imputed_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~sc_simulated_beta_z)),summary(lm(sc_imputed_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~sc_simulated_gamma_z)),summary(lm(sc_imputed_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~sc_simulated_delta_z)))
+ sc_imputed_correlations<-rbind(summary(lm(sc_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40])),summary(lm(sc_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40])),summary(lm(sc_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40])))
  
  write.csv(sc_imputed_correlations,file="sc_imputed_correlations.csv")
  
@@ -1003,23 +953,19 @@ for(j in 1:ncol(sim_std_absw_restricted)){
  lv_imputed_tab_sim_delta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
  #check table
  lv_imputed_tab_sim_delta_sigma
- 
- # create a vector with the simulated betas, gammas, and deltas
- lv_simulated_beta_z<-lv_intercept_beta+centeredage*lv_slope_beta
- lv_simulated_gamma_z<-lv_intercept_gamma+centeredage*lv_slope_gamma
- lv_simulated_delta_z<-lv_intercept_delta+centeredage*lv_slope_delta
+
  
  pdf("lv_imputed_plot.pdf")
  par(mfrow=c(1,3))
- plot(lv_imputed_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~lv_simulated_beta_z,xlab="simulated beta z",ylab="estimated beta z")
+ plot(lv_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~vl_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(lv_imputed_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~lv_simulated_gamma_z,xlab="simulated gamma z",ylab="estimated gamma z")
+ plot(lv_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(lv_imputed_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~lv_simulated_delta_z,xlab="simulated delta z",ylab="estimated delta z")
+ plot(lv_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- lv_imputed_correlations<-rbind(summary(lm(lv_imputed_tab_sim_beta_z[1:39,1]*tab_sim_beta_sigma[1,]~lv_simulated_beta_z)),summary(lm(lv_imputed_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~lv_simulated_gamma_z)),summary(lm(lv_imputed_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~lv_simulated_delta_z)))
+ lv_imputed_correlations<-rbind(summary(lm(lv_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~lv_beta[11:40])),summary(lm(lv_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40])),summary(lm(lv_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40])))
  
  write.csv(lv_imputed_correlations,file="lv_imputed_correlations.csv")
  
