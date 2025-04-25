@@ -501,8 +501,10 @@ for(j in 1:ncol(sim_wealth_imputation)){
  aw_full_fit_simulated <- model_simulated$sample(data = aw_full_simulated_list, 
                                          chains = 4, 
                                          parallel_chains = 15, 
-                                         adapt_delta = 0.95,
+                                         adapt_delta = 0.99,
                                          max_treedepth = 13,
+                                         iter_warmup = 2000,
+                                         iter_sampling = 2000,
                                          init = 0)
  
  # save fit 
@@ -511,6 +513,19 @@ for(j in 1:ncol(sim_wealth_imputation)){
  #load RDS file
  aw_full_rds_simulated <- readRDS("aw_full_fit_simulated_output.rds")
  
+ 
+ # There sometimes seems to be an issue with extracting the posterior sample with the rstan command above
+ # This is an alternative approach
+#  drawsarray_firstsimulated<-aw_full_fit_simulated$draws()
+# drawsdataframe_firstsimulated<-as_draws_df(drawsarray_firstsimulated)
+# aw_full_rds_simulated<-data.frame(drawsdataframe_firstsimulated)
+# When using this alternative approach, the "pars"ing of information below inside the precis commands does not work
+# Add the following to obtain the correct rows with the relevant estimates
+ # Example for beta_wealth_z
+  # aw_full_tab_sim_beta_z <- precis(drawsdataframe_firstsimulated,depth=2)
+  # aw_full_tab_sim_beta_z <- aw_full_tab_sim_beta_z[grep("beta_wealth_z",rownames(aw_full_tab_sim_beta_z)),]
+ 
+
  
  # 2) full wealth data, short term wealth strongest predictor
  # We put all of this together in the list of data for the analyses
@@ -528,8 +543,10 @@ for(j in 1:ncol(sim_wealth_imputation)){
  sc_full_fit_simulated <- model_simulated$sample(data = sc_full_simulated_list, 
                                                  chains = 4, 
                                                  parallel_chains = 15, 
-                                                 adapt_delta = 0.95,
+                                                 adapt_delta = 0.99,
                                                  max_treedepth = 13,
+                                                 iter_warmup = 2000,
+                                                 iter_sampling = 2000,
                                                  init = 0)
  
  # save fit 
@@ -555,8 +572,10 @@ for(j in 1:ncol(sim_wealth_imputation)){
  lv_full_fit_simulated <- model_simulated$sample(data = lv_full_simulated_list, 
                                                  chains = 4, 
                                                  parallel_chains = 15, 
-                                                 adapt_delta = 0.95,
+                                                 adapt_delta = 0.99,
                                                  max_treedepth = 13,
+                                                 iter_warmup = 2000,
+                                                 iter_sampling = 2000,
                                                  init = 0)
  
  # save fit 
@@ -579,11 +598,13 @@ for(j in 1:ncol(sim_wealth_imputation)){
  ## Compile and fit model ----
  #fit model
  aw_imputed_fit_simulated <- model_simulated$sample(data = aw_imputed_simulated_list, 
-                                                 chains = 4, 
-                                                 parallel_chains = 15, 
-                                                 adapt_delta = 0.95,
-                                                 max_treedepth = 13,
-                                                 init = 0)
+                                                    chains = 4, 
+                                                    parallel_chains = 15, 
+                                                    adapt_delta = 0.99,
+                                                    max_treedepth = 13,
+                                                    iter_warmup = 2000,
+                                                    iter_sampling = 2000,
+                                                    init = 0)
  
  # save fit 
  aw_imputed_fit_simulated_csv <- rstan::read_stan_csv(aw_imputed_fit_simulated$output_files())
@@ -606,11 +627,13 @@ for(j in 1:ncol(sim_wealth_imputation)){
  ## Compile and fit model ----
  #fit model
  sc_imputed_fit_simulated <- model_simulated$sample(data = sc_imputed_simulated_list, 
-                                                 chains = 4, 
-                                                 parallel_chains = 15, 
-                                                 adapt_delta = 0.95,
-                                                 max_treedepth = 13,
-                                                 init = 0)
+                                                    chains = 4, 
+                                                    parallel_chains = 15, 
+                                                    adapt_delta = 0.99,
+                                                    max_treedepth = 13,
+                                                    iter_warmup = 2000,
+                                                    iter_sampling = 2000,
+                                                    init = 0)
  
  # save fit 
  sc_imputed_fit_simulated_csv <- rstan::read_stan_csv(sc_imputed_fit_simulated$output_files())
@@ -633,11 +656,13 @@ for(j in 1:ncol(sim_wealth_imputation)){
  ## Compile and fit model ----
  #fit model
  lv_imputed_fit_simulated <- model_simulated$sample(data = lv_imputed_simulated_list, 
-                                                 chains = 4, 
-                                                 parallel_chains = 15, 
-                                                 adapt_delta = 0.95,
-                                                 max_treedepth = 13,
-                                                 init = 0)
+                                                    chains = 4, 
+                                                    parallel_chains = 15, 
+                                                    adapt_delta = 0.99,
+                                                    max_treedepth = 13,
+                                                    iter_warmup = 2000,
+                                                    iter_sampling = 2000,
+                                                    init = 0)
  
  # save fit 
  lv_imputed_fit_simulated_csv <- rstan::read_stan_csv(lv_imputed_fit_simulated$output_files())
@@ -658,9 +683,9 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  #beta sigma
  #create summary table for beta_sigma
- tab_sim_beta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ aw_full_tab_sim_beta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
  #check table
- tab_sim_beta_sigma
+ aw_full_tab_sim_beta_sigma
  
  #gamma z
  #create summary table for gamma_z
@@ -689,7 +714,7 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  pdf("aw_full_plot.pdf")
  par(mfrow=c(1,3))
- plot(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
+ plot(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
  plot(aw_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
@@ -711,9 +736,9 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  #beta sigma
  #create summary table for beta_sigma
- tab_sim_beta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ sc_full_tab_sim_beta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
  #check table
- tab_sim_beta_sigma
+ sc_full_tab_sim_beta_sigma
  
  #gamma z
  #create summary table for gamma_z
@@ -817,9 +842,9 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  #beta sigma
  #create summary table for beta_sigma
- tab_sim_beta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ aw_imupted_tab_sim_beta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
  #check table
- tab_sim_beta_sigma
+ aw_imupted_tab_sim_beta_sigma
  
  #gamma z
  #create summary table for gamma_z
@@ -855,7 +880,7 @@ for(j in 1:ncol(sim_wealth_imputation)){
  title("effects of long-term wealth")
  dev.off()
  
- aw_imputed_correlations<-rbind(summary(lm(aw_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
+ aw_imputed_correlations<-rbind(summary(lm(aw_imputed_tab_sim_beta_z[,1]*aw_imputed_tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_imputed_tab_sim_gamma_z[,1]*aw_imputed_tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
  
  write.csv(aw_imputed_correlations,file="aw_imputed_correlations.csv")
  
@@ -871,9 +896,9 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  #beta sigma
  #create summary table for beta_sigma
- tab_sim_beta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ sc_imputed_tab_sim_beta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
  #check table
- tab_sim_beta_sigma
+ sc_imputed_tab_sim_beta_sigma
  
  #gamma z
  #create summary table for gamma_z
@@ -902,15 +927,15 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  pdf("sc_imputed_plot.pdf")
  par(mfrow=c(1,3))
- plot(sc_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40],xlab="simulated beta",ylab="estimated beta")
+ plot(sc_imputed_tab_sim_beta_z[,1]*sc_imputed_tab_sim_beta_sigma[1,]~sc_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(sc_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
+ plot(sc_imputed_tab_sim_gamma_z[,1]*sc_imputed_tab_sim_gamma_sigma[1,]~sc_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(sc_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40],xlab="simulated delta",ylab="estimated delta")
+ plot(sc_imputed_tab_sim_delta_z[,1]*sc_imputed_tab_sim_delta_sigma[1,]~sc_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- sc_imputed_correlations<-rbind(summary(lm(sc_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40])),summary(lm(sc_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40])),summary(lm(sc_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40])))
+ sc_imputed_correlations<-rbind(summary(lm(sc_imputed_tab_sim_beta_z[,1]*sc_imputed_tab_sim_beta_sigma[1,]~sc_beta[11:40])),summary(lm(sc_imputed_tab_sim_gamma_z[,1]*sc_imputed_tab_sim_gamma_sigma[1,]~sc_gamma[11:40])),summary(lm(sc_imputed_tab_sim_delta_z[,1]*sc_imputed_tab_sim_delta_sigma[1,]~sc_delta[11:40])))
  
  write.csv(sc_imputed_correlations,file="sc_imputed_correlations.csv")
  
@@ -926,9 +951,9 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  #beta sigma
  #create summary table for beta_sigma
- tab_sim_beta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ lv_imputed_tab_sim_beta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
  #check table
- tab_sim_beta_sigma
+ lv_imputed_tab_sim_beta_sigma
  
  #gamma z
  #create summary table for gamma_z
@@ -957,15 +982,15 @@ for(j in 1:ncol(sim_wealth_imputation)){
  
  pdf("lv_imputed_plot.pdf")
  par(mfrow=c(1,3))
- plot(lv_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~vl_beta[11:40],xlab="simulated beta",ylab="estimated beta")
+ plot(lv_imputed_tab_sim_beta_z[,1]*lv_imputed_tab_sim_beta_sigma[1,]~vl_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(lv_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
+ plot(lv_imputed_tab_sim_gamma_z[,1]*lv_imputed_tab_sim_gamma_sigma[1,]~lv_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(lv_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40],xlab="simulated delta",ylab="estimated delta")
+ plot(lv_imputed_tab_sim_delta_z[,1]*lv_imputed_tab_sim_delta_sigma[1,]~lv_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
- lv_imputed_correlations<-rbind(summary(lm(lv_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~lv_beta[11:40])),summary(lm(lv_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40])),summary(lm(lv_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40])))
+ lv_imputed_correlations<-rbind(summary(lm(lv_imputed_tab_sim_beta_z[,1]*lv_imputed_tab_sim_beta_sigma[1,]~lv_beta[11:40])),summary(lm(lv_imputed_tab_sim_gamma_z[,1]*lv_imputed_tab_sim_gamma_sigma[1,]~lv_gamma[11:40])),summary(lm(lv_imputed_tab_sim_delta_z[,1]*lv_imputed_tab_sim_delta_sigma[1,]~lv_delta[11:40])))
  
  write.csv(lv_imputed_correlations,file="lv_imputed_correlations.csv")
  
