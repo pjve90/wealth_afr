@@ -237,7 +237,7 @@ for(individual in 1:nrow(simwealth)){
 simwealth[,1]
 
 #We now simulate the change in wealth for each individual across each year of their age.
-#The process we use to reflect the change in absolute wealth from one year to the next matches the process in the imputation of missing data in the analyses. That means that the value of absolute wealth of the following year is similar to the previous year with probability alpha_miss, if it is dissimilar we change it to be close to value beta_miss, with some noise around these two values indicated by sigma_miss
+#The process we use to reflect the change in absolute wealth from one year to the next matches the process in the imputation of missing data in the analyses. We first determine whether individuals have a wealth that is similar to the year before (with probability prob_change) or whether they show a large change (which could for example reflect that they changed households). If the value stays similar, we take the value from the year before and add only a little bit of noise (sigma of 0.25). If the value changes, we take a new value from a normal distribution with a mean of -0.25 (reflecting the skew in the distribution of the actual wealth data) and a larger amount of noise (sigma of 1) to create variation among individuals.
 set.seed(1934)
 #define the priors in the autorregresive dynamic
 for(individual in 1:nrow(simwealth)){
@@ -312,8 +312,8 @@ afr_age<-agespecific_probabilities_rounded
 # plot the age-specific probabilities to give birth
 plot(afr_age~c(1:74))
 
-# These are the raw probabilities from the data. In the data, these raw probabilities already include the potential wealth effects. Because here we want to specifically later model the wealth effects, we need to reduce these probabilities are bit so that when we later add the wealth effects, the overall probabilities are again closer to the observed ones - they probably won't perfectly match because the actual wealth effects might be different from what we are simulating here
-afr_age_baseline<-afr_age*0.9
+# These values are the complete probabilities that a woman will have her first child at any given age we observe in the actual data. We use these as the baseline age-specific probabilities in the simulations.
+afr_age_baseline<-afr_age
 
 ##Simulate first birth based on the wealth predictors ----
 
@@ -427,8 +427,8 @@ for(j in 1:ncol(sim_wealth_imputation)){
    }
  }
  
-# The matrices recording the simulated births and the simulated wealth contain missing values. 
- #replace NAs with -99 for this to be correctly recognized in the stan models
+# The matrices recording the simulated missing wealth (sim_wealth_imputation) and the simulated birth data (aw_simbirth, sc_simbirth, lv_simbirth) contain missing values. 
+ # We need to replace NAs with -99 for this to be correctly recognized in the stan models
  for(j in 1:ncol(sim_wealth_imputation)){
    for(i in 1:nrow(sim_wealth_imputation)){
      if(is.na(sim_wealth_imputation[i,j])){
