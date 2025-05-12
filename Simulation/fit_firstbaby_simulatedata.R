@@ -413,18 +413,19 @@ which(afr_age==max(afr_age)) # 19
 # The real data only has observations of wealth of individuals at some of their ages, we do not have their full wealth history
 # We can reproduce this by varying how much of the simulated wealth data would have been observed
 
-# Create a coyp of the wealth dataset which we will use in the analyses
-sim_wealth_imputation<-simwealth
+# Create a copy of the wealth dataset with the same number of rows and columns as the original, which we will use in the analyses for the data imputation
+sim_wealth_imputation<-matrix(NA,ncol=ncol(simwealth),nrow=nrow(simwealth))
  
-# introduce missing data - assume that 70% of wealth data are missing
-for(j in 1:ncol(sim_wealth_imputation)){
-  for(i in 1:nrow(sim_wealth_imputation)){
-    if(rbinom(1,1,0.7)==1){
-      sim_wealth_imputation[i,j] <- NA
-     } else{
-       sim_wealth_imputation[i,j] <- sim_wealth_imputation[i,j]
-     }
-   }
+# There were 7 censuses which happened 2 years apart. The age at which any given individual was first visited is random, but it was mostly at a young age before they had their first child - so for each individual, we pick a random age less than 30, and only take the wealth value from that age plus the values from when they were 2, 4, 6, 8, 10, and 12 years older. Individuals are in different columns, ages are in rows.
+for(j in 1:nrow(sim_wealth_imputation)){
+    age_first_census<-runif(1,min=1,max=30)
+    sim_wealth_imputation[j,age_first_census]<-simwealth[j,age_first_census]
+    sim_wealth_imputation[j,age_first_census+2]<-simwealth[j,age_first_census+2]
+    sim_wealth_imputation[j,age_first_census+4]<-simwealth[j,age_first_census+4]
+    sim_wealth_imputation[j,age_first_census+6]<-simwealth[j,age_first_census+6]
+    sim_wealth_imputation[j,age_first_census+8]<-simwealth[j,age_first_census+8]
+    sim_wealth_imputation[j,age_first_census+10]<-simwealth[j,age_first_census+10]
+    sim_wealth_imputation[j,age_first_census+12]<-simwealth[j,age_first_census+12]
  }
  
 # The matrices recording the simulated missing wealth (sim_wealth_imputation) and the simulated birth data (aw_simbirth, sc_simbirth, lv_simbirth) contain missing values. 
