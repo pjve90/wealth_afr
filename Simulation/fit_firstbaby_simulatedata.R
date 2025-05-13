@@ -237,14 +237,16 @@ for(individual in 1:nrow(simwealth)){
 simwealth[,1]
 
 #We now simulate the change in wealth for each individual across each year of their age.
-#The process we use to reflect the change in absolute wealth from one year to the next matches the process in the imputation of missing data in the analyses. We first determine whether individuals have a wealth that is similar to the year before (with probability prob_change) or whether they show a large change (which could for example reflect that they changed households). If the value stays similar, we take the value from the year before and add only a little bit of noise (sigma of 0.25). If the value changes, we take a new value from a normal distribution with a mean of -0.25 (reflecting the skew in the distribution of the actual wealth data) and a larger amount of noise (sigma of 1) to create variation among individuals.
+#The process we use to reflect the change in absolute wealth from one year to the next matches the process in the imputation of missing data in the analyses. We first determine whether individuals show a large change (which could for example reflect that they changed households) or whether they have a wealth that is similar to the year before. If the value stays similar, we take the value from the year before and add only a little bit of noise (sigma of 0.25). If the value changes, we take a new value from a normal distribution with a mean of their median wealth (to reflect that wealthy individuals tend to stay wealthy) and a larger amount of noise (sigma of 1) to create variation among individuals.
 set.seed(1934)
-#define the priors in the autorregresive dynamic
 for(individual in 1:nrow(simwealth)){
   for(ages in 2:ncol(simwealth)){
-    prob_change<-runif(1,min=0.75,max=1) #probability of staying similar to previous year, and in the other 1-prop_change instances we change to a random value close to the mean of the population
-    if(rbinom(1,1,prob_change)==1){simwealth[individual,ages]<-rnorm(1,simwealth[individual,ages-1],0.25) }else{ simwealth[individual,ages]<-rnorm(1,-0.25,1)}
-  }
+  if(rbinom(1,1,0.125)==1) #assume that the probability individuals change wealth by a lot is low, 12.5%
+      {simwealth[individual,ages]<-rnorm(1,medianwealthperindividual[individual],1) #change to a new level of wealth
+}else{
+    simwealth[individual,ages]<-rnorm(1,simwealth[individual,ages-1],0.25) # (almost) no change from one year to the next
+}
+}
 }
 #check the data
 simwealth
@@ -353,8 +355,8 @@ which(afr_age==max(afr_age)) # 19
    aw_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(aw_simbirth)){
-     ageprob<-afr_age_baseline[ages]+simwealth[individual,ages]*aw_beta[ages]+simshorttermwealth[individual,ages]*aw_gamma[ages]+simlongtermwealth[individual,ages]*aw_delta[ages]
-     if(ageprob<0){ageprob<-0}
+     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*aw_beta[ages]+simshorttermwealth[individual,ages]*aw_gamma[ages]+simlongtermwealth[individual,ages]*aw_delta[ages]
+     ageprob<-inv_logit(ageprob)
      ifelse(aw_simbirth[individual,(ages-1)]==1,aw_simbirth[individual,ages]<-NA,aw_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
@@ -378,8 +380,8 @@ which(afr_age==max(afr_age)) # 19
      sc_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(sc_simbirth)){
-     ageprob<-afr_age_baseline[ages]+simwealth[individual,ages]*sc_beta[ages]+simshorttermwealth[individual,ages]*sc_gamma[ages]+simlongtermwealth[individual,ages]*sc_delta[ages]
-     if(ageprob<0){ageprob<-0}
+     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*sc_beta[ages]+simshorttermwealth[individual,ages]*sc_gamma[ages]+simlongtermwealth[individual,ages]*sc_delta[ages]
+     ageprob<-inv_logit(ageprob)
      ifelse(sc_simbirth[individual,(ages-1)]==1,sc_simbirth[individual,ages]<-NA,sc_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
@@ -397,8 +399,8 @@ which(afr_age==max(afr_age)) # 19
      lv_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(lv_simbirth)){
-     ageprob<-afr_age_baseline[ages]+simwealth[individual,ages]*lv_beta[ages]+simshorttermwealth[individual,ages]*lv_gamma[ages]+simlongtermwealth[individual,ages]*lv_delta[ages]
-     if(ageprob<0){ageprob<-0}
+     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*lv_beta[ages]+simshorttermwealth[individual,ages]*lv_gamma[ages]+simlongtermwealth[individual,ages]*lv_delta[ages]
+     ageprob<-inv_logit(ageprob)
      ifelse(lv_simbirth[individual,(ages-1)]==1,lv_simbirth[individual,ages]<-NA,lv_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
