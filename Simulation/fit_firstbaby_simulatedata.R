@@ -498,7 +498,7 @@ for(j in 1:nrow(sim_wealth_imputation)){
  
  ## Compile and fit model ----
  # compile model
- model_simulated <- cmdstan_model("firstbaby_threewealth_unif.stan")
+ model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
  
  #fit model
  aw_full_fit_simulated <- model_simulated$sample(data = aw_full_simulated_list, 
@@ -509,6 +509,8 @@ for(j in 1:nrow(sim_wealth_imputation)){
                                          iter_warmup = 2000,
                                          iter_sampling = 2000,
                                          init = 0)
+ 
+ 
  
  # save fit 
  aw_full_fit_simulated_csv <- rstan::read_stan_csv(aw_full_fit_simulated$output_files())
