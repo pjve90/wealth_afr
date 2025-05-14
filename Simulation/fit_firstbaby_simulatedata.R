@@ -430,6 +430,8 @@ for(j in 1:nrow(sim_wealth_imputation)){
     sim_wealth_imputation[j,age_first_census+12]<-simwealth[j,age_first_census+12]
  }
  
+sim_wealth_imputation 
+ 
 # The matrices recording the simulated missing wealth (sim_wealth_imputation) and the simulated birth data (aw_simbirth, sc_simbirth, lv_simbirth) contain missing values. 
  # We need to replace NAs with -99 for this to be correctly recognized in the stan models
  for(j in 1:ncol(sim_wealth_imputation)){
@@ -518,6 +520,35 @@ for(j in 1:nrow(sim_wealth_imputation)){
  #load RDS file
  aw_full_rds_simulated <- readRDS("aw_full_fit_simulated_output.rds")
  
+ ## Model diagnostics ----
+ 
+ #check trace of all parameters
+ #alpha
+ rstan::traceplot(aw_full_rds_simulated,pars="alpha")
+ #mu
+ traceplot(aw_full_rds_simulated,pars="mu") 
+ #mu_raw
+ traceplot(aw_full_rds_simulated,pars="mu_raw")
+ #mu_tau
+ rstan::traceplot(aw_full_rds_simulated,pars="mu_tau")
+ #mu_kappa
+ rstan::traceplot(aw_full_rds_simulated,pars="mu_kappa")
+ #mu_delta
+ rstan::traceplot(aw_full_rds_simulated,pars="mu_delta")
+ #beta_wealth_z
+ traceplot(aw_full_rds_simulated,pars="beta_wealth_z") 
+ #beta_wealth_sigma
+ traceplot(aw_full_rds_simulated,pars="beta_wealth_sigma") 
+ #gamma_wealth
+ traceplot(aw_full_rds_simulated,pars="gamma_wealth_z") 
+ #gamma_wealth
+ traceplot(aw_full_rds_simulated,pars="gamma_wealth_sigma") 
+ #delta_wealth
+ traceplot(aw_full_rds_simulated,pars="delta_wealth_z") 
+ #delta_wealth
+ traceplot(aw_full_rds_simulated,pars="delta_wealth_sigma") 
+ 
+
  
  # There sometimes seems to be an issue with extracting the posterior sample with the rstan command above
  # This is an alternative approach
@@ -541,7 +572,7 @@ for(j in 1:nrow(sim_wealth_imputation)){
                                 median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
- simulated_list
+ sc_full_simulated_list
  
  ## Compile and fit model ----
  #fit model
@@ -560,6 +591,34 @@ for(j in 1:nrow(sim_wealth_imputation)){
  #load RDS file
  sc_full_rds_simulated <- readRDS("sc_full_fit_simulated_output.rds")
  
+ ## Model diagnostics ----
+ 
+ #check trace of all parameters
+ #alpha
+ rstan::traceplot(sc_full_rds_simulated,pars="alpha")
+ #mu
+ traceplot(sc_full_rds_simulated,pars="mu") 
+ #mu_raw
+ traceplot(sc_full_rds_simulated,pars="mu_raw")
+ #mu_tau
+ rstan::traceplot(sc_full_rds_simulated,pars="mu_tau")
+ #mu_kappa
+ rstan::traceplot(sc_full_rds_simulated,pars="mu_kappa")
+ #mu_delta
+ rstan::traceplot(sc_full_rds_simulated,pars="mu_delta")
+ #beta_wealth_z
+ traceplot(sc_full_rds_simulated,pars="beta_wealth_z") 
+ #beta_wealth_sigma
+ traceplot(sc_full_rds_simulated,pars="beta_wealth_sigma") 
+ #gamma_wealth
+ traceplot(sc_full_rds_simulated,pars="gamma_wealth_z") 
+ #gamma_wealth
+ traceplot(sc_full_rds_simulated,pars="gamma_wealth_sigma") 
+ #delta_wealth
+ traceplot(sc_full_rds_simulated,pars="delta_wealth_z") 
+ #delta_wealth
+ traceplot(sc_full_rds_simulated,pars="delta_wealth_sigma") 
+ 
  
  # 3) full wealth data, long term wealth strongest predictor
  # We put all of this together in the list of data for the analyses
@@ -570,7 +629,7 @@ for(j in 1:nrow(sim_wealth_imputation)){
                                 median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
- simulated_list
+ lv_full_simulated_list
  
  ## Compile and fit model ----
  #fit model
@@ -589,6 +648,33 @@ for(j in 1:nrow(sim_wealth_imputation)){
  #load RDS file
  lv_full_rds_simulated <- readRDS("lv_full_fit_simulated_output.rds")
  
+ ## Model diagnostics ----
+ 
+ #check trace of all parameters
+ #alpha
+ rstan::traceplot(lv_full_rds_simulated,pars="alpha")
+ #mu
+ traceplot(lv_full_rds_simulated,pars="mu") 
+ #mu_raw
+ traceplot(lv_full_rds_simulated,pars="mu_raw")
+ #mu_tau
+ rstan::traceplot(lv_full_rds_simulated,pars="mu_tau")
+ #mu_kappa
+ rstan::traceplot(lv_full_rds_simulated,pars="mu_kappa")
+ #mu_delta
+ rstan::traceplot(lv_full_rds_simulated,pars="mu_delta")
+ #beta_wealth_z
+ traceplot(lv_full_rds_simulated,pars="beta_wealth_z") 
+ #beta_wealth_sigma
+ traceplot(lv_full_rds_simulated,pars="beta_wealth_sigma") 
+ #gamma_wealth
+ traceplot(lv_full_rds_simulated,pars="gamma_wealth_z") 
+ #gamma_wealth
+ traceplot(lv_full_rds_simulated,pars="gamma_wealth_sigma") 
+ #delta_wealth
+ traceplot(lv_full_rds_simulated,pars="delta_wealth_z") 
+ #delta_wealth
+ traceplot(lv_full_rds_simulated,pars="delta_wealth_sigma") 
  
  
  # 4) incomplete wealth data, absolute wealth strongest predictor
@@ -719,11 +805,11 @@ for(j in 1:nrow(sim_wealth_imputation)){
  
  pdf("aw_full_plot.pdf")
  par(mfrow=c(1,3))
- plot(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
+ plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
  title("effects of absolute wealth")
- plot(aw_full_tab_sim_gamma_z[1:39,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
+ plot(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
  title("effects of short-term wealth")
- plot(aw_full_tab_sim_delta_z[1:39,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
+ plot(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
  title("effects of long-term wealth")
  dev.off()
  
