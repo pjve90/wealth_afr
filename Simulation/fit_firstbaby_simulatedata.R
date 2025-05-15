@@ -339,14 +339,14 @@ which(afr_age==max(afr_age)) # 19
  centeredage<-c(seq(from=-1,to=0,length.out=20),seq(from=0.05263158,to=1,length.out=19),rep(0,35))
  
  
- # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is for ages younger than the median are negative, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age)
+ # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is negative for ages younger than the median, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age). The effects are simulated on a logit scale, which are added to the logit scale baseline probability, before being transformed back into the probabilities that a woman of a given wealth will have her first child at the respective age. Given that effects are age-specific, on a logit scale, and linked to the centered age, they are best summarized through their total effect. A slope of 1 means that, on average individuals who have more/less wealth than the average have a 50% chance of having their first birth earlier/later (for each year, this effect shifts the probability by ~3%, so if the baseline is 10%, a shift of 1 standard deviation in wealth leads to probabilities of 7% and 13%, respectively; summed across the 18 years where most women have their first child, there is 18 * 3% = 54% chance that there is a shift). To understand what this means for the average age at having a first child, see below.
  
- # We perform the three simulations - 1) absolute wealth has a 10x larger effect, 2) short term wealth change has a 10x larger effect, 3) long term wealth variability has a 10x larger effect
+ # We perform three simulations - 1) absolute wealth has a 4x larger effect, 2) short term wealth change has a 4x larger effect, 3) long term wealth variability has a 4x larger effect. We assume that even the strongest effect only leads to a relatively small shift in the age at first birth.
  
 # 1) absolute wealth has the largest effect, this creates the age-specific effects for the three wealth predictors
- aw_beta <- 0.1*centeredage # positive slope means wealthy have afr later
- aw_gamma <- -0.01*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 10x lower than for absolute wealth
-  aw_delta <- -0.01*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 10x lower than for absolute wealth
+ aw_beta <- 1*centeredage # positive slope means wealthy have afr later
+ aw_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
+  aw_delta <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
  
 # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  aw_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -367,11 +367,24 @@ which(afr_age==max(afr_age)) # 19
  #counts per column
  apply(aw_simbirth,2,sum,na.rm=T)
 
+ # as a rough way to check whether our simulation works, we can plot for each individual whether their age at first birth is linked to their median wealth
+ # we create a matrix with a single row for each individual where we store their median wealth and age at first birth
+ wealthvsafr<-matrix(ncol=2,nrow=nrow(aw_simbirth))
+ wealthvsafr[,1]<-medianwealthperindividual
+ for(i in 1:nrow(wealthvsafr)){
+   ifelse(sum(aw_simbirth[i,],na.rm=T)==0, wealthvsafr[i,2]<-NA,   wealthvsafr[i,2]<-which(aw_simbirth[i,]==1))
+ }
+ 
+ # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. 
+ plot(wealthvsafr[,2]~wealthvsafr[,1])
+ mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T)
+ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # the poorest individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
+ 
  
  # 2) short term wealth change has the largest effect
- sc_beta <- 0.01*centeredage # positive slope means wealthy have afr later, effect is 10x less than for short term wealth changes
- sc_gamma <- -0.1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier
- sc_delta <- -0.01*centeredage # negative slope means individuals with higher long-term wealth variability have afr later, effect is 10x less than for short term wealth changes
+ sc_beta <- 0.25*centeredage # positive slope means wealthy have afr later, effect is 4x less than for short term wealth changes
+ sc_gamma <- -1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier
+ sc_delta <- -0.25*centeredage # negative slope means individuals with higher long-term wealth variability have afr later, effect is 4x less than for short term wealth changes
  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  sc_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -388,9 +401,9 @@ which(afr_age==max(afr_age)) # 19
  
  
  # 3) long term wealth variability has the largest effect
- lv_beta <- 0.01*centeredage # positive slope means wealthy have afr later, effect is 10x less than for long term variability in wealth
-  lv_gamma <- -0.01*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 10x less than for the long term variability in wealth
-  lv_delta <- -0.1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
+ lv_beta <- 0.25*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
+  lv_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
+  lv_delta <- 1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  lv_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -431,6 +444,9 @@ for(j in 1:nrow(sim_wealth_imputation)){
  }
  
 sim_wealth_imputation 
+# We can compare this with the observed wealth data
+std_absw_matrix
+
  
 # The matrices recording the simulated missing wealth (sim_wealth_imputation) and the simulated birth data (aw_simbirth, sc_simbirth, lv_simbirth) contain missing values. 
  # We need to replace NAs with -99 for this to be correctly recognized in the stan models
