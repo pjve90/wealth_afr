@@ -334,9 +334,9 @@ set.seed(1578)
 # Figure out median age at first birth
 which(afr_age==max(afr_age)) # 19
  
- # Let's make it linear: intercept would be whether overall wealth has a positive or negative effect; slope is hether effect depends on age. We only model this for the relevant age range, that is 0-38 years of age. We assume that wealth has no effect at older ages because no women gives birth at older ages
+ # We introduce a slope that changes the effecs relative to the age. We only model this for the relevant age range, and we want to make it symmetrical so that the overall probability is similar - so from ages 11 to 18 the centered age is negative, at age 19 it is zero, from ages 20 to 33 it is positive, and after that there is no longer an effect because no individuals reproduce. Because there are more values after the centered age (individuals can have their first child for more years after the age of 19 then before), we need to reduce each of the age-specific values such that the overall probability does not change. 
  
- centeredage<-c(seq(from=-1,to=0,length.out=20),seq(from=0.05263158,to=1,length.out=19),rep(0,35))
+ centeredage<-c(rep(0,10),seq(from=-0.75,to=0,length.out=9),seq(from=0.05,to=0.75,length.out=14)^2,rep(0,41))
  
  
  # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is negative for ages younger than the median, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age). The effects are simulated on a logit scale, which are added to the logit scale baseline probability, before being transformed back into the probabilities that a woman of a given wealth will have her first child at the respective age. Given that effects are age-specific, on a logit scale, and linked to the centered age, they are best summarized through their total effect. 
@@ -348,20 +348,24 @@ which(afr_age==max(afr_age)) # 19
  aw_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
   aw_delta <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
  
+  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
+  
+  plot(c(51:1)~aw_beta[51:1],ylim=c(51,1))
+  
   # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average
   
-  ageprobs<-logit(afr_age_baseline)+aw_beta
-  ageprobs<-inv_logit(ageprobs)
+  ageprobs_rich<-logit(afr_age_baseline)+aw_beta
+  ageprobs_rich<-inv_logit(ageprobs_rich)
   # wealthy individuals have lower probabilities to have their first child at younger ages, and higher probabilities to have them at later ages
   plot(inv_logit(aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col="red") # wealthy individuals
   points(afr_age_baseline~c(1:74),col="black") # baseline probability for individuals with average wealth
   
   # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
-  std_ageprobs<-0
+  std_ageprobs_rich<-0
   for(i in 2:74){
-    std_ageprobs[i]<-(1-sum(std_ageprobs[c(1:(i-1))]))*ageprobs[i]
+    std_ageprobs_rich[i]<-(1-sum(std_ageprobs_rich[c(1:(i-1))]))*ageprobs_rich[i]
   }
-  which(cumsum(std_ageprobs)>0.5)[1]
+  which(cumsum(std_ageprobs_rich)>0.5)[1]
   
   # compare it to the expected mean age at first birth for individuals who have average wealth
   std_afr_age_baseline<-0
@@ -369,6 +373,13 @@ which(afr_age==max(afr_age)) # 19
     std_afr_age_baseline[i]<-(1-sum(std_afr_age_baseline[c(1:(i-1))]))*afr_age_baseline[i]
   }
   which(cumsum(std_afr_age_baseline)>0.5)[1]
+
+  # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
+  plot(cumsum(std_ageprobs_rich)~c(1:74),col="blue")
+  lines(cumsum(std_ageprobs_rich)~c(1:74),col="blue")
+  points(cumsum(std_afr_age_baseline)~c(1:74),col="gold")
+  lines(cumsum(std_afr_age_baseline)~c(1:74),col="gold")
+  
 
     
 # If we selected our effect sizes, we can then create the dataframe that records for each simulated women whether she had her first child at a given age or not depending on her wealth. We set it so that reproduction starts the earliest at age 13 
@@ -398,10 +409,12 @@ which(afr_age==max(afr_age)) # 19
    ifelse(sum(aw_simbirth[i,],na.rm=T)==0, wealthvsafr[i,2]<-NA,   wealthvsafr[i,2]<-which(aw_simbirth[i,]==1))
  }
  
- # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. 
+ # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. The exact values can differ a bit because the process above is stochastic.
  plot(wealthvsafr[,2]~wealthvsafr[,1])
  mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T)
  mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # the poorest individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
+ 
+ 
  
  
  # 2) short term wealth change has the largest effect
