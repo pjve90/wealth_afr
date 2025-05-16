@@ -352,13 +352,13 @@ which(afr_age==max(afr_age)) # 19
   
   plot(c(51:1)~aw_beta[51:1],ylim=c(51,1))
   
-  # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average
+  # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
   
-  ageprobs_rich<-logit(afr_age_baseline)+aw_beta
+  ageprobs_rich<-logit(afr_age_baseline)+1*aw_beta
   ageprobs_rich<-inv_logit(ageprobs_rich)
   # wealthy individuals have lower probabilities to have their first child at younger ages, and higher probabilities to have them at later ages
-  plot(inv_logit(aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col="red") # wealthy individuals
-  points(afr_age_baseline~c(1:74),col="black") # baseline probability for individuals with average wealth
+  plot(inv_logit(aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col="blue") # wealthy individuals
+  points(afr_age_baseline~c(1:74),col="gold") # baseline probability for individuals with average wealth
   
   # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
   std_ageprobs_rich<-0
@@ -366,6 +366,21 @@ which(afr_age==max(afr_age)) # 19
     std_ageprobs_rich[i]<-(1-sum(std_ageprobs_rich[c(1:(i-1))]))*ageprobs_rich[i]
   }
   which(cumsum(std_ageprobs_rich)>0.5)[1]
+  
+  
+  ageprobs_poor<-logit(afr_age_baseline)+(-1)*aw_beta
+  ageprobs_poor<-inv_logit(ageprobs_poor)
+  # wealthy individuals have lower probabilities to have their first child at younger ages, and higher probabilities to have them at later ages
+  plot(inv_logit(-aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col="black") # wealthy individuals
+  points(afr_age_baseline~c(1:74),col="gold") # baseline probability for individuals with average wealth
+  
+  # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+  std_ageprobs_poor<-0
+  for(i in 2:74){
+    std_ageprobs_poor[i]<-(1-sum(std_ageprobs_poor[c(1:(i-1))]))*ageprobs_poor[i]
+  }
+  which(cumsum(std_ageprobs_poor)>0.5)[1]
+  
   
   # compare it to the expected mean age at first birth for individuals who have average wealth
   std_afr_age_baseline<-0
@@ -375,10 +390,13 @@ which(afr_age==max(afr_age)) # 19
   which(cumsum(std_afr_age_baseline)>0.5)[1]
 
   # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
-  plot(cumsum(std_ageprobs_rich)~c(1:74),col="blue")
-  lines(cumsum(std_ageprobs_rich)~c(1:74),col="blue")
-  points(cumsum(std_afr_age_baseline)~c(1:74),col="gold")
-  lines(cumsum(std_afr_age_baseline)~c(1:74),col="gold")
+  plot(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col="blue",xlab="age",ylab="cumulative probability first birth")
+  lines(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col="blue")
+  points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col="gold")
+  lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col="gold")
+  points(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col="black")
+  lines(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col="black")
+  legend(x="bottomright",pch=c(1,1,1),col=c("black","gold","blue"),legend=c("poor","average","rich"))
   
 
     
