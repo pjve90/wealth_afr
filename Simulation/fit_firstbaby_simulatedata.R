@@ -178,7 +178,8 @@ for(i in 1:nrow(change_matrix)){
 }
 
 
-#Long-term wealth variability - 
+##Long-term wealth variability ----
+
 #create matrix
 msdw_matrix <-  matrix(nrow = nrow(std_absw_matrix),ncol=ncol(std_absw_matrix))
 
@@ -316,8 +317,6 @@ plot(afr_age~c(1:74))
 afr_age_baseline<-afr_age
 
 ##Simulate first birth based on the wealth predictors ----
-
-###Coefficients are age-specific ----
 
 # Link wealth variables to afr with independent effects at each age - exactly what we are doing in the STAN model
 
@@ -495,12 +494,12 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
 
 #####Checking the effect sizes ----  
  
- #define colour palette
+ #colour palette
  #numbers for color palette
  palette <- palette.colors(9,"Okabe-Ito")
  #select the numbers for color palette
- palette_a<-palette[1:3]
- palette_a
+ palette_b<-palette[4:6]
+ palette_b
  #shape of points
  shape <- c(15:17)
  #line type
@@ -526,35 +525,35 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
  ageprobs_minsc
  
 #Plot it!    
- plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_a[1],pch=shape[1]) # minimum change
- points(inv_logit(0.5*sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_a[2],pch=shape[2]) # average change
- points(inv_logit(sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_a[3],pch=shape[3]) #maximum change
- legend(x="topright",pch=shape,col=palette_a,legend=c("Min.","Med.","Max."))
+ plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_b[1],pch=shape[1]) # minimum change
+ points(inv_logit(0.5*sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_b[2],pch=shape[2]) # average change
+ points(inv_logit(sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_b[3],pch=shape[3]) #maximum change
+ legend(x="topright",pch=shape,col=palette_b,legend=c("Min.","Med.","Max."))
  
  #Expected mean age at first birth
  
  # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
- #maximum wealth (1)
- std_ageprobs_rich<-0
+ #maximum change (1)
+ std_ageprobs_maxsc<-0
  for(i in 2:74){
-   std_ageprobs_rich[i]<-(1-sum(std_ageprobs_rich[c(1:(i-1))]))*ageprobs_rich[i]
+   std_ageprobs_maxsc[i]<-(1-sum(std_ageprobs_maxsc[c(1:(i-1))]))*ageprobs_maxsc[i]
  }
  #check data
- std_ageprobs_rich
+ std_ageprobs_maxsc
  #expected mean age at first birth
- which(cumsum(std_ageprobs_rich)>0.5)[1]
+ which(cumsum(std_ageprobs_maxsc)>0.5)[1]
  
- #minimum wealth (-1)
- std_ageprobs_poor<-0
+ #medium change (0.5)
+ std_ageprobs_medsc<-0
  for(i in 2:74){
-   std_ageprobs_poor[i]<-(1-sum(std_ageprobs_poor[c(1:(i-1))]))*ageprobs_poor[i]
+   std_ageprobs_medsc[i]<-(1-sum(std_ageprobs_medsc[c(1:(i-1))]))*ageprobs_medsc[i]
  }
  #check data
- std_ageprobs_poor
+ std_ageprobs_medsc
  #expected mean age at first birth
- which(cumsum(std_ageprobs_poor)>0.5)[1]
+ which(cumsum(std_ageprobs_medsc)>0.5)[1]
  
- #average wealth (0)
+ #minimum change (0)
  # compare it to the expected mean age at first birth for individuals who have average wealth
  std_afr_age_baseline<-0
  for(i in 2:74){
@@ -569,16 +568,15 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
  
  # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
  #minimum wealth
- plot(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col=palette_a[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
- lines(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col=palette_a[1],lty=type[1])
+ plot(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_b[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+ lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_b[1],lty=type[2])
  #medium wealth
- points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_a[2],pch=shape[2])
- lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_a[2],lty=type[2])
+ points(cumsum(std_ageprobs_medsc)[1:41]~c(1:41),col=palette_b[2],pch=shape[2])
+ lines(cumsum(std_ageprobs_medsc)[1:41]~c(1:41),col=palette_b[2],lty=type[1])
  #maximum wealth
- points(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],pch=shape[3])
- lines(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],lty=type[3])
- legend(x="bottomright",pch=shape,lty=type,col=palette_a,legend=c("Min.","Med.","Max."))
- 
+ points(cumsum(std_ageprobs_maxsc)[1:41]~c(1:41),col=palette_b[3],pch=shape[3])
+ lines(cumsum(std_ageprobs_maxsc)[1:41]~c(1:41),col=palette_b[3],lty=type[3])
+ legend(x="bottomright",pch=shape,lty=type,col=palette_b,legend=c("Min.","Med.","Max."))
  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  sc_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -592,13 +590,129 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
      ifelse(sc_simbirth[individual,(ages-1)]==1,sc_simbirth[individual,ages]<-NA,sc_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
+  #check data
+ sc_simbirth
+ #counts per column
+ apply(sc_simbirth,2,sum,na.rm=T)
  
+ # as a rough way to check whether our simulation works, we can plot for each individual whether their age at first birth is linked to their median wealth
+ # we create a matrix with a single row for each individual where we store their median wealth and age at first birth
+ wealthvsafr<-matrix(ncol=2,nrow=nrow(sc_simbirth))
+ wealthvsafr[,1]<-medianwealthperindividual
+ for(i in 1:nrow(wealthvsafr)){
+   ifelse(sum(sc_simbirth[i,],na.rm=T)==0, wealthvsafr[i,2]<-NA,   wealthvsafr[i,2]<-which(sc_simbirth[i,]==1))
+ }
+ 
+ # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. The exact values can differ a bit because the process above is stochastic.
+ plot(wealthvsafr[,2]~wealthvsafr[,1])
+ mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
+ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
+ # poor individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
+ 
+###Long-term wealth variability ----
  
  # 3) long term wealth variability has the largest effect
  lv_beta <- 0.25*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
   lv_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
-  lv_delta <- 1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
- 
+  lv_delta <- -1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
+
+  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
+  #current wealth
+  plot(c(51:1)~lv_beta[51:1],ylim=c(51,1),pch=16)
+  abline(v=0,lty=2)
+  #short-term wealth variability
+  plot(c(51:1)~lv_gamma[51:1],ylim=c(51,1),pch=16)
+  abline(v=0,lty=2)
+  #long-term wealth variability
+  plot(c(51:1)~lv_delta[51:1],ylim=c(51,1),pch=16)
+  abline(v=0,lty=2)
+  
+  #####Checking the effect sizes ----  
+  
+  #colour palette
+  #numbers for color palette
+  palette <- palette.colors(9,"Okabe-Ito")
+  #select the numbers for color palette
+  palette_c<-palette[7:9]
+  palette_c
+  #shape of points
+  shape <- c(15:17)
+  #line type
+  type <- c(1:3)
+  
+  #Age-specific probabilities of first birth
+  
+  # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
+  #maximum long-term variability (1)
+  ageprobs_maxlv<-logit(afr_age_baseline)+1*lv_delta
+  ageprobs_maxlv<-inv_logit(ageprobs_maxlv)
+  #check data
+  ageprobs_maxlv
+  #medium long-term variability (0.5)
+  ageprobs_medlv<-logit(afr_age_baseline)+(0.5)*lv_delta
+  ageprobs_medlv<-inv_logit(ageprobs_medlv)
+  #check data
+  ageprobs_medlv
+  #minimum long-term variability (0)
+  ageprobs_minlv<-logit(afr_age_baseline)+(0)*lv_delta
+  ageprobs_minlv<-inv_logit(ageprobs_minlv)
+  #check data
+  ageprobs_minlv
+  
+  #Plot it!    
+  plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_c[1],pch=shape[1]) # minimum change
+  points(inv_logit(0.5*lv_delta+logit(afr_age_baseline))~c(1:74),col=palette_c[2],pch=shape[2]) # average change
+  points(inv_logit(lv_delta+logit(afr_age_baseline))~c(1:74),col=palette_c[3],pch=shape[3]) #maximum change
+  legend(x="topright",pch=shape,col=palette_c,legend=c("Min.","Med.","Max."))
+  
+  #Expected mean age at first birth
+  
+  # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+  #maximum change (1)
+  std_ageprobs_maxlv<-0
+  for(i in 2:74){
+    std_ageprobs_maxlv[i]<-(1-sum(std_ageprobs_maxlv[c(1:(i-1))]))*ageprobs_maxlv[i]
+  }
+  #check data
+  std_ageprobs_maxlv
+  #expected mean age at first birth
+  which(cumsum(std_ageprobs_maxlv)>0.5)[1]
+  
+  #medium change (0.5)
+  std_ageprobs_medlv<-0
+  for(i in 2:74){
+    std_ageprobs_medlv[i]<-(1-sum(std_ageprobs_medlv[c(1:(i-1))]))*ageprobs_medlv[i]
+  }
+  #check data
+  std_ageprobs_medlv
+  #expected mean age at first birth
+  which(cumsum(std_ageprobs_medlv)>0.5)[1]
+  
+  #minimum change (0)
+  # compare it to the expected mean age at first birth for individuals who have average wealth
+  std_afr_age_baseline<-0
+  for(i in 2:74){
+    std_afr_age_baseline[i]<-(1-sum(std_afr_age_baseline[c(1:(i-1))]))*afr_age_baseline[i]
+  }
+  #check data
+  std_afr_age_baseline
+  #expected mean age at first birth
+  which(cumsum(std_afr_age_baseline)>0.5)[1]
+  
+  #Cumulative probabilities of first birth
+  
+  # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
+  #minimum wealth
+  plot(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+  lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],lty=type[2])
+  #medium wealth
+  points(cumsum(std_ageprobs_medlv)[1:41]~c(1:41),col=palette_c[2],pch=shape[2])
+  lines(cumsum(std_ageprobs_medlv)[1:41]~c(1:41),col=palette_c[2],lty=type[1])
+  #maximum wealth
+  points(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],pch=shape[3])
+  lines(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],lty=type[3])
+  legend(x="bottomright",pch=shape,lty=type,col=palette_c,legend=c("Min.","Med.","Max."))
+
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  lv_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
  for(individual in 1:nrow(lv_simbirth)){
@@ -615,11 +729,11 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
  
 # # We now have all the data in the same format as in the original data. That means we can perform the same data checks, plus run the inference model, to assess our aim 1.
 
-#Fit the data in the model ----
+# Aim 1: Power analysis ----
 
-#Scenario 1: Current wealth --- 
+#Scenario 1: Current wealth ---- 
   
-# We can now prepare all the data to be analysed in the STAN model  ----
+#Prepare all the data to be analysed in the STAN model  ----
 
 #Replace NAs with -99
  for(j in 1:ncol(aw_simbirth)){
@@ -747,7 +861,7 @@ for (i in 1:30){
       31-i,
       lwd=2,col="black") 
 }
-points(c(30:1)~aw_beta[11:40],col="blue",pch=16)
+points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
 #short-term wealth variability
 plot(c(30:1)~c(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
@@ -759,7 +873,7 @@ for (i in 1:30){
     31-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_gamma[11:40],col="red",pch=16)
+points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
 #long-term wealth variability
 plot(c(30:1)~c(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
@@ -771,7 +885,7 @@ for (i in 1:30){
     31-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_delta[11:40],col="gold",pch=16)
+points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
 
 # plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
 # title("effects of absolute wealth")
@@ -782,11 +896,313 @@ points(c(30:1)~aw_delta[11:40],col="gold",pch=16)
 
 aw_full_correlations<-rbind(summary(lm(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
 
- 
- 
- 
+#Scenario 2: short-term wealth variability ----
 
- # For aim 2, we introduce missing observations in the wealth data  ----
+# 2) full wealth data, short term wealth strongest predictor
+
+#Prepare all the data to be analysed in the STAN model  ----
+
+#Replace NAs with -99
+for(j in 1:ncol(sc_simbirth)){
+  for(i in 1:nrow(sc_simbirth)){
+    if(is.na(sc_simbirth[i,j])){
+      sc_simbirth[i,j] <- -99
+    } else{
+      sc_simbirth[i,j] <- sc_simbirth[i,j]
+    }
+  }
+}
+#restrict data to ages of interest (10 to 39)
+sc_simbirth_res<-sc_simbirth[,1:40] 
+simwealth_res<-simwealth[,1:40]
+
+# We put all of this together in the list of data for the analyses
+sc_full_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
+                               A = ncol(sc_simbirth_res), #age
+                               wealth = as.matrix(simwealth_res), #current absolute wealth
+                               baby = as.matrix(sc_simbirth_res), #AFR
+                               median_wealth = medianwealthperindividual # median wealth of each individual
+)
+#check data
+sc_full_simulated_list
+
+## Compile and fit model ----
+#fit model
+sc_full_fit_simulated <- model_simulated$sample(data = sc_full_simulated_list, 
+                                                chains = 4, 
+                                                parallel_chains = 15, 
+                                                adapt_delta = 0.99,
+                                                max_treedepth = 13,
+                                                iter_warmup = 2000,
+                                                iter_sampling = 2000,
+                                                init = 0)
+
+# save fit 
+sc_full_fit_simulated_csv <- rstan::read_stan_csv(sc_full_fit_simulated$output_files())
+saveRDS(sc_full_fit_simulated_csv, "sc_full_fit_simulated_output.rds")
+#load RDS file
+sc_full_rds_simulated <- readRDS("sc_full_fit_simulated_output.rds")
+
+## Model diagnostics ----
+
+#check trace of all parameters
+#alpha
+rstan::traceplot(sc_full_rds_simulated,pars="alpha")
+#mu
+traceplot(sc_full_rds_simulated,pars="mu") 
+#mu_raw
+traceplot(sc_full_rds_simulated,pars="mu_raw")
+#mu_tau
+rstan::traceplot(sc_full_rds_simulated,pars="mu_tau")
+#mu_kappa
+rstan::traceplot(sc_full_rds_simulated,pars="mu_kappa")
+#mu_delta
+rstan::traceplot(sc_full_rds_simulated,pars="mu_delta")
+#beta_wealth_z
+traceplot(sc_full_rds_simulated,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(sc_full_rds_simulated,pars="beta_wealth_sigma") 
+#gamma_wealth
+traceplot(sc_full_rds_simulated,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(sc_full_rds_simulated,pars="gamma_wealth_sigma") 
+#delta_wealth
+traceplot(sc_full_rds_simulated,pars="delta_wealth_z") 
+#delta_wealth
+traceplot(sc_full_rds_simulated,pars="delta_wealth_sigma") 
+
+# generate output for simulation with full data where current absolute wealth has the strongest effect
+#beta z
+#create summary table for beta_z
+sc_full_tab_sim_beta_z <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_z")
+#check table
+sc_full_tab_sim_beta_z
+
+#beta sigma
+#create summary table for beta_sigma
+sc_full_tab_sim_beta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+#check table
+sc_full_tab_sim_beta_sigma
+
+#gamma z
+#create summary table for gamma_z
+sc_full_tab_sim_gamma_z <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_z")
+#check table
+sc_full_tab_sim_gamma_z
+
+#gamma sigma
+#create summary table for gamma_sigma
+sc_full_tab_sim_gamma_sigma <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+#check table
+sc_full_tab_sim_gamma_sigma
+
+#delta z
+#create summary table for delta_z
+sc_full_tab_sim_delta_z <- precis(sc_full_rds_simulated,depth=2,pars="delta_wealth_z")
+#check table
+sc_full_tab_sim_delta_z
+
+#delta sigma
+#create summary table for delta_sigma
+sc_full_tab_sim_delta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
+#check table
+sc_full_tab_sim_delta_sigma
+
+#Plot it!
+
+par(mfrow=c(1,3))
+#current wealth
+plot(c(30:1)~c(sc_full_tab_sim_beta_z[,1]*sc_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(sc_full_tab_sim_beta_z[i,1]*sc_full_tab_sim_beta_sigma[1,1])-c(sc_full_tab_sim_beta_z[i,2]*sc_full_tab_sim_beta_sigma[1,1]),
+    31-i,
+    c(sc_full_tab_sim_beta_z[i,1]*sc_full_tab_sim_beta_sigma[1,1])+c(sc_full_tab_sim_beta_z[i,2]*sc_full_tab_sim_beta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+#short-term wealth variability
+plot(c(30:1)~c(sc_full_tab_sim_gamma_z[,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])-c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])+c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+#long-term wealth variability
+plot(c(30:1)~c(sc_full_tab_sim_delta_z[,1]*sc_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(sc_full_tab_sim_delta_z[i,1]*sc_full_tab_sim_delta_sigma[1,1])-c(sc_full_tab_sim_delta_z[i,2]*sc_full_tab_sim_delta_sigma[1,1]),
+    31-i,
+    c(sc_full_tab_sim_delta_z[i,1]*sc_full_tab_sim_delta_sigma[1,1])+c(sc_full_tab_sim_delta_z[i,2]*sc_full_tab_sim_delta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+
+#Scenario 3: Long-term wealth variability ----
+
+# 3) full wealth data, long term wealth strongest predictor
+
+#Prepare all the data to be analysed in the STAN model  ----
+
+#Replace NAs with -99
+for(j in 1:ncol(lv_simbirth)){
+  for(i in 1:nrow(lv_simbirth)){
+    if(is.na(lv_simbirth[i,j])){
+      lv_simbirth[i,j] <- -99
+    } else{
+      lv_simbirth[i,j] <- lv_simbirth[i,j]
+    }
+  }
+}
+#restrict data to ages of interest (10 to 39)
+lv_simbirth_res<-lv_simbirth[,1:40] 
+simwealth_res<-simwealth[,1:40]
+
+# We put all of this together in the list of data for the analyses
+lv_full_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
+                               A = ncol(lv_simbirth_res), #age
+                               wealth = as.matrix(simwealth_res), #current absolute wealth
+                               baby = as.matrix(lv_simbirth_res), #AFR
+                               median_wealth = medianwealthperindividual # median wealth of each individual
+)
+#check data
+lv_full_simulated_list
+
+## Compile and fit model ----
+#fit model
+lv_full_fit_simulated <- model_simulated$sample(data = lv_full_simulated_list, 
+                                                chains = 4, 
+                                                parallel_chains = 15, 
+                                                adapt_delta = 0.99,
+                                                max_treedepth = 13,
+                                                iter_warmup = 2000,
+                                                iter_sampling = 2000,
+                                                init = 0)
+
+# save fit 
+lv_full_fit_simulated_csv <- rstan::read_stan_csv(lv_full_fit_simulated$output_files())
+saveRDS(lv_full_fit_simulated_csv, "lv_full_fit_simulated_output.rds")
+#load RDS file
+lv_full_rds_simulated <- readRDS("lv_full_fit_simulated_output.rds")
+
+## Model diagnostics ----
+
+#check trace of all parameters
+#alpha
+rstan::traceplot(lv_full_rds_simulated,pars="alpha")
+#mu
+traceplot(lv_full_rds_simulated,pars="mu") 
+#mu_raw
+traceplot(lv_full_rds_simulated,pars="mu_raw")
+#mu_tau
+rstan::traceplot(lv_full_rds_simulated,pars="mu_tau")
+#mu_kappa
+rstan::traceplot(lv_full_rds_simulated,pars="mu_kappa")
+#mu_delta
+rstan::traceplot(lv_full_rds_simulated,pars="mu_delta")
+#beta_wealth_z
+traceplot(lv_full_rds_simulated,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(lv_full_rds_simulated,pars="beta_wealth_sigma") 
+#gamma_wealth
+traceplot(lv_full_rds_simulated,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(lv_full_rds_simulated,pars="gamma_wealth_sigma") 
+#delta_wealth
+traceplot(lv_full_rds_simulated,pars="delta_wealth_z") 
+#delta_wealth
+traceplot(lv_full_rds_simulated,pars="delta_wealth_sigma") 
+
+# generate output for simulation with full data where current absolute wealth has the strongest effect
+#beta z
+#create summary table for beta_z
+lv_full_tab_sim_beta_z <- precis(lv_full_rds_simulated,depth=2,pars="beta_wealth_z")
+#check table
+lv_full_tab_sim_beta_z
+
+#beta sigma
+#create summary table for beta_sigma
+lv_full_tab_sim_beta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+#check table
+lv_full_tab_sim_beta_sigma
+
+#gamma z
+#create summary table for gamma_z
+lv_full_tab_sim_gamma_z <- precis(lv_full_rds_simulated,depth=2,pars="gamma_wealth_z")
+#check table
+lv_full_tab_sim_gamma_z
+
+#gamma sigma
+#create summary table for gamma_sigma
+lv_full_tab_sim_gamma_sigma <- precis(lv_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+#check table
+lv_full_tab_sim_gamma_sigma
+
+#delta z
+#create summary table for delta_z
+lv_full_tab_sim_delta_z <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_z")
+#check table
+lv_full_tab_sim_delta_z
+
+#delta sigma
+#create summary table for delta_sigma
+lv_full_tab_sim_delta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
+#check table
+lv_full_tab_sim_delta_sigma
+
+#Plot it!
+
+par(mfrow=c(1,3))
+#current wealth
+plot(c(30:1)~c(lv_full_tab_sim_beta_z[,1]*lv_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(lv_full_tab_sim_beta_z[i,1]*lv_full_tab_sim_beta_sigma[1,1])-c(lv_full_tab_sim_beta_z[i,2]*lv_full_tab_sim_beta_sigma[1,1]),
+    31-i,
+    c(lv_full_tab_sim_beta_z[i,1]*lv_full_tab_sim_beta_sigma[1,1])+c(lv_full_tab_sim_beta_z[i,2]*lv_full_tab_sim_beta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+#short-term wealth variability
+plot(c(30:1)~c(lv_full_tab_sim_gamma_z[,1]*lv_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(lv_full_tab_sim_gamma_z[i,1]*lv_full_tab_sim_gamma_sigma[1,1])-c(lv_full_tab_sim_gamma_z[i,2]*lv_full_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    c(lv_full_tab_sim_gamma_z[i,1]*lv_full_tab_sim_gamma_sigma[1,1])+c(lv_full_tab_sim_gamma_z[i,2]*lv_full_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+#long-term wealth variability
+plot(c(30:1)~c(lv_full_tab_sim_delta_z[,1]*lv_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])-c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
+    31-i,
+    c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])+c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+
+#Aim 2: Data imputation ----
+
+ # For aim 2, we introduce missing observations in the wealth data
 # The simulated wealth matrix has a complete history of wealth for each individual for each age - which is what must have happened
 # The real data only has observations of wealth of individuals at some of their ages, we do not have their full wealth history
 # We can reproduce this by varying how much of the simulated wealth data would have been observed
@@ -810,9 +1226,11 @@ sim_wealth_imputation
 # We can compare this with the observed wealth data
 std_absw_matrix
 
- 
+#Prepare all the data to be analysed in the STAN model  ----
+
 # The matrices recording the simulated missing wealth (sim_wealth_imputation) and the simulated birth data (aw_simbirth, sc_simbirth, lv_simbirth) contain missing values. 
  # We need to replace NAs with -99 for this to be correctly recognized in the stan models
+#Wealth data
  for(j in 1:ncol(sim_wealth_imputation)){
    for(i in 1:nrow(sim_wealth_imputation)){
      if(is.na(sim_wealth_imputation[i,j])){
@@ -822,46 +1240,474 @@ std_absw_matrix
      }
    }
  }
- 
- for(j in 1:ncol(aw_simbirth)){
-   for(i in 1:nrow(aw_simbirth)){
-     if(is.na(aw_simbirth[i,j])){
-       aw_simbirth[i,j] <- -99
-     } else{
-       aw_simbirth[i,j] <- aw_simbirth[i,j]
-     }
-   }
- }
- 
- for(j in 1:ncol(sc_simbirth)){
-   for(i in 1:nrow(sc_simbirth)){
-     if(is.na(sc_simbirth[i,j])){
-       sc_simbirth[i,j] <- -99
-     } else{
-       sc_simbirth[i,j] <- sc_simbirth[i,j]
-     }
-   }
- }
 
- for(j in 1:ncol(lv_simbirth)){
-   for(i in 1:nrow(lv_simbirth)){
-     if(is.na(lv_simbirth[i,j])){
-       lv_simbirth[i,j] <- -99
-     } else{
-       lv_simbirth[i,j] <- lv_simbirth[i,j]
-     }
-   }
- }
- 
+#Scenario 4: Current wealth with incomplete data ---- 
 
-# To speed up the analyses, we restrict the matrices to only those columns with the ages where women could have had their first child, we do not need to estimate associations at other ages.  
- aw_simbirth_res<-aw_simbirth[,11:40] 
- sc_simbirth_res<-sc_simbirth[,11:40] 
- lv_simbirth_res<-lv_simbirth[,11:40] 
- simwealth_res<-simwealth[,11:40]
- sim_wealth_imputation_res<-sim_wealth_imputation[,11:40]
+#Prepare all the data to be analysed in the STAN model  ----
+
+#Replace NAs with -99
+for(j in 1:ncol(aw_simbirth)){
+  for(i in 1:nrow(aw_simbirth)){
+    if(is.na(aw_simbirth[i,j])){
+      aw_simbirth[i,j] <- -99
+    } else{
+      aw_simbirth[i,j] <- aw_simbirth[i,j]
+    }
+  }
+}
+#restrict data to ages of interest (10 to 39)
+aw_simbirth_res<-aw_simbirth[,1:40] 
+sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
+
+# 4) incomplete wealth data, absolute wealth strongest predictor
+# We put all of this together in the list of data for the analyses
+aw_imputed_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
+                                  A = ncol(aw_simbirth_res), #age
+                                  wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  median_wealth = medianwealthperindividual # median wealth of each individual
+)
+#check data
+aw_imputed_simulated_list
+
+
+## Compile and fit model ----
+# compile model
+model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+
+#fit model
+aw_imputed_fit_simulated <- model_simulated$sample(data = aw_imputed_simulated_list, 
+                                                   chains = 4, 
+                                                   parallel_chains = 15, 
+                                                   adapt_delta = 0.99,
+                                                   max_treedepth = 13,
+                                                   iter_warmup = 2000,
+                                                   iter_sampling = 2000,
+                                                   init = 0)
+
+# save fit 
+aw_imputed_fit_simulated_csv <- rstan::read_stan_csv(aw_imputed_fit_simulated$output_files())
+saveRDS(aw_imputed_fit_simulated_csv, "aw_imputed_fit_simulated_output.rds")
+#load RDS file
+aw_imputed_rds_simulated <- readRDS("aw_imputed_fit_simulated_output.rds")
+
+## Model diagnostics ----
+
+#check trace of all parameters
+#alpha
+rstan::traceplot(aw_imputed_rds_simulated,pars="alpha")
+#mu
+traceplot(aw_imputed_rds_simulated,pars="mu") 
+#mu_raw
+traceplot(aw_imputed_rds_simulated,pars="mu_raw")
+#mu_tau
+rstan::traceplot(aw_imputed_rds_simulated,pars="mu_tau")
+#mu_kappa
+rstan::traceplot(aw_imputed_rds_simulated,pars="mu_kappa")
+#mu_delta
+rstan::traceplot(aw_imputed_rds_simulated,pars="mu_delta")
+#beta_wealth_z
+traceplot(aw_imputed_rds_simulated,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(aw_imputed_rds_simulated,pars="beta_wealth_sigma") 
+#gamma_wealth
+traceplot(aw_imputed_rds_simulated,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(aw_imputed_rds_simulated,pars="gamma_wealth_sigma") 
+#delta_wealth
+traceplot(aw_imputed_rds_simulated,pars="delta_wealth_z") 
+#delta_wealth
+traceplot(aw_imputed_rds_simulated,pars="delta_wealth_sigma") 
+
+# generate output for simulation with full data where current absolute wealth has the strongest effect
+#beta z
+#create summary table for beta_z
+aw_imputed_tab_sim_beta_z <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
+#check table
+aw_imputed_tab_sim_beta_z
+
+#beta sigma
+#create summary table for beta_sigma
+aw_imputed_tab_sim_beta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
+#check table
+aw_imputed_tab_sim_beta_sigma
+
+#gamma z
+#create summary table for gamma_z
+aw_imputed_tab_sim_gamma_z <- precis(aw_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
+#check table
+aw_imputed_tab_sim_gamma_z
+
+#gamma sigma
+#create summary table for gamma_sigma
+aw_imputed_tab_sim_gamma_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+#check table
+aw_imputed_tab_sim_gamma_sigma
+
+#delta z
+#create summary table for delta_z
+aw_imputed_tab_sim_delta_z <- precis(aw_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
+#check table
+aw_imputed_tab_sim_delta_z
+
+#delta sigma
+#create summary table for delta_sigma
+aw_imputed_tab_sim_delta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
+#check table
+aw_imputed_tab_sim_delta_sigma
+
+#Plot it!
+
+par(mfrow=c(1,3))
+#current wealth
+plot(c(30:1)~c(aw_imputed_tab_sim_beta_z[,1]*aw_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(aw_imputed_tab_sim_beta_z[i,1]*aw_imputed_tab_sim_beta_sigma[1,1])-c(aw_imputed_tab_sim_beta_z[i,2]*aw_imputed_tab_sim_beta_sigma[1,1]),
+    31-i,
+    c(aw_imputed_tab_sim_beta_z[i,1]*aw_imputed_tab_sim_beta_sigma[1,1])+c(aw_imputed_tab_sim_beta_z[i,2]*aw_imputed_tab_sim_beta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+#short-term wealth variability
+plot(c(30:1)~c(aw_imputed_tab_sim_gamma_z[,1]*aw_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(aw_imputed_tab_sim_gamma_z[i,1]*aw_imputed_tab_sim_gamma_sigma[1,1])-c(aw_imputed_tab_sim_gamma_z[i,2]*aw_imputed_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    c(aw_imputed_tab_sim_gamma_z[i,1]*aw_imputed_tab_sim_gamma_sigma[1,1])+c(aw_imputed_tab_sim_gamma_z[i,2]*aw_imputed_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+#long-term wealth variability
+plot(c(30:1)~c(aw_imputed_tab_sim_delta_z[,1]*aw_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(aw_imputed_tab_sim_delta_z[i,1]*aw_imputed_tab_sim_delta_sigma[1,1])-c(aw_imputed_tab_sim_delta_z[i,2]*aw_imputed_tab_sim_delta_sigma[1,1]),
+    31-i,
+    c(aw_imputed_tab_sim_delta_z[i,1]*aw_imputed_tab_sim_delta_sigma[1,1])+c(aw_imputed_tab_sim_delta_z[i,2]*aw_imputed_tab_sim_delta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+
+#Scenario 5: Shor-term wealth variability with incomplete data ---- 
+
+#Prepare all the data to be analysed in the STAN model  ----
+
+#Replace NAs with -99
+for(j in 1:ncol(sc_simbirth)){
+  for(i in 1:nrow(sc_simbirth)){
+    if(is.na(sc_simbirth[i,j])){
+      sc_simbirth[i,j] <- -99
+    } else{
+      sc_simbirth[i,j] <- sc_simbirth[i,j]
+    }
+  }
+}
+#restrict data to ages of interest (10 to 39)
+sc_simbirth_res<-sc_simbirth[,1:40] 
+sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
+
+# 4) incomplete wealth data, absolute wealth strongest predictor
+# We put all of this together in the list of data for the analyses
+sc_imputed_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
+                                  A = ncol(sc_simbirth_res), #age
+                                  wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                  baby = as.matrix(sc_simbirth_res), #AFR
+                                  median_wealth = medianwealthperindividual # median wealth of each individual
+)
+#check data
+sc_imputed_simulated_list
+
+
+## Compile and fit model ----
+# compile model
+model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+
+#fit model
+sc_imputed_fit_simulated <- model_simulated$sample(data = sc_imputed_simulated_list, 
+                                                   chains = 4, 
+                                                   parallel_chains = 15, 
+                                                   adapt_delta = 0.99,
+                                                   max_treedepth = 13,
+                                                   iter_warmup = 2000,
+                                                   iter_sampling = 2000,
+                                                   init = 0)
+
+# save fit 
+sc_imputed_fit_simulated_csv <- rstan::read_stan_csv(sc_imputed_fit_simulated$output_files())
+saveRDS(sc_imputed_fit_simulated_csv, "sc_imputed_fit_simulated_output.rds")
+#load RDS file
+sc_imputed_rds_simulated <- readRDS("sc_imputed_fit_simulated_output.rds")
+
+## Model diagnostics ----
+
+#check trace of all parameters
+#alpha
+rstan::traceplot(sc_imputed_rds_simulated,pars="alpha")
+#mu
+traceplot(sc_imputed_rds_simulated,pars="mu") 
+#mu_raw
+traceplot(sc_imputed_rds_simulated,pars="mu_raw")
+#mu_tau
+rstan::traceplot(sc_imputed_rds_simulated,pars="mu_tau")
+#mu_kappa
+rstan::traceplot(sc_imputed_rds_simulated,pars="mu_kappa")
+#mu_delta
+rstan::traceplot(sc_imputed_rds_simulated,pars="mu_delta")
+#beta_wealth_z
+traceplot(sc_imputed_rds_simulated,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(sc_imputed_rds_simulated,pars="beta_wealth_sigma") 
+#gamma_wealth
+traceplot(sc_imputed_rds_simulated,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(sc_imputed_rds_simulated,pars="gamma_wealth_sigma") 
+#delta_wealth
+traceplot(sc_imputed_rds_simulated,pars="delta_wealth_z") 
+#delta_wealth
+traceplot(sc_imputed_rds_simulated,pars="delta_wealth_sigma") 
+
+# generate output for simulation with full data where current absolute wealth has the strongest effect
+#beta z
+#create summary table for beta_z
+sc_imputed_tab_sim_beta_z <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
+#check table
+sc_imputed_tab_sim_beta_z
+
+#beta sigma
+#create summary table for beta_sigma
+sc_imputed_tab_sim_beta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
+#check table
+sc_imputed_tab_sim_beta_sigma
+
+#gamma z
+#create summary table for gamma_z
+sc_imputed_tab_sim_gamma_z <- precis(sc_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
+#check table
+sc_imputed_tab_sim_gamma_z
+
+#gamma sigma
+#create summary table for gamma_sigma
+sc_imputed_tab_sim_gamma_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+#check table
+sc_imputed_tab_sim_gamma_sigma
+
+#delta z
+#create summary table for delta_z
+sc_imputed_tab_sim_delta_z <- precis(sc_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
+#check table
+sc_imputed_tab_sim_delta_z
+
+#delta sigma
+#create summary table for delta_sigma
+sc_imputed_tab_sim_delta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
+#check table
+sc_imputed_tab_sim_delta_sigma
+
+#Plot it!
+
+par(mfrow=c(1,3))
+#current wealth
+plot(c(30:1)~c(sc_imputed_tab_sim_beta_z[,1]*sc_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(sc_imputed_tab_sim_beta_z[i,1]*sc_imputed_tab_sim_beta_sigma[1,1])-c(sc_imputed_tab_sim_beta_z[i,2]*sc_imputed_tab_sim_beta_sigma[1,1]),
+    31-i,
+    c(sc_imputed_tab_sim_beta_z[i,1]*sc_imputed_tab_sim_beta_sigma[1,1])+c(sc_imputed_tab_sim_beta_z[i,2]*sc_imputed_tab_sim_beta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+#short-term wealth variability
+plot(c(30:1)~c(sc_imputed_tab_sim_gamma_z[,1]*sc_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(sc_imputed_tab_sim_gamma_z[i,1]*sc_imputed_tab_sim_gamma_sigma[1,1])-c(sc_imputed_tab_sim_gamma_z[i,2]*sc_imputed_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    c(sc_imputed_tab_sim_gamma_z[i,1]*sc_imputed_tab_sim_gamma_sigma[1,1])+c(sc_imputed_tab_sim_gamma_z[i,2]*sc_imputed_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+#long-term wealth variability
+plot(c(30:1)~c(sc_imputed_tab_sim_delta_z[,1]*sc_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(sc_imputed_tab_sim_delta_z[i,1]*sc_imputed_tab_sim_delta_sigma[1,1])-c(sc_imputed_tab_sim_delta_z[i,2]*sc_imputed_tab_sim_delta_sigma[1,1]),
+    31-i,
+    c(sc_imputed_tab_sim_delta_z[i,1]*sc_imputed_tab_sim_delta_sigma[1,1])+c(sc_imputed_tab_sim_delta_z[i,2]*sc_imputed_tab_sim_delta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+
+#Scenario 6: Long-term wealth variability with incomplete data ---- 
+
+#Prepare all the data to be analysed in the STAN model  ----
+
+#Replace NAs with -99
+for(j in 1:ncol(lv_simbirth)){
+  for(i in 1:nrow(lv_simbirth)){
+    if(is.na(lv_simbirth[i,j])){
+      lv_simbirth[i,j] <- -99
+    } else{
+      lv_simbirth[i,j] <- lv_simbirth[i,j]
+    }
+  }
+}
+#restrict data to ages of interest (10 to 39)
+lv_simbirth_res<-lv_simbirth[,1:40] 
+sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
+
+# 4) incomplete wealth data, absolute wealth strongest predictor
+# We put all of this together in the list of data for the analyses
+lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
+                                  A = ncol(lv_simbirth_res), #age
+                                  wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                  baby = as.matrix(lv_simbirth_res), #AFR
+                                  median_wealth = medianwealthperindividual # median wealth of each individual
+)
+#check data
+lv_imputed_simulated_list
+
+
+## Compile and fit model ----
+# compile model
+model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+
+#fit model
+lv_imputed_fit_simulated <- model_simulated$sample(data = lv_imputed_simulated_list, 
+                                                   chains = 4, 
+                                                   parallel_chains = 15, 
+                                                   adapt_delta = 0.99,
+                                                   max_treedepth = 13,
+                                                   iter_warmup = 2000,
+                                                   iter_sampling = 2000,
+                                                   init = 0)
+
+# save fit 
+lv_imputed_fit_simulated_csv <- rstan::read_stan_csv(lv_imputed_fit_simulated$output_files())
+saveRDS(lv_imputed_fit_simulated_csv, "lv_imputed_fit_simulated_output.rds")
+#load RDS file
+lv_imputed_rds_simulated <- readRDS("lv_imputed_fit_simulated_output.rds")
+
+## Model diagnostics ----
+
+#check trace of all parameters
+#alpha
+rstan::traceplot(lv_imputed_rds_simulated,pars="alpha")
+#mu
+traceplot(lv_imputed_rds_simulated,pars="mu") 
+#mu_raw
+traceplot(lv_imputed_rds_simulated,pars="mu_raw")
+#mu_tau
+rstan::traceplot(lv_imputed_rds_simulated,pars="mu_tau")
+#mu_kappa
+rstan::traceplot(lv_imputed_rds_simulated,pars="mu_kappa")
+#mu_delta
+rstan::traceplot(lv_imputed_rds_simulated,pars="mu_delta")
+#beta_wealth_z
+traceplot(lv_imputed_rds_simulated,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(lv_imputed_rds_simulated,pars="beta_wealth_sigma") 
+#gamma_wealth
+traceplot(lv_imputed_rds_simulated,pars="gamma_wealth_z") 
+#gamma_wealth
+traceplot(lv_imputed_rds_simulated,pars="gamma_wealth_sigma") 
+#delta_wealth
+traceplot(lv_imputed_rds_simulated,pars="delta_wealth_z") 
+#delta_wealth
+traceplot(lv_imputed_rds_simulated,pars="delta_wealth_sigma") 
+
+# generate output for simulation with full data where current absolute wealth has the strongest effect
+#beta z
+#create summary table for beta_z
+lv_imputed_tab_sim_beta_z <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
+#check table
+lv_imputed_tab_sim_beta_z
+
+#beta sigma
+#create summary table for beta_sigma
+lv_imputed_tab_sim_beta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
+#check table
+lv_imputed_tab_sim_beta_sigma
+
+#gamma z
+#create summary table for gamma_z
+lv_imputed_tab_sim_gamma_z <- precis(lv_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
+#check table
+lv_imputed_tab_sim_gamma_z
+
+#gamma sigma
+#create summary table for gamma_sigma
+lv_imputed_tab_sim_gamma_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+#check table
+lv_imputed_tab_sim_gamma_sigma
+
+#delta z
+#create summary table for delta_z
+lv_imputed_tab_sim_delta_z <- precis(lv_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
+#check table
+lv_imputed_tab_sim_delta_z
+
+#delta sigma
+#create summary table for delta_sigma
+lv_imputed_tab_sim_delta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
+#check table
+lv_imputed_tab_sim_delta_sigma
+
+#Plot it!
+
+par(mfrow=c(1,3))
+#current wealth
+plot(c(30:1)~c(lv_imputed_tab_sim_beta_z[,1]*lv_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(lv_imputed_tab_sim_beta_z[i,1]*lv_imputed_tab_sim_beta_sigma[1,1])-c(lv_imputed_tab_sim_beta_z[i,2]*lv_imputed_tab_sim_beta_sigma[1,1]),
+    31-i,
+    c(lv_imputed_tab_sim_beta_z[i,1]*lv_imputed_tab_sim_beta_sigma[1,1])+c(lv_imputed_tab_sim_beta_z[i,2]*lv_imputed_tab_sim_beta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+#short-term wealth variability
+plot(c(30:1)~c(lv_imputed_tab_sim_gamma_z[,1]*lv_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(lv_imputed_tab_sim_gamma_z[i,1]*lv_imputed_tab_sim_gamma_sigma[1,1])-c(lv_imputed_tab_sim_gamma_z[i,2]*lv_imputed_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    c(lv_imputed_tab_sim_gamma_z[i,1]*lv_imputed_tab_sim_gamma_sigma[1,1])+c(lv_imputed_tab_sim_gamma_z[i,2]*lv_imputed_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+#long-term wealth variability
+plot(c(30:1)~c(lv_imputed_tab_sim_delta_z[,1]*lv_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(lv_imputed_tab_sim_delta_z[i,1]*lv_imputed_tab_sim_delta_sigma[1,1])-c(lv_imputed_tab_sim_delta_z[i,2]*lv_imputed_tab_sim_delta_sigma[1,1]),
+    31-i,
+    c(lv_imputed_tab_sim_delta_z[i,1]*lv_imputed_tab_sim_delta_sigma[1,1])+c(lv_imputed_tab_sim_delta_z[i,2]*lv_imputed_tab_sim_delta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+
+
  
-#------------------------------------------------------------------------------------------------
 
  
  # There sometimes seems to be an issue with extracting the posterior sample with the rstan command above
@@ -877,525 +1723,6 @@ std_absw_matrix
  
 
  
- # 2) full wealth data, short term wealth strongest predictor
- # We put all of this together in the list of data for the analyses
- sc_full_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
-                                A = ncol(sc_simbirth_res), #age
-                                wealth = as.matrix(simwealth_res), #current absolute wealth
-                                baby = as.matrix(sc_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
- )
- #check data
- sc_full_simulated_list
  
- ## Compile and fit model ----
- #fit model
- sc_full_fit_simulated <- model_simulated$sample(data = sc_full_simulated_list, 
-                                                 chains = 4, 
-                                                 parallel_chains = 15, 
-                                                 adapt_delta = 0.99,
-                                                 max_treedepth = 13,
-                                                 iter_warmup = 2000,
-                                                 iter_sampling = 2000,
-                                                 init = 0)
- 
- # save fit 
- sc_full_fit_simulated_csv <- rstan::read_stan_csv(sc_full_fit_simulated$output_files())
- saveRDS(sc_full_fit_simulated_csv, "sc_full_fit_simulated_output.rds")
- #load RDS file
- sc_full_rds_simulated <- readRDS("sc_full_fit_simulated_output.rds")
- 
- ## Model diagnostics ----
- 
- #check trace of all parameters
- #alpha
- rstan::traceplot(sc_full_rds_simulated,pars="alpha")
- #mu
- traceplot(sc_full_rds_simulated,pars="mu") 
- #mu_raw
- traceplot(sc_full_rds_simulated,pars="mu_raw")
- #mu_tau
- rstan::traceplot(sc_full_rds_simulated,pars="mu_tau")
- #mu_kappa
- rstan::traceplot(sc_full_rds_simulated,pars="mu_kappa")
- #mu_delta
- rstan::traceplot(sc_full_rds_simulated,pars="mu_delta")
- #beta_wealth_z
- traceplot(sc_full_rds_simulated,pars="beta_wealth_z") 
- #beta_wealth_sigma
- traceplot(sc_full_rds_simulated,pars="beta_wealth_sigma") 
- #gamma_wealth
- traceplot(sc_full_rds_simulated,pars="gamma_wealth_z") 
- #gamma_wealth
- traceplot(sc_full_rds_simulated,pars="gamma_wealth_sigma") 
- #delta_wealth
- traceplot(sc_full_rds_simulated,pars="delta_wealth_z") 
- #delta_wealth
- traceplot(sc_full_rds_simulated,pars="delta_wealth_sigma") 
- 
- 
- # 3) full wealth data, long term wealth strongest predictor
- # We put all of this together in the list of data for the analyses
- lv_full_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
-                                A = ncol(lv_simbirth_res), #age
-                                wealth = as.matrix(simwealth_res), #current absolute wealth
-                                baby = as.matrix(lv_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
- )
- #check data
- lv_full_simulated_list
- 
- ## Compile and fit model ----
- #fit model
- lv_full_fit_simulated <- model_simulated$sample(data = lv_full_simulated_list, 
-                                                 chains = 4, 
-                                                 parallel_chains = 15, 
-                                                 adapt_delta = 0.99,
-                                                 max_treedepth = 13,
-                                                 iter_warmup = 2000,
-                                                 iter_sampling = 2000,
-                                                 init = 0)
- 
- # save fit 
- lv_full_fit_simulated_csv <- rstan::read_stan_csv(lv_full_fit_simulated$output_files())
- saveRDS(lv_full_fit_simulated_csv, "lv_full_fit_simulated_output.rds")
- #load RDS file
- lv_full_rds_simulated <- readRDS("lv_full_fit_simulated_output.rds")
- 
- ## Model diagnostics ----
- 
- #check trace of all parameters
- #alpha
- rstan::traceplot(lv_full_rds_simulated,pars="alpha")
- #mu
- traceplot(lv_full_rds_simulated,pars="mu") 
- #mu_raw
- traceplot(lv_full_rds_simulated,pars="mu_raw")
- #mu_tau
- rstan::traceplot(lv_full_rds_simulated,pars="mu_tau")
- #mu_kappa
- rstan::traceplot(lv_full_rds_simulated,pars="mu_kappa")
- #mu_delta
- rstan::traceplot(lv_full_rds_simulated,pars="mu_delta")
- #beta_wealth_z
- traceplot(lv_full_rds_simulated,pars="beta_wealth_z") 
- #beta_wealth_sigma
- traceplot(lv_full_rds_simulated,pars="beta_wealth_sigma") 
- #gamma_wealth
- traceplot(lv_full_rds_simulated,pars="gamma_wealth_z") 
- #gamma_wealth
- traceplot(lv_full_rds_simulated,pars="gamma_wealth_sigma") 
- #delta_wealth
- traceplot(lv_full_rds_simulated,pars="delta_wealth_z") 
- #delta_wealth
- traceplot(lv_full_rds_simulated,pars="delta_wealth_sigma") 
- 
- 
- # 4) incomplete wealth data, absolute wealth strongest predictor
- # We put all of this together in the list of data for the analyses
- aw_imputed_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
-                                A = ncol(aw_simbirth_res), #age
-                                wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                baby = as.matrix(aw_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
- )
- 
- ## Compile and fit model ----
- #fit model
- aw_imputed_fit_simulated <- model_simulated$sample(data = aw_imputed_simulated_list, 
-                                                    chains = 4, 
-                                                    parallel_chains = 15, 
-                                                    adapt_delta = 0.99,
-                                                    max_treedepth = 13,
-                                                    iter_warmup = 2000,
-                                                    iter_sampling = 2000,
-                                                    init = 0)
- 
- # save fit 
- aw_imputed_fit_simulated_csv <- rstan::read_stan_csv(aw_imputed_fit_simulated$output_files())
- saveRDS(aw_imputed_fit_simulated_csv, "aw_imputed_fit_simulated_output.rds")
- #load RDS file
- aw_imputed_rds_simulated <- readRDS("aw_imputed_fit_simulated_output.rds")
- 
- 
- # 5) imputed wealth data, short term wealth strongest predictor
- # We put all of this together in the list of data for the analyses
- sc_imputed_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
-                                A = ncol(sc_simbirth_res), #age
-                                wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                baby = as.matrix(sc_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
- )
- #check data
- simulated_list
- 
- ## Compile and fit model ----
- #fit model
- sc_imputed_fit_simulated <- model_simulated$sample(data = sc_imputed_simulated_list, 
-                                                    chains = 4, 
-                                                    parallel_chains = 15, 
-                                                    adapt_delta = 0.99,
-                                                    max_treedepth = 13,
-                                                    iter_warmup = 2000,
-                                                    iter_sampling = 2000,
-                                                    init = 0)
- 
- # save fit 
- sc_imputed_fit_simulated_csv <- rstan::read_stan_csv(sc_imputed_fit_simulated$output_files())
- saveRDS(sc_imputed_fit_simulated_csv, "sc_imputed_fit_simulated_output.rds")
- #load RDS file
- sc_imputed_rds_simulated <- readRDS("sc_imputed_fit_simulated_output.rds")
- 
- 
- # 6) imputed wealth data, long term wealth strongest predictor
- # We put all of this together in the list of data for the analyses
- lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
-                                A = ncol(lv_simbirth_res), #age
-                                wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                baby = as.matrix(lv_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
- )
- #check data
- simulated_list
- 
- ## Compile and fit model ----
- #fit model
- lv_imputed_fit_simulated <- model_simulated$sample(data = lv_imputed_simulated_list, 
-                                                    chains = 4, 
-                                                    parallel_chains = 15, 
-                                                    adapt_delta = 0.99,
-                                                    max_treedepth = 13,
-                                                    iter_warmup = 2000,
-                                                    iter_sampling = 2000,
-                                                    init = 0)
- 
- # save fit 
- lv_imputed_fit_simulated_csv <- rstan::read_stan_csv(lv_imputed_fit_simulated$output_files())
- saveRDS(lv_imputed_fit_simulated_csv, "lv_imputed_fit_simulated_output.rds")
- #load RDS file
- lv_imputed_rds_simulated <- readRDS("lv_imputed_fit_simulated_output.rds")
- 
- 
- 
- 
- 
- # generate output for simulation with full data where current absolute wealth has the strongest effect
- #beta z
- #create summary table for beta_z
- aw_full_tab_sim_beta_z <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_z")
- #check table
- aw_full_tab_sim_beta_z
- 
- #beta sigma
- #create summary table for beta_sigma
- aw_full_tab_sim_beta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
- #check table
- aw_full_tab_sim_beta_sigma
- 
- #gamma z
- #create summary table for gamma_z
- aw_full_tab_sim_gamma_z <- precis(aw_full_rds_simulated,depth=2,pars="gamma_wealth_z")
- #check table
- aw_full_tab_sim_gamma_z
- 
- #gamma sigma
- #create summary table for gamma_sigma
- aw_full_tab_sim_gamma_sigma <- precis(aw_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
- #check table
- aw_full_tab_sim_gamma_sigma
- 
- #delta z
- #create summary table for delta_z
- aw_full_tab_sim_delta_z <- precis(aw_full_rds_simulated,depth=2,pars="delta_wealth_z")
- #check table
- aw_full_tab_sim_delta_z
- 
- #delta sigma
- #create summary table for delta_sigma
- aw_full_tab_sim_delta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
- #check table
- aw_full_tab_sim_delta_sigma
- 
- 
- pdf("aw_full_plot.pdf")
- par(mfrow=c(1,3))
- plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
- title("effects of absolute wealth")
- plot(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
- title("effects of short-term wealth")
- plot(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
- title("effects of long-term wealth")
- dev.off()
- 
- aw_full_correlations<-rbind(summary(lm(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
- 
- write.csv(aw_full_correlations,file="aw_full_correlations.csv")
- 
- 
- # generate output for simulation with full data where short-term wealth change has the strongest effect
- #beta z
- #create summary table for beta_z
- sc_full_tab_sim_beta_z <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_z")
- #check table
- sc_full_tab_sim_beta_z
- 
- #beta sigma
- #create summary table for beta_sigma
- sc_full_tab_sim_beta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
- #check table
- sc_full_tab_sim_beta_sigma
- 
- #gamma z
- #create summary table for gamma_z
- sc_full_tab_sim_gamma_z <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_z")
- #check table
- sc_full_tab_sim_gamma_z
- 
- #gamma sigma
- #create summary table for gamma_sigma
- sc_full_tab_sim_gamma_sigma <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
- #check table
- sc_full_tab_sim_gamma_sigma
- 
- #delta z
- #create summary table for delta_z
- sc_full_tab_sim_delta_z <- precis(sc_full_rds_simulated,depth=2,pars="delta_wealth_z")
- #check table
- sc_full_tab_sim_delta_z
- 
- #delta sigma
- #create summary table for delta_sigma
- sc_full_tab_sim_delta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
- #check table
- sc_full_tab_sim_delta_sigma
- 
- pdf("sc_full_plot.pdf")
- par(mfrow=c(1,3))
- plot(sc_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40],xlab="simulated beta",ylab="estimated beta")
- title("effects of absolute wealth")
- plot(sc_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
- title("effects of short-term wealth")
- plot(sc_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40],xlab="simulated delta",ylab="estimated delta")
- title("effects of long-term wealth")
- dev.off()
- 
- sc_full_correlations<-rbind(summary(lm(sc_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~sc_beta[11:40])),summary(lm(sc_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~sc_gamma[11:40])),summary(lm(sc_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~sc_delta[11:40])))
- 
- write.csv(sc_full_correlations,file="sc_full_correlations.csv")
  
 
- # generate output for simulation with full data where long-term wealth variability has the strongest effect
- #beta z
- #create summary table for beta_z
- lv_full_tab_sim_beta_z <- precis(lv_full_rds_simulated,depth=2,pars="beta_wealth_z")
- #check table
- lv_full_tab_sim_beta_z
- 
- #beta sigma
- #create summary table for beta_sigma
- tab_sim_beta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
- #check table
- tab_sim_beta_sigma
- 
- #gamma z
- #create summary table for gamma_z
- lv_full_tab_sim_gamma_z <- precis(lv_full_rds_simulated,depth=2,pars="gamma_wealth_z")
- #check table
- lv_full_tab_sim_gamma_z
- 
- #gamma sigma
- #create summary table for gamma_sigma
- lv_full_tab_sim_gamma_sigma <- precis(lv_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
- #check table
- lv_full_tab_sim_gamma_sigma
- 
- #delta z
- #create summary table for delta_z
- lv_full_tab_sim_delta_z <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_z")
- #check table
- lv_full_tab_sim_delta_z
- 
- #delta sigma
- #create summary table for delta_sigma
- lv_full_tab_sim_delta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
- #check table
- lv_full_tab_sim_delta_sigma
- 
- pdf("lv_full_plot.pdf")
- par(mfrow=c(1,3))
- plot(lv_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~lv_beta[11:40],xlab="simulated beta",ylab="estimated beta")
- title("effects of absolute wealth")
- plot(lv_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
- title("effects of short-term wealth")
- plot(lv_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40],xlab="simulated delta",ylab="estimated delta")
- title("effects of long-term wealth")
- dev.off()
- 
- lv_full_correlations<-rbind(summary(lm(lv_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~lv_beta[11:40])),summary(lm(lv_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~lv_gamma[11:40])),summary(lm(lv_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~lv_delta[11:40])))
- 
- write.csv(lv_full_correlations,file="lv_full_correlations.csv")
- 
-  
- 
- 
- # generate output for simulation with imputed data where current absolute wealth has the strongest effect
- #beta z
- #create summary table for beta_z
- aw_imputed_tab_sim_beta_z <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
- #check table
- aw_imputed_tab_sim_beta_z
- 
- #beta sigma
- #create summary table for beta_sigma
- aw_imupted_tab_sim_beta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
- #check table
- aw_imupted_tab_sim_beta_sigma
- 
- #gamma z
- #create summary table for gamma_z
- aw_imputed_tab_sim_gamma_z <- precis(aw_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
- #check table
- aw_imputed_tab_sim_gamma_z
- 
- #gamma sigma
- #create summary table for gamma_sigma
- aw_imputed_tab_sim_gamma_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
- #check table
- aw_imputed_tab_sim_gamma_sigma
- 
- #delta z
- #create summary table for delta_z
- aw_imputed_tab_sim_delta_z <- precis(aw_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
- #check table
- aw_imputed_tab_sim_delta_z
- 
- #delta sigma
- #create summary table for delta_sigma
- aw_imputed_tab_sim_delta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
- #check table
- aw_imputed_tab_sim_delta_sigma
- 
- pdf("aw_imputed_plot.pdf")
- par(mfrow=c(1,3))
- plot(aw_imputed_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
- title("effects of absolute wealth")
- plot(aw_imputed_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
- title("effects of short-term wealth")
- plot(aw_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
- title("effects of long-term wealth")
- dev.off()
- 
- aw_imputed_correlations<-rbind(summary(lm(aw_imputed_tab_sim_beta_z[,1]*aw_imputed_tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_imputed_tab_sim_gamma_z[,1]*aw_imputed_tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_imputed_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
- 
- write.csv(aw_imputed_correlations,file="aw_imputed_correlations.csv")
- 
- 
- 
- 
- # generate output for simulation with imputed data where short-term wealth change has the strongest effect
- #beta z
- #create summary table for beta_z
- sc_imputed_tab_sim_beta_z <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
- #check table
- sc_imputed_tab_sim_beta_z
- 
- #beta sigma
- #create summary table for beta_sigma
- sc_imputed_tab_sim_beta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
- #check table
- sc_imputed_tab_sim_beta_sigma
- 
- #gamma z
- #create summary table for gamma_z
- sc_imputed_tab_sim_gamma_z <- precis(sc_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
- #check table
- sc_imputed_tab_sim_gamma_z
- 
- #gamma sigma
- #create summary table for gamma_sigma
- sc_imputed_tab_sim_gamma_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
- #check table
- sc_imputed_tab_sim_gamma_sigma
- 
- #delta z
- #create summary table for delta_z
- sc_imputed_tab_sim_delta_z <- precis(sc_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
- #check table
- sc_imputed_tab_sim_delta_z
- 
- #delta sigma
- #create summary table for delta_sigma
- sc_imputed_tab_sim_delta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
- #check table
- sc_imputed_tab_sim_delta_sigma
- 
- 
- pdf("sc_imputed_plot.pdf")
- par(mfrow=c(1,3))
- plot(sc_imputed_tab_sim_beta_z[,1]*sc_imputed_tab_sim_beta_sigma[1,]~sc_beta[11:40],xlab="simulated beta",ylab="estimated beta")
- title("effects of absolute wealth")
- plot(sc_imputed_tab_sim_gamma_z[,1]*sc_imputed_tab_sim_gamma_sigma[1,]~sc_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
- title("effects of short-term wealth")
- plot(sc_imputed_tab_sim_delta_z[,1]*sc_imputed_tab_sim_delta_sigma[1,]~sc_delta[11:40],xlab="simulated delta",ylab="estimated delta")
- title("effects of long-term wealth")
- dev.off()
- 
- sc_imputed_correlations<-rbind(summary(lm(sc_imputed_tab_sim_beta_z[,1]*sc_imputed_tab_sim_beta_sigma[1,]~sc_beta[11:40])),summary(lm(sc_imputed_tab_sim_gamma_z[,1]*sc_imputed_tab_sim_gamma_sigma[1,]~sc_gamma[11:40])),summary(lm(sc_imputed_tab_sim_delta_z[,1]*sc_imputed_tab_sim_delta_sigma[1,]~sc_delta[11:40])))
- 
- write.csv(sc_imputed_correlations,file="sc_imputed_correlations.csv")
- 
- 
- 
- 
- # generate output for simulation with imputed data where long-term wealth variability has the strongest effect
- #beta z
- #create summary table for beta_z
- lv_imputed_tab_sim_beta_z <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
- #check table
- lv_imputed_tab_sim_beta_z
- 
- #beta sigma
- #create summary table for beta_sigma
- lv_imputed_tab_sim_beta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
- #check table
- lv_imputed_tab_sim_beta_sigma
- 
- #gamma z
- #create summary table for gamma_z
- lv_imputed_tab_sim_gamma_z <- precis(lv_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
- #check table
- lv_imputed_tab_sim_gamma_z
- 
- #gamma sigma
- #create summary table for gamma_sigma
- lv_imputed_tab_sim_gamma_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
- #check table
- lv_imputed_tab_sim_gamma_sigma
- 
- #delta z
- #create summary table for delta_z
- lv_imputed_tab_sim_delta_z <- precis(lv_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
- #check table
- lv_imputed_tab_sim_delta_z
- 
- #delta sigma
- #create summary table for delta_sigma
- lv_imputed_tab_sim_delta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
- #check table
- lv_imputed_tab_sim_delta_sigma
-
- 
- pdf("lv_imputed_plot.pdf")
- par(mfrow=c(1,3))
- plot(lv_imputed_tab_sim_beta_z[,1]*lv_imputed_tab_sim_beta_sigma[1,]~vl_beta[11:40],xlab="simulated beta",ylab="estimated beta")
- title("effects of absolute wealth")
- plot(lv_imputed_tab_sim_gamma_z[,1]*lv_imputed_tab_sim_gamma_sigma[1,]~lv_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
- title("effects of short-term wealth")
- plot(lv_imputed_tab_sim_delta_z[,1]*lv_imputed_tab_sim_delta_sigma[1,]~lv_delta[11:40],xlab="simulated delta",ylab="estimated delta")
- title("effects of long-term wealth")
- dev.off()
- 
- lv_imputed_correlations<-rbind(summary(lm(lv_imputed_tab_sim_beta_z[,1]*lv_imputed_tab_sim_beta_sigma[1,]~lv_beta[11:40])),summary(lm(lv_imputed_tab_sim_gamma_z[,1]*lv_imputed_tab_sim_gamma_sigma[1,]~lv_gamma[11:40])),summary(lm(lv_imputed_tab_sim_delta_z[,1]*lv_imputed_tab_sim_delta_sigma[1,]~lv_delta[11:40])))
- 
- write.csv(lv_imputed_correlations,file="lv_imputed_correlations.csv")
- 
