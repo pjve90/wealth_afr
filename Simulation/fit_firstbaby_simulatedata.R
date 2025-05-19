@@ -208,8 +208,6 @@ medianwealthperindividual[is.na(medianwealthperindividual)]<-rnorm(sum(is.na(med
 #check the data
 medianwealthperindividual
 
-
-
 # Data  simulation ----
 
 # For repeatability and to allow comparison between scenarios 1 and 2 (power with imputation of wealth data), we set a seed whenever there is a random processes of the simulation generate the same outcome each time the simulation is run. In case you want to check independent runs of the simulation, blank out the lines with the command set.seed
@@ -325,7 +323,6 @@ afr_age_baseline<-afr_age
 
 set.seed(1578) 
 
-
 # We specifically want to assess whether our model can detect instances where one of the wealth variables shifts the age of first birth to be earlier or later. For the shift toward earlier or later, we introduce another predictor, mean-centered age: the median age at first birth is set to 0, ages younger than he median get negative values, ages older than the median positive values (calculated simply as age - median(age). Later births now means that probabilities to have the first birth would be higher at ages older than the median age, earlier birth means that probabilities to have the first birth would be higher at ages younter than the median age. We use this together with the wealth predictors.
  # Here we make the beta_wealth parameters age dependent - that is, they would be negative at younger ages and positive at older ages. I think it would mean we have a betawealth in the model that itself is not just coming rom a prior, but based on another model
  # betamuwealth <- centeredage * betamuwealth
@@ -342,71 +339,116 @@ which(afr_age==max(afr_age)) # 19
  # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is negative for ages younger than the median, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age). The effects are simulated on a logit scale, which are added to the logit scale baseline probability, before being transformed back into the probabilities that a woman of a given wealth will have her first child at the respective age. Given that effects are age-specific, on a logit scale, and linked to the centered age, they are best summarized through their total effect. 
  
  # We perform three simulations - 1) absolute wealth has a 4x larger effect, 2) short term wealth change has a 4x larger effect, 3) long term wealth variability has a 4x larger effect. We assume that even the strongest effect only leads to a relatively small shift in the age at first birth.
+
+#### Current wealth ----
  
 # 1) absolute wealth has the largest effect, this creates the age-specific effects for the three wealth predictors
  aw_beta <- 1*centeredage # positive slope means wealthy have afr later
  aw_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
   aw_delta <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
  
-  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
-  
-  plot(c(51:1)~aw_beta[51:1],ylim=c(51,1))
-  
-  # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
-  
+# To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
+#current wealth
+  plot(c(51:1)~aw_beta[51:1],ylim=c(51,1),pch=16)
+  abline(v=0,lty=2)
+#short-term wealth variability
+  plot(c(51:1)~aw_gamma[51:1],ylim=c(51,1),pch=16)
+  abline(v=0,lty=2)
+#long-term wealth variability
+  plot(c(51:1)~aw_delta[51:1],ylim=c(51,1),pch=16)
+  abline(v=0,lty=2)
+
+#####Checking the effect sizes ----  
+
+#define colour palette
+#numbers for color palette
+palette <- palette.colors(9,"Okabe-Ito")
+#select the numbers for color palette
+palette_a<-palette[1:3]
+palette_a
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c(1:3)
+
+#Age-specific probabilities of first birth
+
+# We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
+  #maximum wealth (1)
   ageprobs_rich<-logit(afr_age_baseline)+1*aw_beta
   ageprobs_rich<-inv_logit(ageprobs_rich)
-  # wealthy individuals have lower probabilities to have their first child at younger ages, and higher probabilities to have them at later ages
-  plot(inv_logit(aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col="blue") # wealthy individuals
-  points(afr_age_baseline~c(1:74),col="gold") # baseline probability for individuals with average wealth
+  #check data
+  ageprobs_rich
+  #minimum wealth (-1)
+  ageprobs_poor<-logit(afr_age_baseline)+(-1)*aw_beta
+  ageprobs_poor<-inv_logit(ageprobs_poor)
+  #check data
+  ageprobs_poor
+
+#the age-specific probabilities for medium wealth are the age-specific probabilities of first birth, since the average wealth is equal to zero as it is standardised
+
+#Plot it!    
+  plot(inv_logit(-aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col=palette_a[1],pch=shape[1]) # poor individuals
+  points(afr_age_baseline~c(1:74),col=palette_a[2],pch=shape[2]) # baseline probability for individuals with average wealth
+  points(inv_logit(aw_beta+logit(afr_age_baseline))~c(1:74),col=palette_a[3],pch=shape[3]) #rich individuals
+  legend(x="topright",pch=shape,col=palette_a,legend=c("Min.","Med.","Max."))
   
-  # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+#Expected mean age at first birth
+  
+# We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+  #maximum wealth (1)
   std_ageprobs_rich<-0
   for(i in 2:74){
     std_ageprobs_rich[i]<-(1-sum(std_ageprobs_rich[c(1:(i-1))]))*ageprobs_rich[i]
   }
+  #check data
+  std_ageprobs_rich
+  #expected mean age at first birth
   which(cumsum(std_ageprobs_rich)>0.5)[1]
   
-  
-  ageprobs_poor<-logit(afr_age_baseline)+(-1)*aw_beta
-  ageprobs_poor<-inv_logit(ageprobs_poor)
-  # wealthy individuals have lower probabilities to have their first child at younger ages, and higher probabilities to have them at later ages
-  plot(inv_logit(-aw_beta+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col="black") # wealthy individuals
-  points(afr_age_baseline~c(1:74),col="gold") # baseline probability for individuals with average wealth
-  
-  # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+  #minimum wealth (-1)
   std_ageprobs_poor<-0
   for(i in 2:74){
     std_ageprobs_poor[i]<-(1-sum(std_ageprobs_poor[c(1:(i-1))]))*ageprobs_poor[i]
   }
+  #check data
+  std_ageprobs_poor
+  #expected mean age at first birth
   which(cumsum(std_ageprobs_poor)>0.5)[1]
   
-  
+  #average wealth (0)
   # compare it to the expected mean age at first birth for individuals who have average wealth
   std_afr_age_baseline<-0
   for(i in 2:74){
     std_afr_age_baseline[i]<-(1-sum(std_afr_age_baseline[c(1:(i-1))]))*afr_age_baseline[i]
   }
+  #check data
+  std_afr_age_baseline
+  #expected mean age at first birth
   which(cumsum(std_afr_age_baseline)>0.5)[1]
 
-  # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
-  plot(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col="blue",xlab="age",ylab="cumulative probability first birth")
-  lines(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col="blue")
-  points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col="gold")
-  lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col="gold")
-  points(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col="black")
-  lines(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col="black")
-  legend(x="bottomright",pch=c(1,1,1),col=c("black","gold","blue"),legend=c("poor","average","rich"))
+#Cumulative probabilities of first birth
+  
+# plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
+  #minimum wealth
+  plot(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col=palette_a[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+  lines(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col=palette_a[1],lty=type[1])
+  #medium wealth
+  points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_a[2],pch=shape[2])
+  lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_a[2],lty=type[2])
+  #maximum wealth
+  points(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],pch=shape[3])
+  lines(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],lty=type[3])
+  legend(x="bottomright",pch=shape,lty=type,col=palette_a,legend=c("Min.","Med.","Max."))
   
 
-    
-# If we selected our effect sizes, we can then create the dataframe that records for each simulated women whether she had her first child at a given age or not depending on her wealth. We set it so that reproduction starts the earliest at age 13 
+# If we selected our effect sizes, we can then create the dataframe that records for each simulated women whether she had her first child at a given age or not depending on her wealth. We set it so that reproduction starts the earliest at age 11 
  aw_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
  for(individual in 1:nrow(aw_simbirth)){
-   for(ages in 1:12){
+   for(ages in 1:10){
    aw_simbirth[individual,ages]<-0
    }
-   for(ages in 13:ncol(aw_simbirth)){
+   for(ages in 11:ncol(aw_simbirth)){
      ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*aw_beta[ages]+simshorttermwealth[individual,ages]*aw_gamma[ages]+simlongtermwealth[individual,ages]*aw_delta[ages]
      ageprob<-inv_logit(ageprob)
      ifelse(aw_simbirth[individual,(ages-1)]==1,aw_simbirth[individual,ages]<-NA,aw_simbirth[individual,ages]<-rbinom(1,1,ageprob))
@@ -419,26 +461,124 @@ which(afr_age==max(afr_age)) # 19
  #counts per column
  apply(aw_simbirth,2,sum,na.rm=T)
 
- # as a rough way to check whether our simulation works, we can plot for each individual whether their age at first birth is linked to their median wealth
- # we create a matrix with a single row for each individual where we store their median wealth and age at first birth
- wealthvsafr<-matrix(ncol=2,nrow=nrow(aw_simbirth))
- wealthvsafr[,1]<-medianwealthperindividual
- for(i in 1:nrow(wealthvsafr)){
-   ifelse(sum(aw_simbirth[i,],na.rm=T)==0, wealthvsafr[i,2]<-NA,   wealthvsafr[i,2]<-which(aw_simbirth[i,]==1))
- }
- 
- # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. The exact values can differ a bit because the process above is stochastic.
- plot(wealthvsafr[,2]~wealthvsafr[,1])
- mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T)
- mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # the poorest individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
- 
- 
- 
- 
+# as a rough way to check whether our simulation works, we can plot for each individual whether their age at first birth is linked to their median wealth
+# we create a matrix with a single row for each individual where we store their median wealth and age at first birth
+wealthvsafr<-matrix(ncol=2,nrow=nrow(aw_simbirth))
+wealthvsafr[,1]<-medianwealthperindividual
+for(i in 1:nrow(wealthvsafr)){
+  ifelse(sum(aw_simbirth[i,],na.rm=T)==0, wealthvsafr[i,2]<-NA,   wealthvsafr[i,2]<-which(aw_simbirth[i,]==1))
+}
+
+# The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. The exact values can differ a bit because the process above is stochastic.
+plot(wealthvsafr[,2]~wealthvsafr[,1])
+mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
+mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
+# poor individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
+
+####Short-term wealth variabiliy ----
+
  # 2) short term wealth change has the largest effect
  sc_beta <- 0.25*centeredage # positive slope means wealthy have afr later, effect is 4x less than for short term wealth changes
  sc_gamma <- -1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier
  sc_delta <- -0.25*centeredage # negative slope means individuals with higher long-term wealth variability have afr later, effect is 4x less than for short term wealth changes
+
+ # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
+ #current wealth
+ plot(c(51:1)~sc_beta[51:1],ylim=c(51,1),pch=16)
+ abline(v=0,lty=2)
+ #short-term wealth variability
+ plot(c(51:1)~sc_gamma[51:1],ylim=c(51,1),pch=16)
+ abline(v=0,lty=2)
+ #long-term wealth variability
+ plot(c(51:1)~sc_delta[51:1],ylim=c(51,1),pch=16)
+ abline(v=0,lty=2)
+
+#####Checking the effect sizes ----  
+ 
+ #define colour palette
+ #numbers for color palette
+ palette <- palette.colors(9,"Okabe-Ito")
+ #select the numbers for color palette
+ palette_a<-palette[1:3]
+ palette_a
+ #shape of points
+ shape <- c(15:17)
+ #line type
+ type <- c(1:3)
+ 
+ #Age-specific probabilities of first birth
+ 
+ # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
+ #maximum change (1)
+ ageprobs_maxsc<-logit(afr_age_baseline)+1*sc_gamma
+ ageprobs_maxsc<-inv_logit(ageprobs_maxsc)
+ #check data
+ ageprobs_maxsc
+ #medium change (0.5)
+ ageprobs_medsc<-logit(afr_age_baseline)+(0.5)*sc_gamma
+ ageprobs_medsc<-inv_logit(ageprobs_medsc)
+ #check data
+ ageprobs_medsc
+ #minimum change (0)
+ ageprobs_minsc<-logit(afr_age_baseline)+(0)*sc_gamma
+ ageprobs_minsc<-inv_logit(ageprobs_minsc)
+ #check data
+ ageprobs_minsc
+ 
+#Plot it!    
+ plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_a[1],pch=shape[1]) # minimum change
+ points(inv_logit(0.5*sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_a[2],pch=shape[2]) # average change
+ points(inv_logit(sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_a[3],pch=shape[3]) #maximum change
+ legend(x="topright",pch=shape,col=palette_a,legend=c("Min.","Med.","Max."))
+ 
+ #Expected mean age at first birth
+ 
+ # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+ #maximum wealth (1)
+ std_ageprobs_rich<-0
+ for(i in 2:74){
+   std_ageprobs_rich[i]<-(1-sum(std_ageprobs_rich[c(1:(i-1))]))*ageprobs_rich[i]
+ }
+ #check data
+ std_ageprobs_rich
+ #expected mean age at first birth
+ which(cumsum(std_ageprobs_rich)>0.5)[1]
+ 
+ #minimum wealth (-1)
+ std_ageprobs_poor<-0
+ for(i in 2:74){
+   std_ageprobs_poor[i]<-(1-sum(std_ageprobs_poor[c(1:(i-1))]))*ageprobs_poor[i]
+ }
+ #check data
+ std_ageprobs_poor
+ #expected mean age at first birth
+ which(cumsum(std_ageprobs_poor)>0.5)[1]
+ 
+ #average wealth (0)
+ # compare it to the expected mean age at first birth for individuals who have average wealth
+ std_afr_age_baseline<-0
+ for(i in 2:74){
+   std_afr_age_baseline[i]<-(1-sum(std_afr_age_baseline[c(1:(i-1))]))*afr_age_baseline[i]
+ }
+ #check data
+ std_afr_age_baseline
+ #expected mean age at first birth
+ which(cumsum(std_afr_age_baseline)>0.5)[1]
+ 
+ #Cumulative probabilities of first birth
+ 
+ # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
+ #minimum wealth
+ plot(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col=palette_a[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+ lines(cumsum(std_ageprobs_poor)[1:41]~c(1:41),col=palette_a[1],lty=type[1])
+ #medium wealth
+ points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_a[2],pch=shape[2])
+ lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_a[2],lty=type[2])
+ #maximum wealth
+ points(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],pch=shape[3])
+ lines(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],lty=type[3])
+ legend(x="bottomright",pch=shape,lty=type,col=palette_a,legend=c("Min.","Med.","Max."))
+ 
  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  sc_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
@@ -475,7 +615,133 @@ which(afr_age==max(afr_age)) # 19
  
 # # We now have all the data in the same format as in the original data. That means we can perform the same data checks, plus run the inference model, to assess our aim 1.
 
+#Fit the data in the model ----
 
+#Scenario 1: Current wealth --- 
+  
+# We can now prepare all the data to be analysed in the STAN model  ----
+# We will run six analyses: three with the full wealth dataset, and three with the wealth dataset which has missing values
+
+ # 1) full wealth data, absolute wealth strongest predictor
+ # We put all of this together in the list of data for the analyses
+ aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
+                                A = ncol(aw_simbirth_res), #age
+                                wealth = as.matrix(simwealth_res), #current absolute wealth
+                                baby = as.matrix(aw_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
+ )
+ #check data
+ aw_full_simulated_list
+ 
+ ## Compile and fit model ----
+ # compile model
+ model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+ 
+ #fit model
+ aw_full_fit_simulated <- model_simulated$sample(data = aw_full_simulated_list, 
+                                                 chains = 4, 
+                                                 parallel_chains = 15, 
+                                                 adapt_delta = 0.99,
+                                                 max_treedepth = 13,
+                                                 iter_warmup = 2000,
+                                                 iter_sampling = 2000,
+                                                 init = 0)
+ 
+ 
+ 
+ # save fit 
+ aw_full_fit_simulated_csv <- rstan::read_stan_csv(aw_full_fit_simulated$output_files())
+ saveRDS(aw_full_fit_simulated_csv, "aw_full_fit_simulated_output.rds")
+ #load RDS file
+ aw_full_rds_simulated <- readRDS("aw_full_fit_simulated_output.rds")
+ 
+ ## Model diagnostics ----
+ 
+ #check trace of all parameters
+ #alpha
+ rstan::traceplot(aw_full_rds_simulated,pars="alpha")
+ #mu
+ traceplot(aw_full_rds_simulated,pars="mu") 
+ #mu_raw
+ traceplot(aw_full_rds_simulated,pars="mu_raw")
+ #mu_tau
+ rstan::traceplot(aw_full_rds_simulated,pars="mu_tau")
+ #mu_kappa
+ rstan::traceplot(aw_full_rds_simulated,pars="mu_kappa")
+ #mu_delta
+ rstan::traceplot(aw_full_rds_simulated,pars="mu_delta")
+ #beta_wealth_z
+ traceplot(aw_full_rds_simulated,pars="beta_wealth_z") 
+ #beta_wealth_sigma
+ traceplot(aw_full_rds_simulated,pars="beta_wealth_sigma") 
+ #gamma_wealth
+ traceplot(aw_full_rds_simulated,pars="gamma_wealth_z") 
+ #gamma_wealth
+ traceplot(aw_full_rds_simulated,pars="gamma_wealth_sigma") 
+ #delta_wealth
+ traceplot(aw_full_rds_simulated,pars="delta_wealth_z") 
+ #delta_wealth
+ traceplot(aw_full_rds_simulated,pars="delta_wealth_sigma") 
+ 
+ # generate output for simulation with full data where current absolute wealth has the strongest effect
+ #beta z
+ #create summary table for beta_z
+ aw_full_tab_sim_beta_z <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_z")
+ #check table
+ aw_full_tab_sim_beta_z
+ 
+ #beta sigma
+ #create summary table for beta_sigma
+ aw_full_tab_sim_beta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ #check table
+ aw_full_tab_sim_beta_sigma
+ 
+ #gamma z
+ #create summary table for gamma_z
+ aw_full_tab_sim_gamma_z <- precis(aw_full_rds_simulated,depth=2,pars="gamma_wealth_z")
+ #check table
+ aw_full_tab_sim_gamma_z
+ 
+ #gamma sigma
+ #create summary table for gamma_sigma
+ aw_full_tab_sim_gamma_sigma <- precis(aw_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+ #check table
+ aw_full_tab_sim_gamma_sigma
+ 
+ #delta z
+ #create summary table for delta_z
+ aw_full_tab_sim_delta_z <- precis(aw_full_rds_simulated,depth=2,pars="delta_wealth_z")
+ #check table
+ aw_full_tab_sim_delta_z
+ 
+ #delta sigma
+ #create summary table for delta_sigma
+ aw_full_tab_sim_delta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
+ #check table
+ aw_full_tab_sim_delta_sigma
+ 
+#Plot it!
+
+par(mfrow=c(1,3))
+plot(aw_full_tab_sim_beta_z)
+points(aw_beta[11:40]~c(40:11),col="blue")
+plot(aw_full_tab_sim_gamma_z)
+points(aw_gamma[11:40]~c(40:11),col="red")
+plot(aw_full_tab_sim_delta_z)
+points(aw_delta[11:40]~c(40:11),col="gold")
+
+# plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
+# title("effects of absolute wealth")
+# plot(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
+# title("effects of short-term wealth")
+# plot(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
+# title("effects of long-term wealth")
+
+aw_full_correlations<-rbind(summary(lm(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
+
+ 
+ 
+ 
 
  # For aim 2, we introduce missing observations in the wealth data  ----
 # The simulated wealth matrix has a complete history of wealth for each individual for each age - which is what must have happened
@@ -553,71 +819,6 @@ std_absw_matrix
  sim_wealth_imputation_res<-sim_wealth_imputation[,11:40]
  
 #------------------------------------------------------------------------------------------------
- # We can now prepare all the data to be analysed in the STAN model  ----
- # We will run six analyses: three with the full wealth dataset, and three with the wealth dataset which has missing values
- 
- 
- # 1) full wealth data, absolute wealth strongest predictor
- # We put all of this together in the list of data for the analyses
- aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
-                        A = ncol(aw_simbirth_res), #age
-                        wealth = as.matrix(simwealth_res), #current absolute wealth
-                        baby = as.matrix(aw_simbirth_res), #AFR
-                        median_wealth = medianwealthperindividual # median wealth of each individual
- )
- #check data
- aw_full_simulated_list
- 
- ## Compile and fit model ----
- # compile model
- model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
- 
- #fit model
- aw_full_fit_simulated <- model_simulated$sample(data = aw_full_simulated_list, 
-                                         chains = 4, 
-                                         parallel_chains = 15, 
-                                         adapt_delta = 0.99,
-                                         max_treedepth = 13,
-                                         iter_warmup = 2000,
-                                         iter_sampling = 2000,
-                                         init = 0)
- 
- 
- 
- # save fit 
- aw_full_fit_simulated_csv <- rstan::read_stan_csv(aw_full_fit_simulated$output_files())
- saveRDS(aw_full_fit_simulated_csv, "aw_full_fit_simulated_output.rds")
- #load RDS file
- aw_full_rds_simulated <- readRDS("aw_full_fit_simulated_output.rds")
- 
- ## Model diagnostics ----
- 
- #check trace of all parameters
- #alpha
- rstan::traceplot(aw_full_rds_simulated,pars="alpha")
- #mu
- traceplot(aw_full_rds_simulated,pars="mu") 
- #mu_raw
- traceplot(aw_full_rds_simulated,pars="mu_raw")
- #mu_tau
- rstan::traceplot(aw_full_rds_simulated,pars="mu_tau")
- #mu_kappa
- rstan::traceplot(aw_full_rds_simulated,pars="mu_kappa")
- #mu_delta
- rstan::traceplot(aw_full_rds_simulated,pars="mu_delta")
- #beta_wealth_z
- traceplot(aw_full_rds_simulated,pars="beta_wealth_z") 
- #beta_wealth_sigma
- traceplot(aw_full_rds_simulated,pars="beta_wealth_sigma") 
- #gamma_wealth
- traceplot(aw_full_rds_simulated,pars="gamma_wealth_z") 
- #gamma_wealth
- traceplot(aw_full_rds_simulated,pars="gamma_wealth_sigma") 
- #delta_wealth
- traceplot(aw_full_rds_simulated,pars="delta_wealth_z") 
- #delta_wealth
- traceplot(aw_full_rds_simulated,pars="delta_wealth_sigma") 
- 
 
  
  # There sometimes seems to be an issue with extracting the posterior sample with the rstan command above
