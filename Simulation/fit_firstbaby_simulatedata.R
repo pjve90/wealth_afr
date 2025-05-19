@@ -620,8 +620,21 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
 #Scenario 1: Current wealth --- 
   
 # We can now prepare all the data to be analysed in the STAN model  ----
-# We will run six analyses: three with the full wealth dataset, and three with the wealth dataset which has missing values
 
+#Replace NAs with -99
+ for(j in 1:ncol(aw_simbirth)){
+   for(i in 1:nrow(aw_simbirth)){
+     if(is.na(aw_simbirth[i,j])){
+       aw_simbirth[i,j] <- -99
+     } else{
+       aw_simbirth[i,j] <- aw_simbirth[i,j]
+     }
+   }
+ }
+#restrict data to ages of interest (10 to 39)
+aw_simbirth_res<-aw_simbirth[,1:40] 
+simwealth_res<-simwealth[,1:40]
+ 
  # 1) full wealth data, absolute wealth strongest predictor
  # We put all of this together in the list of data for the analyses
  aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
@@ -723,12 +736,42 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
 #Plot it!
 
 par(mfrow=c(1,3))
-plot(aw_full_tab_sim_beta_z)
-points(aw_beta[11:40]~c(40:11),col="blue")
-plot(aw_full_tab_sim_gamma_z)
-points(aw_gamma[11:40]~c(40:11),col="red")
-plot(aw_full_tab_sim_delta_z)
-points(aw_delta[11:40]~c(40:11),col="gold")
+#current wealth
+plot(c(30:1)~c(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+    segments(
+      c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])-c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
+      31-i,
+      c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])+c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
+      31-i,
+      lwd=2,col="black") 
+}
+points(c(30:1)~aw_beta[11:40],col="blue",pch=16)
+#short-term wealth variability
+plot(c(30:1)~c(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(aw_full_tab_sim_gamma_z[i,1]*aw_full_tab_sim_gamma_sigma[1,1])-c(aw_full_tab_sim_gamma_z[i,2]*aw_full_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    c(aw_full_tab_sim_gamma_z[i,1]*aw_full_tab_sim_gamma_sigma[1,1])+c(aw_full_tab_sim_gamma_z[i,2]*aw_full_tab_sim_gamma_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~aw_gamma[11:40],col="red",pch=16)
+#long-term wealth variability
+plot(c(30:1)~c(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 1:30){
+  segments(
+    c(aw_full_tab_sim_delta_z[i,1]*aw_full_tab_sim_delta_sigma[1,1])-c(aw_full_tab_sim_delta_z[i,2]*aw_full_tab_sim_delta_sigma[1,1]),
+    31-i,
+    c(aw_full_tab_sim_delta_z[i,1]*aw_full_tab_sim_delta_sigma[1,1])+c(aw_full_tab_sim_delta_z[i,2]*aw_full_tab_sim_delta_sigma[1,1]),
+    31-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~aw_delta[11:40],col="gold",pch=16)
 
 # plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
 # title("effects of absolute wealth")
