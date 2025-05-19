@@ -851,41 +851,41 @@ simwealth_res<-simwealth[,1:40]
 
 par(mfrow=c(1,3))
 #current wealth
-plot(c(30:1)~c(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(aw_full_tab_sim_beta_z[11:40,1]*aw_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
     segments(
       c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])-c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
-      31-i,
+      41-i,
       c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])+c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
-      31-i,
+      41-i,
       lwd=2,col="black") 
 }
-points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(aw_full_tab_sim_gamma_z[11:40,1]*aw_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(aw_full_tab_sim_gamma_z[i,1]*aw_full_tab_sim_gamma_sigma[1,1])-c(aw_full_tab_sim_gamma_z[i,2]*aw_full_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     c(aw_full_tab_sim_gamma_z[i,1]*aw_full_tab_sim_gamma_sigma[1,1])+c(aw_full_tab_sim_gamma_z[i,2]*aw_full_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(aw_full_tab_sim_delta_z[11:40,1]*aw_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(aw_full_tab_sim_delta_z[i,1]*aw_full_tab_sim_delta_sigma[1,1])-c(aw_full_tab_sim_delta_z[i,2]*aw_full_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     c(aw_full_tab_sim_delta_z[i,1]*aw_full_tab_sim_delta_sigma[1,1])+c(aw_full_tab_sim_delta_z[i,2]*aw_full_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 # plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
 # title("effects of absolute wealth")
@@ -1010,43 +1010,45 @@ sc_full_tab_sim_delta_sigma
 
 #Plot it!
 
+#Plot it!
+
 par(mfrow=c(1,3))
 #current wealth
-plot(c(30:1)~c(sc_full_tab_sim_beta_z[,1]*sc_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_full_tab_sim_beta_z[11:40,1]*sc_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(sc_full_tab_sim_beta_z[i,1]*sc_full_tab_sim_beta_sigma[1,1])-c(sc_full_tab_sim_beta_z[i,2]*sc_full_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     c(sc_full_tab_sim_beta_z[i,1]*sc_full_tab_sim_beta_sigma[1,1])+c(sc_full_tab_sim_beta_z[i,2]*sc_full_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(sc_full_tab_sim_gamma_z[,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])-c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])+c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(sc_full_tab_sim_delta_z[,1]*sc_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_full_tab_sim_delta_z[11:40,1]*sc_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(sc_full_tab_sim_delta_z[i,1]*sc_full_tab_sim_delta_sigma[1,1])-c(sc_full_tab_sim_delta_z[i,2]*sc_full_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     c(sc_full_tab_sim_delta_z[i,1]*sc_full_tab_sim_delta_sigma[1,1])+c(sc_full_tab_sim_delta_z[i,2]*sc_full_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 #Scenario 3: Long-term wealth variability ----
 
@@ -1164,41 +1166,41 @@ lv_full_tab_sim_delta_sigma
 
 par(mfrow=c(1,3))
 #current wealth
-plot(c(30:1)~c(lv_full_tab_sim_beta_z[,1]*lv_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(lv_full_tab_sim_beta_z[11:40,1]*lv_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(lv_full_tab_sim_beta_z[i,1]*lv_full_tab_sim_beta_sigma[1,1])-c(lv_full_tab_sim_beta_z[i,2]*lv_full_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     c(lv_full_tab_sim_beta_z[i,1]*lv_full_tab_sim_beta_sigma[1,1])+c(lv_full_tab_sim_beta_z[i,2]*lv_full_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(lv_full_tab_sim_gamma_z[,1]*lv_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(lv_full_tab_sim_gamma_z[11:40,1]*lv_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(lv_full_tab_sim_gamma_z[i,1]*lv_full_tab_sim_gamma_sigma[1,1])-c(lv_full_tab_sim_gamma_z[i,2]*lv_full_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     c(lv_full_tab_sim_gamma_z[i,1]*lv_full_tab_sim_gamma_sigma[1,1])+c(lv_full_tab_sim_gamma_z[i,2]*lv_full_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(lv_full_tab_sim_delta_z[,1]*lv_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(lv_full_tab_sim_delta_z[11:40,1]*lv_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])-c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])+c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 #Aim 2: Data imputation ----
 
@@ -1360,41 +1362,41 @@ aw_imputed_tab_sim_delta_sigma
 
 par(mfrow=c(1,3))
 #current wealth
-plot(c(30:1)~c(aw_imputed_tab_sim_beta_z[,1]*aw_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(aw_imputed_tab_sim_beta_z[11:40,1]*aw_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(aw_imputed_tab_sim_beta_z[i,1]*aw_imputed_tab_sim_beta_sigma[1,1])-c(aw_imputed_tab_sim_beta_z[i,2]*aw_imputed_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     c(aw_imputed_tab_sim_beta_z[i,1]*aw_imputed_tab_sim_beta_sigma[1,1])+c(aw_imputed_tab_sim_beta_z[i,2]*aw_imputed_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(aw_imputed_tab_sim_gamma_z[,1]*aw_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(aw_imputed_tab_sim_gamma_z[11:40,1]*aw_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(aw_imputed_tab_sim_gamma_z[i,1]*aw_imputed_tab_sim_gamma_sigma[1,1])-c(aw_imputed_tab_sim_gamma_z[i,2]*aw_imputed_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     c(aw_imputed_tab_sim_gamma_z[i,1]*aw_imputed_tab_sim_gamma_sigma[1,1])+c(aw_imputed_tab_sim_gamma_z[i,2]*aw_imputed_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(aw_imputed_tab_sim_delta_z[,1]*aw_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(aw_imputed_tab_sim_delta_z[11:40,1]*aw_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(aw_imputed_tab_sim_delta_z[i,1]*aw_imputed_tab_sim_delta_sigma[1,1])-c(aw_imputed_tab_sim_delta_z[i,2]*aw_imputed_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     c(aw_imputed_tab_sim_delta_z[i,1]*aw_imputed_tab_sim_delta_sigma[1,1])+c(aw_imputed_tab_sim_delta_z[i,2]*aw_imputed_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 #Scenario 5: Shor-term wealth variability with incomplete data ---- 
 
@@ -1515,41 +1517,41 @@ sc_imputed_tab_sim_delta_sigma
 
 par(mfrow=c(1,3))
 #current wealth
-plot(c(30:1)~c(sc_imputed_tab_sim_beta_z[,1]*sc_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_imputed_tab_sim_beta_z[11:40,1]*sc_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(sc_imputed_tab_sim_beta_z[i,1]*sc_imputed_tab_sim_beta_sigma[1,1])-c(sc_imputed_tab_sim_beta_z[i,2]*sc_imputed_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     c(sc_imputed_tab_sim_beta_z[i,1]*sc_imputed_tab_sim_beta_sigma[1,1])+c(sc_imputed_tab_sim_beta_z[i,2]*sc_imputed_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(sc_imputed_tab_sim_gamma_z[,1]*sc_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_imputed_tab_sim_gamma_z[11:40,1]*sc_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(sc_imputed_tab_sim_gamma_z[i,1]*sc_imputed_tab_sim_gamma_sigma[1,1])-c(sc_imputed_tab_sim_gamma_z[i,2]*sc_imputed_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     c(sc_imputed_tab_sim_gamma_z[i,1]*sc_imputed_tab_sim_gamma_sigma[1,1])+c(sc_imputed_tab_sim_gamma_z[i,2]*sc_imputed_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(sc_imputed_tab_sim_delta_z[,1]*sc_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_imputed_tab_sim_delta_z[11:40,1]*sc_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(sc_imputed_tab_sim_delta_z[i,1]*sc_imputed_tab_sim_delta_sigma[1,1])-c(sc_imputed_tab_sim_delta_z[i,2]*sc_imputed_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     c(sc_imputed_tab_sim_delta_z[i,1]*sc_imputed_tab_sim_delta_sigma[1,1])+c(sc_imputed_tab_sim_delta_z[i,2]*sc_imputed_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 #Scenario 6: Long-term wealth variability with incomplete data ---- 
 
@@ -1670,41 +1672,41 @@ lv_imputed_tab_sim_delta_sigma
 
 par(mfrow=c(1,3))
 #current wealth
-plot(c(30:1)~c(lv_imputed_tab_sim_beta_z[,1]*lv_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(lv_imputed_tab_sim_beta_z[11:40,1]*lv_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(lv_imputed_tab_sim_beta_z[i,1]*lv_imputed_tab_sim_beta_sigma[1,1])-c(lv_imputed_tab_sim_beta_z[i,2]*lv_imputed_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     c(lv_imputed_tab_sim_beta_z[i,1]*lv_imputed_tab_sim_beta_sigma[1,1])+c(lv_imputed_tab_sim_beta_z[i,2]*lv_imputed_tab_sim_beta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"berlin")[1],pch=16)
+points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(lv_imputed_tab_sim_gamma_z[,1]*lv_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(lv_imputed_tab_sim_gamma_z[11:40,1]*lv_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(lv_imputed_tab_sim_gamma_z[i,1]*lv_imputed_tab_sim_gamma_sigma[1,1])-c(lv_imputed_tab_sim_gamma_z[i,2]*lv_imputed_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     c(lv_imputed_tab_sim_gamma_z[i,1]*lv_imputed_tab_sim_gamma_sigma[1,1])+c(lv_imputed_tab_sim_gamma_z[i,2]*lv_imputed_tab_sim_gamma_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"berlin")[2],pch=16)
+points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(lv_imputed_tab_sim_delta_z[,1]*lv_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(lv_imputed_tab_sim_delta_z[11:40,1]*lv_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
-for (i in 1:30){
+for (i in 11:40){
   segments(
     c(lv_imputed_tab_sim_delta_z[i,1]*lv_imputed_tab_sim_delta_sigma[1,1])-c(lv_imputed_tab_sim_delta_z[i,2]*lv_imputed_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     c(lv_imputed_tab_sim_delta_z[i,1]*lv_imputed_tab_sim_delta_sigma[1,1])+c(lv_imputed_tab_sim_delta_z[i,2]*lv_imputed_tab_sim_delta_sigma[1,1]),
-    31-i,
+    41-i,
     lwd=2,col="black") 
 }
-points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"berlin")[3],pch=16)
+points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 
  
