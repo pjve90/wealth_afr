@@ -26,12 +26,10 @@ data {
   int A; // maximum age of women
   
   matrix[N,A] wealth; // age-specific absolute wealth [raw data with missing values coded -99]
+  
+  vector[N] median_wealth; // individual median wealth for data imputation at birth
 
-  int N_miss; // number of missing data points for wealth at time t
-
-  array[N_miss,2] int wealth_miss; // indicator of position [row,column] of missing values in the wealth matrix [id, age]
-
-  array[N,A] int baby; // 0/1 gives birth
+  array[N,A] int baby; // first birth (0=no,1=yes,-99=censored)
 
 }
 
@@ -51,10 +49,9 @@ parameters {
   real <lower = 0> delta_wealth_sigma;
 
   // missing wealth data
-  vector[N_miss] wealth_impute; // imputed values for each missing wealth 
-  real alpha_miss;
+  real <lower = 0, upper = 1> alpha_miss;
   real beta_miss;
-  real<lower=0> sigma_miss;
+  real <lower=0> sigma_miss;
 }
 
 transformed parameters {
@@ -69,10 +66,6 @@ transformed parameters {
 
   wealth_full = wealth; // initialize wealth full with wealth (raw)
 
-  for(n in 1:N_miss){ // here we fill in missing spots with imputed values
-        wealth_full[wealth_miss[n,1],wealth_miss[n,2]] = wealth_impute[n];
-      }
-
 //long-term variability
   matrix[N,A] wealth_msd; //matrix containing moving standard deviation
 
@@ -81,7 +74,7 @@ transformed parameters {
       wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
     }
     for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth_full[n],a-10,11)); //calculating the moving standard deviation with a 10-years window
+      wealth_msd[n,a] = sd(segment(wealth_full[n],a-9,10)); //calculating the moving standard deviation with a 10-years window
     }
   }
 
@@ -104,16 +97,23 @@ model {
     delta_wealth_sigma ~ exponential(1);
     
 // missing wealth parameters
-    alpha_miss ~ normal(0, 1);
+    alpha_miss ~ uniform(0.5, 1);
     beta_miss ~ normal(0, 1);
-    sigma_miss ~ exponential(1);
+    sigma_miss ~ exponential(3);
 
 //Wealth data imputation
+//Data imputation at birth
 for (n in 1:N){
-  wealth_full[n,1] ~ normal(0, 1); //data imputation at birth
-  for(a in 2:A){
-    wealth_full[n,a] ~ normal(alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss), sigma_miss); //autoregressive data imputation
+  if(wealth[n,1] == -99){
+    wealth_full[n,1] ~ normal(median_wealth[n], 1); //data imputation at birth
   }
+
+//Data imputation in later ages
+  for(a in 2:A){
+    if(wealth[n,a] == -99){
+    wealth_full[n,a] ~ normal( (alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss) ), sigma_miss); //autoregressive data imputation
+  }
+}
 }
 
 //Probability of first birth
@@ -132,4 +132,18 @@ for (n in 1:N){
     }
     }
 
+}
+
+generated quantities {
+  matrix[N, A] imputed_wealth;
+
+  for (n in 1:N) {
+    for (a in 1:A) {
+      if (wealth[n, a] == -99) {
+        imputed_wealth[n, a] = wealth_full[n, a];
+      } else {
+        imputed_wealth[n, a] = -999; // signal that the value was not imputed
+      }
+    }
+  }
 }

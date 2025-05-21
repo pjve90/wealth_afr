@@ -316,7 +316,7 @@ plot(afr_age~c(1:74))
 # These values are the complete probabilities that a woman will have her first child at any given age we observe in the actual data. We use these as the baseline age-specific probabilities in the simulations.
 afr_age_baseline<-afr_age
 
-##Simulate first birth based on the wealth predictors ----
+##Aim 1: Power analysis ----
 
 # Link wealth variables to afr with independent effects at each age - exactly what we are doing in the STAN model
 
@@ -339,12 +339,10 @@ which(afr_age==max(afr_age)) # 19
  
  # We perform three simulations - 1) absolute wealth has a 4x larger effect, 2) short term wealth change has a 4x larger effect, 3) long term wealth variability has a 4x larger effect. We assume that even the strongest effect only leads to a relatively small shift in the age at first birth.
 
-#### Current wealth ----
+#### Scenario 1: Current wealth ----
  
 # 1) absolute wealth has the largest effect, this creates the age-specific effects for the three wealth predictors
  aw_beta <- 1*centeredage # positive slope means wealthy have afr later
- aw_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
-  aw_delta <- -0.25*centeredage # negative slope means individuals with higher short-term wealth variability have afr later, but influence is 4x lower than for absolute wealth
  
 # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
 #current wealth
@@ -441,6 +439,8 @@ type <- c(1:3)
   legend(x="bottomright",pch=shape,lty=type,col=palette_a,legend=c("Min.","Med.","Max."))
   
 
+#####Simulate first birth ----  
+  
 # If we selected our effect sizes, we can then create the dataframe that records for each simulated women whether she had her first child at a given age or not depending on her wealth. We set it so that reproduction starts the earliest at age 11 
  aw_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
  for(individual in 1:nrow(aw_simbirth)){
@@ -448,13 +448,11 @@ type <- c(1:3)
    aw_simbirth[individual,ages]<-0
    }
    for(ages in 11:ncol(aw_simbirth)){
-     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*aw_beta[ages]+simshorttermwealth[individual,ages]*aw_gamma[ages]+simlongtermwealth[individual,ages]*aw_delta[ages]
+     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*aw_beta[ages]
      ageprob<-inv_logit(ageprob)
      ifelse(aw_simbirth[individual,(ages-1)]==1,aw_simbirth[individual,ages]<-NA,aw_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
- 
- 
  #check data
  aw_simbirth
  #counts per column
@@ -474,22 +472,206 @@ mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
 mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
 # poor individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
 
-####Short-term wealth variabiliy ----
+##### Prepare all the data to be analysed in the STAN model  ----
+
+#Replace NAs with -99
+for(j in 1:ncol(aw_simbirth)){
+  for(i in 1:nrow(aw_simbirth)){
+    if(is.na(aw_simbirth[i,j])){
+      aw_simbirth[i,j] <- -99
+    } else{
+      aw_simbirth[i,j] <- aw_simbirth[i,j]
+    }
+  }
+}
+#restrict data to ages of interest (10 to 39)
+aw_simbirth_res<-aw_simbirth[,1:40] 
+simwealth_res<-simwealth[,1:40]
+
+# 1) full wealth data, absolute wealth strongest predictor
+# We put all of this together in the list of data for the analyses
+aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
+                               A = ncol(aw_simbirth_res), #age
+                               wealth = as.matrix(simwealth_res), #current absolute wealth
+                               baby = as.matrix(aw_simbirth_res), #AFR
+                               median_wealth = medianwealthperindividual # median wealth of each individual
+)
+#check data
+aw_full_simulated_list
+
+##### Compile and fit model ----
+# compile model
+aw_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_absonly.stan")
+
+#fit model
+aw_full_fit_simulated <- aw_model_simulated$sample(data = aw_full_simulated_list, 
+                                                   chains = 4, 
+                                                   parallel_chains = 15, 
+                                                   adapt_delta = 0.99,
+                                                   max_treedepth = 13,
+                                                   iter_warmup = 2000,
+                                                   iter_sampling = 2000,
+                                                   init = 0)
+
+
+
+# save fit 
+aw_full_fit_simulated_csv <- rstan::read_stan_csv(aw_full_fit_simulated$output_files())
+saveRDS(aw_full_fit_simulated_csv, "aw_full_fit_simulated_output.rds")
+#load RDS file
+aw_full_rds_simulated <- readRDS("aw_full_fit_simulated_output.rds")
+#extract samples
+post_aw_full <- extract.samples(aw_full_rds_simulated)
+
+##### Model diagnostics ----
+
+#check trace of all parameters
+#alpha
+rstan::traceplot(aw_full_rds_simulated,pars="alpha")
+#mu
+traceplot(aw_full_rds_simulated,pars="mu") 
+#mu_raw
+traceplot(aw_full_rds_simulated,pars="mu_raw")
+#mu_tau
+rstan::traceplot(aw_full_rds_simulated,pars="mu_tau")
+#mu_kappa
+rstan::traceplot(aw_full_rds_simulated,pars="mu_kappa")
+#mu_delta
+rstan::traceplot(aw_full_rds_simulated,pars="mu_delta")
+#beta_wealth_z
+traceplot(aw_full_rds_simulated,pars="beta_wealth_z") 
+#beta_wealth_sigma
+traceplot(aw_full_rds_simulated,pars="beta_wealth_sigma") 
+
+# generate output for simulation with full data where current absolute wealth has the strongest effect
+#beta z
+#create summary table for beta_z
+aw_full_tab_sim_beta_z <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_z")
+#check table
+aw_full_tab_sim_beta_z
+
+#beta sigma
+#create summary table for beta_sigma
+aw_full_tab_sim_beta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+#check table
+aw_full_tab_sim_beta_sigma
+
+
+#####Plot it! ----
+
+###### Coefficients plot ---- 
+
+par(mfrow=c(1,1))
+#current wealth
+plot(c(30:1)~c(aw_full_tab_sim_beta_z[11:40,1]*aw_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 11:40){
+  segments(
+    c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])-c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
+    41-i,
+    c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])+c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
+    41-i,
+    lwd=2,col="black") 
+}
+points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
+
+###### Cumulative probabilities plot ----
+
+#simulate wealth values
+simwealth_aw_full <- seq(from=round(min(post_aw_full$wealth_full),1),to=round(max(post_aw_full$wealth_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_aw_full
+#get the deciles
+deciles_aw_full <- as.numeric(quantile(simwealth_aw_full,seq(0,1,0.5)))
+deciles_aw_full
+
+#colour palette
+#numbers for color palette
+palette <- palette.colors(9,"Okabe-Ito")
+#select the numbers for color palette
+palette_a<-palette[1:length(deciles_aw_full)]
+palette_a
+
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c(1:3)
+
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+
+#plot empty plot
+plot(c(0,1)~c(10,ncol(post_aw_full$mu)),
+     ylab="Cumulative probability of first birth",
+     xlab="Age",
+     main="Current levels\nof material wealth",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
+     type="n")
+legend(53,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+
+#add lines
+for(k in 1:(length(deciles_aw_full))){
+  #create matrix to store the data
+  p_aw_full <- matrix(nrow=nrow(post_aw_full$mu),ncol=ncol(post_aw_full$mu))
+  p_aw_full
+  #fill it in with values for age 25
+  for(j in 1:ncol(post_aw_full$mu)){
+    for(i in 1:nrow(post_aw_full$mu)){
+      p_aw_full[i,j] <- inv_logit(post_aw_full$alpha[i] + #inv logit because originally is logit
+                                    post_aw_full$mu[i,j] + #age
+                                    (post_aw_full$beta_wealth_z[i,j]*post_aw_full$beta_wealth_sigma[i])*deciles_aw_full[k] ) #absolute wealth
+    }
+  }
+  #check data
+  p_aw_full
+  #plot it!
+  #prepare model prediction data
+  plot_aw_full <- data.frame(age = 1:ncol(p_aw_full),
+                             median = apply(p_aw_full, 2, median), 
+                             upp = apply(p_aw_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                             low = apply(p_aw_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #store data per decile
+  assign(paste0("aw_full",k),plot_aw_full)
+  
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_absw <- numeric(length(plot_aw_full$median))
+  cumulative_low_absw <- numeric(length(plot_aw_full$low))
+  cumulative_upp_absw <- numeric(length(plot_aw_full$upp))
+  #set the first probability
+  cumulative_median_absw[1] <- plot_aw_full$median[1]
+  cumulative_low_absw[1] <- plot_aw_full$low[1]
+  cumulative_upp_absw[1] <- plot_aw_full$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_aw_full$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_aw_full$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_aw_full$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_aw_full$upp[a]
+  }
+  #store data per decile
+  assign(paste0("cumulative_median_aw_full",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_aw_full",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_aw_full",k),cumulative_upp_absw)
+  
+  #add median
+  #add points
+  points(cumulative_median_absw[11:51] ~ plot_aw_full$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_absw[11:51] ~ plot_aw_full$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_aw_full$age[11:51], rev(plot_aw_full$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
+}
+
+#### Scenario 2: Short-term wealth variabiliy ----
 
  # 2) short term wealth change has the largest effect
- sc_beta <- 0.25*centeredage # positive slope means wealthy have afr later, effect is 4x less than for short term wealth changes
  sc_gamma <- -1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier
- sc_delta <- -0.25*centeredage # negative slope means individuals with higher long-term wealth variability have afr later, effect is 4x less than for short term wealth changes
 
  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
- #current wealth
- plot(c(51:1)~sc_beta[51:1],ylim=c(51,1),pch=16)
- abline(v=0,lty=2)
  #short-term wealth variability
  plot(c(51:1)~sc_gamma[51:1],ylim=c(51,1),pch=16)
- abline(v=0,lty=2)
- #long-term wealth variability
- plot(c(51:1)~sc_delta[51:1],ylim=c(51,1),pch=16)
  abline(v=0,lty=2)
 
 #####Checking the effect sizes ----  
@@ -577,7 +759,9 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
  points(cumsum(std_ageprobs_maxsc)[1:41]~c(1:41),col=palette_b[3],pch=shape[3])
  lines(cumsum(std_ageprobs_maxsc)[1:41]~c(1:41),col=palette_b[3],lty=type[3])
  legend(x="bottomright",pch=shape,lty=type,col=palette_b,legend=c("Min.","Med.","Max."))
- 
+
+##### Simulate first births ----
+  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  sc_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
  for(individual in 1:nrow(sc_simbirth)){
@@ -585,7 +769,7 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
      sc_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(sc_simbirth)){
-     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*sc_beta[ages]+simshorttermwealth[individual,ages]*sc_gamma[ages]+simlongtermwealth[individual,ages]*sc_delta[ages]
+     ageprob<-logit(afr_age_baseline[ages])+simshorttermwealth[individual,ages]*sc_gamma[ages]
      ageprob<-inv_logit(ageprob)
      ifelse(sc_simbirth[individual,(ages-1)]==1,sc_simbirth[individual,ages]<-NA,sc_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
@@ -608,21 +792,202 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
  mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
  mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
  # poor individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
+
+#####Prepare all the data to be analysed in the STAN model  ----
  
-###Long-term wealth variability ----
+ #Replace NAs with -99
+ for(j in 1:ncol(sc_simbirth)){
+   for(i in 1:nrow(sc_simbirth)){
+     if(is.na(sc_simbirth[i,j])){
+       sc_simbirth[i,j] <- -99
+     } else{
+       sc_simbirth[i,j] <- sc_simbirth[i,j]
+     }
+   }
+ }
+ #restrict data to ages of interest (10 to 39)
+ sc_simbirth_res<-sc_simbirth[,1:40] 
+ simwealth_res<-simwealth[,1:40]
+ 
+ # We put all of this together in the list of data for the analyses
+ sc_full_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
+                                A = ncol(sc_simbirth_res), #age
+                                wealth = as.matrix(simwealth_res), #current absolute wealth
+                                baby = as.matrix(sc_simbirth_res), #AFR
+                                median_wealth = medianwealthperindividual # median wealth of each individual
+ )
+ #check data
+ sc_full_simulated_list
+ 
+ ##### Compile and fit model ----
+ # compile model
+ sc_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_diffonly.stan")
+ 
+ #fit model
+ sc_full_fit_simulated <- sc_model_simulated$sample(data = sc_full_simulated_list, 
+                                                    chains = 4, 
+                                                    parallel_chains = 15, 
+                                                    adapt_delta = 0.99,
+                                                    max_treedepth = 13,
+                                                    iter_warmup = 2000,
+                                                    iter_sampling = 2000,
+                                                    init = 0)
+ 
+ # save fit 
+ sc_full_fit_simulated_csv <- rstan::read_stan_csv(sc_full_fit_simulated$output_files())
+ saveRDS(sc_full_fit_simulated_csv, "sc_full_fit_simulated_output.rds")
+ #load RDS file
+ sc_full_rds_simulated <- readRDS("sc_full_fit_simulated_output.rds")
+ #extract samples
+ post_sc_full <- extract.samples(sc_full_rds_simulated)
+ 
+ ##### Model diagnostics ----
+ 
+ #check trace of all parameters
+ #alpha
+ rstan::traceplot(sc_full_rds_simulated,pars="alpha")
+ #mu
+ traceplot(sc_full_rds_simulated,pars="mu") 
+ #mu_raw
+ traceplot(sc_full_rds_simulated,pars="mu_raw")
+ #mu_tau
+ rstan::traceplot(sc_full_rds_simulated,pars="mu_tau")
+ #mu_kappa
+ rstan::traceplot(sc_full_rds_simulated,pars="mu_kappa")
+ #mu_delta
+ rstan::traceplot(sc_full_rds_simulated,pars="mu_delta")
+ #gamma_wealth
+ traceplot(sc_full_rds_simulated,pars="gamma_wealth_z") 
+ #gamma_wealth
+ traceplot(sc_full_rds_simulated,pars="gamma_wealth_sigma") 
+ 
+ # generate output for simulation with full data where current absolute wealth has the strongest effect
+  #gamma z
+ #create summary table for gamma_z
+ sc_full_tab_sim_gamma_z <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_z")
+ #check table
+ sc_full_tab_sim_gamma_z
+ 
+ #gamma sigma
+ #create summary table for gamma_sigma
+ sc_full_tab_sim_gamma_sigma <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+ #check table
+ sc_full_tab_sim_gamma_sigma
+ 
+ #####Plot it! ----
+ 
+ ######Coefficients plots ----
+ 
+ par(mfrow=c(1,1))
+ #short-term wealth variability
+ plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+ axis(2,c(30:1),c(10:39))
+ for (i in 11:40){
+   segments(
+     c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])-c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
+     41-i,
+     c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])+c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
+     41-i,
+     lwd=2,col="black") 
+ }
+ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
+ 
+ ###### Cumulative probabilities plot ----
+ 
+ #simulate wealth values
+ simwealth_sc_full <- seq(from=round(min(post_sc_full$wealth_change),1),to=round(max(post_sc_full$wealth_change),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+ simwealth_sc_full
+ #get the deciles
+ deciles_sc_full <- as.numeric(quantile(simwealth_sc_full,seq(0,1,0.5)))
+ deciles_sc_full
+ 
+ #colour palette
+ #numbers for color palette
+ palette <- palette.colors(9,"Okabe-Ito")
+ #select the numbers for color palette
+ palette_b<-palette[4:(length(deciles_sc_full)+3)]
+ palette_b
+ 
+ #shape of points
+ shape <- c(15:17)
+ #line type
+ type <- c(1:3)
+ 
+ #set parameters for a legend outside of the plot
+ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+ 
+ #plot empty plot
+ plot(c(0,1)~c(10,ncol(post_sc_full$mu)),
+      ylab="Cumulative probability of first birth",
+      xlab="Age",
+      main="Short-term variability\nof material wealth",
+      cex.axis=1.2,
+      cex.lab=1.5,
+      cex.main=1.5,
+      type="n")
+ legend(53,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+ 
+ #add lines
+ for(k in 1:(length(deciles_sc_full))){
+   #create matrix to store the data
+   p_sc_full_diff <- matrix(nrow=nrow(post_sc_full$mu),ncol=ncol(post_sc_full$mu))
+   p_sc_full_diff
+   #fill it in with values for age 25
+   for(j in 1:ncol(post_sc_full$mu)){
+     for(i in 1:nrow(post_sc_full$mu)){
+       p_sc_full_diff[i,j] <- inv_logit(post_sc_full$alpha[i] + #inv logit because originally is logit
+                                          post_sc_full$mu[i,j] + #age
+                                          (post_sc_full$gamma_wealth_z[i,j]*post_sc_full$gamma_wealth_sigma[i])*deciles_sc_full[k]  #wealth change
+       ) #moving variance
+     }
+   }
+   #check data
+   p_sc_full_diff
+   #plot it!
+   #prepare model prediction data
+   plot_sc_full_diff <- data.frame(age = 1:ncol(p_sc_full_diff),
+                                   median = apply(p_sc_full_diff, 2, median), 
+                                   upp = apply(p_sc_full_diff, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                   low = apply(p_sc_full_diff, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+   ) 
+   #store data per decile
+   assign(paste0("sc_full_",k),plot_sc_full_diff)
+   
+   # Calculate cumulative probabilities
+   #create vectors
+   cumulative_median_sc_full <- numeric(length(plot_sc_full_diff$median))
+   cumulative_low_sc_full <- numeric(length(plot_sc_full_diff$low))
+   cumulative_upp_sc_full <- numeric(length(plot_sc_full_diff$upp))
+   #set the first probability
+   cumulative_median_sc_full[1] <- plot_sc_full_diff$median[1]
+   cumulative_low_sc_full[1] <- plot_sc_full_diff$low[1]
+   cumulative_upp_sc_full[1] <- plot_sc_full_diff$upp[1]
+   #calculate the cumulative probabilities for the other ages
+   for (a in 2:length(plot_sc_full_diff$median)) {
+     cumulative_median_sc_full[a] <- cumulative_median_sc_full[a-1] + (1 - cumulative_median_sc_full[a-1]) * plot_sc_full_diff$median[a]
+     cumulative_low_sc_full[a] <- cumulative_low_sc_full[a-1] + (1 - cumulative_low_sc_full[a-1]) * plot_sc_full_diff$low[a]
+     cumulative_upp_sc_full[a] <- cumulative_upp_sc_full[a-1] + (1 - cumulative_upp_sc_full[a-1]) * plot_sc_full_diff$upp[a]
+   }
+   #store data per decile
+   assign(paste0("cumulative_median_sc_full_",k),cumulative_median_sc_full)
+   assign(paste0("cumulative_low_sc_full_",k),cumulative_low_sc_full)
+   assign(paste0("cumulative_upp_sc_full_",k),cumulative_upp_sc_full)
+   
+   #add median
+   #add points
+   points(cumulative_median_sc_full[11:51] ~ plot_sc_full_diff$age[11:51], col=palette_b[k], pch=shape[k], cex=1.5)
+   #add lines
+   lines(cumulative_median_sc_full[11:51] ~ plot_sc_full_diff$age[11:51], col=palette_b[k], lwd=3, lty=type[k])
+   #add confidence intervals
+   polygon(c(plot_sc_full_diff$age[11:51], rev(plot_sc_full_diff$age[11:51])), c(cumulative_low_sc_full[11:51], rev(cumulative_upp_sc_full[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
+ }
+ 
+###Scenario 3: Long-term wealth variability ----
  
  # 3) long term wealth variability has the largest effect
- lv_beta <- 0.25*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
-  lv_gamma <- -0.25*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
   lv_delta <- -1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
 
   # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
-  #current wealth
-  plot(c(51:1)~lv_beta[51:1],ylim=c(51,1),pch=16)
-  abline(v=0,lty=2)
-  #short-term wealth variability
-  plot(c(51:1)~lv_gamma[51:1],ylim=c(51,1),pch=16)
-  abline(v=0,lty=2)
   #long-term wealth variability
   plot(c(51:1)~lv_delta[51:1],ylim=c(51,1),pch=16)
   abline(v=0,lty=2)
@@ -713,6 +1078,8 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
   lines(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],lty=type[3])
   legend(x="bottomright",pch=shape,lty=type,col=palette_c,legend=c("Min.","Med.","Max."))
 
+#####Simulate first births ----  
+  
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
  lv_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
  for(individual in 1:nrow(lv_simbirth)){
@@ -720,488 +1087,749 @@ mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
      lv_simbirth[individual,ages]<-0
    }
    for(ages in 13:ncol(lv_simbirth)){
-     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*lv_beta[ages]+simshorttermwealth[individual,ages]*lv_gamma[ages]+simlongtermwealth[individual,ages]*lv_delta[ages]
+     ageprob<-logit(afr_age_baseline[ages])+simlongtermwealth[individual,ages]*lv_delta[ages]
      ageprob<-inv_logit(ageprob)
      ifelse(lv_simbirth[individual,(ages-1)]==1,lv_simbirth[individual,ages]<-NA,lv_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
- 
- 
-# # We now have all the data in the same format as in the original data. That means we can perform the same data checks, plus run the inference model, to assess our aim 1.
 
-# Aim 1: Power analysis ----
-
-#Scenario 1: Current wealth ---- 
+#####Prepare all the data to be analysed in the STAN model  ----
   
-#Prepare all the data to be analysed in the STAN model  ----
+  #Replace NAs with -99
+  for(j in 1:ncol(lv_simbirth)){
+    for(i in 1:nrow(lv_simbirth)){
+      if(is.na(lv_simbirth[i,j])){
+        lv_simbirth[i,j] <- -99
+      } else{
+        lv_simbirth[i,j] <- lv_simbirth[i,j]
+      }
+    }
+  }
+  #restrict data to ages of interest (10 to 39)
+  lv_simbirth_res<-lv_simbirth[,1:40] 
+  simwealth_res<-simwealth[,1:40]
+  
+  # We put all of this together in the list of data for the analyses
+  lv_full_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
+                                 A = ncol(lv_simbirth_res), #age
+                                 wealth = as.matrix(simwealth_res), #current absolute wealth
+                                 baby = as.matrix(lv_simbirth_res), #AFR
+                                 median_wealth = medianwealthperindividual # median wealth of each individual
+  )
+  #check data
+  lv_full_simulated_list
+  
+##### Compile and fit model ----
+  # compile model
+  lv_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_msdonly.stan")
+  
+  #fit model
+  lv_full_fit_simulated <- lv_model_simulated$sample(data = lv_full_simulated_list, 
+                                                     chains = 4, 
+                                                     parallel_chains = 15, 
+                                                     adapt_delta = 0.99,
+                                                     max_treedepth = 13,
+                                                     iter_warmup = 2000,
+                                                     iter_sampling = 2000,
+                                                     init = 0)
+  
+  # save fit 
+  lv_full_fit_simulated_csv <- rstan::read_stan_csv(lv_full_fit_simulated$output_files())
+  saveRDS(lv_full_fit_simulated_csv, "lv_full_fit_simulated_output.rds")
+  #load RDS file
+  lv_full_rds_simulated <- readRDS("lv_full_fit_simulated_output.rds")
+  #extract samples
+  post_lv_full <- extract.samples(lv_full_rds_simulated)
+  
+##### Model diagnostics ----
+  
+  #check trace of all parameters
+  #alpha
+  rstan::traceplot(lv_full_rds_simulated,pars="alpha")
+  #mu
+  traceplot(lv_full_rds_simulated,pars="mu") 
+  #mu_raw
+  traceplot(lv_full_rds_simulated,pars="mu_raw")
+  #mu_tau
+  rstan::traceplot(lv_full_rds_simulated,pars="mu_tau")
+  #mu_kappa
+  rstan::traceplot(lv_full_rds_simulated,pars="mu_kappa")
+  #mu_delta
+  rstan::traceplot(lv_full_rds_simulated,pars="mu_delta")
+  #delta_wealth
+  traceplot(lv_full_rds_simulated,pars="delta_wealth_z") 
+  #delta_wealth
+  traceplot(lv_full_rds_simulated,pars="delta_wealth_sigma") 
+  
+  # generate output for simulation with full data where current absolute wealth has the strongest effect
+  #delta z
+  #create summary table for delta_z
+  lv_full_tab_sim_delta_z <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_z")
+  #check table
+  lv_full_tab_sim_delta_z
+  
+  #delta sigma
+  #create summary table for delta_sigma
+  lv_full_tab_sim_delta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
+  #check table
+  lv_full_tab_sim_delta_sigma
+  
+#####Plot it! ----
+  
+######Coefficient plots ----
+  
+  par(mfrow=c(1,1))
+  #long-term wealth variability
+  plot(c(30:1)~c(lv_full_tab_sim_delta_z[11:40,1]*lv_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+  axis(2,c(30:1),c(10:39))
+  for (i in 11:40){
+    segments(
+      c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])-c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
+      41-i,
+      c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])+c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
+      41-i,
+      lwd=2,col="black") 
+  }
+  points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
+  
+######Cumulative probabilities plot ----
+  
+  #simulate wealth values
+  simwealth_lv_full <- seq(from=round(min(post_lv_full$wealth_lv_full),1),to=round(max(post_lv_full$wealth_lv_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+  simwealth_lv_full
+  #get the deciles
+  deciles_lv_full <- as.numeric(quantile(simwealth_lv_full,seq(0,1,0.5)))
+  deciles_lv_full
+  
+  #colour palette
+  #numbers for color palette
+  palette <- palette.colors(9,"Okabe-Ito")
+  #select the numbers for color palette
+  palette_c<-palette[7:(length(deciles_lv_full)+6)]
+  palette_c
+  
+  #shape of points
+  shape <- c(15:17)
+  #line type
+  type <- c(1:3)
+  
+  #set parameters for a legend outside of the plot
+  par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+  
+  #plot empty plot
+  plot(c(0,1)~c(10,ncol(post_lv_full$mu)),
+       ylab="Cumulative probability of first birth",
+       xlab="Age",
+       main="Long-term variability\nof material wealth",
+       cex.axis=1.2,
+       cex.lab=1.5,
+       cex.main=1.5,
+       type="n")
+  legend(53,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
+  
+  #add lines
+  for(k in 1:(length(deciles_lv_full))){
+    #create matrix to store the data
+    p_lv_full <- matrix(nrow=nrow(post_lv_full$mu),ncol=ncol(post_lv_full$mu))
+    p_lv_full
+    #fill it in with values for age 25
+    for(j in 1:ncol(post_lv_full$mu)){
+      for(i in 1:nrow(post_lv_full$mu)){
+        p_lv_full[i,j] <- inv_logit(post_lv_full$alpha[i] + #inv logit because originally is logit
+                                      post_lv_full$mu[i,j] + #age
+                                      (post_lv_full$delta_wealth_z[i,j]*post_lv_full$delta_wealth_sigma[i])*deciles_lv_full[k]) #moving variance
+      }
+    }
+    #check data
+    p_lv_full
+    #plot it!
+    #prepare model prediction data
+    plot_lv_fullw_lv_full <- data.frame(age = 1:ncol(p_lv_full),
+                                        median = apply(p_lv_full, 2, median), 
+                                        upp = apply(p_lv_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                        low = apply(p_lv_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+    ) 
+    #store data per decile
+    assign(paste0("msdw_",k),plot_lv_fullw_lv_full)
+    
+    # Calculate cumulative probabilities
+    #create vectors
+    cumulative_median_lv_fullw <- numeric(length(plot_lv_fullw_lv_full$median))
+    cumulative_low_lv_fullw <- numeric(length(plot_lv_fullw_lv_full$low))
+    cumulative_upp_lv_fullw <- numeric(length(plot_lv_fullw_lv_full$upp))
+    #set the first probability
+    cumulative_median_lv_fullw[1] <- plot_lv_fullw_lv_full$median[1]
+    cumulative_low_lv_fullw[1] <- plot_lv_fullw_lv_full$low[1]
+    cumulative_upp_lv_fullw[1] <- plot_lv_fullw_lv_full$upp[1]
+    #calculate the cumulative probabilities for the other ages
+    for (a in 2:length(plot_lv_fullw_lv_full$median)) {
+      cumulative_median_lv_fullw[a] <- cumulative_median_lv_fullw[a-1] + (1 - cumulative_median_lv_fullw[a-1]) * plot_lv_fullw_lv_full$median[a]
+      cumulative_low_lv_fullw[a] <- cumulative_low_lv_fullw[a-1] + (1 - cumulative_low_lv_fullw[a-1]) * plot_lv_fullw_lv_full$low[a]
+      cumulative_upp_lv_fullw[a] <- cumulative_upp_lv_fullw[a-1] + (1 - cumulative_upp_lv_fullw[a-1]) * plot_lv_fullw_lv_full$upp[a]
+    }
+    #store data per decile
+    assign(paste0("cumulative_median_lv_fullw_",k),cumulative_median_lv_fullw)
+    assign(paste0("cumulative_low_lv_fullw_",k),cumulative_low_lv_fullw)
+    assign(paste0("cumulative_upp_lv_fullw_",k),cumulative_upp_lv_fullw)
+    
+    #add median
+    #add points
+    points(cumulative_median_lv_fullw[11:51] ~ plot_lv_fullw_lv_full$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
+    #add lines
+    lines(cumulative_median_lv_fullw[11:51] ~ plot_lv_fullw_lv_full$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
+    #add confidence intervals
+    polygon(c(plot_lv_fullw_lv_full$age[11:51], rev(plot_lv_fullw_lv_full$age[11:51])), c(cumulative_low_lv_fullw[11:51], rev(cumulative_upp_lv_fullw[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
+  }
 
-#Replace NAs with -99
- for(j in 1:ncol(aw_simbirth)){
-   for(i in 1:nrow(aw_simbirth)){
-     if(is.na(aw_simbirth[i,j])){
-       aw_simbirth[i,j] <- -99
+ ###Scenario 4: All wealth predictors ----
+ 
+ # 3) long term wealth variability has the largest effect
+ all_beta <- 1*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
+ all_gamma <- -1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
+ all_delta <- -1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
+ 
+ # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
+ #current wealth
+ plot(c(51:1)~all_beta[51:1],ylim=c(51,1),pch=16)
+ abline(v=0,lty=2)
+ #short-term wealth variability
+ plot(c(51:1)~all_gamma[51:1],ylim=c(51,1),pch=16)
+ abline(v=0,lty=2)
+ #long-term wealth variability
+ plot(c(51:1)~all_delta[51:1],ylim=c(51,1),pch=16)
+ abline(v=0,lty=2)
+ 
+ #####Checking the effect sizes ----  
+ 
+ #colour palette
+ #numbers for color palette
+ palette <- palette.colors(9,"Okabe-Ito")
+ #select the numbers for color palette
+ palette_c<-palette[7:9]
+ palette_c
+ #shape of points
+ shape <- c(15:17)
+ #line type
+ type <- c(1:3)
+ 
+ #Age-specific probabilities of first birth
+ 
+ # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
+ #maximum long-term variability (1)
+ ageprobs_maxall<-logit(afr_age_baseline)+1*all_delta
+ ageprobs_maxall<-inv_logit(ageprobs_maxall)
+ #check data
+ ageprobs_maxall
+ #medium long-term variability (0.5)
+ ageprobs_medall<-logit(afr_age_baseline)+(0.5)*all_delta
+ ageprobs_medall<-inv_logit(ageprobs_medall)
+ #check data
+ ageprobs_medall
+ #minimum long-term variability (0)
+ ageprobs_minall<-logit(afr_age_baseline)+(0)*all_delta
+ ageprobs_minall<-inv_logit(ageprobs_minall)
+ #check data
+ ageprobs_minall
+ 
+ #Plot it!    
+ plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_c[1],pch=shape[1]) # minimum change
+ points(inv_logit(0.5*all_delta+logit(afr_age_baseline))~c(1:74),col=palette_c[2],pch=shape[2]) # average change
+ points(inv_logit(all_delta+logit(afr_age_baseline))~c(1:74),col=palette_c[3],pch=shape[3]) #maximum change
+ legend(x="topright",pch=shape,col=palette_c,legend=c("Min.","Med.","Max."))
+ 
+ #Expected mean age at first birth
+ 
+ # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
+ #maximum change (1)
+ std_ageprobs_maxall<-0
+ for(i in 2:74){
+   std_ageprobs_maxall[i]<-(1-sum(std_ageprobs_maxall[c(1:(i-1))]))*ageprobs_maxall[i]
+ }
+ #check data
+ std_ageprobs_maxall
+ #expected mean age at first birth
+ which(cumsum(std_ageprobs_maxall)>0.5)[1]
+ 
+ #medium change (0.5)
+ std_ageprobs_medall<-0
+ for(i in 2:74){
+   std_ageprobs_medall[i]<-(1-sum(std_ageprobs_medall[c(1:(i-1))]))*ageprobs_medall[i]
+ }
+ #check data
+ std_ageprobs_medall
+ #expected mean age at first birth
+ which(cumsum(std_ageprobs_medall)>0.5)[1]
+ 
+ #minimum change (0)
+ # compare it to the expected mean age at first birth for individuals who have average wealth
+ std_afr_age_baseline<-0
+ for(i in 2:74){
+   std_afr_age_baseline[i]<-(1-sum(std_afr_age_baseline[c(1:(i-1))]))*afr_age_baseline[i]
+ }
+ #check data
+ std_afr_age_baseline
+ #expected mean age at first birth
+ which(cumsum(std_afr_age_baseline)>0.5)[1]
+ 
+ #Cumulative probabilities of first birth
+ 
+ # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
+ #minimum wealth
+ plot(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+ lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],lty=type[2])
+ #medium wealth
+ points(cumsum(std_ageprobs_medall)[1:41]~c(1:41),col=palette_c[2],pch=shape[2])
+ lines(cumsum(std_ageprobs_medall)[1:41]~c(1:41),col=palette_c[2],lty=type[1])
+ #maximum wealth
+ points(cumsum(std_ageprobs_maxall)[1:41]~c(1:41),col=palette_c[3],pch=shape[3])
+ lines(cumsum(std_ageprobs_maxall)[1:41]~c(1:41),col=palette_c[3],lty=type[3])
+ legend(x="bottomright",pch=shape,lty=type,col=palette_c,legend=c("Min.","Med.","Max."))
+ 
+ ##### Simulate first births ----
+ 
+ # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
+ all_simbirth<-as.data.frame(matrix(NA,ncol=74,nrow=495))
+ for(individual in 1:nrow(all_simbirth)){
+   for(ages in 1:12){
+     all_simbirth[individual,ages]<-0
+   }
+   for(ages in 13:ncol(all_simbirth)){
+     ageprob<-logit(afr_age_baseline[ages])+simwealth[individual,ages]*all_beta[ages]+simshorttermwealth[individual,ages]*all_gamma[ages]+simlongtermwealth[individual,ages]*all_delta[ages]
+     ageprob<-inv_logit(ageprob)
+     ifelse(all_simbirth[individual,(ages-1)]==1,all_simbirth[individual,ages]<-NA,all_simbirth[individual,ages]<-rbinom(1,1,ageprob))
+   }
+ }
+
+#####Prepare all the data to be analysed in the STAN model  ----
+ 
+ #Replace NAs with -99
+ for(j in 1:ncol(all_simbirth)){
+   for(i in 1:nrow(all_simbirth)){
+     if(is.na(all_simbirth[i,j])){
+       all_simbirth[i,j] <- -99
      } else{
-       aw_simbirth[i,j] <- aw_simbirth[i,j]
+       all_simbirth[i,j] <- all_simbirth[i,j]
      }
    }
  }
-#restrict data to ages of interest (10 to 39)
-aw_simbirth_res<-aw_simbirth[,1:40] 
-simwealth_res<-simwealth[,1:40]
+ #restrict data to ages of interest (10 to 39)
+ all_simbirth_res<-all_simbirth[,1:40] 
+ simwealth_res<-simwealth[,1:40]
  
- # 1) full wealth data, absolute wealth strongest predictor
  # We put all of this together in the list of data for the analyses
- aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
-                                A = ncol(aw_simbirth_res), #age
+ all_full_simulated_list <- list(N = nrow(all_simbirth_res), #population size
+                                A = ncol(all_simbirth_res), #age
                                 wealth = as.matrix(simwealth_res), #current absolute wealth
-                                baby = as.matrix(aw_simbirth_res), #AFR
+                                baby = as.matrix(all_simbirth_res), #AFR
                                 median_wealth = medianwealthperindividual # median wealth of each individual
  )
  #check data
- aw_full_simulated_list
+ all_full_simulated_list
  
- ## Compile and fit model ----
+##### Compile and fit model ----
  # compile model
- model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+ all_model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
  
  #fit model
- aw_full_fit_simulated <- model_simulated$sample(data = aw_full_simulated_list, 
-                                                 chains = 4, 
-                                                 parallel_chains = 15, 
-                                                 adapt_delta = 0.99,
-                                                 max_treedepth = 13,
-                                                 iter_warmup = 2000,
-                                                 iter_sampling = 2000,
-                                                 init = 0)
- 
- 
+ all_full_fit_simulated <- all_model_simulated$sample(data = all_full_simulated_list, 
+                                                    chains = 4, 
+                                                    parallel_chains = 15, 
+                                                    adapt_delta = 0.99,
+                                                    max_treedepth = 13,
+                                                    iter_warmup = 2000,
+                                                    iter_sampling = 2000,
+                                                    init = 0)
  
  # save fit 
- aw_full_fit_simulated_csv <- rstan::read_stan_csv(aw_full_fit_simulated$output_files())
- saveRDS(aw_full_fit_simulated_csv, "aw_full_fit_simulated_output.rds")
+ all_full_fit_simulated_csv <- rstan::read_stan_csv(all_full_fit_simulated$output_files())
+ saveRDS(all_full_fit_simulated_csv, "all_full_fit_simulated_output.rds")
  #load RDS file
- aw_full_rds_simulated <- readRDS("aw_full_fit_simulated_output.rds")
+ all_full_rds_simulated <- readRDS("all_full_fit_simulated_output.rds")
+ #extract samples
+ post_all_full <- extract.samples(all_full_rds_simulated)
  
- ## Model diagnostics ----
+ ##### Model diagnostics ----
  
  #check trace of all parameters
  #alpha
- rstan::traceplot(aw_full_rds_simulated,pars="alpha")
+ rstan::traceplot(all_full_rds_simulated,pars="alpha")
  #mu
- traceplot(aw_full_rds_simulated,pars="mu") 
+ traceplot(all_full_rds_simulated,pars="mu") 
  #mu_raw
- traceplot(aw_full_rds_simulated,pars="mu_raw")
+ traceplot(all_full_rds_simulated,pars="mu_raw")
  #mu_tau
- rstan::traceplot(aw_full_rds_simulated,pars="mu_tau")
+ rstan::traceplot(all_full_rds_simulated,pars="mu_tau")
  #mu_kappa
- rstan::traceplot(aw_full_rds_simulated,pars="mu_kappa")
+ rstan::traceplot(all_full_rds_simulated,pars="mu_kappa")
  #mu_delta
- rstan::traceplot(aw_full_rds_simulated,pars="mu_delta")
+ rstan::traceplot(all_full_rds_simulated,pars="mu_delta")
  #beta_wealth_z
- traceplot(aw_full_rds_simulated,pars="beta_wealth_z") 
+ traceplot(all_full_rds_simulated,pars="beta_wealth_z") 
  #beta_wealth_sigma
- traceplot(aw_full_rds_simulated,pars="beta_wealth_sigma") 
+ traceplot(all_full_rds_simulated,pars="beta_wealth_sigma") 
  #gamma_wealth
- traceplot(aw_full_rds_simulated,pars="gamma_wealth_z") 
+ traceplot(all_full_rds_simulated,pars="gamma_wealth_z") 
  #gamma_wealth
- traceplot(aw_full_rds_simulated,pars="gamma_wealth_sigma") 
+ traceplot(all_full_rds_simulated,pars="gamma_wealth_sigma") 
  #delta_wealth
- traceplot(aw_full_rds_simulated,pars="delta_wealth_z") 
+ traceplot(all_full_rds_simulated,pars="delta_wealth_z") 
  #delta_wealth
- traceplot(aw_full_rds_simulated,pars="delta_wealth_sigma") 
+ traceplot(all_full_rds_simulated,pars="delta_wealth_sigma") 
  
  # generate output for simulation with full data where current absolute wealth has the strongest effect
  #beta z
  #create summary table for beta_z
- aw_full_tab_sim_beta_z <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_z")
+ all_full_tab_sim_beta_z <- precis(all_full_rds_simulated,depth=2,pars="beta_wealth_z")
  #check table
- aw_full_tab_sim_beta_z
+ all_full_tab_sim_beta_z
  
  #beta sigma
  #create summary table for beta_sigma
- aw_full_tab_sim_beta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
+ all_full_tab_sim_beta_sigma <- precis(all_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
  #check table
- aw_full_tab_sim_beta_sigma
+ all_full_tab_sim_beta_sigma
  
  #gamma z
  #create summary table for gamma_z
- aw_full_tab_sim_gamma_z <- precis(aw_full_rds_simulated,depth=2,pars="gamma_wealth_z")
+ all_full_tab_sim_gamma_z <- precis(all_full_rds_simulated,depth=2,pars="gamma_wealth_z")
  #check table
- aw_full_tab_sim_gamma_z
+ all_full_tab_sim_gamma_z
  
  #gamma sigma
  #create summary table for gamma_sigma
- aw_full_tab_sim_gamma_sigma <- precis(aw_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
+ all_full_tab_sim_gamma_sigma <- precis(all_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
  #check table
- aw_full_tab_sim_gamma_sigma
+ all_full_tab_sim_gamma_sigma
  
  #delta z
  #create summary table for delta_z
- aw_full_tab_sim_delta_z <- precis(aw_full_rds_simulated,depth=2,pars="delta_wealth_z")
+ all_full_tab_sim_delta_z <- precis(all_full_rds_simulated,depth=2,pars="delta_wealth_z")
  #check table
- aw_full_tab_sim_delta_z
+ all_full_tab_sim_delta_z
  
  #delta sigma
  #create summary table for delta_sigma
- aw_full_tab_sim_delta_sigma <- precis(aw_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
+ all_full_tab_sim_delta_sigma <- precis(all_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
  #check table
- aw_full_tab_sim_delta_sigma
+ all_full_tab_sim_delta_sigma
  
-#Plot it!
-
-par(mfrow=c(1,3))
-#current wealth
-plot(c(30:1)~c(aw_full_tab_sim_beta_z[11:40,1]*aw_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-    segments(
-      c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])-c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
-      41-i,
-      c(aw_full_tab_sim_beta_z[i,1]*aw_full_tab_sim_beta_sigma[1,1])+c(aw_full_tab_sim_beta_z[i,2]*aw_full_tab_sim_beta_sigma[1,1]),
-      41-i,
-      lwd=2,col="black") 
-}
-points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
-#short-term wealth variability
-plot(c(30:1)~c(aw_full_tab_sim_gamma_z[11:40,1]*aw_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(aw_full_tab_sim_gamma_z[i,1]*aw_full_tab_sim_gamma_sigma[1,1])-c(aw_full_tab_sim_gamma_z[i,2]*aw_full_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    c(aw_full_tab_sim_gamma_z[i,1]*aw_full_tab_sim_gamma_sigma[1,1])+c(aw_full_tab_sim_gamma_z[i,2]*aw_full_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~aw_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
-#long-term wealth variability
-plot(c(30:1)~c(aw_full_tab_sim_delta_z[11:40,1]*aw_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(aw_full_tab_sim_delta_z[i,1]*aw_full_tab_sim_delta_sigma[1,1])-c(aw_full_tab_sim_delta_z[i,2]*aw_full_tab_sim_delta_sigma[1,1]),
-    41-i,
-    c(aw_full_tab_sim_delta_z[i,1]*aw_full_tab_sim_delta_sigma[1,1])+c(aw_full_tab_sim_delta_z[i,2]*aw_full_tab_sim_delta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
-
-# plot(aw_full_tab_sim_beta_z[,1]*aw_full_tab_sim_beta_sigma[1,1]~aw_beta[11:40],xlab="simulated beta",ylab="estimated beta")
-# title("effects of absolute wealth")
-# plot(aw_full_tab_sim_gamma_z[,1]*aw_full_tab_sim_gamma_sigma[1,]~aw_gamma[11:40],xlab="simulated gamma",ylab="estimated gamma")
-# title("effects of short-term wealth")
-# plot(aw_full_tab_sim_delta_z[,1]*aw_full_tab_sim_delta_sigma[1,]~aw_delta[11:40],xlab="simulated delta",ylab="estimated delta")
-# title("effects of long-term wealth")
-
-aw_full_correlations<-rbind(summary(lm(aw_full_tab_sim_beta_z[,1]*tab_sim_beta_sigma[1,]~aw_beta[11:40])),summary(lm(aw_full_tab_sim_gamma_z[,1]*tab_sim_gamma_sigma[1,]~aw_gamma[11:40])),summary(lm(aw_full_tab_sim_delta_z[,1]*tab_sim_delta_sigma[1,]~aw_delta[11:40])))
-
-#Scenario 2: short-term wealth variability ----
-
-# 2) full wealth data, short term wealth strongest predictor
-
-#Prepare all the data to be analysed in the STAN model  ----
-
-#Replace NAs with -99
-for(j in 1:ncol(sc_simbirth)){
-  for(i in 1:nrow(sc_simbirth)){
-    if(is.na(sc_simbirth[i,j])){
-      sc_simbirth[i,j] <- -99
-    } else{
-      sc_simbirth[i,j] <- sc_simbirth[i,j]
-    }
-  }
-}
-#restrict data to ages of interest (10 to 39)
-sc_simbirth_res<-sc_simbirth[,1:40] 
-simwealth_res<-simwealth[,1:40]
-
-# We put all of this together in the list of data for the analyses
-sc_full_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
-                               A = ncol(sc_simbirth_res), #age
-                               wealth = as.matrix(simwealth_res), #current absolute wealth
-                               baby = as.matrix(sc_simbirth_res), #AFR
-                               median_wealth = medianwealthperindividual # median wealth of each individual
-)
-#check data
-sc_full_simulated_list
-
-## Compile and fit model ----
-#fit model
-sc_full_fit_simulated <- model_simulated$sample(data = sc_full_simulated_list, 
-                                                chains = 4, 
-                                                parallel_chains = 15, 
-                                                adapt_delta = 0.99,
-                                                max_treedepth = 13,
-                                                iter_warmup = 2000,
-                                                iter_sampling = 2000,
-                                                init = 0)
-
-# save fit 
-sc_full_fit_simulated_csv <- rstan::read_stan_csv(sc_full_fit_simulated$output_files())
-saveRDS(sc_full_fit_simulated_csv, "sc_full_fit_simulated_output.rds")
-#load RDS file
-sc_full_rds_simulated <- readRDS("sc_full_fit_simulated_output.rds")
-
-## Model diagnostics ----
-
-#check trace of all parameters
-#alpha
-rstan::traceplot(sc_full_rds_simulated,pars="alpha")
-#mu
-traceplot(sc_full_rds_simulated,pars="mu") 
-#mu_raw
-traceplot(sc_full_rds_simulated,pars="mu_raw")
-#mu_tau
-rstan::traceplot(sc_full_rds_simulated,pars="mu_tau")
-#mu_kappa
-rstan::traceplot(sc_full_rds_simulated,pars="mu_kappa")
-#mu_delta
-rstan::traceplot(sc_full_rds_simulated,pars="mu_delta")
-#beta_wealth_z
-traceplot(sc_full_rds_simulated,pars="beta_wealth_z") 
-#beta_wealth_sigma
-traceplot(sc_full_rds_simulated,pars="beta_wealth_sigma") 
-#gamma_wealth
-traceplot(sc_full_rds_simulated,pars="gamma_wealth_z") 
-#gamma_wealth
-traceplot(sc_full_rds_simulated,pars="gamma_wealth_sigma") 
-#delta_wealth
-traceplot(sc_full_rds_simulated,pars="delta_wealth_z") 
-#delta_wealth
-traceplot(sc_full_rds_simulated,pars="delta_wealth_sigma") 
-
-# generate output for simulation with full data where current absolute wealth has the strongest effect
-#beta z
-#create summary table for beta_z
-sc_full_tab_sim_beta_z <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_z")
-#check table
-sc_full_tab_sim_beta_z
-
-#beta sigma
-#create summary table for beta_sigma
-sc_full_tab_sim_beta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
-#check table
-sc_full_tab_sim_beta_sigma
-
-#gamma z
-#create summary table for gamma_z
-sc_full_tab_sim_gamma_z <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_z")
-#check table
-sc_full_tab_sim_gamma_z
-
-#gamma sigma
-#create summary table for gamma_sigma
-sc_full_tab_sim_gamma_sigma <- precis(sc_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
-#check table
-sc_full_tab_sim_gamma_sigma
-
-#delta z
-#create summary table for delta_z
-sc_full_tab_sim_delta_z <- precis(sc_full_rds_simulated,depth=2,pars="delta_wealth_z")
-#check table
-sc_full_tab_sim_delta_z
-
-#delta sigma
-#create summary table for delta_sigma
-sc_full_tab_sim_delta_sigma <- precis(sc_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
-#check table
-sc_full_tab_sim_delta_sigma
-
-#Plot it!
-
-#Plot it!
-
-par(mfrow=c(1,3))
-#current wealth
-plot(c(30:1)~c(sc_full_tab_sim_beta_z[11:40,1]*sc_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(sc_full_tab_sim_beta_z[i,1]*sc_full_tab_sim_beta_sigma[1,1])-c(sc_full_tab_sim_beta_z[i,2]*sc_full_tab_sim_beta_sigma[1,1]),
-    41-i,
-    c(sc_full_tab_sim_beta_z[i,1]*sc_full_tab_sim_beta_sigma[1,1])+c(sc_full_tab_sim_beta_z[i,2]*sc_full_tab_sim_beta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
-#short-term wealth variability
-plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])-c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])+c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
-#long-term wealth variability
-plot(c(30:1)~c(sc_full_tab_sim_delta_z[11:40,1]*sc_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(sc_full_tab_sim_delta_z[i,1]*sc_full_tab_sim_delta_sigma[1,1])-c(sc_full_tab_sim_delta_z[i,2]*sc_full_tab_sim_delta_sigma[1,1]),
-    41-i,
-    c(sc_full_tab_sim_delta_z[i,1]*sc_full_tab_sim_delta_sigma[1,1])+c(sc_full_tab_sim_delta_z[i,2]*sc_full_tab_sim_delta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
-
-#Scenario 3: Long-term wealth variability ----
-
-# 3) full wealth data, long term wealth strongest predictor
-
-#Prepare all the data to be analysed in the STAN model  ----
-
-#Replace NAs with -99
-for(j in 1:ncol(lv_simbirth)){
-  for(i in 1:nrow(lv_simbirth)){
-    if(is.na(lv_simbirth[i,j])){
-      lv_simbirth[i,j] <- -99
-    } else{
-      lv_simbirth[i,j] <- lv_simbirth[i,j]
-    }
-  }
-}
-#restrict data to ages of interest (10 to 39)
-lv_simbirth_res<-lv_simbirth[,1:40] 
-simwealth_res<-simwealth[,1:40]
-
-# We put all of this together in the list of data for the analyses
-lv_full_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
-                               A = ncol(lv_simbirth_res), #age
-                               wealth = as.matrix(simwealth_res), #current absolute wealth
-                               baby = as.matrix(lv_simbirth_res), #AFR
-                               median_wealth = medianwealthperindividual # median wealth of each individual
-)
-#check data
-lv_full_simulated_list
-
-## Compile and fit model ----
-#fit model
-lv_full_fit_simulated <- model_simulated$sample(data = lv_full_simulated_list, 
-                                                chains = 4, 
-                                                parallel_chains = 15, 
-                                                adapt_delta = 0.99,
-                                                max_treedepth = 13,
-                                                iter_warmup = 2000,
-                                                iter_sampling = 2000,
-                                                init = 0)
-
-# save fit 
-lv_full_fit_simulated_csv <- rstan::read_stan_csv(lv_full_fit_simulated$output_files())
-saveRDS(lv_full_fit_simulated_csv, "lv_full_fit_simulated_output.rds")
-#load RDS file
-lv_full_rds_simulated <- readRDS("lv_full_fit_simulated_output.rds")
-
-## Model diagnostics ----
-
-#check trace of all parameters
-#alpha
-rstan::traceplot(lv_full_rds_simulated,pars="alpha")
-#mu
-traceplot(lv_full_rds_simulated,pars="mu") 
-#mu_raw
-traceplot(lv_full_rds_simulated,pars="mu_raw")
-#mu_tau
-rstan::traceplot(lv_full_rds_simulated,pars="mu_tau")
-#mu_kappa
-rstan::traceplot(lv_full_rds_simulated,pars="mu_kappa")
-#mu_delta
-rstan::traceplot(lv_full_rds_simulated,pars="mu_delta")
-#beta_wealth_z
-traceplot(lv_full_rds_simulated,pars="beta_wealth_z") 
-#beta_wealth_sigma
-traceplot(lv_full_rds_simulated,pars="beta_wealth_sigma") 
-#gamma_wealth
-traceplot(lv_full_rds_simulated,pars="gamma_wealth_z") 
-#gamma_wealth
-traceplot(lv_full_rds_simulated,pars="gamma_wealth_sigma") 
-#delta_wealth
-traceplot(lv_full_rds_simulated,pars="delta_wealth_z") 
-#delta_wealth
-traceplot(lv_full_rds_simulated,pars="delta_wealth_sigma") 
-
-# generate output for simulation with full data where current absolute wealth has the strongest effect
-#beta z
-#create summary table for beta_z
-lv_full_tab_sim_beta_z <- precis(lv_full_rds_simulated,depth=2,pars="beta_wealth_z")
-#check table
-lv_full_tab_sim_beta_z
-
-#beta sigma
-#create summary table for beta_sigma
-lv_full_tab_sim_beta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="beta_wealth_sigma")
-#check table
-lv_full_tab_sim_beta_sigma
-
-#gamma z
-#create summary table for gamma_z
-lv_full_tab_sim_gamma_z <- precis(lv_full_rds_simulated,depth=2,pars="gamma_wealth_z")
-#check table
-lv_full_tab_sim_gamma_z
-
-#gamma sigma
-#create summary table for gamma_sigma
-lv_full_tab_sim_gamma_sigma <- precis(lv_full_rds_simulated,depth=2,pars="gamma_wealth_sigma")
-#check table
-lv_full_tab_sim_gamma_sigma
-
-#delta z
-#create summary table for delta_z
-lv_full_tab_sim_delta_z <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_z")
-#check table
-lv_full_tab_sim_delta_z
-
-#delta sigma
-#create summary table for delta_sigma
-lv_full_tab_sim_delta_sigma <- precis(lv_full_rds_simulated,depth=2,pars="delta_wealth_sigma")
-#check table
-lv_full_tab_sim_delta_sigma
-
-#Plot it!
-
-par(mfrow=c(1,3))
-#current wealth
-plot(c(30:1)~c(lv_full_tab_sim_beta_z[11:40,1]*lv_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(lv_full_tab_sim_beta_z[i,1]*lv_full_tab_sim_beta_sigma[1,1])-c(lv_full_tab_sim_beta_z[i,2]*lv_full_tab_sim_beta_sigma[1,1]),
-    41-i,
-    c(lv_full_tab_sim_beta_z[i,1]*lv_full_tab_sim_beta_sigma[1,1])+c(lv_full_tab_sim_beta_z[i,2]*lv_full_tab_sim_beta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
-#short-term wealth variability
-plot(c(30:1)~c(lv_full_tab_sim_gamma_z[11:40,1]*lv_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(lv_full_tab_sim_gamma_z[i,1]*lv_full_tab_sim_gamma_sigma[1,1])-c(lv_full_tab_sim_gamma_z[i,2]*lv_full_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    c(lv_full_tab_sim_gamma_z[i,1]*lv_full_tab_sim_gamma_sigma[1,1])+c(lv_full_tab_sim_gamma_z[i,2]*lv_full_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
-#long-term wealth variability
-plot(c(30:1)~c(lv_full_tab_sim_delta_z[11:40,1]*lv_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])-c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
-    41-i,
-    c(lv_full_tab_sim_delta_z[i,1]*lv_full_tab_sim_delta_sigma[1,1])+c(lv_full_tab_sim_delta_z[i,2]*lv_full_tab_sim_delta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
-
+ #####Plot it! ----
+ 
+ ######Coefficient plots ----
+ 
+ par(mfrow=c(1,1))
+ #current wealth
+ plot(c(30:1)~c(all_full_tab_sim_beta_z[11:40,1]*all_full_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="beta coefficients",ylab="Ages",pch=16)
+ axis(2,c(30:1),c(10:39))
+ for (i in 11:40){
+   segments(
+     c(all_full_tab_sim_beta_z[i,1]*all_full_tab_sim_beta_sigma[1,1])-c(all_full_tab_sim_beta_z[i,2]*all_full_tab_sim_beta_sigma[1,1]),
+     41-i,
+     c(all_full_tab_sim_beta_z[i,1]*all_full_tab_sim_beta_sigma[1,1])+c(all_full_tab_sim_beta_z[i,2]*all_full_tab_sim_beta_sigma[1,1]),
+     41-i,
+     lwd=2,col="black") 
+ }
+ points(c(30:1)~all_beta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
+ #short-term wealth variability
+ plot(c(30:1)~c(all_full_tab_sim_gamma_z[11:40,1]*all_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="gamma coefficients",ylab="Ages",pch=16)
+ axis(2,c(30:1),c(10:39))
+ for (i in 11:40){
+   segments(
+     c(all_full_tab_sim_gamma_z[i,1]*all_full_tab_sim_gamma_sigma[1,1])-c(all_full_tab_sim_gamma_z[i,2]*all_full_tab_sim_gamma_sigma[1,1]),
+     41-i,
+     c(all_full_tab_sim_gamma_z[i,1]*all_full_tab_sim_gamma_sigma[1,1])+c(all_full_tab_sim_gamma_z[i,2]*all_full_tab_sim_gamma_sigma[1,1]),
+     41-i,
+     lwd=2,col="black") 
+ }
+ points(c(30:1)~all_gamma[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
+ #long-term wealth variability
+ plot(c(30:1)~c(all_full_tab_sim_delta_z[11:40,1]*all_full_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
+ axis(2,c(30:1),c(10:39))
+ for (i in 11:40){
+   segments(
+     c(all_full_tab_sim_delta_z[i,1]*all_full_tab_sim_delta_sigma[1,1])-c(all_full_tab_sim_delta_z[i,2]*all_full_tab_sim_delta_sigma[1,1]),
+     41-i,
+     c(all_full_tab_sim_delta_z[i,1]*all_full_tab_sim_delta_sigma[1,1])+c(all_full_tab_sim_delta_z[i,2]*all_full_tab_sim_delta_sigma[1,1]),
+     41-i,
+     lwd=2,col="black") 
+ }
+ points(c(30:1)~all_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
+ 
+ ######Cumulative probabilities plot ----
+ 
+ ####### Current Wealth ----
+ 
+ #simulate wealth values
+ simwealth_aw_all_full <- seq(from=round(min(post_all_full$wealth_full),1),to=round(max(post_all_full$wealth_full),1),length.out=nrow(std_aw_all_full_restricted)) #specify according to range and length related to sample size
+ simwealth_aw_all_full
+ #get the deciles
+ deciles_aw_all_full <- as.numeric(quantile(simwealth_aw_all_full,seq(0,1,0.5)))
+ deciles_aw_all_full
+ 
+ #colour palette
+ #numbers for color palette
+ palette <- palette.colors(9,"Okabe-Ito")
+ #select the numbers for color palette
+ palette_a<-palette[1:length(deciles_aw_all_full)]
+ palette_a
+ 
+ #shape of points
+ shape <- c(15:17)
+ #line type
+ type <- c(1:3)
+ 
+ #set parameters for a legend outside of the plot
+ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+ 
+ #plot empty plot
+ plot(c(0,1)~c(10,ncol(post_all_full$mu)),
+      ylab="Cumulative probability of first birth",
+      xlab="Age",
+      main="Current levels\nof material wealth",
+      cex.axis=1.2,
+      cex.lab=1.5,
+      cex.main=1.5,
+      type="n")
+ legend(53,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+ 
+ #add lines
+ for(k in 1:(length(deciles_aw_all_full))){
+   #create matrix to store the data
+   p_aw_all_full <- matrix(nrow=nrow(post_all_full$mu),ncol=ncol(post_all_full$mu))
+   p_aw_all_full
+   #fill it in with values for age 25
+   for(j in 1:ncol(post_all_full$mu)){
+     for(i in 1:nrow(post_all_full$mu)){
+       p_aw_all_full[i,j] <- inv_logit(post_all_full$alpha[i] + #inv logit because originally is logit
+                                       post_all_full$mu[i,j] + #age
+                                       (post_all_full$beta_wealth_z[i,j]*post_all_full$beta_wealth_sigma[i])*deciles_aw_all_full[k] + #absolute wealth
+                                       (post_all_full$gamma_wealth_z[i,j]*post_all_full$gamma_wealth_sigma[i])*0 + #wealth change
+                                       (post_all_full$delta_wealth_z[i,j]*post_all_full$delta_wealth_sigma[i])*0) #moving variance
+     }
+   }
+   #check data
+   p_aw_all_full
+   #plot it!
+   #prepare model prediction data
+   plot_aw_all_full <- data.frame(age = 1:ncol(p_aw_all_full),
+                                median = apply(p_aw_all_full, 2, median), 
+                                upp = apply(p_aw_all_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p_aw_all_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+   ) 
+   #store data per decile
+   assign(paste0("aw_all_",k),plot_aw_all_full)
+   
+   # Calculate cumulative probabilities
+   #create vectors
+   cumulative_median_aw_all_full <- numeric(length(plot_aw_all_full$median))
+   cumulative_low_aw_all_full <- numeric(length(plot_aw_all_full$low))
+   cumulative_upp_aw_all_full <- numeric(length(plot_aw_all_full$upp))
+   #set the first probability
+   cumulative_median_aw_all_full[1] <- plot_aw_all_full$median[1]
+   cumulative_low_aw_all_full[1] <- plot_aw_all_full$low[1]
+   cumulative_upp_aw_all_full[1] <- plot_aw_all_full$upp[1]
+   #calculate the cumulative probabilities for the other ages
+   for (a in 2:length(plot_aw_all_full$median)) {
+     cumulative_median_aw_all_full[a] <- cumulative_median_aw_all_full[a-1] + (1 - cumulative_median_aw_all_full[a-1]) * plot_aw_all_full$median[a]
+     cumulative_low_aw_all_full[a] <- cumulative_low_aw_all_full[a-1] + (1 - cumulative_low_aw_all_full[a-1]) * plot_aw_all_full$low[a]
+     cumulative_upp_aw_all_full[a] <- cumulative_upp_aw_all_full[a-1] + (1 - cumulative_upp_aw_all_full[a-1]) * plot_aw_all_full$upp[a]
+   }
+   #store data per decile
+   assign(paste0("cumulative_median_aw_all_full_",k),cumulative_median_aw_all_full)
+   assign(paste0("cumulative_low_aw_all_full_",k),cumulative_low_aw_all_full)
+   assign(paste0("cumulative_upp_aw_all_full_",k),cumulative_upp_aw_all_full)
+   
+   #add median
+   #add points
+   points(cumulative_median_aw_all_full[11:51] ~ plot_aw_all_full$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
+   #add lines
+   lines(cumulative_median_aw_all_full[11:51] ~ plot_aw_all_full$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
+   #add confidence intervals
+   polygon(c(plot_aw_all_full$age[11:51], rev(plot_aw_all_full$age[11:51])), c(cumulative_low_aw_all_full[11:51], rev(cumulative_upp_aw_all_full[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
+ }
+ 
+ ###### Short-term wealth variability ----
+ 
+ #simulate wealth values
+ simwealth_sc_all_full <- seq(from=round(min(post_all_full$wealth_change),1),to=round(max(post_all_full$wealth_change),1),length.out=nrow(std_aw_all_restricted)) #specify according to range and length related to sample size
+ simwealth_sc_all_full
+ #get the deciles
+ deciles_sc_all_full <- as.numeric(quantile(simwealth_sc_all_full,seq(0,1,0.5)))
+ deciles_sc_all_full
+ 
+ #colour palette
+ #numbers for color palette
+ palette <- palette.colors(9,"Okabe-Ito")
+ #select the numbers for color palette
+ palette_b<-palette[4:(length(deciles_sc_all_full)+3)]
+ palette_b
+ 
+ #shape of points
+ shape <- c(15:17)
+ #line type
+ type <- c(1:3)
+ 
+ #set parameters for a legend outside of the plot
+ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+ 
+ #plot empty plot
+ plot(c(0,1)~c(10,ncol(post_all_full$mu)),
+      ylab="Cumulative probability of first birth",
+      xlab="Age",
+      main="Short-term variability\nof material wealth",
+      cex.axis=1.2,
+      cex.lab=1.5,
+      cex.main=1.5,
+      type="n")
+ legend(53,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+ 
+ #add lines
+ for(k in 1:(length(deciles_sc_all_full))){
+   #create matrix to store the data
+   p_sc_all_full_real <- matrix(nrow=nrow(post_all_full$mu),ncol=ncol(post_all_full$mu))
+   p_sc_all_full_real
+   #fill it in with values for age 25
+   for(j in 1:ncol(post_all_full$mu)){
+     for(i in 1:nrow(post_all_full$mu)){
+       p_sc_all_full_real[i,j] <- inv_logit(post_all_full$alpha[i] + #inv logit because originally is logit
+                                        post_all_full$mu[i,j] + #age
+                                        (post_all_full$beta_wealth_z[i,j]*post_all_full$beta_wealth_sigma[i])*0 + #absolute wealth
+                                        (post_all_full$gamma_wealth_z[i,j]*post_all_full$gamma_wealth_sigma[i])*deciles_sc_all_full[k] + #wealth change
+                                        (post_all_full$delta_wealth_z[i,j]*post_all_full$delta_wealth_sigma[i])*0) #moving variance
+     }
+   }
+   #check data
+   p_sc_all_full_real
+   #plot it!
+   #prepare model prediction data
+   plot_sc_all_full_real <- data.frame(age = 1:ncol(p_sc_all_full_real),
+                                 median = apply(p_sc_all_full_real, 2, median), 
+                                 upp = apply(p_sc_all_full_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p_sc_all_full_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+   ) 
+   #store data per decile
+   assign(paste0("sc_all_full_",k),plot_sc_all_full_real)
+   
+   # Calculate cumulative probabilities
+   #create vectors
+   cumulative_median_sc_all_full <- numeric(length(plot_sc_all_full_real$median))
+   cumulative_low_sc_all_full <- numeric(length(plot_sc_all_full_real$low))
+   cumulative_upp_sc_all_full <- numeric(length(plot_sc_all_full_real$upp))
+   #set the first probability
+   cumulative_median_sc_all_full[1] <- plot_sc_all_full_real$median[1]
+   cumulative_low_sc_all_full[1] <- plot_sc_all_full_real$low[1]
+   cumulative_upp_sc_all_full[1] <- plot_sc_all_full_real$upp[1]
+   #calculate the cumulative probabilities for the other ages
+   for (a in 2:length(plot_sc_all_full_real$median)) {
+     cumulative_median_sc_all_full[a] <- cumulative_median_sc_all_full[a-1] + (1 - cumulative_median_sc_all_full[a-1]) * plot_sc_all_full_real$median[a]
+     cumulative_low_sc_all_full[a] <- cumulative_low_sc_all_full[a-1] + (1 - cumulative_low_sc_all_full[a-1]) * plot_sc_all_full_real$low[a]
+     cumulative_upp_sc_all_full[a] <- cumulative_upp_sc_all_full[a-1] + (1 - cumulative_upp_sc_all_full[a-1]) * plot_sc_all_full_real$upp[a]
+   }
+   #store data per decile
+   assign(paste0("cumulative_median_sc_all_full_",k),cumulative_median_sc_all_full)
+   assign(paste0("cumulative_low_sc_all_full_",k),cumulative_low_sc_all_full)
+   assign(paste0("cumulative_upp_sc_all_full_",k),cumulative_upp_sc_all_full)
+   
+   #add median
+   #add points
+   points(cumulative_median_sc_all_full[11:51] ~ plot_sc_all_full_real$age[11:51], col=palette_b[k], pch=shape[k], cex=1.5)
+   #add lines
+   lines(cumulative_median_sc_all_full[11:51] ~ plot_sc_all_full_real$age[11:51], col=palette_b[k], lwd=3, lty=type[k])
+   #add confidence intervals
+   polygon(c(plot_sc_all_full_real$age[11:51], rev(plot_sc_all_full_real$age[11:51])), c(cumulative_low_sc_all_full[11:51], rev(cumulative_upp_sc_all_full[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
+ }
+ 
+ ###### Long-term variability of wealth ----
+ 
+ #simulate wealth values
+ simwealth_lv_all_full <- seq(from=round(min(post_all_full$wealth_lv_all_full),1),to=round(max(post_all_full$wealth_lv_all_full),1),length.out=nrow(std_aw_all_restricted)) #specify according to range and length related to sample size
+ simwealth_lv_all_full
+ #get the deciles
+ deciles_lv_all_full <- as.numeric(quantile(simwealth_lv_all_full,seq(0,1,0.5)))
+ deciles_lv_all_full
+ 
+ #colour palette
+ #numbers for color palette
+ palette <- palette.colors(9,"Okabe-Ito")
+ #select the numbers for color palette
+ palette_c<-palette[7:(length(deciles_lv_all_full)+6)]
+ palette_c
+ 
+ #shape of points
+ shape <- c(15:17)
+ #line type
+ type <- c(1:3)
+ 
+ #set parameters for a legend outside of the plot
+ par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+ 
+ #plot empty plot
+ plot(c(0,1)~c(10,ncol(post_all_full$mu)),
+      ylab="Cumulative probability of first birth",
+      xlab="Age",
+      main="Long-term variability\nof material wealth",
+      cex.axis=1.2,
+      cex.lab=1.5,
+      cex.main=1.5,
+      type="n")
+ legend(53,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
+ 
+ #add lines
+ for(k in 1:(length(deciles_lv_all_full))){
+   #create matrix to store the data
+   p_lv_all_full <- matrix(nrow=nrow(post_all_full$mu),ncol=ncol(post_all_full$mu))
+   p_lv_all_full
+   #fill it in with values for age 25
+   for(j in 1:ncol(post_all_full$mu)){
+     for(i in 1:nrow(post_all_full$mu)){
+       p_lv_all_full[i,j] <- inv_logit(post_all_full$alpha[i] + #inv logit because originally is logit
+                                      post_all_full$mu[i,j] + #age
+                                      (post_all_full$beta_wealth_z[i,j]*post_all_full$beta_wealth_sigma[i])*0 + #absolute wealth
+                                      (post_all_full$gamma_wealth_z[i,j]*post_all_full$gamma_wealth_sigma[i])*0 + #wealth change
+                                      (post_all_full$delta_wealth_z[i,j]*post_all_full$delta_wealth_sigma[i])*deciles_lv_all_full[k]) #moving variance
+     }
+   }
+   #check data
+   p_lv_all_full
+   #plot it!
+   #prepare model prediction data
+   plot_lv_all_full_real <- data.frame(age = 1:ncol(p_lv_all_full),
+                                median = apply(p_lv_all_full, 2, median), 
+                                upp = apply(p_lv_all_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p_lv_all_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+   ) 
+   #store data per decile
+   assign(paste0("lv_all_full_",k),plot_lv_all_full_real)
+   
+   # Calculate cumulative probabilities
+   #create vectors
+   cumulative_median_lv_all_full <- numeric(length(plot_lv_all_full_real$median))
+   cumulative_low_lv_all_full <- numeric(length(plot_lv_all_full_real$low))
+   cumulative_upp_lv_all_full <- numeric(length(plot_lv_all_full_real$upp))
+   #set the first probability
+   cumulative_median_lv_all_full[1] <- plot_lv_all_full_real$median[1]
+   cumulative_low_lv_all_full[1] <- plot_lv_all_full_real$low[1]
+   cumulative_upp_lv_all_full[1] <- plot_lv_all_full_real$upp[1]
+   #calculate the cumulative probabilities for the other ages
+   for (a in 2:length(plot_lv_all_full_real$median)) {
+     cumulative_median_lv_all_full[a] <- cumulative_median_lv_all_full[a-1] + (1 - cumulative_median_lv_all_full[a-1]) * plot_lv_all_full_real$median[a]
+     cumulative_low_lv_all_full[a] <- cumulative_low_lv_all_full[a-1] + (1 - cumulative_low_lv_all_full[a-1]) * plot_lv_all_full_real$low[a]
+     cumulative_upp_lv_all_full[a] <- cumulative_upp_lv_all_full[a-1] + (1 - cumulative_upp_lv_all_full[a-1]) * plot_lv_all_full_real$upp[a]
+   }
+   #store data per decile
+   assign(paste0("cumulative_median_lv_all_full_",k),cumulative_median_lv_all_full)
+   assign(paste0("cumulative_low_lv_all_full_",k),cumulative_low_lv_all_full)
+   assign(paste0("cumulative_upp_lv_all_full_",k),cumulative_upp_lv_all_full)
+   
+   #add median
+   #add points
+   points(cumulative_median_lv_all_full[11:51] ~ plot_lv_all_full_real$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
+   #add lines
+   lines(cumulative_median_lv_all_full[11:51] ~ plot_lv_all_full_real$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
+   #add confidence intervals
+   polygon(c(plot_lv_all_full_real$age[11:51], rev(plot_lv_all_full_real$age[11:51])), c(cumulative_low_lv_all_full[11:51], rev(cumulative_upp_lv_all_full[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
+ }
+ 
 #Aim 2: Data imputation ----
 
  # For aim 2, we introduce missing observations in the wealth data
@@ -1243,7 +1871,7 @@ std_absw_matrix
    }
  }
 
-#Scenario 4: Current wealth with incomplete data ---- 
+#Scenario 5: Current wealth with incomplete data ---- 
 
 #Prepare all the data to be analysed in the STAN model  ----
 
@@ -1398,7 +2026,7 @@ for (i in 11:40){
 }
 points(c(30:1)~aw_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
-#Scenario 5: Shor-term wealth variability with incomplete data ---- 
+#Scenario 6: Shor-term wealth variability with incomplete data ---- 
 
 #Prepare all the data to be analysed in the STAN model  ----
 
@@ -1553,7 +2181,7 @@ for (i in 11:40){
 }
 points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
-#Scenario 6: Long-term wealth variability with incomplete data ---- 
+#Scenario 7: Long-term wealth variability with incomplete data ---- 
 
 #Prepare all the data to be analysed in the STAN model  ----
 

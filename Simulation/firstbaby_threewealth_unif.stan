@@ -29,7 +29,7 @@ data {
   
   vector[N] median_wealth; // individual median wealth for data imputation at birth
 
-  array[N,A] int baby; // 0/1 gives birth
+  array[N,A] int baby; // first birth (0=no,1=yes,-99=censored)
 
 }
 
