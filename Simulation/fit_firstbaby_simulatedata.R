@@ -341,18 +341,13 @@ which(afr_age==max(afr_age)) # 19
 
 #### Scenario 1: Current wealth ----
  
-# 1) absolute wealth has the largest effect, this creates the age-specific effects for the three wealth predictors
- aw_beta <- 1*centeredage # positive slope means wealthy have afr later
+# 1) only absolute wealth has an effect
+ # Create the age-specif effects
+ aw_beta <- 2*centeredage # positive slope means wealthy have afr later
  
 # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
 #current wealth
   plot(c(51:1)~aw_beta[51:1],ylim=c(51,1),pch=16)
-  abline(v=0,lty=2)
-#short-term wealth variability
-  plot(c(51:1)~aw_gamma[51:1],ylim=c(51,1),pch=16)
-  abline(v=0,lty=2)
-#long-term wealth variability
-  plot(c(51:1)~aw_delta[51:1],ylim=c(51,1),pch=16)
   abline(v=0,lty=2)
 
 #####Checking the effect sizes ----  
@@ -470,7 +465,8 @@ for(i in 1:nrow(wealthvsafr)){
 plot(wealthvsafr[,2]~wealthvsafr[,1])
 mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
 mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
-# poor individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
+# poorest individuals in the simulation have their first child on average 3.4 year earlier than the richest individuals (predicted was more than 2 years).
+
 
 ##### Prepare all the data to be analysed in the STAN model  ----
 
@@ -664,10 +660,15 @@ for(k in 1:(length(deciles_aw_full))){
   polygon(c(plot_aw_full$age[11:51], rev(plot_aw_full$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
 }
 
+
+
+
+
+
 #### Scenario 2: Short-term wealth variabiliy ----
 
- # 2) short term wealth change has the largest effect
- sc_gamma <- -1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier
+ # 2) only short term wealth change has an effect
+ sc_gamma <- -4*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier; effect has to be larger than for absolute wealth because effects are not additive. While rich individuals are rich across all ages (so the effects can occur at all ages), individuals only rarely experience a large short term wealth change, and all individuals can experience this
 
  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
  #short-term wealth variability
@@ -779,19 +780,6 @@ for(k in 1:(length(deciles_aw_full))){
  #counts per column
  apply(sc_simbirth,2,sum,na.rm=T)
  
- # as a rough way to check whether our simulation works, we can plot for each individual whether their age at first birth is linked to their median wealth
- # we create a matrix with a single row for each individual where we store their median wealth and age at first birth
- wealthvsafr<-matrix(ncol=2,nrow=nrow(sc_simbirth))
- wealthvsafr[,1]<-medianwealthperindividual
- for(i in 1:nrow(wealthvsafr)){
-   ifelse(sum(sc_simbirth[i,],na.rm=T)==0, wealthvsafr[i,2]<-NA,   wealthvsafr[i,2]<-which(sc_simbirth[i,]==1))
- }
- 
- # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. The exact values can differ a bit because the process above is stochastic.
- plot(wealthvsafr[,2]~wealthvsafr[,1])
- mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
- mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
- # poor individuals in the simulation have their first child on average 1 year earlier than the richest individuals.
 
 #####Prepare all the data to be analysed in the STAN model  ----
  
@@ -982,10 +970,13 @@ for(k in 1:(length(deciles_aw_full))){
    polygon(c(plot_sc_full_diff$age[11:51], rev(plot_sc_full_diff$age[11:51])), c(cumulative_low_sc_full[11:51], rev(cumulative_upp_sc_full[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
  }
  
+ 
+ 
+ 
 ###Scenario 3: Long-term wealth variability ----
  
  # 3) long term wealth variability has the largest effect
-  lv_delta <- -1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
+  lv_delta <- -4*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier; similar as for short-term wealth change, need stronger effects here
 
   # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
   #long-term wealth variability
@@ -1077,6 +1068,8 @@ for(k in 1:(length(deciles_aw_full))){
   points(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],pch=shape[3])
   lines(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],lty=type[3])
   legend(x="bottomright",pch=shape,lty=type,col=palette_c,legend=c("Min.","Med.","Max."))
+  
+
 
 #####Simulate first births ----  
   
@@ -1281,12 +1274,15 @@ for(k in 1:(length(deciles_aw_full))){
     polygon(c(plot_lv_fullw_lv_full$age[11:51], rev(plot_lv_fullw_lv_full$age[11:51])), c(cumulative_low_lv_fullw[11:51], rev(cumulative_upp_lv_fullw[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
   }
 
+  
+  
+  
  ###Scenario 4: All wealth predictors ----
  
- # 3) long term wealth variability has the largest effect
- all_beta <- 1*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
- all_gamma <- -1*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
- all_delta <- -1*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
+ # all wealth predictors have strong effects
+ all_beta <- 2*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
+ all_gamma <- -4*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
+ all_delta <- -4*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
  
  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
  #current wealth
@@ -1331,59 +1327,6 @@ for(k in 1:(length(deciles_aw_full))){
  #check data
  ageprobs_minall
  
- #Plot it!    
- plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_c[1],pch=shape[1]) # minimum change
- points(inv_logit(0.5*all_delta+logit(afr_age_baseline))~c(1:74),col=palette_c[2],pch=shape[2]) # average change
- points(inv_logit(all_delta+logit(afr_age_baseline))~c(1:74),col=palette_c[3],pch=shape[3]) #maximum change
- legend(x="topright",pch=shape,col=palette_c,legend=c("Min.","Med.","Max."))
- 
- #Expected mean age at first birth
- 
- # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
- #maximum change (1)
- std_ageprobs_maxall<-0
- for(i in 2:74){
-   std_ageprobs_maxall[i]<-(1-sum(std_ageprobs_maxall[c(1:(i-1))]))*ageprobs_maxall[i]
- }
- #check data
- std_ageprobs_maxall
- #expected mean age at first birth
- which(cumsum(std_ageprobs_maxall)>0.5)[1]
- 
- #medium change (0.5)
- std_ageprobs_medall<-0
- for(i in 2:74){
-   std_ageprobs_medall[i]<-(1-sum(std_ageprobs_medall[c(1:(i-1))]))*ageprobs_medall[i]
- }
- #check data
- std_ageprobs_medall
- #expected mean age at first birth
- which(cumsum(std_ageprobs_medall)>0.5)[1]
- 
- #minimum change (0)
- # compare it to the expected mean age at first birth for individuals who have average wealth
- std_afr_age_baseline<-0
- for(i in 2:74){
-   std_afr_age_baseline[i]<-(1-sum(std_afr_age_baseline[c(1:(i-1))]))*afr_age_baseline[i]
- }
- #check data
- std_afr_age_baseline
- #expected mean age at first birth
- which(cumsum(std_afr_age_baseline)>0.5)[1]
- 
- #Cumulative probabilities of first birth
- 
- # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
- #minimum wealth
- plot(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
- lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],lty=type[2])
- #medium wealth
- points(cumsum(std_ageprobs_medall)[1:41]~c(1:41),col=palette_c[2],pch=shape[2])
- lines(cumsum(std_ageprobs_medall)[1:41]~c(1:41),col=palette_c[2],lty=type[1])
- #maximum wealth
- points(cumsum(std_ageprobs_maxall)[1:41]~c(1:41),col=palette_c[3],pch=shape[3])
- lines(cumsum(std_ageprobs_maxall)[1:41]~c(1:41),col=palette_c[3],lty=type[3])
- legend(x="bottomright",pch=shape,lty=type,col=palette_c,legend=c("Min.","Med.","Max."))
  
  ##### Simulate first births ----
  
@@ -1399,6 +1342,21 @@ for(k in 1:(length(deciles_aw_full))){
      ifelse(all_simbirth[individual,(ages-1)]==1,all_simbirth[individual,ages]<-NA,all_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
+ 
+ # as a rough way to check whether our simulation works, we can plot for each individual whether their age at first birth is linked to their median wealth
+ # we create a matrix with a single row for each individual where we store their median wealth and age at first birth
+ all_wealthvsafr<-matrix(ncol=2,nrow=nrow(all_simbirth))
+ all_wealthvsafr[,1]<-medianwealthperindividual
+ for(i in 1:nrow(all_wealthvsafr)){
+   ifelse(sum(all_simbirth[i,],na.rm=T)==0, all_wealthvsafr[i,2]<-NA,   all_wealthvsafr[i,2]<-which(all_simbirth[i,]==1))
+ }
+ 
+ # The plot shows that when we set the effect to 1 x the age-specific (centered age) modulators, individuals who have 1 SD more or less wealth than the average reproduce ~0.5 years later/earlier. The exact values can differ a bit because the process above is stochastic.
+ plot(all_wealthvsafr[,2]~all_wealthvsafr[,1])
+ mean(all_wealthvsafr[all_wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
+ mean(all_wealthvsafr[all_wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
+ # poorest individuals in the simulation have their first child on average 2.5 year earlier than the richest individuals (predicted was more than 2 years). Effect is smaller than in the simulation where absolute wealth is the only predictor, because the other two wealth variables now have an effect as well.
+ 
 
 #####Prepare all the data to be analysed in the STAN model  ----
  
