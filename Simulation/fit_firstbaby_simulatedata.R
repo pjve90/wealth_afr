@@ -340,8 +340,7 @@ which(afr_age==max(afr_age)) # 19
  
  # We introduce a slope that changes the effecs relative to the age. We only model this for the relevant age range, and we want to make it symmetrical so that the overall probability is similar - so from ages 11 to 18 the centered age is negative, at age 19 it is zero, from ages 20 to 33 it is positive, and after that there is no longer an effect because no individuals reproduce. Because there are more values after the centered age (individuals can have their first child for more years after the age of 19 then before), we need to reduce each of the age-specific values such that the overall probability does not change. 
  
- # centeredage<-c(rep(0,10),seq(from=-0.75,to=0,length.out=9),seq(from=0.05,to=0.75,length.out=14)^2,rep(0,41))
- centeredage<-c(rep(0,9),rep(-0.25,9),0,rep(0.16,14),rep(0,41))
+centeredage<-c(rep(0,10),seq(from=-0.3,to=0,length.out=9),seq(from=0.01,to=0.10,length.out=15),rep(0,40))
  
  # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is negative for ages younger than the median, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age). The effects are simulated on a logit scale, which are added to the logit scale baseline probability, before being transformed back into the probabilities that a woman of a given wealth will have her first child at the respective age. Given that effects are age-specific, on a logit scale, and linked to the centered age, they are best summarized through their total effect. 
  
@@ -351,7 +350,7 @@ which(afr_age==max(afr_age)) # 19
  
 # 1) only absolute wealth has an effect
  # Create the age-specif effects
- aw_beta <- 2*centeredage # positive slope means wealthy have afr later
+ aw_beta <- 5*centeredage # positive slope means wealthy have afr later
  
 # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
 #current wealth
@@ -676,7 +675,7 @@ for(k in 1:(length(deciles_aw_full))){
 #### Scenario 2: Short-term wealth variabiliy ----
 
  # 2) only short term wealth change has an effect
- sc_gamma <- -4*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier; effect has to be larger than for absolute wealth because effects are not additive. While rich individuals are rich across all ages (so the effects can occur at all ages), individuals only rarely experience a large short term wealth change, and all individuals can experience this
+ sc_gamma <- -5*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier; effect has to be larger than for absolute wealth because effects are not additive. While rich individuals are rich across all ages (so the effects can occur at all ages), individuals only rarely experience a large short term wealth change, and all individuals can experience this
 
  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
  #short-term wealth variability
@@ -984,7 +983,7 @@ for(k in 1:(length(deciles_aw_full))){
 ###Scenario 3: Long-term wealth variability ----
  
  # 3) long term wealth variability has the largest effect
-  lv_delta <- -4*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier; similar as for short-term wealth change, need stronger effects here
+  lv_delta <- -5*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier; similar as for short-term wealth change, need stronger effects here
 
   # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
   #long-term wealth variability
