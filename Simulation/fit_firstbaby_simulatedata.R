@@ -274,6 +274,11 @@ simshorttermwealth
 # We now simulate all ages, so we add values for the first two years. These will not affect the simulation because the age-specific probability to have a first child at these ages is zero
 simshorttermwealth[,c(1,2)]<-rnorm(2*nrow(simshorttermwealth),mean=mean(simshorttermwealth,na.rm=T),sd=0.2)
 
+# We standardize the short term wealth variability, so that values reflecting less variability than average are negative, while values reflecting more variability are positive. This makes it easier for the simulation and the inferences.
+
+simshorttermwealth <- matrix(standardize(simshorttermwealth),ncol=ncol(simshorttermwealth),nrow=nrow(simshorttermwealth))
+
+
 ### Long-term wealth variability ----
 
 # Based on the amount of wealth individuals, we calculate the standard deviation over the past 10 years to create the predictor variable of long-term variability in wealth. 
@@ -291,6 +296,9 @@ simlongtermwealth
 # We now simulate all ages, so we add values for the first ten years. These will not affect the simulation because the age-specific probability to have a first child at these ages is zero
 simlongtermwealth[,c(1:10)]<-rnorm(10*nrow(simlongtermwealth),mean=mean(simlongtermwealth,na.rm=T),sd=0.2)
 
+# We standardize the short term wealth variability, so that values reflecting less variability than average are negative, while values reflecting more variability are positive. This makes it easier for the simulation and the inferences.
+
+simlongtermwealth <- matrix(standardize(simlongtermwealth),ncol=ncol(simlongtermwealth),nrow=nrow(simlongtermwealth))
 
 ## Simulate age-specific probabilities of first birth ----
 
@@ -332,12 +340,12 @@ which(afr_age==max(afr_age)) # 19
  
  # We introduce a slope that changes the effecs relative to the age. We only model this for the relevant age range, and we want to make it symmetrical so that the overall probability is similar - so from ages 11 to 18 the centered age is negative, at age 19 it is zero, from ages 20 to 33 it is positive, and after that there is no longer an effect because no individuals reproduce. Because there are more values after the centered age (individuals can have their first child for more years after the age of 19 then before), we need to reduce each of the age-specific values such that the overall probability does not change. 
  
- centeredage<-c(rep(0,10),seq(from=-0.75,to=0,length.out=9),seq(from=0.05,to=0.75,length.out=14)^2,rep(0,41))
- 
+ # centeredage<-c(rep(0,10),seq(from=-0.75,to=0,length.out=9),seq(from=0.05,to=0.75,length.out=14)^2,rep(0,41))
+ centeredage<-c(rep(0,9),rep(-0.25,9),0,rep(0.16,14),rep(0,41))
  
  # a positive effect (the slope) means that individuals are less likely to reproduce when they are young (because the centered age is negative for ages younger than the median, leading to a reduction in the probability) but a higher probability to reproduce when they are old (because the centered age is positive for ages larger than the median age). The effects are simulated on a logit scale, which are added to the logit scale baseline probability, before being transformed back into the probabilities that a woman of a given wealth will have her first child at the respective age. Given that effects are age-specific, on a logit scale, and linked to the centered age, they are best summarized through their total effect. 
  
- # We perform three simulations - 1) absolute wealth has a 4x larger effect, 2) short term wealth change has a 4x larger effect, 3) long term wealth variability has a 4x larger effect. We assume that even the strongest effect only leads to a relatively small shift in the age at first birth.
+ # We perform four simulations - 1) only absolute wealth has an effect, 2) only short term wealth change has an effect, 3) only long term wealth variability has an effect, 4) all three wealth predictors have an effect. We assume that even the strongest effect only leads to a relatively small shift in the age at first birth.
 
 #### Scenario 1: Current wealth ----
  
@@ -465,7 +473,7 @@ for(i in 1:nrow(wealthvsafr)){
 plot(wealthvsafr[,2]~wealthvsafr[,1])
 mean(wealthvsafr[wealthvsafr[,1]>1,2],na.rm=T) #rich individuals
 mean(wealthvsafr[wealthvsafr[,1]< -1,2],na.rm=T) # poor individuals
-# poorest individuals in the simulation have their first child on average 3.4 year earlier than the richest individuals (predicted was more than 2 years).
+# poorest individuals in the simulation have their first child on average 1.5 year earlier than the richest individuals (predicted was more than 2 years).
 
 
 ##### Prepare all the data to be analysed in the STAN model  ----
@@ -1085,6 +1093,8 @@ for(k in 1:(length(deciles_aw_full))){
      ifelse(lv_simbirth[individual,(ages-1)]==1,lv_simbirth[individual,ages]<-NA,lv_simbirth[individual,ages]<-rbinom(1,1,ageprob))
    }
  }
+  
+  apply(lv_simbirth,2,sum,na.rm=T)
 
 #####Prepare all the data to be analysed in the STAN model  ----
   
