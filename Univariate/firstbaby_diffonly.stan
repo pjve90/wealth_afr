@@ -78,6 +78,30 @@ transformed parameters {
     }
   }
 
+// Standardization excluding placeholder zeros
+  int wc_len = N * (A - 2);
+  vector[wc_len] wc_vec;
+  int wc_idx = 1;
+
+  for (n in 1:N) {
+    for (a in 3:A) {
+      wc_vec[wc_idx] = wealth_change[n, a];
+      wc_idx += 1;
+    }
+  }
+
+  real wc_mean = mean(wc_vec);
+  real wc_sd = sd(wc_vec);
+
+  matrix[N, A] wealth_change_std;
+  matrix[N, A] wealth_msd_std;
+
+  for (n in 1:N) {
+    for (a in 1:2)
+      wealth_change_std[n, a] = 0;
+    for (a in 3:A)
+      wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean) / wc_sd;
+  }
 }
 
 model {
@@ -125,7 +149,7 @@ for (n in 1:N){
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
         mu[a] + // age
-        (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change[n,a] // 2-years lagged wealth change
+        (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change_std[n,a] // 2-years lagged wealth change
         );
           
     }
