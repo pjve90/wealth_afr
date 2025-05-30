@@ -78,30 +78,27 @@ transformed parameters {
     }
   }
 
-// Standardization excluding placeholder zeros
-  int msd_len = N * (A - 10);
-  vector[msd_len] msd_vec;
-  int msd_idx = 1;
-
+// Flatten wealth_msd (excluding a = 1 to 10) for standardization
+  vector[N * (A - 10)] msd_vec;
   for (n in 1:N) {
     for (a in 11:A) {
-      msd_vec[msd_idx] = wealth_msd[n, a];
-      msd_idx += 1;
+      msd_vec[(n - 1) * (A - 10) + (a - 10)] = wealth_msd[n, a];
     }
   }
 
   real msd_mean = mean(msd_vec);
   real msd_sd = sd(msd_vec);
 
+  // Standardize wealth_msd
   matrix[N, A] wealth_msd_std;
-
   for (n in 1:N) {
-    for (a in 1:10)
+    for (a in 1:10) {
       wealth_msd_std[n, a] = 0;
-    for (a in 11:A)
+    }
+    for (a in 11:A) {
       wealth_msd_std[n, a] = (wealth_msd[n, a] - msd_mean) / msd_sd;
+    }
   }
-
 }
 
 model {

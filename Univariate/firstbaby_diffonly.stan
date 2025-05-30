@@ -78,29 +78,27 @@ transformed parameters {
     }
   }
 
-// Standardization excluding placeholder zeros
-  int wc_len = N * (A - 2);
-  vector[wc_len] wc_vec;
-  int wc_idx = 1;
-
+// Flatten wealth_change (excluding a = 1 and 2) to compute mean and sd
+  vector[N * (A - 2)] wc_vec;
   for (n in 1:N) {
     for (a in 3:A) {
-      wc_vec[wc_idx] = wealth_change[n, a];
-      wc_idx += 1;
+      wc_vec[(n - 1) * (A - 2) + (a - 2)] = wealth_change[n, a];
     }
   }
 
   real wc_mean = mean(wc_vec);
   real wc_sd = sd(wc_vec);
 
+  // Standardize wealth change
   matrix[N, A] wealth_change_std;
-  matrix[N, A] wealth_msd_std;
 
   for (n in 1:N) {
-    for (a in 1:2)
+    for (a in 1:2) {
       wealth_change_std[n, a] = 0;
-    for (a in 3:A)
+    }
+    for (a in 3:A) {
       wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean) / wc_sd;
+    }
   }
 }
 

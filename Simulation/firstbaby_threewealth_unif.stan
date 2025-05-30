@@ -96,45 +96,44 @@ transformed parameters {
     }
   }
 
-// Standardization excluding placeholder zeros
-  int wc_len = N * (A - 2);
-  int msd_len = N * (A - 10);
-  vector[wc_len] wc_vec;
-  vector[msd_len] msd_vec;
-  int wc_idx = 1;
-  int msd_idx = 1;
+// Flattened vectors for standardization (manual indexing)
+  vector[N * (A - 2)] wc_vec;
+  vector[N * (A - 10)] msd_vec;
 
   for (n in 1:N) {
     for (a in 3:A) {
-      wc_vec[wc_idx] = wealth_change[n, a];
-      wc_idx += 1;
+      wc_vec[(n - 1) * (A - 2) + (a - 2)] = wealth_change[n, a];
     }
     for (a in 11:A) {
-      msd_vec[msd_idx] = wealth_msd[n, a];
-      msd_idx += 1;
+      msd_vec[(n - 1) * (A - 10) + (a - 10)] = wealth_msd[n, a];
     }
   }
 
+  // Means and standard deviations
   real wc_mean = mean(wc_vec);
   real wc_sd = sd(wc_vec);
   real msd_mean = mean(msd_vec);
   real msd_sd = sd(msd_vec);
 
+  // Standardized versions
   matrix[N, A] wealth_change_std;
   matrix[N, A] wealth_msd_std;
 
   for (n in 1:N) {
-    for (a in 1:2)
+    for (a in 1:2) {
       wealth_change_std[n, a] = 0;
-    for (a in 3:A)
+    }
+    for (a in 3:A) {
       wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean) / wc_sd;
+    }
 
-    for (a in 1:10)
+    for (a in 1:10) {
       wealth_msd_std[n, a] = 0;
-    for (a in 11:A)
+    }
+    for (a in 11:A) {
       wealth_msd_std[n, a] = (wealth_msd[n, a] - msd_mean) / msd_sd;
+    }
   }
-
 }
 
 model {
