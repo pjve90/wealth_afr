@@ -439,7 +439,7 @@ type <- c(1:3)
   points(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],pch=shape[3])
   lines(cumsum(std_ageprobs_rich)[1:41]~c(1:41),col=palette_a[3],lty=type[3])
   legend(x="bottomright",pch=shape,lty=type,col=palette_a,legend=c("Min.","Med.","Max."))
-  
+
 
 #####Simulate first birth ----  
   
@@ -581,10 +581,12 @@ points(c(30:1)~aw_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 ###### Cumulative probabilities plot ----
 
 #simulate wealth values
-simwealth_aw_full <- seq(from=round(min(post_aw_full$wealth_full),1),to=round(max(post_aw_full$wealth_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_aw_full <- seq(from=round(min(post_aw_full$wealth_full),1),to=round(max(post_aw_full$wealth_full),1),length.out=nrow(simwealth_res)) #specify according to range and length related to sample size
 simwealth_aw_full
 #get the deciles
-deciles_aw_full <- as.numeric(quantile(simwealth_aw_full,seq(0,1,0.5)))
+deciles_aw_full <- c(mean(simwealth_aw_full)-sd(simwealth_aw_full),
+                              mean(simwealth_aw_full),
+                              mean(simwealth_aw_full)+sd(simwealth_aw_full))
 deciles_aw_full
 
 #colour palette
@@ -603,7 +605,7 @@ type <- c(1:3)
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_aw_full$mu)),
+plot(c(0,1)~c(11,ncol(post_aw_full$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Current levels\nof material wealth",
@@ -611,7 +613,7 @@ plot(c(0,1)~c(10,ncol(post_aw_full$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(53,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+legend(43,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
 
 #add lines
 for(k in 1:(length(deciles_aw_full))){
@@ -660,11 +662,11 @@ for(k in 1:(length(deciles_aw_full))){
   
   #add median
   #add points
-  points(cumulative_median_absw[11:51] ~ plot_aw_full$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_aw_full$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:51] ~ plot_aw_full$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_aw_full$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_aw_full$age[11:51], rev(plot_aw_full$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
+  polygon(c(plot_aw_full$age[11:40], rev(plot_aw_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.25), border=NA)
 }
 
 
@@ -703,13 +705,13 @@ for(k in 1:(length(deciles_aw_full))){
  ageprobs_maxsc<-inv_logit(ageprobs_maxsc)
  #check data
  ageprobs_maxsc
- #medium change (0.5)
- ageprobs_medsc<-logit(afr_age_baseline)+(0.5)*sc_gamma
+ #medium change (0)
+ ageprobs_medsc<-logit(afr_age_baseline)+(0)*sc_gamma
  ageprobs_medsc<-inv_logit(ageprobs_medsc)
  #check data
  ageprobs_medsc
- #minimum change (0)
- ageprobs_minsc<-logit(afr_age_baseline)+(0)*sc_gamma
+ #minimum change (-1)
+ ageprobs_minsc<-logit(afr_age_baseline)+(-1)*sc_gamma
  ageprobs_minsc<-inv_logit(ageprobs_minsc)
  #check data
  ageprobs_minsc
@@ -722,8 +724,7 @@ for(k in 1:(length(deciles_aw_full))){
  
  #Expected mean age at first birth
  
- # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
- #maximum change (1)
+ #maximum wealth (1)
  std_ageprobs_maxsc<-0
  for(i in 2:74){
    std_ageprobs_maxsc[i]<-(1-sum(std_ageprobs_maxsc[c(1:(i-1))]))*ageprobs_maxsc[i]
@@ -733,17 +734,17 @@ for(k in 1:(length(deciles_aw_full))){
  #expected mean age at first birth
  which(cumsum(std_ageprobs_maxsc)>0.5)[1]
  
- #medium change (0.5)
- std_ageprobs_medsc<-0
+ #minimum wealth (-1)
+ std_ageprobs_minsc<-0
  for(i in 2:74){
-   std_ageprobs_medsc[i]<-(1-sum(std_ageprobs_medsc[c(1:(i-1))]))*ageprobs_medsc[i]
+   std_ageprobs_minsc[i]<-(1-sum(std_ageprobs_minsc[c(1:(i-1))]))*ageprobs_minsc[i]
  }
  #check data
- std_ageprobs_medsc
+ std_ageprobs_minsc
  #expected mean age at first birth
- which(cumsum(std_ageprobs_medsc)>0.5)[1]
+ which(cumsum(std_ageprobs_minsc)>0.5)[1]
  
- #minimum change (0)
+ #average wealth (0)
  # compare it to the expected mean age at first birth for individuals who have average wealth
  std_afr_age_baseline<-0
  for(i in 2:74){
@@ -758,16 +759,16 @@ for(k in 1:(length(deciles_aw_full))){
  
  # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
  #minimum wealth
- plot(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_b[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
- lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_b[1],lty=type[2])
+ plot(cumsum(std_ageprobs_minsc)[1:41]~c(1:41),col=palette_b[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+ lines(cumsum(std_ageprobs_minsc)[1:41]~c(1:41),col=palette_b[1],lty=type[1])
  #medium wealth
- points(cumsum(std_ageprobs_medsc)[1:41]~c(1:41),col=palette_b[2],pch=shape[2])
- lines(cumsum(std_ageprobs_medsc)[1:41]~c(1:41),col=palette_b[2],lty=type[1])
+ points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_b[2],pch=shape[2])
+ lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_b[2],lty=type[2])
  #maximum wealth
  points(cumsum(std_ageprobs_maxsc)[1:41]~c(1:41),col=palette_b[3],pch=shape[3])
  lines(cumsum(std_ageprobs_maxsc)[1:41]~c(1:41),col=palette_b[3],lty=type[3])
  legend(x="bottomright",pch=shape,lty=type,col=palette_b,legend=c("Min.","Med.","Max."))
-
+ 
 ##### Simulate first births ----
   
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
@@ -873,27 +874,30 @@ for(k in 1:(length(deciles_aw_full))){
  
  ######Coefficients plots ----
  
- par(mfrow=c(1,1))
- #short-term wealth variability
- plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
- axis(2,c(30:1),c(10:39))
- for (i in 11:40){
-   segments(
-     c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])-c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
-     41-i,
-     c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])+c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
-     41-i,
-     lwd=2,col="black") 
- }
- points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
+par(mfrow=c(1,1))
+#current wealth
+plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+for (i in 11:40){
+ segments(
+   c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])-c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
+   41-i,
+   c(sc_full_tab_sim_gamma_z[i,1]*sc_full_tab_sim_gamma_sigma[1,1])+c(sc_full_tab_sim_gamma_z[i,2]*sc_full_tab_sim_gamma_sigma[1,1]),
+   41-i,
+   lwd=2,col="black") 
+}
+points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
  
  ###### Cumulative probabilities plot ----
  
  #simulate wealth values
- simwealth_sc_full <- seq(from=round(min(post_sc_full$wealth_change),1),to=round(max(post_sc_full$wealth_change),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+ simwealth_sc_full <- seq(from=round(min(post_sc_full$wealth_change_std),1),to=round(max(post_sc_full$wealth_change_std),1),length.out=nrow(simwealth_res)) #specify according to range and length related to sample size
  simwealth_sc_full
  #get the deciles
- deciles_sc_full <- as.numeric(quantile(simwealth_sc_full,seq(0,1,0.5)))
+ #get the deciles
+ deciles_sc_full <- c(mean(simwealth_sc_full)-sd(simwealth_sc_full),
+                      mean(simwealth_sc_full),
+                      mean(simwealth_sc_full)+sd(simwealth_sc_full))
  deciles_sc_full
  
  #colour palette
@@ -920,7 +924,7 @@ for(k in 1:(length(deciles_aw_full))){
       cex.lab=1.5,
       cex.main=1.5,
       type="n")
- legend(53,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+ legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
  
  #add lines
  for(k in 1:(length(deciles_sc_full))){
@@ -970,14 +974,12 @@ for(k in 1:(length(deciles_aw_full))){
    
    #add median
    #add points
-   points(cumulative_median_sc_full[11:51] ~ plot_sc_full_diff$age[11:51], col=palette_b[k], pch=shape[k], cex=1.5)
+   points(cumulative_median_sc_full[11:40] ~ plot_sc_full_diff$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
    #add lines
-   lines(cumulative_median_sc_full[11:51] ~ plot_sc_full_diff$age[11:51], col=palette_b[k], lwd=3, lty=type[k])
+   lines(cumulative_median_sc_full[11:40] ~ plot_sc_full_diff$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
    #add confidence intervals
-   polygon(c(plot_sc_full_diff$age[11:51], rev(plot_sc_full_diff$age[11:51])), c(cumulative_low_sc_full[11:51], rev(cumulative_upp_sc_full[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
+   polygon(c(plot_sc_full_diff$age[11:40], rev(plot_sc_full_diff$age[11:40])), c(cumulative_low_sc_full[11:40], rev(cumulative_upp_sc_full[11:40])), col=alpha(palette_b[k], 0.25), border=NA)
  }
- 
- 
  
  
 ###Scenario 3: Long-term wealth variability ----
@@ -1007,17 +1009,17 @@ for(k in 1:(length(deciles_aw_full))){
   
   # We simulate the effects on the logit scale, so we first need to transform the baseline age-specific probabilities, add the effects, and retransform this into the total age-specific probabilities - we can show the shift in probabilities for individuals who have 1 sd more wealth than the average (rich) and 1 sd less wealth (poor)
   #maximum long-term variability (1)
-  ageprobs_maxlv<-logit(afr_age_baseline)+1*lv_delta
+  ageprobs_maxlv<-logit(afr_age_baseline)+(1)*lv_delta
   ageprobs_maxlv<-inv_logit(ageprobs_maxlv)
   #check data
   ageprobs_maxlv
-  #medium long-term variability (0.5)
-  ageprobs_medlv<-logit(afr_age_baseline)+(0.5)*lv_delta
+  #medium long-term variability (0)
+  ageprobs_medlv<-logit(afr_age_baseline)+(0)*lv_delta
   ageprobs_medlv<-inv_logit(ageprobs_medlv)
   #check data
   ageprobs_medlv
-  #minimum long-term variability (0)
-  ageprobs_minlv<-logit(afr_age_baseline)+(0)*lv_delta
+  #minimum long-term variability (-1)
+  ageprobs_minlv<-logit(afr_age_baseline)+(-1)*lv_delta
   ageprobs_minlv<-inv_logit(ageprobs_minlv)
   #check data
   ageprobs_minlv
@@ -1030,8 +1032,7 @@ for(k in 1:(length(deciles_aw_full))){
   
   #Expected mean age at first birth
   
-  # We can calculate the expected mean age at first birth for individuals who have 1 sd more wealth than average
-  #maximum change (1)
+  #maximum wealth (1)
   std_ageprobs_maxlv<-0
   for(i in 2:74){
     std_ageprobs_maxlv[i]<-(1-sum(std_ageprobs_maxlv[c(1:(i-1))]))*ageprobs_maxlv[i]
@@ -1041,17 +1042,17 @@ for(k in 1:(length(deciles_aw_full))){
   #expected mean age at first birth
   which(cumsum(std_ageprobs_maxlv)>0.5)[1]
   
-  #medium change (0.5)
-  std_ageprobs_medlv<-0
+  #minimum wealth (-1)
+  std_ageprobs_minlv<-0
   for(i in 2:74){
-    std_ageprobs_medlv[i]<-(1-sum(std_ageprobs_medlv[c(1:(i-1))]))*ageprobs_medlv[i]
+    std_ageprobs_minlv[i]<-(1-sum(std_ageprobs_minlv[c(1:(i-1))]))*ageprobs_minlv[i]
   }
   #check data
-  std_ageprobs_medlv
+  std_ageprobs_minlv
   #expected mean age at first birth
-  which(cumsum(std_ageprobs_medlv)>0.5)[1]
+  which(cumsum(std_ageprobs_minlv)>0.5)[1]
   
-  #minimum change (0)
+  #average wealth (0)
   # compare it to the expected mean age at first birth for individuals who have average wealth
   std_afr_age_baseline<-0
   for(i in 2:74){
@@ -1063,21 +1064,18 @@ for(k in 1:(length(deciles_aw_full))){
   which(cumsum(std_afr_age_baseline)>0.5)[1]
   
   #Cumulative probabilities of first birth
-  
   # plot the cumulative, similar to Figure 3 in the manuscript - remember, these are the expected values, they will differ later because there is stochasticity in when exactly individuals will have their first child.
   #minimum wealth
-  plot(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
-  lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[1],lty=type[2])
+  plot(cumsum(std_ageprobs_minlv)[1:41]~c(1:41),col=palette_c[1],pch=shape[1],xlab="age",ylab="cumulative probability first birth")
+  lines(cumsum(std_ageprobs_minlv)[1:41]~c(1:41),col=palette_c[1],lty=type[1])
   #medium wealth
-  points(cumsum(std_ageprobs_medlv)[1:41]~c(1:41),col=palette_c[2],pch=shape[2])
-  lines(cumsum(std_ageprobs_medlv)[1:41]~c(1:41),col=palette_c[2],lty=type[1])
+  points(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[2],pch=shape[2])
+  lines(cumsum(std_afr_age_baseline)[1:41]~c(1:41),col=palette_c[2],lty=type[2])
   #maximum wealth
   points(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],pch=shape[3])
   lines(cumsum(std_ageprobs_maxlv)[1:41]~c(1:41),col=palette_c[3],lty=type[3])
   legend(x="bottomright",pch=shape,lty=type,col=palette_c,legend=c("Min.","Med.","Max."))
   
-
-
 #####Simulate first births ----  
   
  # We create the dataframe that records for each simulated women whether she had her first child at a given age or not. We set it so that reproduction starts the earliest at age 13 
@@ -1197,10 +1195,12 @@ for(k in 1:(length(deciles_aw_full))){
 ######Cumulative probabilities plot ----
   
   #simulate wealth values
-  simwealth_lv_full <- seq(from=round(min(post_lv_full$wealth_lv_full),1),to=round(max(post_lv_full$wealth_lv_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+  simwealth_lv_full <- seq(from=round(min(post_lv_full$wealth_msd_std),1),to=round(max(post_lv_full$wealth_msd_std),1),length.out=nrow(simwealth_res)) #specify according to range and length related to sample size
   simwealth_lv_full
   #get the deciles
-  deciles_lv_full <- as.numeric(quantile(simwealth_lv_full,seq(0,1,0.5)))
+  deciles_lv_full <- c(mean(simwealth_lv_full)-sd(simwealth_lv_full),
+                       mean(simwealth_lv_full),
+                       mean(simwealth_lv_full)+sd(simwealth_lv_full))
   deciles_lv_full
   
   #colour palette
@@ -1227,7 +1227,7 @@ for(k in 1:(length(deciles_aw_full))){
        cex.lab=1.5,
        cex.main=1.5,
        type="n")
-  legend(53,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
+  legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
   
   #add lines
   for(k in 1:(length(deciles_lv_full))){
@@ -1276,11 +1276,11 @@ for(k in 1:(length(deciles_aw_full))){
     
     #add median
     #add points
-    points(cumulative_median_lv_fullw[11:51] ~ plot_lv_fullw_lv_full$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
+    points(cumulative_median_lv_fullw[11:40] ~ plot_lv_fullw_lv_full$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
     #add lines
-    lines(cumulative_median_lv_fullw[11:51] ~ plot_lv_fullw_lv_full$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
+    lines(cumulative_median_lv_fullw[11:40] ~ plot_lv_fullw_lv_full$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
     #add confidence intervals
-    polygon(c(plot_lv_fullw_lv_full$age[11:51], rev(plot_lv_fullw_lv_full$age[11:51])), c(cumulative_low_lv_fullw[11:51], rev(cumulative_upp_lv_fullw[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
+    polygon(c(plot_lv_fullw_lv_full$age[11:40], rev(plot_lv_fullw_lv_full$age[11:40])), c(cumulative_low_lv_fullw[11:40], rev(cumulative_upp_lv_fullw[11:40])), col=alpha(palette_c[k], 0.25), border=NA)
   }
 
   
