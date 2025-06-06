@@ -1289,9 +1289,9 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
  ###Scenario 4: All wealth predictors ----
  
  # all wealth predictors have strong effects
- all_beta <- 2*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
- all_gamma <- -4*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
- all_delta <- -4*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
+ all_beta <- 5*centeredage # positive slope means wealthy have afr later, effect is 4x less than for long term variability in wealth
+ all_gamma <- -5*centeredage # negative slope means individuals with higher short-term wealth changes have afr earlier, effect is 4x less than for the long term variability in wealth
+ all_delta <- -5*centeredage # negative slope means individuals with higher long-term wealth variability have afr earlier
  
  # To get a coefficient plot (similar to Figure 6 in the manuscript), we plot the effect sizes over age
  #current wealth
