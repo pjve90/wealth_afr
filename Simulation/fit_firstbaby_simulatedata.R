@@ -716,10 +716,10 @@ for(k in 1:(length(deciles_aw_full))){
  #check data
  ageprobs_minsc
  
-#Plot it!    
- plot(afr_age_baseline~c(1:74),ylim=c(0,0.3),col=palette_b[1],pch=shape[1]) # minimum change
- points(inv_logit(0.5*sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_b[2],pch=shape[2]) # average change
- points(inv_logit(sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_b[3],pch=shape[3]) #maximum change
+ #Plot it!    
+ plot(inv_logit(-sc_gamma+logit(afr_age_baseline))~c(1:74),ylim=c(0,0.3),col=palette_b[1],pch=shape[1]) # poor individuals
+ points(afr_age_baseline~c(1:74),col=palette_b[2],pch=shape[2]) # baseline probability for individuals with average wealth
+ points(inv_logit(sc_gamma+logit(afr_age_baseline))~c(1:74),col=palette_b[3],pch=shape[3]) #rich individuals
  legend(x="topright",pch=shape,col=palette_b,legend=c("Min.","Med.","Max."))
  
  #Expected mean age at first birth
