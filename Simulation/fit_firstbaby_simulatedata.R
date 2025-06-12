@@ -2128,7 +2128,7 @@ n_miss
 sc_imputed_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
                                   A = ncol(sc_simbirth_res), #age
                                   wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  baby = as.matrix(sc_simbirth_res), #AFR
                                   median_wealth = medianwealthperindividual, # median wealth of each individual
                                   N_miss = n_miss, #number of missing values
                                   wealth_miss = wealth_miss #location of missing values
@@ -2343,7 +2343,7 @@ n_miss
 lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
                                   A = ncol(lv_simbirth_res), #age
                                   wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  baby = as.matrix(lv_simbirth_res), #AFR
                                   median_wealth = medianwealthperindividual, # median wealth of each individual
                                   N_miss = n_miss, #number of missing values
                                   wealth_miss = wealth_miss #location of missing values
@@ -2557,7 +2557,7 @@ n_miss
 all_imputed_simulated_list <- list(N = nrow(all_simbirth_res), #population size
                                   A = ncol(all_simbirth_res), #age
                                   wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  baby = as.matrix(all_simbirth_res), #AFR
                                   median_wealth = medianwealthperindividual, # median wealth of each individual
                                   N_miss = n_miss, #number of missing values
                                   wealth_miss = wealth_miss #location of missing values
