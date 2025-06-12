@@ -879,7 +879,7 @@ for(k in 1:(length(deciles_aw_full))){
  
  par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,5))
  #current wealth
-plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_full_tab_sim_gamma_z[11:40,1]*sc_full_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
 for (i in 11:40){
  segments(
@@ -1414,7 +1414,7 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
  
 ##### Compile and fit model ----
  # compile model
- all_model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+ all_model_simulated <- cmdstan_model("~/wealth_afr/Model_code/firstbaby_threewealth.stan")
  
  #fit model
  all_full_fit_simulated <- all_model_simulated$sample(data = all_full_simulated_list, 
@@ -2520,7 +2520,7 @@ all_imputed_simulated_list
 
 ##### Compile and fit model ----
 # compile model
-all_model_simulated <- cmdstan_model("~/wealth_afr/Simulation/firstbaby_threewealth_unif.stan")
+all_model_simulated <- cmdstan_model("~/wealth_afr/Model_code/firstbaby_threewealth.stan")
 
 #fit model
 all_imputed_fit_simulated <- all_model_simulated$sample(data = all_imputed_simulated_list,
