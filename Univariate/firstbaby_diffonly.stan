@@ -26,8 +26,10 @@ data {
   int A; // maximum age of women
   
   matrix[N,A] wealth; // age-specific absolute wealth [raw data with missing values coded -99]
-  
   vector[N] median_wealth; // individual median wealth for data imputation at birth
+
+  int N_miss; // number of missing data points for wealth
+  array[N_miss, 2] int wealth_miss; // positions of missing wealth
 
   array[N,A] int baby; // first birth (0=no,1=yes,-99=censored)
 
@@ -49,6 +51,7 @@ parameters {
   real <lower = 0> gamma_wealth_sigma;
 
   // missing wealth data
+  vector[N_miss] wealth_impute; // imputed values for missing wealth
   real <lower = 0, upper = 1> alpha_miss;
   real beta_miss;
   real <lower=0> sigma_miss;
@@ -65,6 +68,11 @@ transformed parameters {
   matrix[N,A] wealth_full; // full wealth data (raw with missing + imputed)
 
   wealth_full = wealth; // initialize wealth full with wealth (raw)
+  
+  // Fill missing spots with imputed values
+  for (n in 1:N_miss) {
+    wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]] = wealth_impute[n];
+  }
 
 //short-term wealth variability
   matrix[N,A] wealth_change; //matrix containing wealth change
@@ -124,19 +132,19 @@ model {
     sigma_miss ~ exponential(3);
 
 //Wealth data imputation
-//Data imputation at birth
-for (n in 1:N){
-  if(wealth[n,1] == -99){
-    wealth_full[n,1] ~ normal(median_wealth[n], 1); //data imputation at birth
+for (n in 1:N_miss) {
+    if (wealth_miss[n, 2] == 1) {
+      // Data imputation at birth
+      wealth_impute[n] ~ normal(median_wealth[wealth_miss[n, 1]], 1);
+    } else {
+      // Data imputation at later ages
+      wealth_impute[n] ~ normal(
+        alpha_miss * wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]-1] + // weight of previous wealth
+        (1 - alpha_miss) * beta_miss, // weight of stochastic component
+        sigma_miss // uncertainty in prediction
+      );
+    }
   }
-
-//Data imputation in later ages
-  for(a in 2:A){
-    if(wealth[n,a] == -99){
-    wealth_full[n,a] ~ normal( (alpha_miss*wealth_full[n, a-1] + (1-alpha_miss)*(beta_miss) ), sigma_miss); //autoregressive data imputation
-  }
-}
-}
 
 //Probability of first birth
   for (n in 1:N) {

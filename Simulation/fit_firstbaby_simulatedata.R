@@ -1908,13 +1908,25 @@ for(j in 1:ncol(aw_simbirth)){
 aw_simbirth_res<-aw_simbirth[,1:40] 
 sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
 
+#prepare missing values
+#location
+wealth_miss <- which(sim_wealth_imputation_res == -99, arr.ind = TRUE)
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
+
 # 4) incomplete wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 aw_imputed_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
                                   A = ncol(aw_simbirth_res), #age
                                   wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
                                   baby = as.matrix(aw_simbirth_res), #AFR
-                                  median_wealth = medianwealthperindividual # median wealth of each individual
+                                  median_wealth = medianwealthperindividual, # median wealth of each individual
+                                  N_miss = n_miss, #number of missing values
+                                  wealth_miss = wealth_miss #location of missing values
 )
 #check data
 aw_imputed_simulated_list
@@ -2101,13 +2113,25 @@ for(j in 1:ncol(sc_simbirth)){
 sc_simbirth_res<-sc_simbirth[,1:40] 
 sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
 
+#prepare missing values
+#location
+wealth_miss <- which(sim_wealth_imputation_res == -99, arr.ind = TRUE)
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
+
 # 4) incomplete wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 sc_imputed_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
                                   A = ncol(sc_simbirth_res), #age
                                   wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                  baby = as.matrix(sc_simbirth_res), #AFR
-                                  median_wealth = medianwealthperindividual # median wealth of each individual
+                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  median_wealth = medianwealthperindividual, # median wealth of each individual
+                                  N_miss = n_miss, #number of missing values
+                                  wealth_miss = wealth_miss #location of missing values
 )
 #check data
 sc_imputed_simulated_list
@@ -2304,15 +2328,26 @@ for(j in 1:ncol(lv_simbirth)){
 lv_simbirth_res<-lv_simbirth[,1:40] 
 sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
 
+#prepare missing values
+#location
+wealth_miss <- which(sim_wealth_imputation_res == -99, arr.ind = TRUE)
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
+
 # 4) incomplete wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
                                   A = ncol(lv_simbirth_res), #age
                                   wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
-                                  baby = as.matrix(lv_simbirth_res), #AFR
-                                  median_wealth = medianwealthperindividual # median wealth of each individual
+                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  median_wealth = medianwealthperindividual, # median wealth of each individual
+                                  N_miss = n_miss, #number of missing values
+                                  wealth_miss = wealth_miss #location of missing values
 )
-#check data
 lv_imputed_simulated_list
 
 
@@ -2507,12 +2542,25 @@ for(j in 1:ncol(all_simbirth)){
 all_simbirth_res<-all_simbirth[,1:40]
 sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
 
+#prepare missing values
+#location
+wealth_miss <- which(sim_wealth_imputation_res == -99, arr.ind = TRUE)
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
+
+# 4) incomplete wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 all_imputed_simulated_list <- list(N = nrow(all_simbirth_res), #population size
-                                A = ncol(all_simbirth_res), #age
-                                wealth = as.matrix(simwealth_res), #current absolute wealth
-                                baby = as.matrix(all_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
+                                  A = ncol(all_simbirth_res), #age
+                                  wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
+                                  baby = as.matrix(aw_simbirth_res), #AFR
+                                  median_wealth = medianwealthperindividual, # median wealth of each individual
+                                  N_miss = n_miss, #number of missing values
+                                  wealth_miss = wealth_miss #location of missing values
 )
 #check data
 all_imputed_simulated_list
