@@ -509,7 +509,7 @@ aw_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_absonly.s
 #fit model
 aw_full_fit_simulated <- aw_model_simulated$sample(data = aw_full_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 15, 
+                                                   parallel_chains = 4, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -825,7 +825,7 @@ for(k in 1:(length(deciles_aw_full))){
  #fit model
  sc_full_fit_simulated <- sc_model_simulated$sample(data = sc_full_simulated_list, 
                                                     chains = 4, 
-                                                    parallel_chains = 15, 
+                                                    parallel_chains = 4, 
                                                     adapt_delta = 0.99,
                                                     max_treedepth = 13,
                                                     iter_warmup = 2000,
@@ -1137,7 +1137,7 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
   #fit model
   lv_full_fit_simulated <- lv_model_simulated$sample(data = lv_full_simulated_list, 
                                                      chains = 4, 
-                                                     parallel_chains = 15, 
+                                                     parallel_chains = 4, 
                                                      adapt_delta = 0.99,
                                                      max_treedepth = 13,
                                                      iter_warmup = 2000,
@@ -1419,7 +1419,7 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
  #fit model
  all_full_fit_simulated <- all_model_simulated$sample(data = all_full_simulated_list, 
                                                     chains = 4, 
-                                                    parallel_chains = 15, 
+                                                    parallel_chains = 4, 
                                                     adapt_delta = 0.99,
                                                     max_treedepth = 13,
                                                     iter_warmup = 2000,
@@ -1926,7 +1926,7 @@ aw_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_absonly.s
 #fit model
 aw_imputed_fit_simulated <- aw_model_simulated$sample(data = aw_imputed_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 15, 
+                                                   parallel_chains = 4, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -1973,7 +1973,6 @@ aw_imputed_tab_sim_beta_z
 aw_imputed_tab_sim_beta_sigma <- precis(aw_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
 #check table
 aw_imputed_tab_sim_beta_sigma
-
 
 #####Plot it! ----
 
@@ -2120,7 +2119,7 @@ sc_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_diffonly.
 #fit model
 sc_imputed_fit_simulated <- sc_model_simulated$sample(data = sc_imputed_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 15, 
+                                                   parallel_chains = 4, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -2324,7 +2323,7 @@ lv_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_msdonly.s
 #fit model
 lv_imputed_fit_simulated <- lv_model_simulated$sample(data = lv_imputed_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 15, 
+                                                   parallel_chains = 4, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -2525,7 +2524,7 @@ all_model_simulated <- cmdstan_model("~/wealth_afr/Model_code/firstbaby_threewea
 #fit model
 all_imputed_fit_simulated <- all_model_simulated$sample(data = all_imputed_simulated_list,
                                                      chains = 4,
-                                                     parallel_chains = 15,
+                                                     parallel_chains = 4,
                                                      adapt_delta = 0.99,
                                                      max_treedepth = 13,
                                                      iter_warmup = 2000,
