@@ -2135,7 +2135,7 @@ sc_imputed_rds_simulated <- readRDS("sc_imputed_fit_simulated_output.rds")
 #extract samples
 post_sc_imputed <- extract.samples(sc_imputed_rds_simulated)
 
-## Model diagnostics ----
+##### Model diagnostics ----
 
 #check trace of all parameters
 #alpha
@@ -2150,32 +2150,12 @@ rstan::traceplot(sc_imputed_rds_simulated,pars="mu_tau")
 rstan::traceplot(sc_imputed_rds_simulated,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(sc_imputed_rds_simulated,pars="mu_delta")
-#beta_wealth_z
-traceplot(sc_imputed_rds_simulated,pars="beta_wealth_z") 
-#beta_wealth_sigma
-traceplot(sc_imputed_rds_simulated,pars="beta_wealth_sigma") 
 #gamma_wealth
 traceplot(sc_imputed_rds_simulated,pars="gamma_wealth_z") 
 #gamma_wealth
 traceplot(sc_imputed_rds_simulated,pars="gamma_wealth_sigma") 
-#delta_wealth
-traceplot(sc_imputed_rds_simulated,pars="delta_wealth_z") 
-#delta_wealth
-traceplot(sc_imputed_rds_simulated,pars="delta_wealth_sigma") 
 
 # generate output for simulation with full data where current absolute wealth has the strongest effect
-#beta z
-#create summary table for beta_z
-sc_imputed_tab_sim_beta_z <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
-#check table
-sc_imputed_tab_sim_beta_z
-
-#beta sigma
-#create summary table for beta_sigma
-sc_imputed_tab_sim_beta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
-#check table
-sc_imputed_tab_sim_beta_sigma
-
 #gamma z
 #create summary table for gamma_z
 sc_imputed_tab_sim_gamma_z <- precis(sc_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
@@ -2188,35 +2168,13 @@ sc_imputed_tab_sim_gamma_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="
 #check table
 sc_imputed_tab_sim_gamma_sigma
 
-#delta z
-#create summary table for delta_z
-sc_imputed_tab_sim_delta_z <- precis(sc_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
-#check table
-sc_imputed_tab_sim_delta_z
+#####Plot it! ----
 
-#delta sigma
-#create summary table for delta_sigma
-sc_imputed_tab_sim_delta_sigma <- precis(sc_imputed_rds_simulated,depth=2,pars="delta_wealth_sigma")
-#check table
-sc_imputed_tab_sim_delta_sigma
+######Coefficients plots ----
 
-#Plot it!
-
-par(mfrow=c(1,3))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,5))
 #current wealth
-plot(c(30:1)~c(sc_imputed_tab_sim_beta_z[11:40,1]*sc_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(sc_imputed_tab_sim_beta_z[i,1]*sc_imputed_tab_sim_beta_sigma[1,1])-c(sc_imputed_tab_sim_beta_z[i,2]*sc_imputed_tab_sim_beta_sigma[1,1]),
-    41-i,
-    c(sc_imputed_tab_sim_beta_z[i,1]*sc_imputed_tab_sim_beta_sigma[1,1])+c(sc_imputed_tab_sim_beta_z[i,2]*sc_imputed_tab_sim_beta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~sc_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
-#short-term wealth variability
-plot(c(30:1)~c(sc_imputed_tab_sim_gamma_z[11:40,1]*sc_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
+plot(c(30:1)~c(sc_imputed_tab_sim_gamma_z[11:40,1]*sc_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
 for (i in 11:40){
   segments(
@@ -2227,18 +2185,107 @@ for (i in 11:40){
     lwd=2,col="black") 
 }
 points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
-#long-term wealth variability
-plot(c(30:1)~c(sc_imputed_tab_sim_delta_z[11:40,1]*sc_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(sc_imputed_tab_sim_delta_z[i,1]*sc_imputed_tab_sim_delta_sigma[1,1])-c(sc_imputed_tab_sim_delta_z[i,2]*sc_imputed_tab_sim_delta_sigma[1,1]),
-    41-i,
-    c(sc_imputed_tab_sim_delta_z[i,1]*sc_imputed_tab_sim_delta_sigma[1,1])+c(sc_imputed_tab_sim_delta_z[i,2]*sc_imputed_tab_sim_delta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
+
+###### Cumulative probabilities plot ----
+
+#simulate wealth values
+simwealth_sc_imputed <- seq(from=round(min(post_sc_imputed$wealth_change_std),1),to=round(max(post_sc_imputed$wealth_change_std),1),length.out=nrow(simwealth_res)) #specify according to range and length related to sample size
+simwealth_sc_imputed
+#get the deciles
+#get the deciles
+deciles_sc_imputed <- c(mean(simwealth_sc_imputed)-sd(simwealth_sc_imputed),
+                     mean(simwealth_sc_imputed),
+                     mean(simwealth_sc_imputed)+sd(simwealth_sc_imputed))
+deciles_sc_imputed
+
+#colour palette
+#numbers for color palette
+palette <- palette.colors(9,"Okabe-Ito")
+#select the numbers for color palette
+palette_b<-palette[4:(length(deciles_sc_imputed)+3)]
+palette_b
+
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c(1:6)
+
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+
+#plot empty plot
+plot(c(0,1)~c(10,ncol(post_sc_imputed$mu)),
+     ylab="Cumulative probability of first birth",
+     xlab="Age",
+     main="Short-term variability\nof material wealth",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
+     type="n")
+legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
+legend(43,0.8,c("Min.","Med.", "Max."),col=palette_b,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+
+#add simulated cumulative probabilities
+lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=type[4],lwd=2)
+#medium wealth
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=type[5],lwd=2)
+#maximum wealth
+lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=type[6],lwd=2)
+
+#add lines
+for(k in 1:(length(deciles_sc_imputed))){
+  #create matrix to store the data
+  p_sc_imputed_diff <- matrix(nrow=nrow(post_sc_imputed$mu),ncol=ncol(post_sc_imputed$mu))
+  p_sc_imputed_diff
+  #fill it in with values for age 25
+  for(j in 1:ncol(post_sc_imputed$mu)){
+    for(i in 1:nrow(post_sc_imputed$mu)){
+      p_sc_imputed_diff[i,j] <- inv_logit(post_sc_imputed$alpha[i] + #inv logit because originally is logit
+                                         post_sc_imputed$mu[i,j] + #age
+                                         (post_sc_imputed$gamma_wealth_z[i,j]*post_sc_imputed$gamma_wealth_sigma[i])*deciles_sc_imputed[k]  #wealth change
+      ) #moving variance
+    }
+  }
+  #check data
+  p_sc_imputed_diff
+  #plot it!
+  #prepare model prediction data
+  plot_sc_imputed_diff <- data.frame(age = 1:ncol(p_sc_imputed_diff),
+                                  median = apply(p_sc_imputed_diff, 2, median), 
+                                  upp = apply(p_sc_imputed_diff, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p_sc_imputed_diff, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #store data per decile
+  assign(paste0("sc_imputed_",k),plot_sc_imputed_diff)
+  
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_sc_imputed <- numeric(length(plot_sc_imputed_diff$median))
+  cumulative_low_sc_imputed <- numeric(length(plot_sc_imputed_diff$low))
+  cumulative_upp_sc_imputed <- numeric(length(plot_sc_imputed_diff$upp))
+  #set the first probability
+  cumulative_median_sc_imputed[1] <- plot_sc_imputed_diff$median[1]
+  cumulative_low_sc_imputed[1] <- plot_sc_imputed_diff$low[1]
+  cumulative_upp_sc_imputed[1] <- plot_sc_imputed_diff$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_sc_imputed_diff$median)) {
+    cumulative_median_sc_imputed[a] <- cumulative_median_sc_imputed[a-1] + (1 - cumulative_median_sc_imputed[a-1]) * plot_sc_imputed_diff$median[a]
+    cumulative_low_sc_imputed[a] <- cumulative_low_sc_imputed[a-1] + (1 - cumulative_low_sc_imputed[a-1]) * plot_sc_imputed_diff$low[a]
+    cumulative_upp_sc_imputed[a] <- cumulative_upp_sc_imputed[a-1] + (1 - cumulative_upp_sc_imputed[a-1]) * plot_sc_imputed_diff$upp[a]
+  }
+  #store data per decile
+  assign(paste0("cumulative_median_sc_imputed_",k),cumulative_median_sc_imputed)
+  assign(paste0("cumulative_low_sc_imputed_",k),cumulative_low_sc_imputed)
+  assign(paste0("cumulative_upp_sc_imputed_",k),cumulative_upp_sc_imputed)
+  
+  #add median
+  #add confidence intervals
+  polygon(c(plot_sc_imputed_diff$age[11:40], rev(plot_sc_imputed_diff$age[11:40])), c(cumulative_low_sc_imputed[11:40], rev(cumulative_upp_sc_imputed[11:40])), col=alpha(palette_b[k], 0.1), border=NA)
+  #add points
+  points(cumulative_median_sc_imputed[11:40] ~ plot_sc_imputed_diff$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_sc_imputed[11:40] ~ plot_sc_imputed_diff$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
 }
-points(c(30:1)~sc_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
 #Scenario 7: Long-term wealth variability with incomplete data ---- 
 
@@ -2292,7 +2339,7 @@ lv_imputed_rds_simulated <- readRDS("lv_imputed_fit_simulated_output.rds")
 #extract samples
 post_lv_imputed <- extract.samples(lv_imputed_rds_simulated)
 
-## Model diagnostics ----
+##### Model diagnostics ----
 
 #check trace of all parameters
 #alpha
@@ -2307,44 +2354,12 @@ rstan::traceplot(lv_imputed_rds_simulated,pars="mu_tau")
 rstan::traceplot(lv_imputed_rds_simulated,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(lv_imputed_rds_simulated,pars="mu_delta")
-#beta_wealth_z
-traceplot(lv_imputed_rds_simulated,pars="beta_wealth_z") 
-#beta_wealth_sigma
-traceplot(lv_imputed_rds_simulated,pars="beta_wealth_sigma") 
-#gamma_wealth
-traceplot(lv_imputed_rds_simulated,pars="gamma_wealth_z") 
-#gamma_wealth
-traceplot(lv_imputed_rds_simulated,pars="gamma_wealth_sigma") 
 #delta_wealth
 traceplot(lv_imputed_rds_simulated,pars="delta_wealth_z") 
 #delta_wealth
 traceplot(lv_imputed_rds_simulated,pars="delta_wealth_sigma") 
 
 # generate output for simulation with full data where current absolute wealth has the strongest effect
-#beta z
-#create summary table for beta_z
-lv_imputed_tab_sim_beta_z <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_z")
-#check table
-lv_imputed_tab_sim_beta_z
-
-#beta sigma
-#create summary table for beta_sigma
-lv_imputed_tab_sim_beta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="beta_wealth_sigma")
-#check table
-lv_imputed_tab_sim_beta_sigma
-
-#gamma z
-#create summary table for gamma_z
-lv_imputed_tab_sim_gamma_z <- precis(lv_imputed_rds_simulated,depth=2,pars="gamma_wealth_z")
-#check table
-lv_imputed_tab_sim_gamma_z
-
-#gamma sigma
-#create summary table for gamma_sigma
-lv_imputed_tab_sim_gamma_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="gamma_wealth_sigma")
-#check table
-lv_imputed_tab_sim_gamma_sigma
-
 #delta z
 #create summary table for delta_z
 lv_imputed_tab_sim_delta_z <- precis(lv_imputed_rds_simulated,depth=2,pars="delta_wealth_z")
@@ -2357,33 +2372,11 @@ lv_imputed_tab_sim_delta_sigma <- precis(lv_imputed_rds_simulated,depth=2,pars="
 #check table
 lv_imputed_tab_sim_delta_sigma
 
-#Plot it!
+#####Plot it! ----
 
-par(mfrow=c(1,3))
-#current wealth
-plot(c(30:1)~c(lv_imputed_tab_sim_beta_z[11:40,1]*lv_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-1.5,1.5),main="Current wealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(lv_imputed_tab_sim_beta_z[i,1]*lv_imputed_tab_sim_beta_sigma[1,1])-c(lv_imputed_tab_sim_beta_z[i,2]*lv_imputed_tab_sim_beta_sigma[1,1]),
-    41-i,
-    c(lv_imputed_tab_sim_beta_z[i,1]*lv_imputed_tab_sim_beta_sigma[1,1])+c(lv_imputed_tab_sim_beta_z[i,2]*lv_imputed_tab_sim_beta_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~lv_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
-#short-term wealth variability
-plot(c(30:1)~c(lv_imputed_tab_sim_gamma_z[11:40,1]*lv_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-1.5,1.5),main="Short-term\nwealth variability",yaxt="n",xlab="Gamma coefficients",ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
-for (i in 11:40){
-  segments(
-    c(lv_imputed_tab_sim_gamma_z[i,1]*lv_imputed_tab_sim_gamma_sigma[1,1])-c(lv_imputed_tab_sim_gamma_z[i,2]*lv_imputed_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    c(lv_imputed_tab_sim_gamma_z[i,1]*lv_imputed_tab_sim_gamma_sigma[1,1])+c(lv_imputed_tab_sim_gamma_z[i,2]*lv_imputed_tab_sim_gamma_sigma[1,1]),
-    41-i,
-    lwd=2,col="black") 
-}
-points(c(30:1)~lv_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
+######Coefficient plots ----
+
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,5))
 #long-term wealth variability
 plot(c(30:1)~c(lv_imputed_tab_sim_delta_z[11:40,1]*lv_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-1.5,1.5),main="Long-term\nwealth variability",yaxt="n",xlab="Delta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
@@ -2397,21 +2390,106 @@ for (i in 11:40){
 }
 points(c(30:1)~lv_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
+######Cumulative probabilities plot ----
 
- 
+#simulate wealth values
+simwealth_lv_imputed <- seq(from=round(min(post_lv_imputed$wealth_msd_std),1),to=round(max(post_lv_imputed$wealth_msd_std),1),length.out=nrow(simwealth_res)) #specify according to range and length related to sample size
+simwealth_lv_imputed
+#get the deciles
+deciles_lv_imputed <- c(mean(simwealth_lv_imputed)-sd(simwealth_lv_imputed),
+                     mean(simwealth_lv_imputed),
+                     mean(simwealth_lv_imputed)+sd(simwealth_lv_imputed))
+deciles_lv_imputed
 
- 
- # There sometimes seems to be an issue with extracting the posterior sample with the rstan command above
- # This is an alternative approach
-#  drawsarray_firstsimulated<-aw_full_fit_simulated$draws()
-# drawsdataframe_firstsimulated<-as_draws_df(drawsarray_firstsimulated)
-# aw_full_rds_simulated<-data.frame(drawsdataframe_firstsimulated)
-# When using this alternative approach, the "pars"ing of information below inside the precis commands does not work
-# Add the following to obtain the correct rows with the relevant estimates
- # Example for beta_wealth_z
-  # aw_full_tab_sim_beta_z <- precis(drawsdataframe_firstsimulated,depth=2)
-  # aw_full_tab_sim_beta_z <- aw_full_tab_sim_beta_z[grep("beta_wealth_z",rownames(aw_full_tab_sim_beta_z)),]
- 
+#colour palette
+#numbers for color palette
+palette <- palette.colors(9,"Okabe-Ito")
+#select the numbers for color palette
+palette_c<-palette[7:(length(deciles_lv_imputed)+6)]
+palette_c
+
+#shape of points
+shape <- c(15:17)
+#line type
+type <- c(1:6)
+
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+
+#plot empty plot
+plot(c(0,1)~c(10,ncol(post_lv_imputed$mu)),
+     ylab="Cumulative probability of first birth",
+     xlab="Age",
+     main="Long-term variability\nof material wealth",
+     cex.axis=1.2,
+     cex.lab=1.5,
+     cex.main=1.5,
+     type="n")
+legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA,title="Estimated")
+legend(43,0.8,c("Min.","Med.", "Max."),col=palette_c,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+
+#add simulated cumulative probabilities
+lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=type[4],lwd=2)
+#medium wealth
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=type[5],lwd=2)
+#maximum wealth
+lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=type[6],lwd=2)
+
+#add lines
+for(k in 1:(length(deciles_lv_imputed))){
+  #create matrix to store the data
+  p_lv_imputed <- matrix(nrow=nrow(post_lv_imputed$mu),ncol=ncol(post_lv_imputed$mu))
+  p_lv_imputed
+  #fill it in with values for age 25
+  for(j in 1:ncol(post_lv_imputed$mu)){
+    for(i in 1:nrow(post_lv_imputed$mu)){
+      p_lv_imputed[i,j] <- inv_logit(post_lv_imputed$alpha[i] + #inv logit because originally is logit
+                                    post_lv_imputed$mu[i,j] + #age
+                                    (post_lv_imputed$delta_wealth_z[i,j]*post_lv_imputed$delta_wealth_sigma[i])*deciles_lv_imputed[k]) #moving variance
+    }
+  }
+  #check data
+  p_lv_imputed
+  #plot it!
+  #prepare model prediction data
+  plot_lv_imputedw_lv_imputed <- data.frame(age = 1:ncol(p_lv_imputed),
+                                      median = apply(p_lv_imputed, 2, median), 
+                                      upp = apply(p_lv_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                      low = apply(p_lv_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  ) 
+  #store data per decile
+  assign(paste0("msdw_",k),plot_lv_imputedw_lv_imputed)
+  
+  # Calculate cumulative probabilities
+  #create vectors
+  cumulative_median_lv_imputedw <- numeric(length(plot_lv_imputedw_lv_imputed$median))
+  cumulative_low_lv_imputedw <- numeric(length(plot_lv_imputedw_lv_imputed$low))
+  cumulative_upp_lv_imputedw <- numeric(length(plot_lv_imputedw_lv_imputed$upp))
+  #set the first probability
+  cumulative_median_lv_imputedw[1] <- plot_lv_imputedw_lv_imputed$median[1]
+  cumulative_low_lv_imputedw[1] <- plot_lv_imputedw_lv_imputed$low[1]
+  cumulative_upp_lv_imputedw[1] <- plot_lv_imputedw_lv_imputed$upp[1]
+  #calculate the cumulative probabilities for the other ages
+  for (a in 2:length(plot_lv_imputedw_lv_imputed$median)) {
+    cumulative_median_lv_imputedw[a] <- cumulative_median_lv_imputedw[a-1] + (1 - cumulative_median_lv_imputedw[a-1]) * plot_lv_imputedw_lv_imputed$median[a]
+    cumulative_low_lv_imputedw[a] <- cumulative_low_lv_imputedw[a-1] + (1 - cumulative_low_lv_imputedw[a-1]) * plot_lv_imputedw_lv_imputed$low[a]
+    cumulative_upp_lv_imputedw[a] <- cumulative_upp_lv_imputedw[a-1] + (1 - cumulative_upp_lv_imputedw[a-1]) * plot_lv_imputedw_lv_imputed$upp[a]
+  }
+  #store data per decile
+  assign(paste0("cumulative_median_lv_imputedw_",k),cumulative_median_lv_imputedw)
+  assign(paste0("cumulative_low_lv_imputedw_",k),cumulative_low_lv_imputedw)
+  assign(paste0("cumulative_upp_lv_imputedw_",k),cumulative_upp_lv_imputedw)
+  
+  #add median
+  #add confidence intervals
+  polygon(c(plot_lv_imputedw_lv_imputed$age[11:40], rev(plot_lv_imputedw_lv_imputed$age[11:40])), c(cumulative_low_lv_imputedw[11:40], rev(cumulative_upp_lv_imputedw[11:40])), col=alpha(palette_c[k], 0.1), border=NA)
+  #add points
+  points(cumulative_median_lv_imputedw[11:40] ~ plot_lv_imputedw_lv_imputed$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
+  #add lines
+  lines(cumulative_median_lv_imputedw[11:40] ~ plot_lv_imputedw_lv_imputed$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
+}
+
+
 #Scenario 8: All wealth predictors ----
 
 #####Prepare all the data to be analysed in the STAN model  ----
@@ -2468,7 +2546,7 @@ post_all_imputed <- extract.samples(all_imputed_rds_simulated)
 #alpha
 rstan::traceplot(all_imputed_rds_simulated,pars="alpha")
 #mu
-traceplot(all_imputed_rds_simulated,pars="mu")
+traceplot(all_imputed_rds_simulated,pars="mu") 
 #mu_raw
 traceplot(all_imputed_rds_simulated,pars="mu_raw")
 #mu_tau
@@ -2478,17 +2556,17 @@ rstan::traceplot(all_imputed_rds_simulated,pars="mu_kappa")
 #mu_delta
 rstan::traceplot(all_imputed_rds_simulated,pars="mu_delta")
 #beta_wealth_z
-traceplot(all_imputed_rds_simulated,pars="beta_wealth_z")
+traceplot(all_imputed_rds_simulated,pars="beta_wealth_z") 
 #beta_wealth_sigma
-traceplot(all_imputed_rds_simulated,pars="beta_wealth_sigma")
+traceplot(all_imputed_rds_simulated,pars="beta_wealth_sigma") 
 #gamma_wealth
-traceplot(all_imputed_rds_simulated,pars="gamma_wealth_z")
+traceplot(all_imputed_rds_simulated,pars="gamma_wealth_z") 
 #gamma_wealth
-traceplot(all_imputed_rds_simulated,pars="gamma_wealth_sigma")
+traceplot(all_imputed_rds_simulated,pars="gamma_wealth_sigma") 
 #delta_wealth
-traceplot(all_imputed_rds_simulated,pars="delta_wealth_z")
+traceplot(all_imputed_rds_simulated,pars="delta_wealth_z") 
 #delta_wealth
-traceplot(all_imputed_rds_simulated,pars="delta_wealth_sigma")
+traceplot(all_imputed_rds_simulated,pars="delta_wealth_sigma") 
 
 # generate output for simulation with full data where current absolute wealth has the strongest effect
 #beta z
@@ -2531,7 +2609,7 @@ all_imputed_tab_sim_delta_sigma
 
 ######Coefficient plots ----
 
-par(mfrow=c(1,1))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,5))
 #current wealth
 plot(c(30:1)~c(all_imputed_tab_sim_beta_z[11:40,1]*all_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-2,2),main="Current\nwealth",yaxt="n",xlab="Beta coefficients",ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
@@ -2541,7 +2619,7 @@ for (i in 11:40){
     41-i,
     c(all_imputed_tab_sim_beta_z[i,1]*all_imputed_tab_sim_beta_sigma[1,1])+c(all_imputed_tab_sim_beta_z[i,2]*all_imputed_tab_sim_beta_sigma[1,1]),
     41-i,
-    lwd=2,col="black")
+    lwd=2,col="black") 
 }
 points(c(30:1)~all_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
@@ -2553,7 +2631,7 @@ for (i in 11:40){
     41-i,
     c(all_imputed_tab_sim_gamma_z[i,1]*all_imputed_tab_sim_gamma_sigma[1,1])+c(all_imputed_tab_sim_gamma_z[i,2]*all_imputed_tab_sim_gamma_sigma[1,1]),
     41-i,
-    lwd=2,col="black")
+    lwd=2,col="black") 
 }
 points(c(30:1)~all_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
@@ -2565,7 +2643,7 @@ for (i in 11:40){
     41-i,
     c(all_imputed_tab_sim_delta_z[i,1]*all_imputed_tab_sim_delta_sigma[1,1])+c(all_imputed_tab_sim_delta_z[i,2]*all_imputed_tab_sim_delta_sigma[1,1]),
     41-i,
-    lwd=2,col="black")
+    lwd=2,col="black") 
 }
 points(c(30:1)~all_delta[11:40],col=hcl.colors(3,"zissou 1")[3],pch=16)
 
@@ -2592,7 +2670,7 @@ palette_a
 #shape of points
 shape <- c(15:17)
 #line type
-type <- c(1:3)
+type <- c(1:6)
 
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
@@ -2606,7 +2684,15 @@ plot(c(0,1)~c(10,ncol(post_all_imputed$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+legend(43,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
+legend(43,0.8,c("Min.","Med.", "Max."),col=palette_a,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+
+#add simulated cumulative probabilities
+lines(cumsum(std_ageprobs_poor)[11:40]~c(11:40),col=palette_a[1],lty=type[4],lwd=2)
+#medium wealth
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_a[2],lty=type[5],lwd=2)
+#maximum wealth
+lines(cumsum(std_ageprobs_rich)[11:40]~c(11:40),col=palette_a[3],lty=type[6],lwd=2)
 
 #add lines
 for(k in 1:(length(deciles_aw_all_imputed))){
@@ -2628,13 +2714,13 @@ for(k in 1:(length(deciles_aw_all_imputed))){
   #plot it!
   #prepare model prediction data
   plot_aw_all_imputed <- data.frame(age = 1:ncol(p_aw_all_imputed),
-                                 median = apply(p_aw_all_imputed, 2, median),
-                                 upp = apply(p_aw_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ],
+                                 median = apply(p_aw_all_imputed, 2, median), 
+                                 upp = apply(p_aw_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                  low = apply(p_aw_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  )
+  ) 
   #store data per decile
   assign(paste0("aw_all_",k),plot_aw_all_imputed)
-
+  
   # Calculate cumulative probabilities
   #create vectors
   cumulative_median_aw_all_imputed <- numeric(length(plot_aw_all_imputed$median))
@@ -2654,14 +2740,14 @@ for(k in 1:(length(deciles_aw_all_imputed))){
   assign(paste0("cumulative_median_aw_all_imputed_",k),cumulative_median_aw_all_imputed)
   assign(paste0("cumulative_low_aw_all_imputed_",k),cumulative_low_aw_all_imputed)
   assign(paste0("cumulative_upp_aw_all_imputed_",k),cumulative_upp_aw_all_imputed)
-
+  
   #add median
+  #add confidence intervals
+  polygon(c(plot_aw_all_imputed$age[11:40], rev(plot_aw_all_imputed$age[11:40])), c(cumulative_low_aw_all_imputed[11:40], rev(cumulative_upp_aw_all_imputed[11:40])), col=alpha(palette_a[k], 0.1), border=NA)
   #add points
   points(cumulative_median_aw_all_imputed[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
   #add lines
   lines(cumulative_median_aw_all_imputed[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
-  #add confidence intervals
-  polygon(c(plot_aw_all_imputed$age[11:40], rev(plot_aw_all_imputed$age[11:40])), c(cumulative_low_aw_all_imputed[11:40], rev(cumulative_upp_aw_all_imputed[11:40])), col=alpha(palette_a[k], 0.25), border=NA)
 }
 
 ###### Short-term wealth variability ----
@@ -2685,7 +2771,7 @@ palette_b
 #shape of points
 shape <- c(15:17)
 #line type
-type <- c(1:3)
+type <- c(1:6)
 
 #set parameters for a legend outside of the plot
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
@@ -2699,7 +2785,16 @@ plot(c(0,1)~c(10,ncol(post_all_imputed$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
+legend(43,0.8,c("Min.","Med.", "Max."),col=palette_b,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+
+#add simulated cumulative probabilities
+lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=type[4],lwd=2)
+#medium wealth
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=type[5],lwd=2)
+#maximum wealth
+lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=type[6],lwd=2)
+
 
 #add lines
 for(k in 1:(length(deciles_sc_all_imputed))){
@@ -2721,13 +2816,13 @@ for(k in 1:(length(deciles_sc_all_imputed))){
   #plot it!
   #prepare model prediction data
   plot_sc_all_imputed_real <- data.frame(age = 1:ncol(p_sc_all_imputed_real),
-                                      median = apply(p_sc_all_imputed_real, 2, median),
-                                      upp = apply(p_sc_all_imputed_real, 2, function(x) HPDI(x, prob = 0.9))[1, ],
+                                      median = apply(p_sc_all_imputed_real, 2, median), 
+                                      upp = apply(p_sc_all_imputed_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p_sc_all_imputed_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  )
+  ) 
   #store data per decile
   assign(paste0("sc_all_imputed_",k),plot_sc_all_imputed_real)
-
+  
   # Calculate cumulative probabilities
   #create vectors
   cumulative_median_sc_all_imputed <- numeric(length(plot_sc_all_imputed_real$median))
@@ -2747,14 +2842,14 @@ for(k in 1:(length(deciles_sc_all_imputed))){
   assign(paste0("cumulative_median_sc_all_imputed_",k),cumulative_median_sc_all_imputed)
   assign(paste0("cumulative_low_sc_all_imputed_",k),cumulative_low_sc_all_imputed)
   assign(paste0("cumulative_upp_sc_all_imputed_",k),cumulative_upp_sc_all_imputed)
-
+  
   #add median
+  #add confidence intervals
+  polygon(c(plot_sc_all_imputed_real$age[11:40], rev(plot_sc_all_imputed_real$age[11:40])), c(cumulative_low_sc_all_imputed[11:40], rev(cumulative_upp_sc_all_imputed[11:40])), col=alpha(palette_b[k], 0.1), border=NA)
   #add points
   points(cumulative_median_sc_all_imputed[11:40] ~ plot_sc_all_imputed_real$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
   #add lines
   lines(cumulative_median_sc_all_imputed[11:40] ~ plot_sc_all_imputed_real$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
-  #add confidence intervals
-  polygon(c(plot_sc_all_imputed_real$age[11:40], rev(plot_sc_all_imputed_real$age[11:40])), c(cumulative_low_sc_all_imputed[11:40], rev(cumulative_upp_sc_all_imputed[11:40])), col=alpha(palette_b[k], 0.25), border=NA)
 }
 
 ###### Long-term variability of wealth ----
@@ -2792,7 +2887,15 @@ plot(c(0,1)~c(10,ncol(post_all_imputed$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
+legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA,title="Estimated")
+legend(43,0.8,c("Min.","Med.", "Max."),col=palette_c,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+
+#add simulated cumulative probabilities
+lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=type[4],lwd=2)
+#medium wealth
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=type[5],lwd=2)
+#maximum wealth
+lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=type[6],lwd=2)
 
 #add lines
 for(k in 1:(length(deciles_lv_all_imputed))){
@@ -2814,13 +2917,13 @@ for(k in 1:(length(deciles_lv_all_imputed))){
   #plot it!
   #prepare model prediction data
   plot_lv_all_imputed_real <- data.frame(age = 1:ncol(p_lv_all_imputed),
-                                      median = apply(p_lv_all_imputed, 2, median),
-                                      upp = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ],
+                                      median = apply(p_lv_all_imputed, 2, median), 
+                                      upp = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
                                       low = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
-  )
+  ) 
   #store data per decile
   assign(paste0("lv_all_imputed_",k),plot_lv_all_imputed_real)
-
+  
   # Calculate cumulative probabilities
   #create vectors
   cumulative_median_lv_all_imputed <- numeric(length(plot_lv_all_imputed_real$median))
@@ -2840,18 +2943,12 @@ for(k in 1:(length(deciles_lv_all_imputed))){
   assign(paste0("cumulative_median_lv_all_imputed_",k),cumulative_median_lv_all_imputed)
   assign(paste0("cumulative_low_lv_all_imputed_",k),cumulative_low_lv_all_imputed)
   assign(paste0("cumulative_upp_lv_all_imputed_",k),cumulative_upp_lv_all_imputed)
-
+  
   #add median
+  #add confidence intervals
+  polygon(c(plot_lv_all_imputed_real$age[11:40], rev(plot_lv_all_imputed_real$age[11:40])), c(cumulative_low_lv_all_imputed[11:40], rev(cumulative_upp_lv_all_imputed[11:40])), col=alpha(palette_c[k], 0.1), border=NA)
   #add points
   points(cumulative_median_lv_all_imputed[11:40] ~ plot_lv_all_imputed_real$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
   #add lines
   lines(cumulative_median_lv_all_imputed[11:40] ~ plot_lv_all_imputed_real$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
-  #add confidence intervals
-  polygon(c(plot_lv_all_imputed_real$age[11:40], rev(plot_lv_all_imputed_real$age[11:40])), c(cumulative_low_lv_all_imputed[11:40], rev(cumulative_upp_lv_all_imputed[11:40])), col=alpha(palette_c[k], 0.25), border=NA)
 }
-
-
-
- 
- 
-
