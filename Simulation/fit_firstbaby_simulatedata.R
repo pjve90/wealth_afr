@@ -491,13 +491,25 @@ for(j in 1:ncol(aw_simbirth)){
 aw_simbirth_res<-aw_simbirth[,1:40] 
 simwealth_res<-simwealth[,1:40]
 
+#prepare missing values
+#location
+wealth_miss <- which(simwealth_res == -99, arr.ind = TRUE)
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
+
 # 1) full wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 aw_full_simulated_list <- list(N = nrow(aw_simbirth_res), #population size
                                A = ncol(aw_simbirth_res), #age
                                wealth = as.matrix(simwealth_res), #current absolute wealth
                                baby = as.matrix(aw_simbirth_res), #AFR
-                               median_wealth = medianwealthperindividual # median wealth of each individual
+                               median_wealth = medianwealthperindividual, # median wealth of each individual
+                               N_miss = n_miss, #number of missing values
+                               wealth_miss = wealth_miss #location of missing values
 )
 #check data
 aw_full_simulated_list
@@ -509,7 +521,7 @@ aw_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_absonly.s
 #fit model
 aw_full_fit_simulated <- aw_model_simulated$sample(data = aw_full_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 4, 
+                                                   parallel_chains = 15, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -808,12 +820,24 @@ for(k in 1:(length(deciles_aw_full))){
  sc_simbirth_res<-sc_simbirth[,1:40] 
  simwealth_res<-simwealth[,1:40]
  
+ #prepare missing values
+ #location
+ wealth_miss <- which(simwealth_res == -99, arr.ind = TRUE)
+ #check data
+ dim(wealth_miss)
+ #number of missing values
+ n_miss <- nrow(wealth_miss)
+ #check data
+ n_miss
+
  # We put all of this together in the list of data for the analyses
  sc_full_simulated_list <- list(N = nrow(sc_simbirth_res), #population size
                                 A = ncol(sc_simbirth_res), #age
                                 wealth = as.matrix(simwealth_res), #current absolute wealth
                                 baby = as.matrix(sc_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
+                                median_wealth = medianwealthperindividual, # median wealth of each individual
+                               N_miss = n_miss, #number of missing values
+                               wealth_miss = wealth_miss #location of missing values 
  )
  #check data
  sc_full_simulated_list
@@ -825,7 +849,7 @@ for(k in 1:(length(deciles_aw_full))){
  #fit model
  sc_full_fit_simulated <- sc_model_simulated$sample(data = sc_full_simulated_list, 
                                                     chains = 4, 
-                                                    parallel_chains = 4, 
+                                                    parallel_chains = 15, 
                                                     adapt_delta = 0.99,
                                                     max_treedepth = 13,
                                                     iter_warmup = 2000,
@@ -1120,12 +1144,24 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
   lv_simbirth_res<-lv_simbirth[,1:40] 
   simwealth_res<-simwealth[,1:40]
   
+  #prepare missing values
+  #location
+  wealth_miss <- which(simwealth_res == -99, arr.ind = TRUE)
+  #check data
+  dim(wealth_miss)
+  #number of missing values
+  n_miss <- nrow(wealth_miss)
+  #check data
+  n_miss
+  
   # We put all of this together in the list of data for the analyses
   lv_full_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
                                  A = ncol(lv_simbirth_res), #age
                                  wealth = as.matrix(simwealth_res), #current absolute wealth
                                  baby = as.matrix(lv_simbirth_res), #AFR
-                                 median_wealth = medianwealthperindividual # median wealth of each individual
+                                 median_wealth = medianwealthperindividual , # median wealth of each individual
+                                 N_miss = n_miss, #number of missing values
+                                 wealth_miss = wealth_miss #location of missing values
   )
   #check data
   lv_full_simulated_list
@@ -1137,7 +1173,7 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
   #fit model
   lv_full_fit_simulated <- lv_model_simulated$sample(data = lv_full_simulated_list, 
                                                      chains = 4, 
-                                                     parallel_chains = 4, 
+                                                     parallel_chains = 15, 
                                                      adapt_delta = 0.99,
                                                      max_treedepth = 13,
                                                      iter_warmup = 2000,
@@ -1402,12 +1438,24 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
  all_simbirth_res<-all_simbirth[,1:40] 
  simwealth_res<-simwealth[,1:40]
  
+ #prepare missing values
+ #location
+ wealth_miss <- which(simwealth_res == -99, arr.ind = TRUE)
+ #check data
+ dim(wealth_miss)
+ #number of missing values
+ n_miss <- nrow(wealth_miss)
+ #check data
+ n_miss
+ 
  # We put all of this together in the list of data for the analyses
  all_full_simulated_list <- list(N = nrow(all_simbirth_res), #population size
                                 A = ncol(all_simbirth_res), #age
                                 wealth = as.matrix(simwealth_res), #current absolute wealth
                                 baby = as.matrix(all_simbirth_res), #AFR
-                                median_wealth = medianwealthperindividual # median wealth of each individual
+                                median_wealth = medianwealthperindividual , # median wealth of each individual
+                                N_miss = n_miss, #number of missing values
+                                wealth_miss = wealth_miss #location of missing values
  )
  #check data
  all_full_simulated_list
@@ -1419,7 +1467,7 @@ points(c(30:1)~sc_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
  #fit model
  all_full_fit_simulated <- all_model_simulated$sample(data = all_full_simulated_list, 
                                                     chains = 4, 
-                                                    parallel_chains = 4, 
+                                                    parallel_chains = 15, 
                                                     adapt_delta = 0.99,
                                                     max_treedepth = 13,
                                                     iter_warmup = 2000,
@@ -1938,7 +1986,7 @@ aw_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_absonly.s
 #fit model
 aw_imputed_fit_simulated <- aw_model_simulated$sample(data = aw_imputed_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 4, 
+                                                   parallel_chains = 15, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -2143,7 +2191,7 @@ sc_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_diffonly.
 #fit model
 sc_imputed_fit_simulated <- sc_model_simulated$sample(data = sc_imputed_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 4, 
+                                                   parallel_chains = 15, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -2358,7 +2406,7 @@ lv_model_simulated <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_msdonly.s
 #fit model
 lv_imputed_fit_simulated <- lv_model_simulated$sample(data = lv_imputed_simulated_list, 
                                                    chains = 4, 
-                                                   parallel_chains = 4, 
+                                                   parallel_chains = 15, 
                                                    adapt_delta = 0.99,
                                                    max_treedepth = 13,
                                                    iter_warmup = 2000,
@@ -2572,7 +2620,7 @@ all_model_simulated <- cmdstan_model("~/wealth_afr/Model_code/firstbaby_threewea
 #fit model
 all_imputed_fit_simulated <- all_model_simulated$sample(data = all_imputed_simulated_list,
                                                      chains = 4,
-                                                     parallel_chains = 4,
+                                                     parallel_chains = 15,
                                                      adapt_delta = 0.99,
                                                      max_treedepth = 13,
                                                      iter_warmup = 2000,
