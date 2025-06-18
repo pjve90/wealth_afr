@@ -51,7 +51,7 @@ parameters {
   real <lower = 0> gamma_wealth_sigma;
 
   // missing wealth data
-  vector[N_miss] wealth_impute; // imputed values for missing wealth
+  vector[N_miss] wealth_impute_z; 
   real <lower = 0, upper = 1> alpha_miss;
   real beta_miss;
   real <lower=0> sigma_miss;
@@ -69,7 +69,25 @@ transformed parameters {
 
   wealth_full = wealth; // initialize wealth full with wealth (raw)
   
-  // Fill missing spots with imputed values
+//Data imputation
+  vector[N_miss] wealth_impute; // initialize vector with imputed data
+
+for (n in 1:N_miss) {
+    int i = wealth_miss[n, 1]; // individual
+    int a = wealth_miss[n, 2]; // age
+
+    if (a == 1) {
+      // At birth: centered on median_wealth
+      wealth_impute[n] = median_wealth[i] + wealth_impute_z[n];
+    } else {
+      // After birth: AR(1)-like imputation
+      real mu_miss = alpha_miss * wealth_full[i, a - 1] +
+                     (1 - alpha_miss) * beta_miss;
+      wealth_impute[n] = mu_miss + sigma_miss * wealth_impute_z[n];
+    }
+}
+    
+// Fill missing spots with imputed values
   for (n in 1:N_miss) {
     wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]] = wealth_impute[n];
   }
@@ -127,24 +145,10 @@ model {
     gamma_wealth_sigma ~ exponential(1);
 
 // missing wealth parameters
-    alpha_miss ~ uniform(0.5, 1);
+    alpha_miss ~ normal(0.5, 0.25);
     beta_miss ~ normal(0, 1);
     sigma_miss ~ exponential(3);
-
-//Wealth data imputation
-for (n in 1:N_miss) {
-    if (wealth_miss[n, 2] == 1) {
-      // Data imputation at birth
-      wealth_impute[n] ~ normal(median_wealth[wealth_miss[n, 1]], 1);
-    } else {
-      // Data imputation at later ages
-      wealth_impute[n] ~ normal(
-        alpha_miss * wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]-1] + // weight of previous wealth
-        (1 - alpha_miss) * beta_miss, // weight of stochastic component
-        sigma_miss // uncertainty in prediction
-      );
-    }
-  }
+    wealth_impute_z ~ normal(0, 1);
 
 //Probability of first birth
   for (n in 1:N) {
