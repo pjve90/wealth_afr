@@ -30,6 +30,12 @@ data {
 
   int N_miss; // number of missing data points for wealth
   array[N_miss, 2] int wealth_miss; // positions of missing wealth
+  
+//  real wc_mean_obs; //mean of observed short-term wealth variability
+//  real wc_sd_obs; //sd of observed short-term wealth variability
+  
+//  real lv_mean_obs; //mean of observed long-term wealth variability
+//  real lv_sd_obs; //sd of observed long-term wealth variability
 
   array[N,A] int baby; // first birth (0=no,1=yes,-99=censored)
 
@@ -57,9 +63,9 @@ parameters {
   real <lower = 0> delta_wealth_sigma;
 
   // missing wealth data
-  vector[N_miss] wealth_impute; // imputed values for missing wealth
+  vector[N_miss] wealth_impute_z; 
   real <lower = 0, upper = 1> alpha_miss;
-  real beta_miss;
+//  real beta_miss;
   real <lower=0> sigma_miss;
 }
 
@@ -75,73 +81,84 @@ transformed parameters {
 
   wealth_full = wealth; // initialize wealth full with wealth (raw)
   
-  // Fill missing spots with imputed values
-  for (n in 1:N_miss) {
-    wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]] = wealth_impute[n];
-  }
+//Data imputation
+  vector[N_miss] wealth_impute; // initialize vector with imputed data
+
+for (n in 1:N_miss) {
+    int i = wealth_miss[n, 1]; // individual
+    int a = wealth_miss[n, 2]; // age
+
+    if (a == 1) {
+      // At birth: centered on median_wealth
+      wealth_impute[n] = median_wealth[i] + sigma_miss * wealth_impute_z[n];
+    } else {
+      // After birth: AR(1)-like imputation
+      real mu_miss = alpha_miss * wealth_full[i, a - 1] +
+                     (1 - alpha_miss) * median_wealth[i];
+      wealth_impute[n] = mu_miss + sigma_miss * wealth_impute_z[n];
+    }
+    // Fill missing spots with imputed values
+    wealth_full[i, a] = wealth_impute[n];
+}
+    
 
 //short-term wealth variability
-  matrix[N,A] wealth_change; //matrix containing wealth change
+matrix[N,A] wealth_change;
+matrix[N,A-2] non_zero_change;  // Correct dimension: A-2 columns for ages 3 to A
 
-  for(n in 1:N){
-    for(a in 1:2){
-      wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
-    }
-    for(a in 3:A){
-      wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]); //calculating the 2-years lagged wealth change
-    }
+for(n in 1:N){
+  for(a in 1:2){
+    wealth_change[n,a] = 0;
   }
+  for(a in 3:A){
+    wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]);
+    non_zero_change[n,a-2] = wealth_change[n,a];  // Note: a-2 to index correctly
+  }
+}
+
+// Calculate mean and standard deviation
+real wc_mean_model = mean(to_vector(non_zero_change));  // Need to_vector() for matrix
+real wc_sd_model = sd(to_vector(non_zero_change));
+
+// Standardize wealth_change
+matrix[N, A] wealth_change_std;
+for (n in 1:N) {
+  for (a in 1:2) {  // Should be 1:2, not 1:10
+    wealth_change_std[n, a] = 0;
+  }
+  for (a in 3:A) {  // Should be 3:A, not 11:A
+    wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean_model) / wc_sd_model;
+  }
+}
 
 //long-term variability
-  matrix[N,A] wealth_msd; //matrix containing moving standard deviation
+matrix[N,A] wealth_msd;
+matrix[N,A-10] non_zero_msd;  // Correct dimension: A-10 columns for ages 11 to A
 
-  for(n in 1:N){
-    for(a in 1:10){
-      wealth_msd[n,a] = 0; //setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
-    }
-    for(a in 11:A){
-      wealth_msd[n,a] = sd(segment(wealth_full[n],a-9,10)); //calculating the moving standard deviation with a 10-years window
-    }
+for(n in 1:N){
+  for(a in 1:10){
+    wealth_msd[n,a] = 0;
   }
-
-// Flattened vectors for standardization (manual indexing)
-  vector[N * (A - 2)] wc_vec;
-  vector[N * (A - 10)] msd_vec;
-
-  for (n in 1:N) {
-    for (a in 3:A) {
-      wc_vec[(n - 1) * (A - 2) + (a - 2)] = wealth_change[n, a];
-    }
-    for (a in 11:A) {
-      msd_vec[(n - 1) * (A - 10) + (a - 10)] = wealth_msd[n, a];
-    }
+  for(a in 11:A){
+    wealth_msd[n,a] = sd(segment(wealth_full[n],a-9,10));
+    non_zero_msd[n,a-10] = wealth_msd[n,a];  // Note: a-10 to index correctly
   }
+}
 
-  // Means and standard deviations
-  real wc_mean = mean(wc_vec);
-  real wc_sd = sd(wc_vec);
-  real msd_mean = mean(msd_vec);
-  real msd_sd = sd(msd_vec);
+// Calculate mean and standard deviation
+real lv_mean_model = mean(to_vector(non_zero_msd));
+real lv_sd_model = sd(to_vector(non_zero_msd));
 
-  // Standardized versions
-  matrix[N, A] wealth_change_std;
-  matrix[N, A] wealth_msd_std;
-
-  for (n in 1:N) {
-    for (a in 1:2) {
-      wealth_change_std[n, a] = 0;
-    }
-    for (a in 3:A) {
-      wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean) / wc_sd;
-    }
-
-    for (a in 1:10) {
-      wealth_msd_std[n, a] = 0;
-    }
-    for (a in 11:A) {
-      wealth_msd_std[n, a] = (wealth_msd[n, a] - msd_mean) / msd_sd;
-    }
+// Standardize wealth_msd
+matrix[N, A] wealth_msd_std;
+for (n in 1:N) {
+  for (a in 1:10) {
+    wealth_msd_std[n, a] = 0;
   }
+  for (a in 11:A) {
+    wealth_msd_std[n, a] = (wealth_msd[n, a] - lv_mean_model) / lv_sd_model;
+  }
+}
 }
 
 model {
@@ -158,33 +175,18 @@ model {
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 
-    beta_wealth_sigma ~ exponential(1);
+    beta_wealth_sigma ~ normal(0,1);
     // wealth change
     gamma_wealth_z ~ normal(0, 1);
-    gamma_wealth_sigma ~ exponential(1);
+    gamma_wealth_sigma ~ normal(0,1);
     // moving standard deviation
     delta_wealth_z ~ normal(0, 1);
-    delta_wealth_sigma ~ exponential(1);
+    delta_wealth_sigma ~ normal(0,1);
     
 // missing wealth parameters
-    alpha_miss ~ uniform(0.5, 1);
-    beta_miss ~ normal(0, 1);
-    sigma_miss ~ exponential(3);
-
-//Wealth data imputation
-for (n in 1:N_miss) {
-    if (wealth_miss[n, 2] == 1) {
-      // Data imputation at birth
-      wealth_impute[n] ~ normal(median_wealth[wealth_miss[n, 1]], 1);
-    } else {
-      // Data imputation at later ages
-      wealth_impute[n] ~ normal(
-        alpha_miss * wealth_full[wealth_miss[n, 1], wealth_miss[n, 2]-1] + // weight of previous wealth
-        (1 - alpha_miss) * beta_miss, // weight of stochastic component
-        sigma_miss // uncertainty in prediction
-      );
-    }
-  }
+    alpha_miss ~ beta(3, 2);           
+    sigma_miss ~ normal(0, 0.5); 
+    wealth_impute_z ~ normal(0, 1);
 
 //Probability of first birth
   for (n in 1:N) {
