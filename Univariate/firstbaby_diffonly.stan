@@ -31,6 +31,9 @@ data {
   int N_miss; // number of missing data points for wealth
   array[N_miss, 2] int wealth_miss; // positions of missing wealth
   
+  real wc_mean_obs; //mean of observed short-term wealth variability
+  real wc_sd_obs; //sd of observed short-term wealth variability
+  
   array[N,A] int baby; // first birth (0=no,1=yes,-99=censored)
 
 }
@@ -90,34 +93,28 @@ for (n in 1:N_miss) {
 }
 
 //short-term wealth variability
-matrix[N,A] wealth_change;
-matrix[N,A-2] non_zero_change;  // Correct dimension: A-2 columns for ages 3 to A
+  matrix[N,A] wealth_change; //matrix containing wealth change
 
-for(n in 1:N){
-  for(a in 1:2){
-    wealth_change[n,a] = 0;
+  for(n in 1:N){
+    for(a in 1:2){
+      wealth_change[n,a] = 0; //setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
+    }
+    for(a in 3:A){
+      wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]); //calculating the 2-years lagged wealth change
+    }
   }
-  for(a in 3:A){
-    wealth_change[n,a] = abs(wealth_full[n,a] - wealth_full[n,a-2]);
-    non_zero_change[n,a-2] = wealth_change[n,a];  // Note: a-2 to index correctly
-  }
-}
 
-// Calculate mean and standard deviation
-real wc_mean_model = mean(to_vector(non_zero_change));  // Need to_vector() for matrix
-real wc_sd_model = sd(to_vector(non_zero_change));
+  // Standardize wealth change
+  matrix[N, A] wealth_change_std;
 
-// Standardize wealth_change
-matrix[N, A] wealth_change_std;
-for (n in 1:N) {
-  for (a in 1:2) {  // Should be 1:2, not 1:10
-    wealth_change_std[n, a] = 0;
+  for (n in 1:N) {
+    for (a in 1:2) {
+      wealth_change_std[n, a] = 0;
+    }
+    for (a in 3:A) {
+      wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean_obs) / wc_sd_obs;
+    }
   }
-  for (a in 3:A) {  // Should be 3:A, not 11:A
-    wealth_change_std[n, a] = (wealth_change[n, a] - wc_mean_model) / wc_sd_model;
-  }
-}
-
 }
 
 model {
@@ -137,8 +134,8 @@ model {
     gamma_wealth_sigma ~ normal(0,1);
 
 // missing wealth parameters
-alpha_miss ~ beta(2, 2);           
-sigma_miss ~ normal(0, 0.5); 
+alpha_miss ~ beta(1, 1);           
+sigma_miss ~ normal(0, 0.1); 
 wealth_impute_z ~ normal(0, 1);
 
 //Probability of first birth
