@@ -134,12 +134,12 @@ model {
 // wealth
     // moving standard deviation
     delta_wealth_z ~ normal(0, 1);
-    delta_wealth_sigma ~ normal(0,1);
+    delta_wealth_sigma ~ normal(0,0.5);
     
 // missing wealth parameters
-alpha_miss ~ beta(2, 2);           
-sigma_miss ~ normal(0, 0.5); 
-wealth_impute_z ~ normal(0, 1);
+    alpha_miss ~ beta(2, 2);           
+    sigma_miss ~ normal(0, 0.5); 
+    wealth_impute_z ~ normal(0, 1);
 
 //Probability of first birth
   for (n in 1:N) {

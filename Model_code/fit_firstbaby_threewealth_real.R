@@ -15,7 +15,9 @@ library(corrplot)
 # Data wrangling of real data ----
 
 #Load data
-real_data <- read.csv("Data/dataf.csv")[,-1]
+#real_data <- read.csv("Data/dataf.csv")[,-1]
+real_data <- read.csv(url("https://raw.githubusercontent.com/pjve90/wealth_afr/refs/heads/master/Data/dataf.csv"), header=T, sep=",", stringsAsFactors=F)[,-1] 
+
 head(real_data)
 
 # Age at first reproduction ----
@@ -56,7 +58,7 @@ plot(cumulative_probs~c(1:length(cumulative_probs)),
      type="b",
      col="black",
      pch=16
-     )
+)
 
 #Current absolute wealth ----
 
@@ -196,7 +198,7 @@ plot(NA,
      ylim=range(std_absw_matrix,na.rm=T),
      xlab="Age",
      ylab="Std. current absolute wealth"
-     )
+)
 for(i in 1:nrow(std_absw_matrix)){
   row_data <- std_absw_matrix[i, ]
   col_indices <- which(!is.na(row_data))
@@ -290,6 +292,12 @@ afr_matrix
 wealth_miss <- which(is.na(std_absw_matrix),arr.ind = T)
 #check data
 wealth_miss
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
 
 #replace NAs with -99
 for(j in 1:ncol(std_absw_matrix)){
@@ -304,6 +312,20 @@ for(j in 1:ncol(std_absw_matrix)){
 #check the data
 std_absw_matrix
 
+#Calculate the median wealth per individual
+median_wealth<-NA
+for(i in 1:nrow(std_absw_matrix)){
+  median_wealth[i]<-median(std_absw_matrix[i,which(std_absw_matrix[i,]!=-99)])
+}
+#check the data
+median_wealth
+#If there are individuals without wealth data, sample random values from a normal(0,1) distribution since the data is standardised
+median_wealth[is.na(median_wealth)]<-rnorm(sum(is.na(median_wealth)),0,1)
+#check the data
+median_wealth
+#standardise median wealth
+std_median_wealth <- standardize(median_wealth)
+
 #Subset the data for realistic ages
 #Subset wealth and AFB for those between zero years old and 50 years old.
 #wealth
@@ -314,15 +336,21 @@ afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do n
 afrs_restricted
 #missing wealth data
 wealth_miss_restricted <- wealth_miss[wealth_miss[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
+wealth_miss_restricted
+#number of missing values
+n_miss_restricted <- nrow(wealth_miss_restricted)
+n_miss_restricted
 
 #put all the data together
 #create dataset
 real_list <- list(N = nrow(afrs_restricted), #population size
-                   A = ncol(afrs_restricted), #age
-                   wealth = std_absw_restricted, #current absolute wealth
-                   baby = afrs_restricted, #AFR
-                   N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
-                   wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
+                  A = ncol(afrs_restricted), #age
+                  wealth = std_absw_restricted, #current absolute wealth
+                  baby = afrs_restricted, #AFR
+                  N_miss = n_miss_restricted, # number of missing values that need imputation
+                  wealth_miss=wealth_miss_restricted, # matrix indicating missing wealth data
+                  median_wealth=std_median_wealth
+) 
 #check data
 real_list
 
@@ -330,15 +358,18 @@ real_list
 
 # compile model
 
-model_3w <- cmdstan_model("Model_code/firstbaby_threewealth.stan")
+model_3w <- cmdstan_model("~/wealth_afr/Model_code/firstbaby_threewealth.stan")
 
 #fit model
-fit_real <- model_3w$sample(data = real_list, 
+fit_real <- model_3w$sample(data = real_list,
                             chains = 4, 
                             parallel_chains = 15, 
-                            adapt_delta = 0.95,
+                            adapt_delta = 0.99,
                             max_treedepth = 13,
+                            iter_warmup = 2000,
+                            iter_sampling = 2000,
                             init = 0)
+
 # save fit 
 fit_real_csv <- rstan::read_stan_csv(fit_real$output_files())
 saveRDS(fit_real_csv, "fit_real_output.rds")
@@ -381,9 +412,9 @@ traceplot(rds_real,pars="delta_wealth_sigma")
 #alpha and hiper priors of Gaussian process
 #create summary table for alpha and hiper priors of Gaussian process
 tab_real_alphagp <- precis(rds_real,depth=2,pars=c("alpha",
-                                                     "mu_raw",
-                                                     "mu_tau",
-                                                     "mu_delta"))
+                                                   "mu_raw",
+                                                   "mu_tau",
+                                                   "mu_delta"))
 #check table
 tab_real_alphagp
 
@@ -465,19 +496,19 @@ hist(post_real$wealth_full,
      col=hcl.colors(3,"ag_Sunset")[1],
      main="Current wealth",
      xlab="Std. current wealth"
-     )
-hist(post_real$wealth_change,
+)
+hist(post_real$wealth_change_std,
      freq=F,
      col=hcl.colors(3,"ag_Sunset")[2],
      main="Short-term wealth variability",
      xlab="Absolute wealth difference"
-     )
-hist(post_real$wealth_msd,
+)
+hist(post_real$wealth_msd_std,
      freq=F,
      col=hcl.colors(3,"ag_Sunset")[3],
      main="Long-term wealth variability",
      xlab="Moving standard deviation"
-     )
+)
 
 # Plot the output of the model ----
 
@@ -506,15 +537,34 @@ type <- c(1:3)
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_real$mu)),
+plot(c(0,1)~c(11,ncol(post_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Current levels\nof material wealth",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(53,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_real$mu), by = 5), 
+     labels = seq(10, ncol(post_real$mu)-1, by = 5))
+# Combined legend
+legend(53,1,  # or specify x/y coordinates
+       legend = c("Cumulative\nprobabilities", "", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Expected age\nat first birth", "", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_a,NA,NA,NA,palette_a),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, type[1:3],NA,NA, NA, c(4,4,4)),  # NA for headers
+       pch = c(NA,NA, shape,NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add lines
 for(k in 1:(length(deciles_absw))){
@@ -525,10 +575,10 @@ for(k in 1:(length(deciles_absw))){
   for(j in 1:ncol(post_real$mu)){
     for(i in 1:nrow(post_real$mu)){
       p_absw_real[i,j] <- inv_logit(post_real$alpha[i] + #inv logit because originally is logit
-                                        post_real$mu[i,j] + #age
-                                        (post_real$beta_wealth_z[i,j]*post_real$beta_wealth_sigma[i])*deciles_absw[k] + #absolute wealth
-                                        (post_real$gamma_wealth_z[i,j]*post_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                        (post_real$delta_wealth_z[i,j]*post_real$delta_wealth_sigma[i])*0) #moving variance
+                                      post_real$mu[i,j] + #age
+                                      (post_real$beta_wealth_z[i,j]*post_real$beta_wealth_sigma[i])*deciles_absw[k] + #absolute wealth
+                                      (post_real$gamma_wealth_z[i,j]*post_real$gamma_wealth_sigma[i])*0 + #wealth change
+                                      (post_real$delta_wealth_z[i,j]*post_real$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
@@ -536,9 +586,9 @@ for(k in 1:(length(deciles_absw))){
   #plot it!
   #prepare model prediction data
   plot_absw_real <- data.frame(age = 1:ncol(p_absw_real),
-                                      median = apply(p_absw_real, 2, median), 
-                                      upp = apply(p_absw_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p_absw_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                               median = apply(p_absw_real, 2, median), 
+                               upp = apply(p_absw_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                               low = apply(p_absw_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
   assign(paste0("absw_",k),plot_absw_real)
@@ -562,20 +612,32 @@ for(k in 1:(length(deciles_absw))){
   assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
   assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
   assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
-    
+  
+  # Calculate exact median age at first birth
+  age_before <- max(which(cumulative_median_absw < 0.5))
+  age_after <- min(which(cumulative_median_absw >= 0.5))
+  prob_before <- cumulative_median_absw[age_before]
+  prob_after <- cumulative_median_absw[age_after]
+  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  
+  # Store the exact median age
+  assign(paste0("exact_age_median_absw_", k), exact_age_median)
+  
   #add median
   #add points
   points(cumulative_median_absw[11:51] ~ plot_absw_real$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
   #add lines
   lines(cumulative_median_absw[11:51] ~ plot_absw_real$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_absw_real$age[11:51], rev(plot_absw_real$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
+  polygon(c(plot_absw_real$age[11:51], rev(plot_absw_real$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.1), border=palette_a[k])
+  # Add vertical line for median age at first birth
+  segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_a[k], lwd=3, lty=4)
 }
 
 ## Short-term wealth variability ----
 
 #simulate wealth values
-simwealth_change_real <- seq(from=round(min(post_real$wealth_change),1),to=round(max(post_real$wealth_change),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_change_real <- seq(from=round(min(post_real$wealth_change_std),1),to=round(max(post_real$wealth_change_std),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
 simwealth_change_real
 #get the deciles
 deciles_diffw <- as.numeric(quantile(simwealth_change_real,seq(0,1,0.5)))
@@ -597,15 +659,35 @@ type <- c(1:3)
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_real$mu)),
+plot(c(0,1)~c(11,ncol(post_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Short-term variability\nof material wealth",
+     main="Short-term\nwealth variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(53,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_real$mu), by = 5), 
+     labels = seq(10, ncol(post_real$mu)-1, by = 5))
+# Combined legend
+legend(53,1,  # or specify x/y coordinates
+       legend = c("Cumulative\nprobabilities", "", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Expected age\nat first birth", "", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_b,NA,NA,NA,palette_b),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, type[1:3],NA,NA, NA, c(4,4,4)),  # NA for headers
+       pch = c(NA,NA, shape,NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
+
 
 #add lines
 for(k in 1:(length(deciles_diffw))){
@@ -616,10 +698,10 @@ for(k in 1:(length(deciles_diffw))){
   for(j in 1:ncol(post_real$mu)){
     for(i in 1:nrow(post_real$mu)){
       p_diffw_real[i,j] <- inv_logit(post_real$alpha[i] + #inv logit because originally is logit
-                                        post_real$mu[i,j] + #age
-                                        (post_real$beta_wealth_z[i,j]*post_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                        (post_real$gamma_wealth_z[i,j]*post_real$gamma_wealth_sigma[i])*deciles_diffw[k] + #wealth change
-                                        (post_real$delta_wealth_z[i,j]*post_real$delta_wealth_sigma[i])*0) #moving variance
+                                       post_real$mu[i,j] + #age
+                                       (post_real$beta_wealth_z[i,j]*post_real$beta_wealth_sigma[i])*0+ #absolute wealth
+                                       (post_real$gamma_wealth_z[i,j]*post_real$gamma_wealth_sigma[i])*deciles_diffw[k] + #wealth change
+                                       (post_real$delta_wealth_z[i,j]*post_real$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
@@ -627,9 +709,9 @@ for(k in 1:(length(deciles_diffw))){
   #plot it!
   #prepare model prediction data
   plot_diffw_real <- data.frame(age = 1:ncol(p_diffw_real),
-                                      median = apply(p_diffw_real, 2, median), 
-                                      upp = apply(p_diffw_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p_diffw_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                                median = apply(p_diffw_real, 2, median), 
+                                upp = apply(p_diffw_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                low = apply(p_diffw_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
   assign(paste0("diffw_",k),plot_diffw_real)
@@ -654,19 +736,32 @@ for(k in 1:(length(deciles_diffw))){
   assign(paste0("cumulative_low_diffw_",k),cumulative_low_diffw)
   assign(paste0("cumulative_upp_diffw_",k),cumulative_upp_diffw)
   
+  # Calculate exact median age at first birth
+  age_before <- max(which(cumulative_median_diffw < 0.5))
+  age_after <- min(which(cumulative_median_diffw >= 0.5))
+  prob_before <- cumulative_median_diffw[age_before]
+  prob_after <- cumulative_median_diffw[age_after]
+  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  
+  # Store the exact median age
+  assign(paste0("exact_age_median_diffw_", k), exact_age_median)
+  
   #add median
   #add points
   points(cumulative_median_diffw[11:51] ~ plot_diffw_real$age[11:51], col=palette_b[k], pch=shape[k], cex=1.5)
   #add lines
   lines(cumulative_median_diffw[11:51] ~ plot_diffw_real$age[11:51], col=palette_b[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_diffw_real$age[11:51], rev(plot_diffw_real$age[11:51])), c(cumulative_low_diffw[11:51], rev(cumulative_upp_diffw[11:51])), col=alpha(palette_b[k], 0.25), border=NA)
+  polygon(c(plot_diffw_real$age[11:51], rev(plot_diffw_real$age[11:51])), c(cumulative_low_diffw[11:51], rev(cumulative_upp_diffw[11:51])), col=alpha(palette_b[k], 0.1), border=palette_b[k])
+  # Add vertical line for median age at first birth
+  segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_b[k], lwd=3, lty=4)
 }
+
 
 ## Long-term variability of wealth ----
 
 #simulate wealth values
-simwealth_msd_real <- seq(from=round(min(post_real$wealth_msd),1),to=round(max(post_real$wealth_msd),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_msd_real <- seq(from=round(min(post_real$wealth_msd_std),1),to=round(max(post_real$wealth_msd_std),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
 simwealth_msd_real
 #get the deciles
 deciles_msd <- as.numeric(quantile(simwealth_msd_real,seq(0,1,0.5)))
@@ -688,15 +783,35 @@ type <- c(1:3)
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_real$mu)),
+plot(c(0,1)~c(11,ncol(post_real$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
-     main="Long-term variability\nof material wealth",
+     main="Long-term\nwealth variability",
      cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(53,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA)
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_real$mu), by = 5), 
+     labels = seq(10, ncol(post_real$mu)-1, by = 5))
+
+# Combined legend
+legend(53,1,  # or specify x/y coordinates
+       legend = c("Cumulative\nprobabilities", "", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Expected age\nat first birth", "", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_c,NA,NA,NA,palette_c),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, type[1:3],NA,NA, NA, c(4,4,4)),  # NA for headers
+       pch = c(NA,NA, shape,NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add lines
 for(k in 1:(length(deciles_msd))){
@@ -707,51 +822,63 @@ for(k in 1:(length(deciles_msd))){
   for(j in 1:ncol(post_real$mu)){
     for(i in 1:nrow(post_real$mu)){
       p_msd_real[i,j] <- inv_logit(post_real$alpha[i] + #inv logit because originally is logit
-                                        post_real$mu[i,j] + #age
-                                        (post_real$beta_wealth_z[i,j]*post_real$beta_wealth_sigma[i])*0 + #absolute wealth
-                                        (post_real$gamma_wealth_z[i,j]*post_real$gamma_wealth_sigma[i])*0 + #wealth change
-                                        (post_real$delta_wealth_z[i,j]*post_real$delta_wealth_sigma[i])*deciles_msd[k]) #moving variance
+                                     post_real$mu[i,j] + #age
+                                     (post_real$beta_wealth_z[i,j]*post_real$beta_wealth_sigma[i])*0+ #absolute wealth
+                                     (post_real$gamma_wealth_z[i,j]*post_real$gamma_wealth_sigma[i])*deciles_msd[k] + #wealth change
+                                     (post_real$delta_wealth_z[i,j]*post_real$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
   p_msd_real
   #plot it!
   #prepare model prediction data
-  plot_msdw_real <- data.frame(age = 1:ncol(p_msd_real),
-                                      median = apply(p_msd_real, 2, median), 
-                                      upp = apply(p_msd_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p_msd_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_msd_real <- data.frame(age = 1:ncol(p_msd_real),
+                              median = apply(p_msd_real, 2, median), 
+                              upp = apply(p_msd_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                              low = apply(p_msd_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("msdw_",k),plot_msdw_real)
+  assign(paste0("msd_",k),plot_msd_real)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_msdw <- numeric(length(plot_msdw_real$median))
-  cumulative_low_msdw <- numeric(length(plot_msdw_real$low))
-  cumulative_upp_msdw <- numeric(length(plot_msdw_real$upp))
+  cumulative_median_msd <- numeric(length(plot_msd_real$median))
+  cumulative_low_msd <- numeric(length(plot_msd_real$low))
+  cumulative_upp_msd <- numeric(length(plot_msd_real$upp))
   #set the first probability
-  cumulative_median_msdw[1] <- plot_msdw_real$median[1]
-  cumulative_low_msdw[1] <- plot_msdw_real$low[1]
-  cumulative_upp_msdw[1] <- plot_msdw_real$upp[1]
+  cumulative_median_msd[1] <- plot_msd_real$median[1]
+  cumulative_low_msd[1] <- plot_msd_real$low[1]
+  cumulative_upp_msd[1] <- plot_msd_real$upp[1]
   #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_msdw_real$median)) {
-    cumulative_median_msdw[a] <- cumulative_median_msdw[a-1] + (1 - cumulative_median_msdw[a-1]) * plot_msdw_real$median[a]
-    cumulative_low_msdw[a] <- cumulative_low_msdw[a-1] + (1 - cumulative_low_msdw[a-1]) * plot_msdw_real$low[a]
-    cumulative_upp_msdw[a] <- cumulative_upp_msdw[a-1] + (1 - cumulative_upp_msdw[a-1]) * plot_msdw_real$upp[a]
+  for (a in 2:length(plot_msd_real$median)) {
+    cumulative_median_msd[a] <- cumulative_median_msd[a-1] + (1 - cumulative_median_msd[a-1]) * plot_msd_real$median[a]
+    cumulative_low_msd[a] <- cumulative_low_msd[a-1] + (1 - cumulative_low_msd[a-1]) * plot_msd_real$low[a]
+    cumulative_upp_msd[a] <- cumulative_upp_msd[a-1] + (1 - cumulative_upp_msd[a-1]) * plot_msd_real$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_msdw_",k),cumulative_median_msdw)
-  assign(paste0("cumulative_low_msdw_",k),cumulative_low_msdw)
-  assign(paste0("cumulative_upp_msdw_",k),cumulative_upp_msdw)
+  assign(paste0("cumulative_median_msd_",k),cumulative_median_msd)
+  assign(paste0("cumulative_low_msd_",k),cumulative_low_msd)
+  assign(paste0("cumulative_upp_msd_",k),cumulative_upp_msd)
+  
+  # Calculate exact median age at first birth
+  age_before <- max(which(cumulative_median_msd < 0.5))
+  age_after <- min(which(cumulative_median_msd >= 0.5))
+  prob_before <- cumulative_median_msd[age_before]
+  prob_after <- cumulative_median_msd[age_after]
+  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  
+  # Store the exact median age
+  assign(paste0("exact_age_median_msd_", k), exact_age_median)
   
   #add median
   #add points
-  points(cumulative_median_msdw[11:51] ~ plot_msdw_real$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_msd[11:51] ~ plot_msd_real$age[11:51], col=palette_c[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_msdw[11:51] ~ plot_msdw_real$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_msd[11:51] ~ plot_msd_real$age[11:51], col=palette_c[k], lwd=3, lty=type[k])
   #add confidence intervals
-  polygon(c(plot_msdw_real$age[11:51], rev(plot_msdw_real$age[11:51])), c(cumulative_low_msdw[11:51], rev(cumulative_upp_msdw[11:51])), col=alpha(palette_c[k], 0.25), border=NA)
+  polygon(c(plot_msd_real$age[11:51], rev(plot_msd_real$age[11:51])), c(cumulative_low_msd[11:51], rev(cumulative_upp_msd[11:51])), col=alpha(palette_c[k], 0.1), border=palette_c[k])
+  # Add vertical line for median age at first birth
+  segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_c[k], lwd=3, lty=4)
 }
 
 # Expected median age ----
@@ -759,80 +886,35 @@ for(k in 1:(length(deciles_msd))){
 ### Current absolute wealth ----
 
 #Minimum current absolute wealth
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_absw_1 >= tail(cumulative_median_absw_1,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_absw_1 >= tail(cumulative_median_absw_1,1)*0.5)[1] - 1
-#median probability and hpdi
-absw_1[which(cumulative_median_absw_1 >= tail(cumulative_median_absw_1,1)*0.5)[1],]
+exact_age_median_absw_1 -1
 
 #Median current absolute wealth
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_absw_2 >= tail(cumulative_median_absw_2,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_absw_2 >= tail(cumulative_median_absw_2,1)*0.5)[1] - 1
-#median probability and hpdi
-absw_2[which(cumulative_median_absw_2 >= tail(cumulative_median_absw_2,1)*0.5)[1],]
+exact_age_median_absw_2 -1
 
 #Maximum current absolute wealth
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_absw_3 >= tail(cumulative_median_absw_3,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_absw_3 >= tail(cumulative_median_absw_3,1)*0.5)[1] - 1
-#median probability and hpdi
-absw_3[which(cumulative_median_absw_3 >= tail(cumulative_median_absw_3,1)*0.5)[1],]
+exact_age_median_absw_3 -1
 
 ### Short-term variability ----
 
-#Minimum short-term variability
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_diffw_1 >= tail(cumulative_median_diffw_1,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_diffw_1 >= tail(cumulative_median_diffw_1,1)*0.5)[1] - 1
-#median probability and hpdi
-diffw_1[which(cumulative_median_diffw_1 >= tail(cumulative_median_diffw_1,1)*0.5)[1],]
+#Minimum short-term wealth variability
+exact_age_median_diffw_1 -1
 
-#Median short-term variability
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_diffw_2 >= tail(cumulative_median_diffw_2,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_diffw_2 >= tail(cumulative_median_diffw_2,1)*0.5)[1] - 1
-#median probability and hpdi
-diffw_2[which(cumulative_median_diffw_2 >= tail(cumulative_median_diffw_2,1)*0.5)[1],]
+#Median short-term wealth variability
+exact_age_median_diffw_2 -1
 
-#Maximum short-term variability
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_diffw_3 >= tail(cumulative_median_diffw_3,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_diffw_3 >= tail(cumulative_median_diffw_3,1)*0.5)[1] - 1
-#median probability and hpdi
-diffw_3[which(cumulative_median_diffw_3 >= tail(cumulative_median_diffw_3,1)*0.5)[1],]
+#Maximum short-term wealth variability
+exact_age_median_diffw_3 -1
 
 ### Long-term variability ----
 
-#Minimum long-term variability
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_msdw_1 >= tail(cumulative_median_msdw_1,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_msdw_1 >= tail(cumulative_median_msdw_1,1)*0.5)[1] - 1
-#median probability and hpdi
-msdw_1[which(cumulative_median_msdw_1 >= tail(cumulative_median_msdw_1,1)*0.5)[1],]
+#Minimum long-term wealth variability
+exact_age_median_msd_1 -1
 
-#Median long-term variability
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_msdw_2 >= tail(cumulative_median_msdw_2,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_msdw_2 >= tail(cumulative_median_msdw_2,1)*0.5)[1] - 1
-#median probability and hpdi
-msdw_2[which(cumulative_median_msdw_2 >= tail(cumulative_median_msdw_2,1)*0.5)[1],]
+#Median long-term wealth variability
+exact_age_median_msd_2 -1
 
-#Maximum long-term variability
-#check which cumulative probability of 0.5 while adjusting for childlessness
-which(cumulative_median_msdw_3 >= tail(cumulative_median_msdw_3,1)*0.5)[1]
-#check specific age, since columns are age+1
-which(cumulative_median_msdw_3 >= tail(cumulative_median_msdw_3,1)*0.5)[1] - 1
-#median probability and hpdi
-msdw_3[which(cumulative_median_msdw_3 >= tail(cumulative_median_msdw_3,1)*0.5)[1],]
+#Maximum long-term wealth variability
+exact_age_median_msd_3 -1
 
 # Differences within wealth classes ----
 
@@ -918,74 +1000,152 @@ which(abs(diff(cumulative_median_msdw_3[11:51])) == max(abs(diff(cumulative_medi
 
 ## Current absolute wealth ----
 
-#Minimum versus median
-which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))))) + 10
-#Median versus maximum
-which(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))))) + 10
-#Minimum versus maximum
-which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))))) + 10
+#Minimum versus median - largest absolute difference
+max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))) == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))) == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_2[11:51]))))) + 10
+
+#Median versus maximum - largest absolute difference  
+max(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_absw_2[11:51],cumulative_median_absw_3[11:51]))))) + 10
+
+#Minimum versus maximum - largest absolute difference
+max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_absw_1[11:51],cumulative_median_absw_3[11:51]))))) + 10
 
 ## Short-term variability ----
 
-#Minimum versus Median
-which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))))) + 10
-#Median versus Maximum
-which(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))))) + 10
-#Minimum versus Maximum
-which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))))) + 10
+#Minimum versus median - largest absolute difference
+max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))) == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))) == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_2[11:51]))))) + 10
+
+#Median versus maximum - largest absolute difference  
+max(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_diffw_2[11:51],cumulative_median_diffw_3[11:51]))))) + 10
+
+#Minimum versus maximum - largest absolute difference
+max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))) == max(abs(diff(rbind(cumulative_median_diffw_1[11:51],cumulative_median_diffw_3[11:51]))))) + 10
 
 ##Long-term variability ----
 
-#Minimum versus Median
-which(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_2[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_2[11:51]))))) + 10
-#Median versus Maximum
-which(abs(diff(rbind(cumulative_median_msdw_2[11:51],cumulative_median_msdw_3[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_msdw_2[11:51],cumulative_median_msdw_3[11:51]))))) + 10
-#Minimum versus Maximum
-which(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_3[11:51]))) 
-      == max(abs(diff(rbind(cumulative_median_msdw_1[11:51],cumulative_median_msdw_3[11:51]))))) + 10
+#Minimum versus median - largest absolute difference
+max(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_2[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_2[11:51]))) == max(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_2[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_2[11:51]))) == max(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_2[11:51]))))) + 10
 
-# Relative importance ----
+#Median versus maximum - largest absolute difference  
+max(abs(diff(rbind(cumulative_median_msd_2[11:51],cumulative_median_msd_3[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_msd_2[11:51],cumulative_median_msd_3[11:51]))) == max(abs(diff(rbind(cumulative_median_msd_2[11:51],cumulative_median_msd_3[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_msd_2[11:51],cumulative_median_msd_3[11:51]))) == max(abs(diff(rbind(cumulative_median_msd_2[11:51],cumulative_median_msd_3[11:51]))))) + 10
 
-#prepare data
-relative <- precis(rds_real,
-                   depth=2,
-                   pars=c("beta_wealth_sigma","gamma_wealth_sigma","delta_wealth_sigma"))
+#Minimum versus maximum - largest absolute difference
+max(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_3[11:51]))))
+#position of largest absolute difference
+which(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_3[11:51]))) == max(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_3[11:51])))))
+#age of largest absolute difference (11 (columns) - 1 (age) = 10)
+which(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_3[11:51]))) == max(abs(diff(rbind(cumulative_median_msd_1[11:51],cumulative_median_msd_3[11:51]))))) + 10
 
-#set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,5,5))
-#plot it!
-plot(c(0,1),c(0,3),
-     main="Relative importance\nof wealth predictors",
-     type="n",
-     xlab="Value",
-     ylab="Wealth predictor",
-     yaxt="n",
-     cex.axis=1.2,
-     cex.lab=1.5,
-     cex.main=1.5
-) 
-axis(2,at=seq(2.5,0.5,by=-1),
-     labels=c(expression(sigma[beta]),
-              expression(sigma[gamma]),
-              expression(sigma[delta])
-     ),
-     las=1,
-     tick=F,
-     cex.axis=1.2
+# Coefficient plots ----
+
+# Set up plotting area with space at bottom
+par(mfrow = c(1, 4), mar = c(4, 4, 4, 2) + 0.1, oma = c(1, 0, 0, 0), xpd = NA)
+
+## Age ----
+
+plot(c(30:1)~c(tab_real_mu[11:40,1]),xlim=c(-9,1),main="Age",yaxt="n",xlab=expression(mu~coefficients),ylab="Ages",pch=16)
+axis(2,c(30:1),c(10:39))
+clip(-9, 1, 0, 31)
+abline(v=0,lty=2)
+for (i in 11:40){
+  segments(
+    c(tab_real_mu[i,1])-c(tab_real_mu[i,2]),
+    41-i,
+    c(tab_real_mu[i,1])+c(tab_real_mu[i,2]),
+    41-i,
+    lwd=2,col="black") 
+}
+
+## Current wealth ----
+
+plot(c(30:1)~c(tab_real_beta_z[11:40,1]*tab_real_beta_sigma[1,1]),xlim=c(-0.5,0.5),main="Current\nwealth",yaxt="n",xlab=expression(beta~coefficients),ylab="Ages",pch=16,col="#648FFF")
+axis(2,c(30:1),c(10:39))
+clip(-1, 1, 0, 31)
+abline(v=0,lty=2)
+for (i in 11:40){
+  segments(
+    c(tab_real_beta_z[i,1]*tab_real_beta_sigma[1,1])-c(tab_real_beta_z[i,2]*tab_real_beta_sigma[1,1]),
+    41-i,
+    c(tab_real_beta_z[i,1]*tab_real_beta_sigma[1,1])+c(tab_real_beta_z[i,2]*tab_real_beta_sigma[1,1]),
+    41-i,
+    lwd=2,col="#648FFF") 
+}
+
+## Short-term wealth variability ----
+
+plot(c(30:1)~c(tab_real_gamma_z[11:40,1]*tab_real_gamma_sigma[1,1]),xlim=c(-0.5,0.5),main="Short-term\nwealth variability",yaxt="n",xlab=expression(gamma~coefficients),ylab="Ages",pch=16,col="#785EF0")
+axis(2,c(30:1),c(10:39))
+clip(-1, 1, 0, 31)
+abline(v=0,lty=2)
+for (i in 11:40){
+  segments(
+    c(tab_real_gamma_z[i,1]*tab_real_gamma_sigma[1,1])-c(tab_real_gamma_z[i,2]*tab_real_gamma_sigma[1,1]),
+    41-i,
+    c(tab_real_gamma_z[i,1]*tab_real_gamma_sigma[1,1])+c(tab_real_gamma_z[i,2]*tab_real_gamma_sigma[1,1]),
+    41-i,
+    lwd=2,col="#785EF0") 
+}
+
+## Long-term wealth variability ----
+
+plot(c(30:1)~c(tab_real_delta_z[11:40,1]*tab_real_delta_sigma[1,1]),xlim=c(-0.5,0.5),main="Long-term\nwealth variability",yaxt="n",xlab=expression(delta~coefficients),ylab="Ages",pch=16,col="#DC267F")
+axis(2,c(30:1),c(10:39))
+clip(-1, 1, 0, 31)
+abline(v=0,lty=2)
+for (i in 11:40){
+  segments(
+    c(tab_real_delta_z[i,1]*tab_real_delta_sigma[1,1])-c(tab_real_delta_z[i,2]*tab_real_delta_sigma[1,1]),
+    41-i,
+    c(tab_real_delta_z[i,1]*tab_real_delta_sigma[1,1])+c(tab_real_delta_z[i,2]*tab_real_delta_sigma[1,1]),
+    41-i,
+    lwd=2,col="#DC267F") 
+}
+
+# Add common legend at bottom
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0.5, 0), new = TRUE)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n", xlim = c(0, 1), ylim = c(0, 1))
+
+# Create custom legend with proper spacing
+legend("bottom", 
+       legend = c(expression(mu), expression(beta), expression(gamma), expression(delta)),
+       col = c("black", "#648FFF", "#785EF0", "#DC267F"),
+       lwd = c(2, 2, 2, 2),
+       lty = c(1, 1, 1, 1),
+       pch = c(16, 16, 16, 16),
+       ncol = 4,
+       bty = "n",
+       xjust = 0.5,
+       text.width = c( 0.01, 0.01, 0.01, 0.01)
 )
-segments(0,-0.1,0,3.1,lty="dashed",col="lightgrey")
-segments(-0.01,0.5,1,0.5,lty="dashed",col="lightgrey")
-segments(-0.01,1.5,1,1.5,lty="dashed",col="lightgrey")
-segments(-0.01,2.5,1,2.5,lty="dashed",col="lightgrey")
-points(relative[,1],seq(2.5,0.5,by=-1),cex=2,pch=16,col=hcl.colors(3,"berlin"))
-segments(relative[1,1]-relative[1,2],2.5,relative[1,1]+relative[1,2],2.5,lwd=3,col=hcl.colors(3,"berlin")[1])
-segments(relative[2,1]-relative[2,2],1.5,relative[2,1]+relative[2,2],1.5,lwd=3,col=hcl.colors(3,"berlin")[2])
-segments(relative[3,1]-relative[3,2],0.5,relative[3,1]+relative[3,2],0.5,lwd=3,col=hcl.colors(3,"berlin")[3])
+

@@ -1844,35 +1844,35 @@ for(k in 1:(length(deciles_aw_all_full))){
                                  low = apply(p_aw_all_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("aw_all_",k),plot_aw_all_full)
+  assign(paste0("aw_all_full",k),plot_aw_all_full)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_aw_all_full <- numeric(length(plot_aw_all_full$median))
-  cumulative_low_aw_all_full <- numeric(length(plot_aw_all_full$low))
-  cumulative_upp_aw_all_full <- numeric(length(plot_aw_all_full$upp))
+  cumulative_median_absw <- numeric(length(plot_aw_all_full$median))
+  cumulative_low_absw <- numeric(length(plot_aw_all_full$low))
+  cumulative_upp_absw <- numeric(length(plot_aw_all_full$upp))
   #set the first probability
-  cumulative_median_aw_all_full[1] <- plot_aw_all_full$median[1]
-  cumulative_low_aw_all_full[1] <- plot_aw_all_full$low[1]
-  cumulative_upp_aw_all_full[1] <- plot_aw_all_full$upp[1]
+  cumulative_median_absw[1] <- plot_aw_all_full$median[1]
+  cumulative_low_absw[1] <- plot_aw_all_full$low[1]
+  cumulative_upp_absw[1] <- plot_aw_all_full$upp[1]
   #calculate the cumulative probabilities for the other ages
   for (a in 2:length(plot_aw_all_full$median)) {
-    cumulative_median_aw_all_full[a] <- cumulative_median_aw_all_full[a-1] + (1 - cumulative_median_aw_all_full[a-1]) * plot_aw_all_full$median[a]
-    cumulative_low_aw_all_full[a] <- cumulative_low_aw_all_full[a-1] + (1 - cumulative_low_aw_all_full[a-1]) * plot_aw_all_full$low[a]
-    cumulative_upp_aw_all_full[a] <- cumulative_upp_aw_all_full[a-1] + (1 - cumulative_upp_aw_all_full[a-1]) * plot_aw_all_full$upp[a]
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_aw_all_full$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_aw_all_full$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_aw_all_full$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_aw_all_full_",k),cumulative_median_aw_all_full)
-  assign(paste0("cumulative_low_aw_all_full_",k),cumulative_low_aw_all_full)
-  assign(paste0("cumulative_upp_aw_all_full_",k),cumulative_upp_aw_all_full)
+  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
   
   #add median
-  #add confidence intervals
-  polygon(c(plot_aw_all_full$age[11:40], rev(plot_aw_all_full$age[11:40])), c(cumulative_low_aw_all_full[11:40], rev(cumulative_upp_aw_all_full[11:40])), col=alpha(palette_a[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_aw_all_full[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_aw_all_full[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_aw_all_full$age[11:40], rev(plot_aw_all_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.25), border=NA)
 }
 
 ###### Short-term wealth variability ----
@@ -1924,57 +1924,57 @@ lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=type[6],lw
 #add lines
 for(k in 1:(length(deciles_sc_all_full))){
   #create matrix to store the data
-  p_sc_all_full_real <- matrix(nrow=nrow(post_all_full$mu),ncol=ncol(post_all_full$mu))
-  p_sc_all_full_real
+  p_sc_all_full <- matrix(nrow=nrow(post_all_full$mu),ncol=ncol(post_all_full$mu))
+  p_sc_all_full
   #fill it in with values for age 25
   for(j in 1:ncol(post_all_full$mu)){
     for(i in 1:nrow(post_all_full$mu)){
-      p_sc_all_full_real[i,j] <- inv_logit(post_all_full$alpha[i] + #inv logit because originally is logit
-                                             post_all_full$mu[i,j] + #age
-                                             (post_all_full$beta_wealth_z[i,j]*post_all_full$beta_wealth_sigma[i])*0 + #absolute wealth
-                                             (post_all_full$gamma_wealth_z[i,j]*post_all_full$gamma_wealth_sigma[i])*deciles_sc_all_full[k] + #wealth change
-                                             (post_all_full$delta_wealth_z[i,j]*post_all_full$delta_wealth_sigma[i])*0) #moving variance
+      p_sc_all_full[i,j] <- inv_logit(post_all_full$alpha[i] + #inv logit because originally is logit
+                                        post_all_full$mu[i,j] + #age
+                                        (post_all_full$beta_wealth_z[i,j]*post_all_full$beta_wealth_sigma[i])*0 + #absolute wealth
+                                        (post_all_full$gamma_wealth_z[i,j]*post_all_full$gamma_wealth_sigma[i])*deciles_sc_all_full[k] + #wealth change
+                                        (post_all_full$delta_wealth_z[i,j]*post_all_full$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
-  p_sc_all_full_real
+  p_sc_all_full
   #plot it!
   #prepare model prediction data
-  plot_sc_all_full_real <- data.frame(age = 1:ncol(p_sc_all_full_real),
-                                      median = apply(p_sc_all_full_real, 2, median), 
-                                      upp = apply(p_sc_all_full_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p_sc_all_full_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_sc_all_full <- data.frame(age = 1:ncol(p_sc_all_full),
+                                 median = apply(p_sc_all_full, 2, median), 
+                                 upp = apply(p_sc_all_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p_sc_all_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("sc_all_full_",k),plot_sc_all_full_real)
+  assign(paste0("sc_all_full",k),plot_sc_all_full)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_sc_all_full <- numeric(length(plot_sc_all_full_real$median))
-  cumulative_low_sc_all_full <- numeric(length(plot_sc_all_full_real$low))
-  cumulative_upp_sc_all_full <- numeric(length(plot_sc_all_full_real$upp))
+  cumulative_median_absw <- numeric(length(plot_sc_all_full$median))
+  cumulative_low_absw <- numeric(length(plot_sc_all_full$low))
+  cumulative_upp_absw <- numeric(length(plot_sc_all_full$upp))
   #set the first probability
-  cumulative_median_sc_all_full[1] <- plot_sc_all_full_real$median[1]
-  cumulative_low_sc_all_full[1] <- plot_sc_all_full_real$low[1]
-  cumulative_upp_sc_all_full[1] <- plot_sc_all_full_real$upp[1]
+  cumulative_median_absw[1] <- plot_sc_all_full$median[1]
+  cumulative_low_absw[1] <- plot_sc_all_full$low[1]
+  cumulative_upp_absw[1] <- plot_sc_all_full$upp[1]
   #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_sc_all_full_real$median)) {
-    cumulative_median_sc_all_full[a] <- cumulative_median_sc_all_full[a-1] + (1 - cumulative_median_sc_all_full[a-1]) * plot_sc_all_full_real$median[a]
-    cumulative_low_sc_all_full[a] <- cumulative_low_sc_all_full[a-1] + (1 - cumulative_low_sc_all_full[a-1]) * plot_sc_all_full_real$low[a]
-    cumulative_upp_sc_all_full[a] <- cumulative_upp_sc_all_full[a-1] + (1 - cumulative_upp_sc_all_full[a-1]) * plot_sc_all_full_real$upp[a]
+  for (a in 2:length(plot_sc_all_full$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_sc_all_full$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_sc_all_full$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_sc_all_full$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_sc_all_full_",k),cumulative_median_sc_all_full)
-  assign(paste0("cumulative_low_sc_all_full_",k),cumulative_low_sc_all_full)
-  assign(paste0("cumulative_upp_sc_all_full_",k),cumulative_upp_sc_all_full)
+  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
   
   #add median
-  #add confidence intervals
-  polygon(c(plot_sc_all_full_real$age[11:40], rev(plot_sc_all_full_real$age[11:40])), c(cumulative_low_sc_all_full[11:40], rev(cumulative_upp_sc_all_full[11:40])), col=alpha(palette_b[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_sc_all_full[11:40] ~ plot_sc_all_full_real$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_sc_all_full$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_sc_all_full[11:40] ~ plot_sc_all_full_real$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_sc_all_full$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_sc_all_full$age[11:40], rev(plot_sc_all_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_b[k], 0.25), border=NA)
 }
 
 ###### Long-term variability of wealth ----
@@ -2041,41 +2041,41 @@ for(k in 1:(length(deciles_lv_all_full))){
   p_lv_all_full
   #plot it!
   #prepare model prediction data
-  plot_lv_all_full_real <- data.frame(age = 1:ncol(p_lv_all_full),
-                                      median = apply(p_lv_all_full, 2, median), 
-                                      upp = apply(p_lv_all_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p_lv_all_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_lv_all_full <- data.frame(age = 1:ncol(p_lv_all_full),
+                                 median = apply(p_lv_all_full, 2, median), 
+                                 upp = apply(p_lv_all_full, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                 low = apply(p_lv_all_full, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("lv_all_full_",k),plot_lv_all_full_real)
+  assign(paste0("lv_all_full",k),plot_lv_all_full)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_lv_all_full <- numeric(length(plot_lv_all_full_real$median))
-  cumulative_low_lv_all_full <- numeric(length(plot_lv_all_full_real$low))
-  cumulative_upp_lv_all_full <- numeric(length(plot_lv_all_full_real$upp))
+  cumulative_median_absw <- numeric(length(plot_lv_all_full$median))
+  cumulative_low_absw <- numeric(length(plot_lv_all_full$low))
+  cumulative_upp_absw <- numeric(length(plot_lv_all_full$upp))
   #set the first probability
-  cumulative_median_lv_all_full[1] <- plot_lv_all_full_real$median[1]
-  cumulative_low_lv_all_full[1] <- plot_lv_all_full_real$low[1]
-  cumulative_upp_lv_all_full[1] <- plot_lv_all_full_real$upp[1]
+  cumulative_median_absw[1] <- plot_lv_all_full$median[1]
+  cumulative_low_absw[1] <- plot_lv_all_full$low[1]
+  cumulative_upp_absw[1] <- plot_lv_all_full$upp[1]
   #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_lv_all_full_real$median)) {
-    cumulative_median_lv_all_full[a] <- cumulative_median_lv_all_full[a-1] + (1 - cumulative_median_lv_all_full[a-1]) * plot_lv_all_full_real$median[a]
-    cumulative_low_lv_all_full[a] <- cumulative_low_lv_all_full[a-1] + (1 - cumulative_low_lv_all_full[a-1]) * plot_lv_all_full_real$low[a]
-    cumulative_upp_lv_all_full[a] <- cumulative_upp_lv_all_full[a-1] + (1 - cumulative_upp_lv_all_full[a-1]) * plot_lv_all_full_real$upp[a]
+  for (a in 2:length(plot_lv_all_full$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_lv_all_full$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_lv_all_full$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_lv_all_full$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_lv_all_full_",k),cumulative_median_lv_all_full)
-  assign(paste0("cumulative_low_lv_all_full_",k),cumulative_low_lv_all_full)
-  assign(paste0("cumulative_upp_lv_all_full_",k),cumulative_upp_lv_all_full)
+  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
   
   #add median
-  #add confidence intervals
-  polygon(c(plot_lv_all_full_real$age[11:40], rev(plot_lv_all_full_real$age[11:40])), c(cumulative_low_lv_all_full[11:40], rev(cumulative_upp_lv_all_full[11:40])), col=alpha(palette_c[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_lv_all_full[11:40] ~ plot_lv_all_full_real$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_lv_all_full$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_lv_all_full[11:40] ~ plot_lv_all_full_real$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_lv_all_full$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_lv_all_full$age[11:40], rev(plot_lv_all_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_c[k], 0.25), border=NA)
 }
 
 #Aim 2: Data imputation ----
@@ -2960,56 +2960,6 @@ n_miss <- nrow(wealth_miss)
 #check data
 n_miss
 
-#prepare observed mean and sd of wealth change
-#change -99 to NA
-sim_wealth_imputation_res[sim_wealth_imputation_res==-99] <- NA
-sim_wealth_imputation_res
-#create matrix
-simshorttermwealth_imp <- matrix(NA,nrow=nrow(sim_wealth_imputation_res),ncol=ncol(sim_wealth_imputation_res))
-#calculate the short-term wealth variability
-for(individual in 1:nrow(sim_wealth_imputation_res)){
-  for(ages in 3:ncol(sim_wealth_imputation_res)){
-    simshorttermwealth_imp[individual,ages]<-abs(sim_wealth_imputation_res[individual,ages]-sim_wealth_imputation_res[individual,ages-2])
-  }
-}
-#check data
-simshorttermwealth_imp
-#calculate mean and sd
-#mean
-wc_mean_obs <- mean(simshorttermwealth_imp,na.rm=T)
-wc_mean_obs
-#sd
-wc_sd_obs <- sd(simshorttermwealth_imp,na.rm=T)
-wc_sd_obs
-#change NA to -99
-sim_wealth_imputation_res[which(is.na(sim_wealth_imputation_res))] <- -99
-sim_wealth_imputation_res
-
-#prepare observed mean and sd of wealth change
-#change -99 to NA
-sim_wealth_imputation_res[sim_wealth_imputation_res==-99] <- NA
-sim_wealth_imputation_res
-#create matrix
-simlongtermwealth_imp <- matrix(NA,nrow=nrow(sim_wealth_imputation_res),ncol=ncol(sim_wealth_imputation_res))
-#calculate the long-term wealth variability
-for(individual in 1:nrow(sim_wealth_imputation_res)){
-  for(ages in 11:ncol(sim_wealth_imputation_res)){
-    simlongtermwealth_imp[individual,ages]<-sd(as.numeric(std_simwealth[individual,(ages-10):(ages)]),na.rm=T)
-  }
-}
-#check data
-simlongtermwealth_imp
-#calculate mean and sd
-#mean
-lv_mean_obs <- mean(simlongtermwealth_imp,na.rm=T)
-lv_mean_obs
-#sd
-lv_sd_obs <- sd(simlongtermwealth_imp,na.rm=T)
-lv_sd_obs
-#change NA to -99
-sim_wealth_imputation_res[which(is.na(sim_wealth_imputation_res))] <- -99
-sim_wealth_imputation_res
-
 # 4) incomplete wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 all_imputed_simulated_list <- list(N = nrow(all_simbirth_res), #population size
@@ -3018,11 +2968,7 @@ all_imputed_simulated_list <- list(N = nrow(all_simbirth_res), #population size
                                    baby = as.matrix(all_simbirth_res), #AFR
                                    median_wealth = medianwealthperindividual, # median wealth of each individual
                                    N_miss = n_miss, #number of missing values
-                                   wealth_miss = wealth_miss, #location of missing values
-                                   wc_mean_obs = wc_mean_obs, #mean of observed wealth change
-                                   wc_sd_obs = wc_sd_obs, #sd of observed wealth change
-                                   lv_mean_obs = lv_mean_obs, #mean of observed long-term variability
-                                   lv_sd_obs = lv_sd_obs #sd of observed long-term variability
+                                   wealth_miss = wealth_miss #location of missing values
 )
 #check data
 all_imputed_simulated_list
@@ -3201,7 +3147,7 @@ legend("bottom",
 ####### Current Wealth ----
 
 #simulate wealth values
-std_simwealth_aw_all_imputed <- seq(from=round(min(post_all_imputed$wealth_full),1),to=round(max(post_all_imputed$wealth_full),1),length.out=nrow(sim_wealth_imputation_res)) #specify according to range and length related to sample size
+std_simwealth_aw_all_imputed <- seq(from=round(min(post_all_imputed$wealth_full),1),to=round(max(post_all_imputed$wealth_full),1),length.out=nrow(std_simwealth_res)) #specify according to range and length related to sample size
 std_simwealth_aw_all_imputed
 #get the deciles
 deciles_aw_all_imputed <- c(mean(std_simwealth_aw_all_imputed)-sd(std_simwealth_aw_all_imputed),
@@ -3237,11 +3183,11 @@ legend(43,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.c
 legend(43,0.5,c("Min.","Med.", "Max."),col=palette_a,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_poor)[10:40]~c(10:40),col=palette_a[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_poor)[11:40]~c(11:40),col=palette_a[1],lty=type[4],lwd=2)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[10:40]~c(10:40),col=palette_a[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_a[2],lty=type[5],lwd=2)
 #maximum wealth
-lines(cumsum(std_ageprobs_rich)[10:40]~c(10:40),col=palette_a[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_rich)[11:40]~c(11:40),col=palette_a[3],lty=type[6],lwd=2)
 
 #add lines
 for(k in 1:(length(deciles_aw_all_imputed))){
@@ -3268,41 +3214,41 @@ for(k in 1:(length(deciles_aw_all_imputed))){
                                     low = apply(p_aw_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("aw_all_",k),plot_aw_all_imputed)
+  assign(paste0("aw_all_imputed",k),plot_aw_all_imputed)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_aw_all_imputed <- numeric(length(plot_aw_all_imputed$median))
-  cumulative_low_aw_all_imputed <- numeric(length(plot_aw_all_imputed$low))
-  cumulative_upp_aw_all_imputed <- numeric(length(plot_aw_all_imputed$upp))
+  cumulative_median_absw <- numeric(length(plot_aw_all_imputed$median))
+  cumulative_low_absw <- numeric(length(plot_aw_all_imputed$low))
+  cumulative_upp_absw <- numeric(length(plot_aw_all_imputed$upp))
   #set the first probability
-  cumulative_median_aw_all_imputed[1] <- plot_aw_all_imputed$median[1]
-  cumulative_low_aw_all_imputed[1] <- plot_aw_all_imputed$low[1]
-  cumulative_upp_aw_all_imputed[1] <- plot_aw_all_imputed$upp[1]
+  cumulative_median_absw[1] <- plot_aw_all_imputed$median[1]
+  cumulative_low_absw[1] <- plot_aw_all_imputed$low[1]
+  cumulative_upp_absw[1] <- plot_aw_all_imputed$upp[1]
   #calculate the cumulative probabilities for the other ages
   for (a in 2:length(plot_aw_all_imputed$median)) {
-    cumulative_median_aw_all_imputed[a] <- cumulative_median_aw_all_imputed[a-1] + (1 - cumulative_median_aw_all_imputed[a-1]) * plot_aw_all_imputed$median[a]
-    cumulative_low_aw_all_imputed[a] <- cumulative_low_aw_all_imputed[a-1] + (1 - cumulative_low_aw_all_imputed[a-1]) * plot_aw_all_imputed$low[a]
-    cumulative_upp_aw_all_imputed[a] <- cumulative_upp_aw_all_imputed[a-1] + (1 - cumulative_upp_aw_all_imputed[a-1]) * plot_aw_all_imputed$upp[a]
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_aw_all_imputed$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_aw_all_imputed$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_aw_all_imputed$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_aw_all_imputed_",k),cumulative_median_aw_all_imputed)
-  assign(paste0("cumulative_low_aw_all_imputed_",k),cumulative_low_aw_all_imputed)
-  assign(paste0("cumulative_upp_aw_all_imputed_",k),cumulative_upp_aw_all_imputed)
+  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
   
   #add median
-  #add confidence intervals
-  polygon(c(plot_aw_all_imputed$age[10:40], rev(plot_aw_all_imputed$age[10:40])), c(cumulative_low_aw_all_imputed[10:40], rev(cumulative_upp_aw_all_imputed[10:40])), col=alpha(palette_a[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_aw_all_imputed[10:40] ~ plot_aw_all_imputed$age[10:40], col=palette_a[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_aw_all_imputed[10:40] ~ plot_aw_all_imputed$age[10:40], col=palette_a[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_aw_all_imputed$age[11:40], rev(plot_aw_all_imputed$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.25), border=NA)
 }
 
 ###### Short-term wealth variability ----
 
 #simulate wealth values
-std_simwealth_sc_all_imputed <- seq(from=round(min(post_all_imputed$wealth_change_std),1),to=round(max(post_all_imputed$wealth_change_std),1),length.out=nrow(sim_wealth_imputation_res)) #specify according to range and length related to sample size
+std_simwealth_sc_all_imputed <- seq(from=round(min(post_all_imputed$wealth_change_std),1),to=round(max(post_all_imputed$wealth_change_std),1),length.out=nrow(std_simwealth_res)) #specify according to range and length related to sample size
 std_simwealth_sc_all_imputed
 #get the deciles
 deciles_sc_all_imputed <- c(mean(std_simwealth_sc_all_imputed)-sd(std_simwealth_sc_all_imputed),
@@ -3338,73 +3284,73 @@ legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.c
 legend(43,0.5,c("Min.","Med.", "Max."),col=palette_b,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minsc)[10:40]~c(10:40),col=palette_b[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=type[4],lwd=2)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[10:40]~c(10:40),col=palette_b[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=type[5],lwd=2)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxsc)[10:40]~c(10:40),col=palette_b[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=type[6],lwd=2)
 
 
 #add lines
 for(k in 1:(length(deciles_sc_all_imputed))){
   #create matrix to store the data
-  p_sc_all_imputed_real <- matrix(nrow=nrow(post_all_imputed$mu),ncol=ncol(post_all_imputed$mu))
-  p_sc_all_imputed_real
+  p_sc_all_imputed <- matrix(nrow=nrow(post_all_imputed$mu),ncol=ncol(post_all_imputed$mu))
+  p_sc_all_imputed
   #fill it in with values for age 25
   for(j in 1:ncol(post_all_imputed$mu)){
     for(i in 1:nrow(post_all_imputed$mu)){
-      p_sc_all_imputed_real[i,j] <- inv_logit(post_all_imputed$alpha[i] + #inv logit because originally is logit
-                                                post_all_imputed$mu[i,j] + #age
-                                                (post_all_imputed$beta_wealth_z[i,j]*post_all_imputed$beta_wealth_sigma[i])*0 + #absolute wealth
-                                                (post_all_imputed$gamma_wealth_z[i,j]*post_all_imputed$gamma_wealth_sigma[i])*deciles_sc_all_imputed[k] + #wealth change
-                                                (post_all_imputed$delta_wealth_z[i,j]*post_all_imputed$delta_wealth_sigma[i])*0) #moving variance
+      p_sc_all_imputed[i,j] <- inv_logit(post_all_imputed$alpha[i] + #inv logit because originally is logit
+                                           post_all_imputed$mu[i,j] + #age
+                                           (post_all_imputed$beta_wealth_z[i,j]*post_all_imputed$beta_wealth_sigma[i])*0 + #absolute wealth
+                                           (post_all_imputed$gamma_wealth_z[i,j]*post_all_imputed$gamma_wealth_sigma[i])*deciles_sc_all_imputed[k] + #wealth change
+                                           (post_all_imputed$delta_wealth_z[i,j]*post_all_imputed$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
-  p_sc_all_imputed_real
+  p_sc_all_imputed
   #plot it!
   #prepare model prediction data
-  plot_sc_all_imputed_real <- data.frame(age = 1:ncol(p_sc_all_imputed_real),
-                                         median = apply(p_sc_all_imputed_real, 2, median), 
-                                         upp = apply(p_sc_all_imputed_real, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                         low = apply(p_sc_all_imputed_real, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_sc_all_imputed <- data.frame(age = 1:ncol(p_sc_all_imputed),
+                                    median = apply(p_sc_all_imputed, 2, median), 
+                                    upp = apply(p_sc_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                    low = apply(p_sc_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("sc_all_imputed_",k),plot_sc_all_imputed_real)
+  assign(paste0("sc_all_imputed",k),plot_sc_all_imputed)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_sc_all_imputed <- numeric(length(plot_sc_all_imputed_real$median))
-  cumulative_low_sc_all_imputed <- numeric(length(plot_sc_all_imputed_real$low))
-  cumulative_upp_sc_all_imputed <- numeric(length(plot_sc_all_imputed_real$upp))
+  cumulative_median_absw <- numeric(length(plot_sc_all_imputed$median))
+  cumulative_low_absw <- numeric(length(plot_sc_all_imputed$low))
+  cumulative_upp_absw <- numeric(length(plot_sc_all_imputed$upp))
   #set the first probability
-  cumulative_median_sc_all_imputed[1] <- plot_sc_all_imputed_real$median[1]
-  cumulative_low_sc_all_imputed[1] <- plot_sc_all_imputed_real$low[1]
-  cumulative_upp_sc_all_imputed[1] <- plot_sc_all_imputed_real$upp[1]
+  cumulative_median_absw[1] <- plot_sc_all_imputed$median[1]
+  cumulative_low_absw[1] <- plot_sc_all_imputed$low[1]
+  cumulative_upp_absw[1] <- plot_sc_all_imputed$upp[1]
   #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_sc_all_imputed_real$median)) {
-    cumulative_median_sc_all_imputed[a] <- cumulative_median_sc_all_imputed[a-1] + (1 - cumulative_median_sc_all_imputed[a-1]) * plot_sc_all_imputed_real$median[a]
-    cumulative_low_sc_all_imputed[a] <- cumulative_low_sc_all_imputed[a-1] + (1 - cumulative_low_sc_all_imputed[a-1]) * plot_sc_all_imputed_real$low[a]
-    cumulative_upp_sc_all_imputed[a] <- cumulative_upp_sc_all_imputed[a-1] + (1 - cumulative_upp_sc_all_imputed[a-1]) * plot_sc_all_imputed_real$upp[a]
+  for (a in 2:length(plot_sc_all_imputed$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_sc_all_imputed$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_sc_all_imputed$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_sc_all_imputed$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_sc_all_imputed_",k),cumulative_median_sc_all_imputed)
-  assign(paste0("cumulative_low_sc_all_imputed_",k),cumulative_low_sc_all_imputed)
-  assign(paste0("cumulative_upp_sc_all_imputed_",k),cumulative_upp_sc_all_imputed)
+  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
   
   #add median
-  #add confidence intervals
-  polygon(c(plot_sc_all_imputed_real$age[10:40], rev(plot_sc_all_imputed_real$age[10:40])), c(cumulative_low_sc_all_imputed[10:40], rev(cumulative_upp_sc_all_imputed[10:40])), col=alpha(palette_b[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_sc_all_imputed[10:40] ~ plot_sc_all_imputed_real$age[10:40], col=palette_b[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_sc_all_imputed$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_sc_all_imputed[10:40] ~ plot_sc_all_imputed_real$age[10:40], col=palette_b[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_sc_all_imputed$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_sc_all_imputed$age[11:40], rev(plot_sc_all_imputed$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_b[k], 0.25), border=NA)
 }
 
 ###### Long-term variability of wealth ----
 
 #simulate wealth values
-std_simwealth_lv_all_imputed <- seq(from=round(min(post_all_imputed$wealth_msd_std),1),to=round(max(post_all_imputed$wealth_msd_std),1),length.out=nrow(sim_wealth_imputation_res)) #specify according to range and length related to sample size
+std_simwealth_lv_all_imputed <- seq(from=round(min(post_all_imputed$wealth_msd_std),1),to=round(max(post_all_imputed$wealth_msd_std),1),length.out=nrow(std_simwealth_res)) #specify according to range and length related to sample size
 std_simwealth_lv_all_imputed
 #get the deciles
 deciles_lv_all_imputed <- c(mean(std_simwealth_lv_all_imputed)-sd(std_simwealth_lv_all_imputed),
@@ -3440,11 +3386,11 @@ legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.c
 legend(43,0.5,c("Min.","Med.", "Max."),col=palette_c,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minlv)[10:40]~c(10:40),col=palette_c[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=type[4],lwd=2)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[10:40]~c(10:40),col=palette_c[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=type[5],lwd=2)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxlv)[10:40]~c(10:40),col=palette_c[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=type[6],lwd=2)
 
 #add lines
 for(k in 1:(length(deciles_lv_all_imputed))){
@@ -3465,39 +3411,40 @@ for(k in 1:(length(deciles_lv_all_imputed))){
   p_lv_all_imputed
   #plot it!
   #prepare model prediction data
-  plot_lv_all_imputed_real <- data.frame(age = 1:ncol(p_lv_all_imputed),
-                                         median = apply(p_lv_all_imputed, 2, median), 
-                                         upp = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                         low = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_lv_all_imputed <- data.frame(age = 1:ncol(p_lv_all_imputed),
+                                    median = apply(p_lv_all_imputed, 2, median), 
+                                    upp = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                    low = apply(p_lv_all_imputed, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("lv_all_imputed_",k),plot_lv_all_imputed_real)
+  assign(paste0("lv_all_imputed",k),plot_lv_all_imputed)
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_lv_all_imputed <- numeric(length(plot_lv_all_imputed_real$median))
-  cumulative_low_lv_all_imputed <- numeric(length(plot_lv_all_imputed_real$low))
-  cumulative_upp_lv_all_imputed <- numeric(length(plot_lv_all_imputed_real$upp))
+  cumulative_median_absw <- numeric(length(plot_lv_all_imputed$median))
+  cumulative_low_absw <- numeric(length(plot_lv_all_imputed$low))
+  cumulative_upp_absw <- numeric(length(plot_lv_all_imputed$upp))
   #set the first probability
-  cumulative_median_lv_all_imputed[1] <- plot_lv_all_imputed_real$median[1]
-  cumulative_low_lv_all_imputed[1] <- plot_lv_all_imputed_real$low[1]
-  cumulative_upp_lv_all_imputed[1] <- plot_lv_all_imputed_real$upp[1]
+  cumulative_median_absw[1] <- plot_lv_all_imputed$median[1]
+  cumulative_low_absw[1] <- plot_lv_all_imputed$low[1]
+  cumulative_upp_absw[1] <- plot_lv_all_imputed$upp[1]
   #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_lv_all_imputed_real$median)) {
-    cumulative_median_lv_all_imputed[a] <- cumulative_median_lv_all_imputed[a-1] + (1 - cumulative_median_lv_all_imputed[a-1]) * plot_lv_all_imputed_real$median[a]
-    cumulative_low_lv_all_imputed[a] <- cumulative_low_lv_all_imputed[a-1] + (1 - cumulative_low_lv_all_imputed[a-1]) * plot_lv_all_imputed_real$low[a]
-    cumulative_upp_lv_all_imputed[a] <- cumulative_upp_lv_all_imputed[a-1] + (1 - cumulative_upp_lv_all_imputed[a-1]) * plot_lv_all_imputed_real$upp[a]
+  for (a in 2:length(plot_lv_all_imputed$median)) {
+    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_lv_all_imputed$median[a]
+    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_lv_all_imputed$low[a]
+    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_lv_all_imputed$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_lv_all_imputed_",k),cumulative_median_lv_all_imputed)
-  assign(paste0("cumulative_low_lv_all_imputed_",k),cumulative_low_lv_all_imputed)
-  assign(paste0("cumulative_upp_lv_all_imputed_",k),cumulative_upp_lv_all_imputed)
+  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
   
   #add median
-  #add confidence intervals
-  polygon(c(plot_lv_all_imputed_real$age[10:40], rev(plot_lv_all_imputed_real$age[10:40])), c(cumulative_low_lv_all_imputed[10:40], rev(cumulative_upp_lv_all_imputed[10:40])), col=alpha(palette_c[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_lv_all_imputed[10:40] ~ plot_lv_all_imputed_real$age[10:40], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_lv_all_imputed$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_lv_all_imputed[10:40] ~ plot_lv_all_imputed_real$age[10:40], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_lv_all_imputed$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
+  #add confidence intervals
+  polygon(c(plot_lv_all_imputed$age[11:40], rev(plot_lv_all_imputed$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_c[k], 0.25), border=NA)
 }
+

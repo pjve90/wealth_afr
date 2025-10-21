@@ -106,12 +106,11 @@ model {
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 
-    beta_wealth_sigma ~ normal(0, 1);
+    beta_wealth_sigma ~ normal(0, 0.5);
 
 // missing wealth parameters
-    alpha_miss ~ beta(1, 1);
- //   beta_miss ~ normal(0, 1);
-    sigma_miss ~ normal(0, 0.1);
+    alpha_miss ~ beta(2, 2);           
+    sigma_miss ~ normal(0, 0.5); 
     wealth_impute_z ~ normal(0, 1);
 
 //Probability of first birth
