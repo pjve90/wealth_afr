@@ -15,7 +15,9 @@ library(corrplot)
 # Data wrangling of real data ----
 
 #Load data
-real_data <- read.csv("Data/dataf.csv")[,-1]
+#real_data <- read.csv("Data/dataf.csv")[,-1]
+real_data <- read.csv(url("https://raw.githubusercontent.com/pjve90/wealth_afr/refs/heads/master/Data/dataf.csv"), header=T, sep=",", stringsAsFactors=F)[,-1] 
+
 head(real_data)
 
 # Age at first reproduction ----
@@ -203,6 +205,70 @@ for(i in 1:nrow(std_absw_matrix)){
   points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
 }
 
+#Calculate the short-term and long-term wealth variability from the data ----
+
+#short-term wealth variability
+#create matrix
+change_matrix <-  matrix(nrow = nrow(std_absw_matrix),ncol=ncol(std_absw_matrix))
+#check matrix
+change_matrix
+#calculate the short-term wealth variability
+for(i in 1:nrow(change_matrix)){
+  for(j in 1:2){
+    change_matrix[i,j] <- 0 #setting zero change at birth and first year, since wealth change is calculated with a 2-years lag
+  }
+  for(j in 3:ncol(change_matrix)){
+    change_matrix[i,j] = abs(std_absw_matrix[i,j] - std_absw_matrix[i,j-2]) #calculating the 2-years lagged wealth change
+  }
+}
+#check matrix
+change_matrix
+#check the age-specific average of standardised short-term wealth variability
+apply(change_matrix,2,mean,na.rm=T)
+#plot it
+plot(NA,
+     xlim=c(1,ncol(change_matrix)),
+     ylim=range(change_matrix,na.rm=T),
+     xlab="Age",
+     ylab="Absolute 2-year lagged wealth change"
+)
+for(i in 1:nrow(change_matrix)){
+  row_data <- change_matrix[i, ]
+  col_indices <- which(!is.na(row_data))
+  points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
+}
+
+#long-term wealth variability
+#create matrix
+msdw_matrix <-  matrix(nrow = nrow(std_absw_matrix),ncol=ncol(std_absw_matrix))
+#check matrix
+msdw_matrix
+#calculate the long-term wealth variability
+for(i in 1:nrow(msdw_matrix)){
+  for(j in 1:10){
+    msdw_matrix[i,j] <- 0 #setting zero standard deviation from birth until age 10 at birth and first year, since wealth change is calculated with a 10-years window
+  }
+  for(j in 11:ncol(msdw_matrix)){
+    msdw_matrix[i,j] = sd(std_absw_matrix[i,(j-10):j],na.rm=T) #calculating the moving standard deviation with a 10-years window
+  }
+}
+#check matrix
+msdw_matrix
+#check the age-specific average of standardised long-term wealth variability
+apply(msdw_matrix,2,mean,na.rm=T)
+#plot it
+plot(NA,
+     xlim=c(1,ncol(msdw_matrix)),
+     ylim=range(msdw_matrix,na.rm=T),
+     xlab="Age",
+     ylab="Long-term wealth variability"
+)
+for(i in 1:nrow(msdw_matrix)){
+  row_data <- msdw_matrix[i, ]
+  col_indices <- which(!is.na(row_data))
+  points(col_indices, row_data[col_indices],col=alpha("black",0.5), pch = 16)
+}
+
 # Fit real data ----
 
 ##Prepare data ----
@@ -226,6 +292,12 @@ afr_matrix
 wealth_miss <- which(is.na(std_absw_matrix),arr.ind = T)
 #check data
 wealth_miss
+#check data
+dim(wealth_miss)
+#number of missing values
+n_miss <- nrow(wealth_miss)
+#check data
+n_miss
 
 #replace NAs with -99
 for(j in 1:ncol(std_absw_matrix)){
@@ -240,6 +312,20 @@ for(j in 1:ncol(std_absw_matrix)){
 #check the data
 std_absw_matrix
 
+#Calculate the median wealth per individual
+median_wealth<-NA
+for(i in 1:nrow(std_absw_matrix)){
+  median_wealth[i]<-median(std_absw_matrix[i,which(std_absw_matrix[i,]!=-99)])
+}
+#check the data
+median_wealth
+#If there are individuals without wealth data, sample random values from a normal(0,1) distribution since the data is standardised
+median_wealth[is.na(median_wealth)]<-rnorm(sum(is.na(median_wealth)),0,1)
+#check the data
+median_wealth
+#standardise median wealth
+std_median_wealth <- standardize(median_wealth)
+
 #Subset the data for realistic ages
 #Subset wealth and AFB for those between zero years old and 50 years old.
 #wealth
@@ -250,15 +336,21 @@ afrs_restricted[,1:10] <- -99 #turning the first 10 years to NAs because we do n
 afrs_restricted
 #missing wealth data
 wealth_miss_restricted <- wealth_miss[wealth_miss[,2] <= 51,] #Adding 1, since first column in the matrix is year 0
+wealth_miss_restricted
+#number of missing values
+n_miss_restricted <- nrow(wealth_miss_restricted)
+n_miss_restricted
 
 #put all the data together
 #create dataset
 absolute_list <- list(N = nrow(afrs_restricted), #population size
-                  A = ncol(afrs_restricted), #age
-                  wealth = std_absw_restricted, #current absolute wealth
-                  baby = afrs_restricted, #AFR
-                  N_miss = nrow(wealth_miss_restricted), # number of missing values that need imputation
-                  wealth_miss=wealth_miss_restricted) # matrix indicating missing wealth data
+                      A = ncol(afrs_restricted), #age
+                      wealth = std_absw_restricted, #current absolute wealth
+                      baby = afrs_restricted, #AFR
+                      N_miss = n_miss_restricted, # number of missing values that need imputation
+                      wealth_miss=wealth_miss_restricted, # matrix indicating missing wealth data
+                      median_wealth=std_median_wealth
+) 
 #check data
 absolute_list
 
@@ -266,15 +358,17 @@ absolute_list
 
 # compile model
 
-model_absolute <- cmdstan_model("Univariate/firstbaby_absonly.stan")
+model_absolute <- cmdstan_model("~/wealth_afr/Univariate/firstbaby_absonly.stan")
 
 #fit model
 fit_absolute <- model_absolute$sample(data = absolute_list, 
-                            chains = 4, 
-                            parallel_chains = 15, 
-                            adapt_delta = 0.95,
-                            max_treedepth = 13,
-                            init = 0)
+                                      chains = 4, 
+                                      parallel_chains = 15, 
+                                      adapt_delta = 0.99,
+                                      max_treedepth = 13,
+                                      iter_warmup = 2000,
+                                      iter_sampling = 2000,
+                                      init = 0)
 # save fit 
 fit_absolute_csv <- rstan::read_stan_csv(fit_absolute$output_files())
 saveRDS(fit_absolute_csv, "fit_absolute_output.rds")
@@ -309,9 +403,9 @@ traceplot(rds_absolute,pars="beta_wealth_sigma")
 #alpha and hiper priors of Gaussian process
 #create summary table for alpha and hiper priors of Gaussian process
 tab_absolute_alphagp <- precis(rds_absolute,depth=2,pars=c("alpha",
-                                                   "mu_raw",
-                                                   "mu_tau",
-                                                   "mu_delta"))
+                                                           "mu_raw",
+                                                           "mu_tau",
+                                                           "mu_delta"))
 #check table
 tab_absolute_alphagp
 
@@ -352,37 +446,53 @@ hist(post_absolute$wealth_full,
 simwealth_absw_absolute <- seq(from=round(min(post_absolute$wealth_full),1),to=round(max(post_absolute$wealth_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
 simwealth_absw_absolute
 #get the deciles
-deciles_absw <- as.numeric(quantile(simwealth_absw_absolute,seq(0,1,0.5)))
-deciles_absw
+deciles_absw_absolute <- as.numeric(quantile(simwealth_absw_absolute,seq(0,1,0.5)))
+deciles_absw_absolute
 
 #colour palette
 #numbers for color palette
 palette <- palette.colors(9,"Okabe-Ito")
 #select the numbers for color palette
-palette_a<-palette[1:length(deciles_absw)]
+palette_a<-palette[1:length(deciles_absw_absolute)]
 palette_a
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:3)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_absolute$mu)),
+plot(c(0,1)~c(11,ncol(post_absolute$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Current levels\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(53,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA)
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_absolute$mu), by = 5), 
+     labels = seq(10, ncol(post_absolute$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(53,1,  # or specify x/y coordinates
+       legend = c("Cumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Expected age\nat first birth","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_a,NA,NA,NA,palette_a),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add lines
-for(k in 1:(length(deciles_absw))){
+for(k in 1:(length(deciles_absw_absolute))){
   #create matrix to store the data
   p_absw_absolute <- matrix(nrow=nrow(post_absolute$mu),ncol=ncol(post_absolute$mu))
   p_absw_absolute
@@ -390,8 +500,9 @@ for(k in 1:(length(deciles_absw))){
   for(j in 1:ncol(post_absolute$mu)){
     for(i in 1:nrow(post_absolute$mu)){
       p_absw_absolute[i,j] <- inv_logit(post_absolute$alpha[i] + #inv logit because originally is logit
-                                      post_absolute$mu[i,j] + #age
-                                      (post_absolute$beta_wealth_z[i,j]*post_absolute$beta_wealth_sigma[i])*deciles_absw[k] ) #absolute wealth
+                                          post_absolute$mu[i,j] + #age
+                                          (post_absolute$beta_wealth_z[i,j]*post_absolute$beta_wealth_sigma[i])*deciles_absw_absolute[k] #absolute wealth
+      ) 
     }
   }
   #check data
@@ -399,12 +510,12 @@ for(k in 1:(length(deciles_absw))){
   #plot it!
   #prepare model prediction data
   plot_absw_absolute <- data.frame(age = 1:ncol(p_absw_absolute),
-                               median = apply(p_absw_absolute, 2, median), 
-                               upp = apply(p_absw_absolute, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                               low = apply(p_absw_absolute, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+                                   median = apply(p_absw_absolute, 2, median), 
+                                   upp = apply(p_absw_absolute, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                   low = apply(p_absw_absolute, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("absw_",k),plot_absw_absolute)
+  assign(paste0("absw_absolute_",k),plot_absw_absolute)
   
   # Calculate cumulative probabilities
   #create vectors
@@ -422,15 +533,28 @@ for(k in 1:(length(deciles_absw))){
     cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_absw_absolute$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
-  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
-  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
+  assign(paste0("cumulative_median_absw_absolute_",k),cumulative_median_absw)
+  assign(paste0("cumulative_low_absw_absolute_",k),cumulative_low_absw)
+  assign(paste0("cumulative_upp_absw_absolute_",k),cumulative_upp_absw)
+  
+  # Calculate exact median age at first birth
+  age_before <- max(which(cumulative_median_absw < 0.5))
+  age_after <- min(which(cumulative_median_absw >= 0.5))
+  prob_before <- cumulative_median_absw[age_before]
+  prob_after <- cumulative_median_absw[age_after]
+  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  
+  # Store the exact median age
+  assign(paste0("exact_age_median_absw_absolute_", k), exact_age_median)
   
   #add median
   #add points
-  points(cumulative_median_absw[11:51] ~ plot_absw_absolute$age[11:51], col=palette_a[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:51] ~ plot_absw_absolute$age[11:51], col=palette_a[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:51] ~ plot_absw_absolute$age[11:51], col=palette_a[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:51] ~ plot_absw_absolute$age[11:51], col=palette_a[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_absw_absolute$age[11:51], rev(plot_absw_absolute$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.25), border=NA)
+  polygon(c(plot_absw_absolute$age[11:51], rev(plot_absw_absolute$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.1), border=alpha(palette_a[k],0.25))
+  # Add vertical line for median age at first birth
+  segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_a[k], lwd=3, lty=2)
 }
+

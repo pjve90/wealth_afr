@@ -134,7 +134,7 @@ model {
 // wealth
     // moving standard deviation
     delta_wealth_z ~ normal(0, 1);
-    delta_wealth_sigma ~ normal(0,0.5);
+    delta_wealth_sigma ~ normal(0,0.25);
     
 // missing wealth parameters
     alpha_miss ~ beta(2, 2);           

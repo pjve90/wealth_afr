@@ -65,7 +65,6 @@ parameters {
   // missing wealth data
   vector[N_miss] wealth_impute_z; 
   real <lower = 0, upper = 1> alpha_miss;
-//  real beta_miss;
   real <lower=0> sigma_miss;
 }
 
@@ -175,13 +174,13 @@ model {
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 
-    beta_wealth_sigma ~ normal(0,0.5);
+    beta_wealth_sigma ~ normal(0,0.25);
     // wealth change
     gamma_wealth_z ~ normal(0, 1);
-    gamma_wealth_sigma ~ normal(0,0.5);
+    gamma_wealth_sigma ~ normal(0,0.25);
     // moving standard deviation
     delta_wealth_z ~ normal(0, 1);
-    delta_wealth_sigma ~ normal(0,0.5);
+    delta_wealth_sigma ~ normal(0,0.25);
     
 // missing wealth parameters
     alpha_miss ~ beta(2, 2);           

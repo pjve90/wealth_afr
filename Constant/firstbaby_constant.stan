@@ -1,24 +1,3 @@
-functions {
-
-  matrix GP(int K, real C, real D, real S) { // Gaussian process function
-    matrix[K, K] Rho;
-    real KR;
-    KR = K;
-
-    for (i in 1:(K-1)) {
-    for (j in (i+1):K) {
-    Rho[i, j] = C * exp(-D * ((j-i)^2 / KR^2));
-    Rho[j, i] = Rho[i, j];
-    }
-    }
-
-    for (i in 1:K) {
-    Rho[i, i] = 1;
-    }
-
-    return S * cholesky_decompose(Rho);
-  }
-}
 
 data {
 
@@ -31,12 +10,6 @@ data {
   int N_miss; // number of missing data points for wealth
   array[N_miss, 2] int wealth_miss; // positions of missing wealth
   
-//  real wc_mean_obs; //mean of observed short-term wealth variability
-//  real wc_sd_obs; //sd of observed short-term wealth variability
-  
-//  real lv_mean_obs; //mean of observed long-term wealth variability
-//  real lv_sd_obs; //sd of observed long-term wealth variability
-
   array[N,A] int baby; // first birth (0=no,1=yes,-99=censored)
 
 }
@@ -45,37 +18,26 @@ parameters {
 
 // global intercept
   real alpha;
-// Gaussian process of age
-  vector [A] mu_raw;
-  real <lower = 0, upper = 1> mu_kappa;
-  real <lower = 0> mu_tau;
-  real <lower = 0> mu_delta;
 
 // wealth
   // absolute wealth
-  vector [A] beta_wealth_z;
+  real beta_wealth_z;
   real <lower = 0> beta_wealth_sigma;
   // wealth change
-  vector [A] gamma_wealth_z; 
+  real gamma_wealth_z; 
   real <lower = 0> gamma_wealth_sigma;
   // moving standard deviation
-  vector [A] delta_wealth_z; 
+  real delta_wealth_z; 
   real <lower = 0> delta_wealth_sigma;
 
   // missing wealth data
   vector[N_miss] wealth_impute_z; 
   real <lower = 0, upper = 1> alpha_miss;
-//  real beta_miss;
   real <lower=0> sigma_miss;
 }
 
 transformed parameters {
 
-//Gaussian Process of age
-  vector [A] mu; //vector containing mu
-  
-    mu = GP(A, mu_kappa, mu_tau, mu_delta) * mu_raw; // calculating mu from the Gaussian process
-    
 //Bayesian data imputation
   matrix[N,A] wealth_full; // full wealth data (raw with missing + imputed)
 
@@ -166,11 +128,6 @@ model {
 // global intercept
     alpha ~ normal(0, 1);
 
-// Gaussian process of age    
-    mu_raw ~ normal(0, 1);
-    mu_kappa ~ beta(12, 2);
-    mu_tau ~ exponential(1);
-    mu_delta ~ exponential(1);
 
 // wealth
     // absolute wealth
@@ -196,10 +153,9 @@ model {
 
       baby[n, a] ~ bernoulli_logit( // Prob of having your first child
         alpha + // global intercept
-        mu[a] + // age
-        (beta_wealth_z[a]*beta_wealth_sigma)*wealth_full[n,a-1] + // absolute wealth
-        (gamma_wealth_z[a]*gamma_wealth_sigma)*wealth_change[n,a-1] + // 2-years lagged wealth change
-        (delta_wealth_z[a]*delta_wealth_sigma)*wealth_msd[n,a-1]  // moving standard deviation
+        (beta_wealth_z*beta_wealth_sigma)*wealth_full[n,a] + // absolute wealth
+        (gamma_wealth_z*gamma_wealth_sigma)*wealth_change_std[n,a] + // 2-years lagged wealth change
+        (delta_wealth_z*delta_wealth_sigma)*wealth_msd_std[n,a]  // moving standard deviation
         );
           
     }
@@ -221,4 +177,3 @@ generated quantities {
     }
   }
 }
-

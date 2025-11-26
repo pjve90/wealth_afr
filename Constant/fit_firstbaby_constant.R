@@ -343,167 +343,150 @@ n_miss_restricted
 
 #put all the data together
 #create dataset
-actualdiff_list <- list(N = nrow(afrs_restricted), #population size
-                        A = ncol(afrs_restricted), #age
-                        wealth = std_absw_restricted, #current absolute wealth
-                        baby = afrs_restricted, #AFR
-                        N_miss = n_miss_restricted, # number of missing values that need imputation
-                        wealth_miss=wealth_miss_restricted, # matrix indicating missing wealth data
-                        median_wealth=std_median_wealth
+constant_list <- list(N = nrow(afrs_restricted), #population size
+                      A = ncol(afrs_restricted), #age
+                      wealth = std_absw_restricted, #current absolute wealth
+                      baby = afrs_restricted, #AFR
+                      N_miss = n_miss_restricted, # number of missing values that need imputation
+                      wealth_miss=wealth_miss_restricted, # matrix indicating missing wealth data
+                      median_wealth=std_median_wealth
 ) 
 #check data
-actualdiff_list
+constant_list
 
 ## Compile and fit model ----
 
 # compile model
 
-model_actualdiff <- cmdstan_model("~/wealth_afr/Actual_change/firstbaby_actualdiff.stan")
+model_constant <- cmdstan_model("~/wealth_afr/Constant/firstbaby_constant.stan")
 
 #fit model
-fit_actualdiff <- model_actualdiff$sample(data = actualdiff_list,
-                                          chains = 4, 
-                                          parallel_chains = 15, 
-                                          adapt_delta = 0.99,
-                                          max_treedepth = 13,
-                                          iter_warmup = 2000,
-                                          iter_sampling = 2000,
-                                          init = 0)
+fit_constant <- model_constant$sample(data = constant_list,
+                                      chains = 4, 
+                                      parallel_chains = 15, 
+                                      adapt_delta = 0.99,
+                                      max_treedepth = 13,
+                                      iter_warmup = 2000,
+                                      iter_sampling = 2000,
+                                      init = 0)
 
 # save fit 
-fit_actualdiff_csv <- rstan::read_stan_csv(fit_actualdiff$output_files())
-saveRDS(fit_actualdiff_csv, "fit_actualdiff_output.rds")
+fit_constant_csv <- rstan::read_stan_csv(fit_constant$output_files())
+saveRDS(fit_constant_csv, "fit_constant_output.rds")
 #load RDS file
-rds_actualdiff <- readRDS("fit_actualdiff_output.rds")
+rds_constant <- readRDS("fit_constant_output.rds")
 #extract samples
-post_actualdiff <- extract.samples(rds_actualdiff)
+post_constant <- extract.samples(rds_constant)
 
 ## Model diagnostics ----
 
 #check trace of all parameters
 #alpha
-rstan::traceplot(rds_actualdiff,pars="alpha")
+rstan::traceplot(rds_constant,pars="alpha")
 #mu
-traceplot(rds_actualdiff,pars="mu") 
+traceplot(rds_constant,pars="mu") 
 #mu_raw
-traceplot(rds_actualdiff,pars="mu_raw")
+traceplot(rds_constant,pars="mu_raw")
 #mu_tau
-rstan::traceplot(rds_actualdiff,pars="mu_tau")
+rstan::traceplot(rds_constant,pars="mu_tau")
 #mu_kappa
-rstan::traceplot(rds_actualdiff,pars="mu_kappa")
+rstan::traceplot(rds_constant,pars="mu_kappa")
 #mu_delta
-rstan::traceplot(rds_actualdiff,pars="mu_delta")
+rstan::traceplot(rds_constant,pars="mu_delta")
 #beta_wealth_z
-traceplot(rds_actualdiff,pars="beta_wealth_z") 
+rstan::traceplot(rds_constant,pars="beta_wealth_z") 
 #beta_wealth_sigma
-traceplot(rds_actualdiff,pars="beta_wealth_sigma") 
+rstan::traceplot(rds_constant,pars="beta_wealth_sigma") 
 #gamma_wealth
-traceplot(rds_actualdiff,pars="gamma_wealth_z") 
+rstan::traceplot(rds_constant,pars="gamma_wealth_z") 
 #gamma_wealth
-traceplot(rds_actualdiff,pars="gamma_wealth_sigma") 
+rstan::traceplot(rds_constant,pars="gamma_wealth_sigma") 
 #delta_wealth
-traceplot(rds_actualdiff,pars="delta_wealth_z") 
+rstan::traceplot(rds_constant,pars="delta_wealth_z") 
 #delta_wealth
-traceplot(rds_actualdiff,pars="delta_wealth_sigma") 
+rstan::traceplot(rds_constant,pars="delta_wealth_sigma") 
 
 #summary of the model
 #create summary tables of the different parameters
 
 #alpha and hiper priors of Gaussian process
 #create summary table for alpha and hiper priors of Gaussian process
-tab_actualdiff_alphagp <- precis(rds_actualdiff,depth=2,pars=c("alpha",
-                                                               "mu_raw",
-                                                               "mu_tau",
-                                                               "mu_delta"))
+tab_constant_alphagp <- precis(rds_constant,depth=2,pars=c("alpha"))
 #check table
-tab_actualdiff_alphagp
-
-#mu
-#create summary table for mu
-tab_actualdiff_mu <- precis(rds_actualdiff,depth=2,pars="mu")
-#check table
-tab_actualdiff_mu
-#plot it!
-plot(tab_actualdiff_mu)
+tab_constant_alphagp
 
 #beta z
 #create summary table for beta_z
-tab_actualdiff_beta_z <- precis(rds_actualdiff,depth=2,pars="beta_wealth_z")
+tab_constant_beta_z <- precis(rds_constant,depth=2,pars="beta_wealth_z")
 #check table
-tab_actualdiff_beta_z
-#plot it!
-plot(tab_actualdiff_beta_z)
+tab_constant_beta_z
 
 #beta sigma
 #create summary table for beta_sigma
-tab_actualdiff_beta_sigma <- precis(rds_actualdiff,depth=2,pars="beta_wealth_sigma")
+tab_constant_beta_sigma <- precis(rds_constant,depth=2,pars="beta_wealth_sigma")
 #check table
-tab_actualdiff_beta_sigma
+tab_constant_beta_sigma
 
 #gamma z
 #create summary table for gamma_z
-tab_actualdiff_gamma_z <- precis(rds_actualdiff,depth=2,pars="gamma_wealth_z")
+tab_constant_gamma_z <- precis(rds_constant,depth=2,pars="gamma_wealth_z")
 #check table
-tab_actualdiff_gamma_z
-#plot it!
-plot(tab_actualdiff_gamma_z)
+tab_constant_gamma_z
 
 #gamma sigma
 #create summary table for gamma_sigma
-tab_actualdiff_gamma_sigma <- precis(rds_actualdiff,depth=2,pars="gamma_wealth_sigma")
+tab_constant_gamma_sigma <- precis(rds_constant,depth=2,pars="gamma_wealth_sigma")
 #check table
-tab_actualdiff_gamma_sigma
+tab_constant_gamma_sigma
 
 #delta z
 #create summary table for delta_z
-tab_actualdiff_delta_z <- precis(rds_actualdiff,depth=2,pars="delta_wealth_z")
+tab_constant_delta_z <- precis(rds_constant,depth=2,pars="delta_wealth_z")
 #check table
-tab_actualdiff_delta_z
-#plot it!
-plot(tab_actualdiff_delta_z)
+tab_constant_delta_z
 
 #delta sigma
 #create summary table for delta_sigma
-tab_actualdiff_delta_sigma <- precis(rds_actualdiff,depth=2,pars="delta_wealth_sigma")
+tab_constant_delta_sigma <- precis(rds_constant,depth=2,pars="delta_wealth_sigma")
 #check table
-tab_actualdiff_delta_sigma
+tab_constant_delta_sigma
 
 #Check correlation between wealth predictors
 
 #beta versus gamma
 #create correlation matrix
-cor1 <- round(cor(post_actualdiff$beta_wealth_z,post_actualdiff$gamma_wealth_z),3)
+cor1 <- round(cor(post_constant$beta_wealth_z,post_constant$gamma_wealth_z),3)
 #plot it!
 corrplot(cor1, "color", tl.col="black")
 
 #beta versus delta
 #create correlation matrix
-cor2 <- round(cor(post_actualdiff$beta_wealth_z,post_actualdiff$delta_wealth_z),3)
+cor2 <- round(cor(post_constant$beta_wealth_z,post_constant$delta_wealth_z),3)
 #plot it!
 corrplot(cor2, "color", tl.col="black")
 
 #gamma versus delta
 #create correlation matrix
-cor3 <- round(cor(post_actualdiff$gamma_wealth_z,post_actualdiff$delta_wealth_z),3)
+cor3 <- round(cor(post_constant$gamma_wealth_z,post_constant$delta_wealth_z),3)
 #plot it!
 corrplot(cor3, "color", tl.col="black")
 
 #Distribution of wealth data
 
 par(mfrow=c(1,3))
-hist(post_actualdiff$wealth_full,
+hist(post_constant$wealth_full,
      freq=F,
      col=hcl.colors(3,"ag_Sunset")[1],
      main="Current wealth",
      xlab="Std. current wealth"
 )
-hist(post_actualdiff$wealth_change_std,
+hist(post_constant$wealth_change_std,
      freq=F,
      col=hcl.colors(3,"ag_Sunset")[2],
      main="Short-term wealth variability",
      xlab="Absolute wealth difference"
 )
-hist(post_actualdiff$wealth_msd_std,
+hist(post_constant$wealth_msd_std,
      freq=F,
      col=hcl.colors(3,"ag_Sunset")[3],
      main="Long-term wealth variability",
@@ -515,10 +498,10 @@ hist(post_actualdiff$wealth_msd_std,
 ## Current Wealth ----
 
 #simulate wealth values
-simwealth_absw_actualdiff <- seq(from=round(min(post_actualdiff$wealth_full),1),to=round(max(post_actualdiff$wealth_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
-simwealth_absw_actualdiff
+simwealth_absw_constant <- seq(from=round(min(post_constant$wealth_full),1),to=round(max(post_constant$wealth_full),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_absw_constant
 #get the deciles
-deciles_absw <- as.numeric(quantile(simwealth_absw_actualdiff,seq(0,1,0.5)))
+deciles_absw <- as.numeric(quantile(simwealth_absw_constant,seq(0,1,0.5)))
 deciles_absw
 
 #colour palette
@@ -532,8 +515,8 @@ palette_a
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
-plot(c(0,1)~c(11,ncol(post_actualdiff$mu)),
-     ylab="Cumulative probability of first birth",
+plot(c(0,1)~c(0,41),
+     ylab="Complementary cumulative probability of first birth",
      xlab="Age",
      main="Current levels\nof material wealth",
      cex.axis=1.2,
@@ -544,11 +527,11 @@ plot(c(0,1)~c(11,ncol(post_actualdiff$mu)),
 
 #x-axis should follow biological ages
 axis(1,
-     at = seq(11, ncol(post_actualdiff$mu), by = 5), 
-     labels = seq(10, ncol(post_actualdiff$mu)-1, by = 5))
+     at = seq(0, 41, by = 5), 
+     labels = seq(10, 51-1, by = 5),cex.axis=1.2)
 # Combined legend
-legend(53,1,  # or specify x/y coordinates
-       legend = c("Cumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
+legend(44,1,  # or specify x/y coordinates
+       legend = c("Complementary\ncumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
                   "",
                   "Expected age\nat first birth","", "Min.", "Med.", "Max."), # Second group
        col = c(NA,NA, palette_a,NA,NA,NA,palette_a),  # NA for section headers
@@ -564,67 +547,69 @@ legend(53,1,  # or specify x/y coordinates
 #add lines
 for(k in 1:(length(deciles_absw))){
   #create matrix to store the data
-  p_absw_actualdiff <- matrix(nrow=nrow(post_actualdiff$mu),ncol=ncol(post_actualdiff$mu))
-  p_absw_actualdiff
+  p_absw_constant <- matrix(nrow=nrow(post_constant$alpha),ncol=41)
+  p_absw_constant
   #fill it in with values for age 25
-  for(j in 1:ncol(post_actualdiff$mu)){
-    for(i in 1:nrow(post_actualdiff$mu)){
-      p_absw_actualdiff[i,j] <- inv_logit(post_actualdiff$alpha[i] + #inv logit because originally is logit
-                                            post_actualdiff$mu[i,j] + #age
-                                            (post_actualdiff$beta_wealth_z[i,j]*post_actualdiff$beta_wealth_sigma[i])*deciles_absw[k] + #absolute wealth
-                                            (post_actualdiff$gamma_wealth_z[i,j]*post_actualdiff$gamma_wealth_sigma[i])*0 + #wealth change
-                                            (post_actualdiff$delta_wealth_z[i,j]*post_actualdiff$delta_wealth_sigma[i])*0) #moving variance
+  for(j in 1:41){
+    for(i in 1:nrow(post_constant$alpha)){
+      p_absw_constant[i,j] <- inv_logit(post_constant$alpha[i] + #inv logit because originally is logit
+                                          (post_constant$beta_wealth_z[i]*post_constant$beta_wealth_sigma[i])*deciles_absw[k] + #absolute wealth
+                                          (post_constant$gamma_wealth_z[i]*post_constant$gamma_wealth_sigma[i])*0 + #wealth change
+                                          (post_constant$delta_wealth_z[i]*post_constant$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
-  p_absw_actualdiff
+  p_absw_constant
   #plot it!
   #prepare model prediction data
-  plot_absw_actualdiff <- data.frame(age = 1:ncol(p_absw_actualdiff),
-                                     median = apply(p_absw_actualdiff, 2, median), 
-                                     upp = apply(p_absw_actualdiff, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                     low = apply(p_absw_actualdiff, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_absw_constant <- data.frame(age = 1:ncol(p_absw_constant),
+                                   median = apply(p_absw_constant, 2, median), 
+                                   upp = apply(p_absw_constant, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                   low = apply(p_absw_constant, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("absw_",k),plot_absw_actualdiff)
+  assign(paste0("absw_",k),plot_absw_constant)
   
-  # Calculate cumulative probabilities
+  # Calculate COMPLEMENTARY cumulative probabilities (survival function)
   #create vectors
-  cumulative_median_absw <- numeric(length(plot_absw_actualdiff$median))
-  cumulative_low_absw <- numeric(length(plot_absw_actualdiff$low))
-  cumulative_upp_absw <- numeric(length(plot_absw_actualdiff$upp))
-  #set the first probability
-  cumulative_median_absw[1] <- plot_absw_actualdiff$median[1]
-  cumulative_low_absw[1] <- plot_absw_actualdiff$low[1]
-  cumulative_upp_absw[1] <- plot_absw_actualdiff$upp[1]
-  #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_absw_actualdiff$median)) {
-    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_absw_actualdiff$median[a]
-    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_absw_actualdiff$low[a]
-    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_absw_actualdiff$upp[a]
-  }
-  #store data per decile
-  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
-  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
-  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
+  complementary_cumulative_median_absw <- numeric(length(plot_absw_constant$median))
+  complementary_cumulative_low_absw <- numeric(length(plot_absw_constant$low))
+  complementary_cumulative_upp_absw <- numeric(length(plot_absw_constant$upp))
   
-  # Calculate exact median age at first birth
-  age_before <- max(which(cumulative_median_absw < 0.5))
-  age_after <- min(which(cumulative_median_absw >= 0.5))
-  prob_before <- cumulative_median_absw[age_before]
-  prob_after <- cumulative_median_absw[age_after]
-  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  #Start at age 10 with 100% childless
+  complementary_cumulative_median_absw[1] <- 1  # Age 10
+  complementary_cumulative_low_absw[1] <- 1
+  complementary_cumulative_upp_absw[1] <- 1
+  
+  #calculate the complementary cumulative probabilities for the other ages
+  for (a in 2:length(plot_absw_constant$median)) {
+    complementary_cumulative_median_absw[a] <- complementary_cumulative_median_absw[a-1] * (1 - plot_absw_constant$median[a])
+    complementary_cumulative_low_absw[a] <- complementary_cumulative_low_absw[a-1] * (1 - plot_absw_constant$low[a])
+    complementary_cumulative_upp_absw[a] <- complementary_cumulative_upp_absw[a-1] * (1 - plot_absw_constant$upp[a])
+  }
+  
+  #store data per decile
+  assign(paste0("complementary_cumulative_median_absw_",k),complementary_cumulative_median_absw)
+  assign(paste0("complementary_cumulative_low_absw_",k),complementary_cumulative_low_absw)
+  assign(paste0("complementary_cumulative_upp_absw_",k),complementary_cumulative_upp_absw)
+  
+  # Calculate exact median age at first birth (age when complementary cumulative probability drops below 0.5)
+  age_before <- max(which(complementary_cumulative_median_absw >= 0.5))
+  age_after <- min(which(complementary_cumulative_median_absw < 0.5))
+  prob_before <- complementary_cumulative_median_absw[age_before]
+  prob_after <- complementary_cumulative_median_absw[age_after]
+  exact_age_median <- (age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before))
   
   # Store the exact median age
   assign(paste0("exact_age_median_absw_", k), exact_age_median)
   
   #add median
   #add points
-  points(cumulative_median_absw[11:51] ~ plot_absw_actualdiff$age[11:51], col=palette_a[k], pch=16, cex=1.5)
+  points(complementary_cumulative_median_absw[1:41] ~ plot_absw_constant$age[1:41], col=palette_a[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:51] ~ plot_absw_actualdiff$age[11:51], col=palette_a[k], lwd=3, lty=1)
+  lines(complementary_cumulative_median_absw[1:41] ~ plot_absw_constant$age[1:41], col=palette_a[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_absw_actualdiff$age[11:51], rev(plot_absw_actualdiff$age[11:51])), c(cumulative_low_absw[11:51], rev(cumulative_upp_absw[11:51])), col=alpha(palette_a[k], 0.1), border=alpha(palette_a[k],0.25))
+  polygon(c(plot_absw_constant$age[1:41], rev(plot_absw_constant$age[1:41])), c(complementary_cumulative_low_absw[1:41], rev(complementary_cumulative_upp_absw[1:41])), col=alpha(palette_a[k], 0.1), border=alpha(palette_a[k],0.25))
   # Add vertical line for median age at first birth
   segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_a[k], lwd=3, lty=2)
 }
@@ -632,10 +617,10 @@ for(k in 1:(length(deciles_absw))){
 ## Short-term wealth variability ----
 
 #simulate wealth values
-simwealth_change_actualdiff <- seq(from=round(min(post_actualdiff$wealth_change_std),1),to=round(max(post_actualdiff$wealth_change_std),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
-simwealth_change_actualdiff
+simwealth_change_constant <- seq(from=round(min(post_constant$wealth_change_std),1),to=round(max(post_constant$wealth_change_std),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_change_constant
 #get the deciles
-deciles_diffw <- as.numeric(quantile(simwealth_change_actualdiff,seq(0,1,0.5)))
+deciles_diffw <- as.numeric(quantile(simwealth_change_constant,seq(0,1,0.5)))
 deciles_diffw
 
 #colour palette
@@ -649,8 +634,8 @@ palette_b
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
-plot(c(0,1)~c(11,ncol(post_actualdiff$mu)),
-     ylab="Cumulative probability of first birth",
+plot(c(0,1)~c(0,41),
+     ylab="Complementary cumulative probability of first birth",
      xlab="Age",
      main="Short-term\nwealth variability",
      cex.axis=1.2,
@@ -661,16 +646,16 @@ plot(c(0,1)~c(11,ncol(post_actualdiff$mu)),
 
 #x-axis should follow biological ages
 axis(1,
-     at = seq(11, ncol(post_actualdiff$mu), by = 5), 
-     labels = seq(10, ncol(post_actualdiff$mu)-1, by = 5))
+     at = seq(0, 41, by = 5), 
+     labels = seq(10, 51-1, by = 5),cex.axis=1.2)
 # Combined legend
-legend(53,1,  # or specify x/y coordinates
-       legend = c("Cumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
+legend(44,1,  # or specify x/y coordinates
+       legend = c("Complementary\ncumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
                   "",
                   "Expected age\nat first birth","", "Min.", "Med.", "Max."), # Second group
        col = c(NA,NA, palette_b,NA,NA,NA,palette_b),  # NA for section headers
        lwd = 3,
-       lty = c(NA,NA, rep(1, 3),NA,NA, NA, rep(2, 3)),  # NA for headers
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
        pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
        pt.cex = 1.5,
        cex = 1.2,
@@ -681,67 +666,69 @@ legend(53,1,  # or specify x/y coordinates
 #add lines
 for(k in 1:(length(deciles_diffw))){
   #create matrix to store the data
-  p_diffw_actualdiff <- matrix(nrow=nrow(post_actualdiff$mu),ncol=ncol(post_actualdiff$mu))
-  p_diffw_actualdiff
+  p_diffw_constant <- matrix(nrow=nrow(post_constant$alpha),ncol=41)
+  p_diffw_constant
   #fill it in with values for age 25
-  for(j in 1:ncol(post_actualdiff$mu)){
-    for(i in 1:nrow(post_actualdiff$mu)){
-      p_diffw_actualdiff[i,j] <- inv_logit(post_actualdiff$alpha[i] + #inv logit because originally is logit
-                                             post_actualdiff$mu[i,j] + #age
-                                             (post_actualdiff$beta_wealth_z[i,j]*post_actualdiff$beta_wealth_sigma[i])*0+ #absolute wealth
-                                             (post_actualdiff$gamma_wealth_z[i,j]*post_actualdiff$gamma_wealth_sigma[i])*deciles_diffw[k] + #wealth change
-                                             (post_actualdiff$delta_wealth_z[i,j]*post_actualdiff$delta_wealth_sigma[i])*0) #moving variance
+  for(j in 1:41){
+    for(i in 1:nrow(post_constant$alpha)){
+      p_diffw_constant[i,j] <- inv_logit(post_constant$alpha[i] + #inv logit because originally is logit
+                                           (post_constant$beta_wealth_z[i]*post_constant$beta_wealth_sigma[i])* 0 + #diffolute wealth
+                                           (post_constant$gamma_wealth_z[i]*post_constant$gamma_wealth_sigma[i])* deciles_diffw[k] + #wealth change
+                                           (post_constant$delta_wealth_z[i]*post_constant$delta_wealth_sigma[i])*0) #moving variance
     }
   }
   #check data
-  p_diffw_actualdiff
+  p_diffw_constant
   #plot it!
   #prepare model prediction data
-  plot_diffw_actualdiff <- data.frame(age = 1:ncol(p_diffw_actualdiff),
-                                      median = apply(p_diffw_actualdiff, 2, median), 
-                                      upp = apply(p_diffw_actualdiff, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                      low = apply(p_diffw_actualdiff, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_diffw_constant <- data.frame(age = 1:ncol(p_diffw_constant),
+                                    median = apply(p_diffw_constant, 2, median), 
+                                    upp = apply(p_diffw_constant, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                    low = apply(p_diffw_constant, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("diffw_",k),plot_diffw_actualdiff)
+  assign(paste0("diffw_",k),plot_diffw_constant)
   
-  # Calculate cumulative probabilities
+  # Calculate COMPLEMENTARY cumulative probabilities (survival function)
   #create vectors
-  cumulative_median_diffw <- numeric(length(plot_diffw_actualdiff$median))
-  cumulative_low_diffw <- numeric(length(plot_diffw_actualdiff$low))
-  cumulative_upp_diffw <- numeric(length(plot_diffw_actualdiff$upp))
-  #set the first probability
-  cumulative_median_diffw[1] <- plot_diffw_actualdiff$median[1]
-  cumulative_low_diffw[1] <- plot_diffw_actualdiff$low[1]
-  cumulative_upp_diffw[1] <- plot_diffw_actualdiff$upp[1]
-  #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_diffw_actualdiff$median)) {
-    cumulative_median_diffw[a] <- cumulative_median_diffw[a-1] + (1 - cumulative_median_diffw[a-1]) * plot_diffw_actualdiff$median[a]
-    cumulative_low_diffw[a] <- cumulative_low_diffw[a-1] + (1 - cumulative_low_diffw[a-1]) * plot_diffw_actualdiff$low[a]
-    cumulative_upp_diffw[a] <- cumulative_upp_diffw[a-1] + (1 - cumulative_upp_diffw[a-1]) * plot_diffw_actualdiff$upp[a]
-  }
-  #store data per decile
-  assign(paste0("cumulative_median_diffw_",k),cumulative_median_diffw)
-  assign(paste0("cumulative_low_diffw_",k),cumulative_low_diffw)
-  assign(paste0("cumulative_upp_diffw_",k),cumulative_upp_diffw)
+  complementary_cumulative_median_diffw <- numeric(length(plot_diffw_constant$median))
+  complementary_cumulative_low_diffw <- numeric(length(plot_diffw_constant$low))
+  complementary_cumulative_upp_diffw <- numeric(length(plot_diffw_constant$upp))
   
-  # Calculate exact median age at first birth
-  age_before <- max(which(cumulative_median_diffw < 0.5))
-  age_after <- min(which(cumulative_median_diffw >= 0.5))
-  prob_before <- cumulative_median_diffw[age_before]
-  prob_after <- cumulative_median_diffw[age_after]
-  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  #Start at age 10 with 100% childless
+  complementary_cumulative_median_diffw[1] <- 1  # Age 10
+  complementary_cumulative_low_diffw[1] <- 1
+  complementary_cumulative_upp_diffw[1] <- 1
+  
+  #calculate the complementary cumulative probabilities for the other ages
+  for (a in 2:length(plot_diffw_constant$median)) {
+    complementary_cumulative_median_diffw[a] <- complementary_cumulative_median_diffw[a-1] * (1 - plot_diffw_constant$median[a])
+    complementary_cumulative_low_diffw[a] <- complementary_cumulative_low_diffw[a-1] * (1 - plot_diffw_constant$low[a])
+    complementary_cumulative_upp_diffw[a] <- complementary_cumulative_upp_diffw[a-1] * (1 - plot_diffw_constant$upp[a])
+  }
+  
+  #store data per decile
+  assign(paste0("complementary_cumulative_median_diffw_",k),complementary_cumulative_median_diffw)
+  assign(paste0("complementary_cumulative_low_diffw_",k),complementary_cumulative_low_diffw)
+  assign(paste0("complementary_cumulative_upp_diffw_",k),complementary_cumulative_upp_diffw)
+  
+  # Calculate exact median age at first birth (age when complementary cumulative probability drops below 0.5)
+  age_before <- max(which(complementary_cumulative_median_diffw >= 0.5))
+  age_after <- min(which(complementary_cumulative_median_diffw < 0.5))
+  prob_before <- complementary_cumulative_median_diffw[age_before]
+  prob_after <- complementary_cumulative_median_diffw[age_after]
+  exact_age_median <- (age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before))
   
   # Store the exact median age
   assign(paste0("exact_age_median_diffw_", k), exact_age_median)
   
   #add median
   #add points
-  points(cumulative_median_diffw[11:51] ~ plot_diffw_actualdiff$age[11:51], col=palette_b[k], pch=16, cex=1.5)
+  points(complementary_cumulative_median_diffw[1:41] ~ plot_diffw_constant$age[1:41], col=palette_b[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_diffw[11:51] ~ plot_diffw_actualdiff$age[11:51], col=palette_b[k], lwd=3, lty=1)
+  lines(complementary_cumulative_median_diffw[1:41] ~ plot_diffw_constant$age[1:41], col=palette_b[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_diffw_actualdiff$age[11:51], rev(plot_diffw_actualdiff$age[11:51])), c(cumulative_low_diffw[11:51], rev(cumulative_upp_diffw[11:51])), col=alpha(palette_b[k], 0.1), border=alpha(palette_b[k],0.25))
+  polygon(c(plot_diffw_constant$age[1:41], rev(plot_diffw_constant$age[1:41])), c(complementary_cumulative_low_diffw[1:41], rev(complementary_cumulative_upp_diffw[1:41])), col=alpha(palette_b[k], 0.1), border=alpha(palette_b[k],0.25))
   # Add vertical line for median age at first birth
   segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_b[k], lwd=3, lty=2)
 }
@@ -749,10 +736,10 @@ for(k in 1:(length(deciles_diffw))){
 ## Long-term variability of wealth ----
 
 #simulate wealth values
-simwealth_msd_actualdiff <- seq(from=round(min(post_actualdiff$wealth_msd_std),1),to=round(max(post_actualdiff$wealth_msd_std),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
-simwealth_msd_actualdiff
+simwealth_msd_constant <- seq(from=round(min(post_constant$wealth_msd_std),1),to=round(max(post_constant$wealth_msd_std),1),length.out=nrow(std_absw_restricted)) #specify according to range and length related to sample size
+simwealth_msd_constant
 #get the deciles
-deciles_msd <- as.numeric(quantile(simwealth_msd_actualdiff,seq(0,1,0.5)))
+deciles_msd <- as.numeric(quantile(simwealth_msd_constant,seq(0,1,0.5)))
 deciles_msd
 
 #colour palette
@@ -766,8 +753,8 @@ palette_c
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
-plot(c(0,1)~c(11,ncol(post_actualdiff$mu)),
-     ylab="Cumulative probability of first birth",
+plot(c(0,1)~c(0,41),
+     ylab="Complementary cumulative probability of first birth",
      xlab="Age",
      main="Long-term\nwealth variability",
      cex.axis=1.2,
@@ -778,17 +765,17 @@ plot(c(0,1)~c(11,ncol(post_actualdiff$mu)),
 
 #x-axis should follow biological ages
 axis(1,
-     at = seq(11, ncol(post_actualdiff$mu), by = 5), 
-     labels = seq(10, ncol(post_actualdiff$mu)-1, by = 5))
+     at = seq(0, 41, by = 5), 
+     labels = seq(10, 51-1, by = 5),cex.axis=1.2)
 
 # Combined legend
-legend(53,1,  # or specify x/y coordinates
-       legend = c("Cumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
+legend(44,1,  # or specify x/y coordinates
+       legend = c("Complementary\ncumulative\nprobabilities","", "Min.", "Med.", "Max.",  # First group
                   "",
                   "Expected age\nat first birth","", "Min.", "Med.", "Max."), # Second group
        col = c(NA,NA, palette_c,NA,NA,NA,palette_c),  # NA for section headers
        lwd = 3,
-       lty = c(NA,NA, rep(1, 3),NA,NA, NA, rep(2, 3)),  # NA for headers
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
        pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
        pt.cex = 1.5,
        cex = 1.2,
@@ -799,67 +786,69 @@ legend(53,1,  # or specify x/y coordinates
 #add lines
 for(k in 1:(length(deciles_msd))){
   #create matrix to store the data
-  p_msd_actualdiff <- matrix(nrow=nrow(post_actualdiff$mu),ncol=ncol(post_actualdiff$mu))
-  p_msd_actualdiff
+  p_msd_constant <- matrix(nrow=nrow(post_constant$alpha),ncol=41)
+  p_msd_constant
   #fill it in with values for age 25
-  for(j in 1:ncol(post_actualdiff$mu)){
-    for(i in 1:nrow(post_actualdiff$mu)){
-      p_msd_actualdiff[i,j] <- inv_logit(post_actualdiff$alpha[i] + #inv logit because originally is logit
-                                           post_actualdiff$mu[i,j] + #age
-                                           (post_actualdiff$beta_wealth_z[i,j]*post_actualdiff$beta_wealth_sigma[i])*0+ #absolute wealth
-                                           (post_actualdiff$gamma_wealth_z[i,j]*post_actualdiff$gamma_wealth_sigma[i])*0 + #wealth change
-                                           (post_actualdiff$delta_wealth_z[i,j]*post_actualdiff$delta_wealth_sigma[i])*deciles_msd[k]) #moving variance
+  for(j in 1:41){
+    for(i in 1:nrow(post_constant$alpha)){
+      p_msd_constant[i,j] <- inv_logit(post_constant$alpha[i] + #inv logit because originally is logit
+                                         (post_constant$beta_wealth_z[i]*post_constant$beta_wealth_sigma[i])* 0 + #diffolute wealth
+                                         (post_constant$gamma_wealth_z[i]*post_constant$gamma_wealth_sigma[i])*0 + #wealth change
+                                         (post_constant$delta_wealth_z[i]*post_constant$delta_wealth_sigma[i])* deciles_msd[k]) #moving variance
     }
   }
   #check data
-  p_msd_actualdiff
+  p_msd_constant
   #plot it!
   #prepare model prediction data
-  plot_msd_actualdiff <- data.frame(age = 1:ncol(p_msd_actualdiff),
-                                    median = apply(p_msd_actualdiff, 2, median), 
-                                    upp = apply(p_msd_actualdiff, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
-                                    low = apply(p_msd_actualdiff, 2, function(x) HPDI(x, prob = 0.9))[2, ]
+  plot_msd_constant <- data.frame(age = 1:ncol(p_msd_constant),
+                                  median = apply(p_msd_constant, 2, median), 
+                                  upp = apply(p_msd_constant, 2, function(x) HPDI(x, prob = 0.9))[1, ], 
+                                  low = apply(p_msd_constant, 2, function(x) HPDI(x, prob = 0.9))[2, ]
   ) 
   #store data per decile
-  assign(paste0("msd_",k),plot_msd_actualdiff)
+  assign(paste0("msd_",k),plot_msd_constant)
   
-  # Calculate cumulative probabilities
+  # Calculate COMPLEMENTARY cumulative probabilities (survival function)
   #create vectors
-  cumulative_median_msd <- numeric(length(plot_msd_actualdiff$median))
-  cumulative_low_msd <- numeric(length(plot_msd_actualdiff$low))
-  cumulative_upp_msd <- numeric(length(plot_msd_actualdiff$upp))
-  #set the first probability
-  cumulative_median_msd[1] <- plot_msd_actualdiff$median[1]
-  cumulative_low_msd[1] <- plot_msd_actualdiff$low[1]
-  cumulative_upp_msd[1] <- plot_msd_actualdiff$upp[1]
-  #calculate the cumulative probabilities for the other ages
-  for (a in 2:length(plot_msd_actualdiff$median)) {
-    cumulative_median_msd[a] <- cumulative_median_msd[a-1] + (1 - cumulative_median_msd[a-1]) * plot_msd_actualdiff$median[a]
-    cumulative_low_msd[a] <- cumulative_low_msd[a-1] + (1 - cumulative_low_msd[a-1]) * plot_msd_actualdiff$low[a]
-    cumulative_upp_msd[a] <- cumulative_upp_msd[a-1] + (1 - cumulative_upp_msd[a-1]) * plot_msd_actualdiff$upp[a]
-  }
-  #store data per decile
-  assign(paste0("cumulative_median_msd_",k),cumulative_median_msd)
-  assign(paste0("cumulative_low_msd_",k),cumulative_low_msd)
-  assign(paste0("cumulative_upp_msd_",k),cumulative_upp_msd)
+  complementary_cumulative_median_msd <- numeric(length(plot_msd_constant$median))
+  complementary_cumulative_low_msd <- numeric(length(plot_msd_constant$low))
+  complementary_cumulative_upp_msd <- numeric(length(plot_msd_constant$upp))
   
-  # Calculate exact median age at first birth
-  age_before <- max(which(cumulative_median_msd < 0.5))
-  age_after <- min(which(cumulative_median_msd >= 0.5))
-  prob_before <- cumulative_median_msd[age_before]
-  prob_after <- cumulative_median_msd[age_after]
-  exact_age_median <- age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before)
+  #Start at age 10 with 100% childless
+  complementary_cumulative_median_msd[1] <- 1  # Age 10
+  complementary_cumulative_low_msd[1] <- 1
+  complementary_cumulative_upp_msd[1] <- 1
+  
+  #calculate the complementary cumulative probabilities for the other ages
+  for (a in 2:length(plot_msd_constant$median)) {
+    complementary_cumulative_median_msd[a] <- complementary_cumulative_median_msd[a-1] * (1 - plot_msd_constant$median[a])
+    complementary_cumulative_low_msd[a] <- complementary_cumulative_low_msd[a-1] * (1 - plot_msd_constant$low[a])
+    complementary_cumulative_upp_msd[a] <- complementary_cumulative_upp_msd[a-1] * (1 - plot_msd_constant$upp[a])
+  }
+  
+  #store data per decile
+  assign(paste0("complementary_cumulative_median_msd_",k),complementary_cumulative_median_msd)
+  assign(paste0("complementary_cumulative_low_msd_",k),complementary_cumulative_low_msd)
+  assign(paste0("complementary_cumulative_upp_msd_",k),complementary_cumulative_upp_msd)
+  
+  # Calculate exact median age at first birth (age when complementary cumulative probability drops below 0.5)
+  age_before <- max(which(complementary_cumulative_median_msd >= 0.5))
+  age_after <- min(which(complementary_cumulative_median_msd < 0.5))
+  prob_before <- complementary_cumulative_median_msd[age_before]
+  prob_after <- complementary_cumulative_median_msd[age_after]
+  exact_age_median <- (age_before + (0.5 - prob_before) * (age_after - age_before) / (prob_after - prob_before))
   
   # Store the exact median age
   assign(paste0("exact_age_median_msd_", k), exact_age_median)
   
   #add median
   #add points
-  points(cumulative_median_msd[11:51] ~ plot_msd_actualdiff$age[11:51], col=palette_c[k], pch=16, cex=1.5)
+  points(complementary_cumulative_median_msd[1:41] ~ plot_msd_constant$age[1:41], col=palette_c[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_msd[11:51] ~ plot_msd_actualdiff$age[11:51], col=palette_c[k], lwd=3, lty=1)
+  lines(complementary_cumulative_median_msd[1:41] ~ plot_msd_constant$age[1:41], col=palette_c[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_msd_actualdiff$age[11:51], rev(plot_msd_actualdiff$age[11:51])), c(cumulative_low_msd[11:51], rev(cumulative_upp_msd[11:51])), col=alpha(palette_c[k], 0.1), border=alpha(palette_c[k],0.5))
+  polygon(c(plot_msd_constant$age[1:41], rev(plot_msd_constant$age[1:41])), c(complementary_cumulative_low_msd[1:41], rev(complementary_cumulative_upp_msd[1:41])), col=alpha(palette_c[k], 0.1), border=alpha(palette_c[k],0.25))
   # Add vertical line for median age at first birth
   segments(x0 = exact_age_median, y0 = 0, x1 = exact_age_median, y1 = 0.5, col = palette_c[k], lwd=3, lty=2)
 }
@@ -868,87 +857,59 @@ for(k in 1:(length(deciles_msd))){
 # Coefficient plots ----
 
 # Set up plotting area with space at bottom
-par(mfrow = c(1, 3), mar = c(5, 4, 4, 2) + 0.5, oma = c(1, 0, 0, 0), xpd = NA)
+par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.5, oma = c(1, 0, 0, 0), xpd = NA)
 
-## Current wealth ----
-
-plot(c(30:1)~c(tab_actualdiff_beta_z[11:40,1]*tab_actualdiff_beta_sigma[1,1]),
-     xlim=c(-0.75,0.75),
-     main="Current\nwealth",
+#general plot
+plot(c(0,4)~c(-1,1),
+     xlim=c(-0.5,0.5),
+     main="Wealth predictors",
      yaxt="n",
-     xlab=expression(beta~coefficients),
-     ylab="Ages",
+     xlab="Coefficients",
+     ylab="Predictors",
      pch=16,
      col="#648FFF",
-     cex.axis=1.5,
+     type="n",
+     cex.axis=1.2,
      cex.lab=1.5,
      cex.main=1.5,
      mgp = c(2.5, 0.7, 0)
 )
-axis(2,c(30:1),c(10:39),cex.axis=1.5)
-clip(-1, 1, 0, 31)
+axis(2,c(1:3),c(expression(beta), expression(gamma), expression(delta)))
+clip(-1, 1, 0, 4)
 abline(v=0,lty=2)
-for (i in 11:40){
-  segments(
-    c(tab_actualdiff_beta_z[i,1]*tab_actualdiff_beta_sigma[1,1])-c(tab_actualdiff_beta_z[i,2]*tab_actualdiff_beta_sigma[1,1]),
-    41-i,
-    c(tab_actualdiff_beta_z[i,1]*tab_actualdiff_beta_sigma[1,1])+c(tab_actualdiff_beta_z[i,2]*tab_actualdiff_beta_sigma[1,1]),
-    41-i,
-    lwd=2,col="#648FFF") 
-}
+
+## Current wealth ----
+points(c(tab_constant_beta_z[1,1]*tab_constant_beta_sigma[1,1]),
+       1,
+       pch=16,col="#648FFF")
+segments(
+  c(tab_constant_beta_z[1,1]*tab_constant_beta_sigma[1,1])-c(tab_constant_beta_z[2,1]*tab_constant_beta_sigma[1,1]),
+  1,
+  c(tab_constant_beta_z[1,1]*tab_constant_beta_sigma[1,1])+c(tab_constant_beta_z[2,1]*tab_constant_beta_sigma[1,1]),
+  1,
+  lwd=2,col="#648FFF") 
 
 ## Short-term wealth variability ----
-
-plot(c(30:1)~c(tab_actualdiff_gamma_z[11:40,1]*tab_actualdiff_gamma_sigma[1,1]),
-     xlim=c(-0.75,0.75),
-     main="Short-term\nwealth variability",
-     yaxt="n",
-     xlab=expression(gamma~coefficients),
-     ylab="Ages",
-     pch=16,
-     col="#785EF0",
-     cex.axis=1.5,
-     cex.lab=1.5,
-     cex.main=1.5,
-     mgp = c(2.5, 0.7, 0)
-)
-axis(2,c(30:1),c(10:39),cex.axis=1.5)
-clip(-1, 1, 0, 31)
-abline(v=0,lty=2)
-for (i in 11:40){
-  segments(
-    c(tab_actualdiff_gamma_z[i,1]*tab_actualdiff_gamma_sigma[1,1])-c(tab_actualdiff_gamma_z[i,2]*tab_actualdiff_gamma_sigma[1,1]),
-    41-i,
-    c(tab_actualdiff_gamma_z[i,1]*tab_actualdiff_gamma_sigma[1,1])+c(tab_actualdiff_gamma_z[i,2]*tab_actualdiff_gamma_sigma[1,1]),
-    41-i,
-    lwd=2,col="#785EF0") 
-}
+points(c(tab_constant_gamma_z[1,1]*tab_constant_gamma_sigma[1,1]),
+       2,
+       pch=16,col="#785EF0")
+segments(
+  c(tab_constant_gamma_z[1,1]*tab_constant_gamma_sigma[1,1])-c(tab_constant_gamma_z[2,1]*tab_constant_gamma_sigma[1,1]),
+  2,
+  c(tab_constant_gamma_z[1,1]*tab_constant_gamma_sigma[1,1])+c(tab_constant_gamma_z[2,1]*tab_constant_gamma_sigma[1,1]),
+  2,
+  lwd=2,col="#785EF0") 
 
 ## Long-term wealth variability ----
-
-plot(c(30:1)~c(tab_actualdiff_delta_z[11:40,1]*tab_actualdiff_delta_sigma[1,1]),
-     xlim=c(-0.75,0.75),
-     main="Long-term\nwealth variability",
-     yaxt="n",
-     xlab=expression(delta~coefficients),
-     ylab="Ages",
-     pch=16,col="#DC267F",
-     cex.axis=1.5,
-     cex.lab=1.5,
-     cex.main=1.5,
-     mgp = c(2.5, 0.7, 0)
-)
-axis(2,c(30:1),c(10:39),cex.axis=1.5)
-clip(-1, 1, 0, 31)
-abline(v=0,lty=2)
-for (i in 11:40){
-  segments(
-    c(tab_actualdiff_delta_z[i,1]*tab_actualdiff_delta_sigma[1,1])-c(tab_actualdiff_delta_z[i,2]*tab_actualdiff_delta_sigma[1,1]),
-    41-i,
-    c(tab_actualdiff_delta_z[i,1]*tab_actualdiff_delta_sigma[1,1])+c(tab_actualdiff_delta_z[i,2]*tab_actualdiff_delta_sigma[1,1]),
-    41-i,
-    lwd=2,col="#DC267F") 
-}
+points(c(tab_constant_delta_z[1,1]*tab_constant_delta_sigma[1,1]),
+       3,
+       pch=16,col="#DC267F")
+segments(
+  c(tab_constant_delta_z[1,1]*tab_constant_delta_sigma[1,1])-c(tab_constant_delta_z[2,1]*tab_constant_delta_sigma[1,1]),
+  3,
+  c(tab_constant_delta_z[1,1]*tab_constant_delta_sigma[1,1])+c(tab_constant_delta_z[2,1]*tab_constant_delta_sigma[1,1]),
+  3,
+  lwd=2,col="#DC267F") 
 
 # Add common legend at bottom
 par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0.5, 0), new = TRUE)
@@ -964,7 +925,8 @@ legend("bottom",
        ncol = 4,
        bty = "n",
        xjust = 0.5,
-       text.width = c(0.13, 0.01, 0.01, 0.01),
+       text.width = c(0.22, 0.01, 0.01, 0.01),
        pt.cex = 1.5,
        cex = 1.5
 )
+

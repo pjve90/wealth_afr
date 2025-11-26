@@ -106,7 +106,7 @@ model {
 // wealth
     // absolute wealth
     beta_wealth_z ~ normal(0, 1); 
-    beta_wealth_sigma ~ normal(0, 0.5);
+    beta_wealth_sigma ~ normal(0, 0.25);
 
 // missing wealth parameters
     alpha_miss ~ beta(2, 2);           

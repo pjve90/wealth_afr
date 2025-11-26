@@ -657,7 +657,7 @@ shape <- c(15:17)
 type <- c(1:6)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+#set parameters for a legend outside of the plot par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(11,ncol(post_aw_full$mu)),
@@ -1034,7 +1034,7 @@ shape <- c(15:17)
 type <- c(1:6)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+#set parameters for a legend outside of the plot par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_sc_full$mu)),
@@ -1382,7 +1382,7 @@ legend(2.3,30,  # or specify x/y coordinates
        pt.cex = 1.5,
        cex = 1.2,
        box.col = NA,
-       title = expression(gamma~coefficients))
+       title = expression(delta~coefficients))
 
 ######Cumulative probabilities plot ----
 
@@ -1408,7 +1408,7 @@ shape <- c(15:17)
 type <- c(1:6)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+#set parameters for a legend outside of the plot par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_lv_full$mu)),
@@ -1420,7 +1420,7 @@ plot(c(0,1)~c(10,ncol(post_lv_full$mu)),
      cex.main=1.5,
      type="n")
 # Combined legend
-legend(43,1,  # or specify x/y coordinates
+legend(42,1.1,  # or specify x/y coordinates
        legend = c("Estimated", "Min.", "Med.", "Max.",  # First group
                   "",
                   "Simulated", "Min.", "Med.", "Max."), # Second group
@@ -1711,10 +1711,21 @@ all_full_tab_sim_delta_sigma
 ######Coefficient plots ----
 
 # Set up plotting area with space at bottom
-par(mfrow = c(1, 3), mar = c(4, 4, 4, 2) + 0.1, oma = c(2, 0, 0, 0), xpd = NA)
+par(mfrow = c(1, 3), mar = c(5, 4, 4, 2) + 0.5, oma = c(1, 0, 0, 0), xpd = NA)
 #current wealth
-plot(c(30:1)~c(all_full_tab_sim_beta_z[11:40,1]*all_full_tab_sim_beta_sigma[1,1]),xlim=c(-2,2),main="Current\nwealth",yaxt="n",xlab=expression(beta~coefficients),ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
+plot(c(30:1)~c(all_full_tab_sim_beta_z[11:40,1]*all_full_tab_sim_beta_sigma[1,1]),
+     xlim=c(-2,2),
+     main="Current\nwealth",
+     yaxt="n",
+     xlab=expression(beta~coefficients),
+     ylab="Ages",
+     pch=16,
+     cex.axis=1.5,
+     cex.lab=1.5,
+     cex.main=1.5,
+     mgp = c(2.5, 0.7, 0)
+)
+axis(2,c(30:1),c(10:39),cex.axis=1.5)
 clip(-2, 2, 0, 31)
 abline(v=0,lty=2)
 for (i in 11:40){
@@ -1727,8 +1738,19 @@ for (i in 11:40){
 }
 points(c(30:1)~all_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(all_full_tab_sim_gamma_z[11:40,1]*all_full_tab_sim_gamma_sigma[1,1]),xlim=c(-2,2),main="Short-term\nwealth variability",yaxt="n",xlab=expression(gamma~coefficients),ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
+plot(c(30:1)~c(all_full_tab_sim_gamma_z[11:40,1]*all_full_tab_sim_gamma_sigma[1,1]),
+     xlim=c(-2,2),
+     main="Short-term\nwealth variability",
+     yaxt="n",
+     xlab=expression(gamma~coefficients),
+     ylab="Ages",
+     pch=16,
+     cex.axis=1.5,
+     cex.lab=1.5,
+     cex.main=1.5,
+     mgp = c(2.5, 0.7, 0)
+)
+axis(2,c(30:1),c(10:39),cex.axis=1.5)
 clip(-2, 2, 0, 31)
 abline(v=0,lty=2)
 for (i in 11:40){
@@ -1741,8 +1763,19 @@ for (i in 11:40){
 }
 points(c(30:1)~all_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(all_full_tab_sim_delta_z[11:40,1]*all_full_tab_sim_delta_sigma[1,1]),xlim=c(-2,2),main="Long-term\nwealth variability",yaxt="n",xlab=expression(delta~coefficients),ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
+plot(c(30:1)~c(all_full_tab_sim_delta_z[11:40,1]*all_full_tab_sim_delta_sigma[1,1]),
+     xlim=c(-2,2),
+     main="Long-term\nwealth variability",
+     yaxt="n",
+     xlab=expression(delta~coefficients),
+     ylab="Ages",
+     pch=16,
+     cex.axis=1.5,
+     cex.lab=1.5,
+     cex.main=1.5,
+     mgp = c(2.5, 0.7, 0)
+)
+axis(2,c(30:1),c(10:39),cex.axis=1.5)
 clip(-2, 2, 0, 31)
 abline(v=0,lty=2)
 for (i in 11:40){
@@ -1769,7 +1802,9 @@ legend("bottom",
        ncol = 7,
        bty = "n",
        xjust = 0.5,
-       text.width = c(0.05, 0.001, 0.01, 0.01, 0.01, 0.01, 0.01)
+       text.width = c(0.07, 0.01, 0.02, 0.01, 0.01, 0.01, 0.01),
+       pt.cex = 1.5,
+       cex = 1.5
 )
 
 ######Cumulative probabilities plot ----
@@ -1792,32 +1827,47 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_a<-palette[1:length(deciles_aw_all_full)]
 palette_a
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:6)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_all_full$mu)),
+plot(c(0,1)~c(11,ncol(post_all_full$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Current levels\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_a,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_all_full$mu), by = 5), 
+     labels = seq(10, ncol(post_all_full$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(42,1,  # or specify x/y coordinates
+       legend = c("Estimated","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_a,NA,NA,NA,palette_a),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_poor)[11:40]~c(11:40),col=palette_a[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_poor)[11:40]~c(11:40),col=palette_a[1],lty=2,lwd=3)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_a[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_a[2],lty=2,lwd=3)
 #maximum wealth
-lines(cumsum(std_ageprobs_rich)[11:40]~c(11:40),col=palette_a[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_rich)[11:40]~c(11:40),col=palette_a[3],lty=2,lwd=3)
 
 #add lines
 for(k in 1:(length(deciles_aw_all_full))){
@@ -1868,11 +1918,11 @@ for(k in 1:(length(deciles_aw_all_full))){
   
   #add median
   #add points
-  points(cumulative_median_absw[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_aw_all_full$age[11:40], col=palette_a[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_aw_all_full$age[11:40], rev(plot_aw_all_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.25), border=NA)
+  polygon(c(plot_absw_real$age[11:40], rev(plot_absw_real$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.1), border=alpha(palette_a[k],0.25))
 }
 
 ###### Short-term wealth variability ----
@@ -1893,33 +1943,47 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_b<-palette[4:(length(deciles_sc_all_full)+3)]
 palette_b
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:6)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_all_full$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Short-term variability\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_b,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_all_full$mu), by = 5), 
+     labels = seq(10, ncol(post_all_full$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(42,1,  # or specify x/y coordinates
+       legend = c("Estimated","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_b,NA,NA,NA,palette_b),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=2,lwd=3)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=2,lwd=3)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=type[6],lwd=2)
-
+lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=2,lwd=3)
 
 #add lines
 for(k in 1:(length(deciles_sc_all_full))){
@@ -1950,31 +2014,31 @@ for(k in 1:(length(deciles_sc_all_full))){
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_absw <- numeric(length(plot_sc_all_full$median))
-  cumulative_low_absw <- numeric(length(plot_sc_all_full$low))
-  cumulative_upp_absw <- numeric(length(plot_sc_all_full$upp))
+  cumulative_median_diffw <- numeric(length(plot_sc_all_full$median))
+  cumulative_low_diffw <- numeric(length(plot_sc_all_full$low))
+  cumulative_upp_diffw <- numeric(length(plot_sc_all_full$upp))
   #set the first probability
-  cumulative_median_absw[1] <- plot_sc_all_full$median[1]
-  cumulative_low_absw[1] <- plot_sc_all_full$low[1]
-  cumulative_upp_absw[1] <- plot_sc_all_full$upp[1]
+  cumulative_median_diffw[1] <- plot_sc_all_full$median[1]
+  cumulative_low_diffw[1] <- plot_sc_all_full$low[1]
+  cumulative_upp_diffw[1] <- plot_sc_all_full$upp[1]
   #calculate the cumulative probabilities for the other ages
   for (a in 2:length(plot_sc_all_full$median)) {
-    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_sc_all_full$median[a]
-    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_sc_all_full$low[a]
-    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_sc_all_full$upp[a]
+    cumulative_median_diffw[a] <- cumulative_median_diffw[a-1] + (1 - cumulative_median_diffw[a-1]) * plot_sc_all_full$median[a]
+    cumulative_low_diffw[a] <- cumulative_low_diffw[a-1] + (1 - cumulative_low_diffw[a-1]) * plot_sc_all_full$low[a]
+    cumulative_upp_diffw[a] <- cumulative_upp_diffw[a-1] + (1 - cumulative_upp_diffw[a-1]) * plot_sc_all_full$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
-  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
-  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
+  assign(paste0("cumulative_median_diffw_",k),cumulative_median_diffw)
+  assign(paste0("cumulative_low_diffw_",k),cumulative_low_diffw)
+  assign(paste0("cumulative_upp_diffw_",k),cumulative_upp_diffw)
   
   #add median
   #add points
-  points(cumulative_median_absw[11:40] ~ plot_sc_all_full$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_diffw[11:40] ~ plot_sc_all_full$age[11:40], col=palette_b[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:40] ~ plot_sc_all_full$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
+  lines(cumulative_median_diffw[11:40] ~ plot_sc_all_full$age[11:40], col=palette_b[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_sc_all_full$age[11:40], rev(plot_sc_all_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_b[k], 0.25), border=NA)
+  polygon(c(plot_sc_all_full$age[11:40], rev(plot_sc_all_full$age[11:40])), c(cumulative_low_diffw[11:40], rev(cumulative_upp_diffw[11:40])), col=alpha(palette_b[k], 0.1), border=alpha(palette_b[k],0.25))
 }
 
 ###### Long-term variability of wealth ----
@@ -1995,32 +2059,46 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_c<-palette[7:(length(deciles_lv_all_full)+6)]
 palette_c
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:6)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_all_full$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Long-term variability\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA,title="Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_c,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+     type="n",
+     xaxt="n")
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_all_full$mu), by = 5), 
+     labels = seq(10, ncol(post_all_full$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(42,1,  # or specify x/y coordinates
+       legend = c("Estimated","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_c,NA,NA,NA,palette_c),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=2,lwd=3)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=2,lwd=3)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=2,lwd=3)
 
 #add lines
 for(k in 1:(length(deciles_lv_all_full))){
@@ -2051,31 +2129,31 @@ for(k in 1:(length(deciles_lv_all_full))){
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_absw <- numeric(length(plot_lv_all_full$median))
-  cumulative_low_absw <- numeric(length(plot_lv_all_full$low))
-  cumulative_upp_absw <- numeric(length(plot_lv_all_full$upp))
+  cumulative_median_msdw <- numeric(length(plot_lv_all_full$median))
+  cumulative_low_msdw <- numeric(length(plot_lv_all_full$low))
+  cumulative_upp_msdw <- numeric(length(plot_lv_all_full$upp))
   #set the first probability
-  cumulative_median_absw[1] <- plot_lv_all_full$median[1]
-  cumulative_low_absw[1] <- plot_lv_all_full$low[1]
-  cumulative_upp_absw[1] <- plot_lv_all_full$upp[1]
+  cumulative_median_msdw[1] <- plot_lv_all_full$median[1]
+  cumulative_low_msdw[1] <- plot_lv_all_full$low[1]
+  cumulative_upp_msdw[1] <- plot_lv_all_full$upp[1]
   #calculate the cumulative probabilities for the other ages
   for (a in 2:length(plot_lv_all_full$median)) {
-    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_lv_all_full$median[a]
-    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_lv_all_full$low[a]
-    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_lv_all_full$upp[a]
+    cumulative_median_msdw[a] <- cumulative_median_msdw[a-1] + (1 - cumulative_median_msdw[a-1]) * plot_lv_all_full$median[a]
+    cumulative_low_msdw[a] <- cumulative_low_msdw[a-1] + (1 - cumulative_low_msdw[a-1]) * plot_lv_all_full$low[a]
+    cumulative_upp_msdw[a] <- cumulative_upp_msdw[a-1] + (1 - cumulative_upp_msdw[a-1]) * plot_lv_all_full$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
-  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
-  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
+  assign(paste0("cumulative_median_msdw_",k),cumulative_median_msdw)
+  assign(paste0("cumulative_low_msdw_",k),cumulative_low_msdw)
+  assign(paste0("cumulative_upp_msdw_",k),cumulative_upp_msdw)
   
   #add median
   #add points
-  points(cumulative_median_absw[11:40] ~ plot_lv_all_full$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_msdw[11:40] ~ plot_lv_all_full$age[11:40], col=palette_c[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:40] ~ plot_lv_all_full$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_msdw[11:40] ~ plot_lv_all_full$age[11:40], col=palette_c[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_lv_all_full$age[11:40], rev(plot_lv_all_full$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_c[k], 0.25), border=NA)
+  polygon(c(plot_lv_all_full$age[11:40], rev(plot_lv_all_full$age[11:40])), c(cumulative_low_msdw[11:40], rev(cumulative_upp_msdw[11:40])), col=alpha(palette_c[k], 0.1), border=alpha(palette_c[k],0.25))
 }
 
 #Aim 2: Data imputation ----
@@ -2310,7 +2388,7 @@ shape <- c(15:17)
 type <- c(1:6)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_aw_imputed$mu)),
@@ -2322,7 +2400,7 @@ plot(c(0,1)~c(10,ncol(post_aw_imputed$mu)),
      cex.main=1.5,
      type="n")
 # Combined legend
-legend(43,1,  # or specify x/y coordinates
+legend(42,1.1,  # or specify x/y coordinates
        legend = c("Estimated", "Min.", "Med.", "Max.",  # First group
                   "",
                   "Simulated", "Min.", "Med.", "Max."), # Second group
@@ -2589,7 +2667,7 @@ shape <- c(15:17)
 type <- c(1:6)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_sc_imputed$mu)),
@@ -2600,8 +2678,20 @@ plot(c(0,1)~c(10,ncol(post_sc_imputed$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_b,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+# Combined legend
+legend(42,1.1,  # or specify x/y coordinates
+       legend = c("Estimated", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated", "Min.", "Med.", "Max."), # Second group
+       col = c(NA, palette_b,NA,NA,palette_b),  # NA for section headers
+       lwd = 3,
+       lty = c(NA, type[1:3],NA, NA, type[4:6]),  # NA for headers
+       pch = c(NA, shape,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
 lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=type[4],lwd=2)
@@ -2695,31 +2785,6 @@ n_miss <- nrow(wealth_miss)
 #check data
 n_miss
 
-#prepare observed mean and sd of wealth change
-#change -99 to NA
-sim_wealth_imputation_res[sim_wealth_imputation_res==-99] <- NA
-sim_wealth_imputation_res
-#create matrix
-simlongtermwealth_imp <- matrix(NA,nrow=nrow(sim_wealth_imputation_res),ncol=ncol(sim_wealth_imputation_res))
-#calculate the long-term wealth variability
-for(individual in 1:nrow(sim_wealth_imputation_res)){
-  for(ages in 11:ncol(sim_wealth_imputation_res)){
-    simlongtermwealth_imp[individual,ages]<-sd(as.numeric(std_simwealth[individual,(ages-10):(ages)]),na.rm=T)
-  }
-}
-#check data
-simlongtermwealth_imp
-#calculate mean and sd
-#mean
-lv_mean_obs <- mean(simlongtermwealth_imp,na.rm=T)
-lv_mean_obs
-#sd
-lv_sd_obs <- sd(simlongtermwealth_imp,na.rm=T)
-lv_sd_obs
-#change NA to -99
-sim_wealth_imputation_res[which(is.na(sim_wealth_imputation_res))] <- -99
-sim_wealth_imputation_res
-
 # 4) incomplete wealth data, absolute wealth strongest predictor
 # We put all of this together in the list of data for the analyses
 lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
@@ -2728,9 +2793,7 @@ lv_imputed_simulated_list <- list(N = nrow(lv_simbirth_res), #population size
                                   baby = as.matrix(lv_simbirth_res), #AFR
                                   median_wealth = std_median_wealth, # median wealth of each individual
                                   N_miss = n_miss, #number of missing values
-                                  wealth_miss = wealth_miss, #location of missing values
-                                  lv_mean_obs = lv_mean_obs, #mean of observed long-term variability
-                                  lv_sd_obs = lv_sd_obs #sd of observed long-term variability
+                                  wealth_miss = wealth_miss #location of missing values
 )
 lv_imputed_simulated_list
 
@@ -2804,12 +2867,10 @@ sd(post_lv_imputed$sigma_miss)
 
 #####Plot it! ----
 
-######Coefficient plots ----
-
-###### Coefficients plot ---- 
+######Coefficients plots ----
 
 par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,9))
-#Long-term\nwealth variability
+#long-term wealth variability
 plot(c(30:1)~c(lv_imputed_tab_sim_delta_z[11:40,1]*lv_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-2,2),main="Long-term\nwealth variability",yaxt="n",xlab=expression(delta~coefficients),ylab="Ages",pch=16)
 axis(2,c(30:1),c(10:39))
 for (i in 11:40){
@@ -2835,7 +2896,7 @@ legend(2.3,30,  # or specify x/y coordinates
 ######Cumulative probabilities plot ----
 
 #simulate wealth values
-std_simwealth_lv_imputed <- seq(from=round(min(post_lv_imputed$wealth_msd_std),1),to=round(max(post_lv_imputed$wealth_msd_std),1),length.out=nrow(sim_wealth_imputation_res)) #specify according to range and length related to sample size
+std_simwealth_lv_imputed <- seq(from=round(min(post_lv_imputed$wealth_msd_std),1),to=round(max(post_lv_imputed$wealth_msd_std),1),length.out=nrow(std_simwealth_res)) #specify according to range and length related to sample size
 std_simwealth_lv_imputed
 #get the deciles
 deciles_lv_imputed <- c(mean(std_simwealth_lv_imputed)-sd(std_simwealth_lv_imputed),
@@ -2856,7 +2917,8 @@ shape <- c(15:17)
 type <- c(1:6)
 
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+#set parameters for a legend outside of the plot
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_lv_imputed$mu)),
@@ -2867,15 +2929,27 @@ plot(c(0,1)~c(10,ncol(post_lv_imputed$mu)),
      cex.lab=1.5,
      cex.main=1.5,
      type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA,title="Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_c,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+# Combined legend
+legend(42,1.1,  # or specify x/y coordinates
+       legend = c("Estimated", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated", "Min.", "Med.", "Max."), # Second group
+       col = c(NA, palette_c,NA,NA,palette_c),  # NA for section headers
+       lwd = 3,
+       lty = c(NA, type[1:3],NA, NA, type[4:6]),  # NA for headers
+       pch = c(NA, shape,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minlv)[10:40]~c(10:40),col=palette_c[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=type[4],lwd=2)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[10:40]~c(10:40),col=palette_c[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=type[5],lwd=2)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxlv)[10:40]~c(10:40),col=palette_c[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=type[6],lwd=2)
 
 #add lines
 for(k in 1:(length(deciles_lv_imputed))){
@@ -2924,13 +2998,12 @@ for(k in 1:(length(deciles_lv_imputed))){
   
   #add median
   #add confidence intervals
-  polygon(c(plot_lv_imputedw_lv_imputed$age[10:40], rev(plot_lv_imputedw_lv_imputed$age[10:40])), c(cumulative_low_lv_imputedw[10:40], rev(cumulative_upp_lv_imputedw[10:40])), col=alpha(palette_c[k], 0.1), border=NA)
+  polygon(c(plot_lv_imputedw_lv_imputed$age[11:40], rev(plot_lv_imputedw_lv_imputed$age[11:40])), c(cumulative_low_lv_imputedw[11:40], rev(cumulative_upp_lv_imputedw[11:40])), col=alpha(palette_c[k], 0.1), border=NA)
   #add points
-  points(cumulative_median_lv_imputedw[10:40] ~ plot_lv_imputedw_lv_imputed$age[10:40], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_lv_imputedw[11:40] ~ plot_lv_imputedw_lv_imputed$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
   #add lines
-  lines(cumulative_median_lv_imputedw[10:40] ~ plot_lv_imputedw_lv_imputed$age[10:40], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_lv_imputedw[11:40] ~ plot_lv_imputedw_lv_imputed$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
 }
-
 
 #Scenario 8: All wealth predictors ----
 
@@ -2949,6 +3022,8 @@ for(j in 1:ncol(all_simbirth)){
 #restrict data to ages of interest (10 to 39)
 all_simbirth_res<-all_simbirth[,1:40]
 sim_wealth_imputation_res<-sim_wealth_imputation[,1:40]
+#standardise median wealth
+std_median_wealth <- standardize(medianwealthperindividual_imp)
 
 #prepare missing values
 #location
@@ -2966,7 +3041,7 @@ all_imputed_simulated_list <- list(N = nrow(all_simbirth_res), #population size
                                    A = ncol(all_simbirth_res), #age
                                    wealth = as.matrix(sim_wealth_imputation_res), #current absolute wealth
                                    baby = as.matrix(all_simbirth_res), #AFR
-                                   median_wealth = medianwealthperindividual, # median wealth of each individual
+                                   median_wealth = std_median_wealth, # median wealth of each individual
                                    N_miss = n_miss, #number of missing values
                                    wealth_miss = wealth_miss #location of missing values
 )
@@ -3081,10 +3156,21 @@ sd(post_all_imputed$sigma_miss)
 ######Coefficient plots ----
 
 # Set up plotting area with space at bottom
-par(mfrow = c(1, 3), mar = c(4, 4, 4, 2) + 0.1, oma = c(2, 0, 0, 0), xpd = NA)
+par(mfrow = c(1, 3), mar = c(5, 4, 4, 2) + 0.5, oma = c(1, 0, 0, 0), xpd = NA)
 #current wealth
-plot(c(30:1)~c(all_imputed_tab_sim_beta_z[11:40,1]*all_imputed_tab_sim_beta_sigma[1,1]),xlim=c(-2,2),main="Current\nwealth",yaxt="n",xlab=expression(beta~coefficients),ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
+plot(c(30:1)~c(all_imputed_tab_sim_beta_z[11:40,1]*all_imputed_tab_sim_beta_sigma[1,1]),
+     xlim=c(-2,2),
+     main="Current\nwealth",
+     yaxt="n",
+     xlab=expression(beta~coefficients),
+     ylab="Ages",
+     pch=16,
+     cex.axis=1.5,
+     cex.lab=1.5,
+     cex.main=1.5,
+     mgp = c(2.5, 0.7, 0)
+)
+axis(2,c(30:1),c(10:39),cex.axis=1.2)
 clip(-2, 2, 0, 31)
 abline(v=0,lty=2)
 for (i in 11:40){
@@ -3097,8 +3183,19 @@ for (i in 11:40){
 }
 points(c(30:1)~all_beta[11:40],col=hcl.colors(3,"zissou 1")[1],pch=16)
 #short-term wealth variability
-plot(c(30:1)~c(all_imputed_tab_sim_gamma_z[11:40,1]*all_imputed_tab_sim_gamma_sigma[1,1]),xlim=c(-2,2),main="Short-term\nwealth variability",yaxt="n",xlab=expression(gamma~coefficients),ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
+plot(c(30:1)~c(all_imputed_tab_sim_gamma_z[11:40,1]*all_imputed_tab_sim_gamma_sigma[1,1]),
+     xlim=c(-2,2),
+     main="Short-term\nwealth variability",
+     yaxt="n",
+     xlab=expression(gamma~coefficients),
+     ylab="Ages",
+     pch=16,
+     cex.axis=1.5,
+     cex.lab=1.5,
+     cex.main=1.5,
+     mgp = c(2.5, 0.7, 0)
+)
+axis(2,c(30:1),c(10:39),cex.axis=1.5)
 clip(-2, 2, 0, 31)
 abline(v=0,lty=2)
 for (i in 11:40){
@@ -3111,8 +3208,19 @@ for (i in 11:40){
 }
 points(c(30:1)~all_gamma[11:40],col=hcl.colors(3,"zissou 1")[2],pch=16)
 #long-term wealth variability
-plot(c(30:1)~c(all_imputed_tab_sim_delta_z[11:40,1]*all_imputed_tab_sim_delta_sigma[1,1]),xlim=c(-2,2),main="Long-term\nwealth variability",yaxt="n",xlab=expression(delta~coefficients),ylab="Ages",pch=16)
-axis(2,c(30:1),c(10:39))
+plot(c(30:1)~c(all_imputed_tab_sim_delta_z[11:40,1]*all_imputed_tab_sim_delta_sigma[1,1]),
+     xlim=c(-2,2),
+     main="Long-term\nwealth variability",
+     yaxt="n",
+     xlab=expression(delta~coefficients),
+     ylab="Ages",
+     pch=16,
+     cex.axis=1.5,
+     cex.lab=1.5,
+     cex.main=1.5,
+     mgp = c(2.5, 0.7, 0)
+)
+axis(2,c(30:1),c(10:39),cex.axis=1.5)
 clip(-2, 2, 0, 31)
 abline(v=0,lty=2)
 for (i in 11:40){
@@ -3139,7 +3247,9 @@ legend("bottom",
        ncol = 7,
        bty = "n",
        xjust = 0.5,
-       text.width = c(0.05, 0.001, 0.01, 0.01, 0.01, 0.01, 0.01)
+       text.width = c(0.07, 0.01, 0.02, 0.01, 0.01, 0.01, 0.01),
+       pt.cex = 1.5,
+       cex = 1.5
 )
 
 ######Cumulative probabilities plot ----
@@ -3162,32 +3272,47 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_a<-palette[1:length(deciles_aw_all_imputed)]
 palette_a
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:6)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
-plot(c(0,1)~c(10,ncol(post_all_imputed$mu)),
+plot(c(0,1)~c(11,ncol(post_all_imputed$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Current levels\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_a,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_a,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_all_imputed$mu), by = 5), 
+     labels = seq(10, ncol(post_all_imputed$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(42,1,  # or specify x/y coordinates
+       legend = c("Estimated","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_a,NA,NA,NA,palette_a),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_poor)[11:40]~c(11:40),col=palette_a[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_poor)[11:40]~c(11:40),col=palette_a[1],lty=2,lwd=3)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_a[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_a[2],lty=2,lwd=3)
 #maximum wealth
-lines(cumsum(std_ageprobs_rich)[11:40]~c(11:40),col=palette_a[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_rich)[11:40]~c(11:40),col=palette_a[3],lty=2,lwd=3)
 
 #add lines
 for(k in 1:(length(deciles_aw_all_imputed))){
@@ -3238,11 +3363,11 @@ for(k in 1:(length(deciles_aw_all_imputed))){
   
   #add median
   #add points
-  points(cumulative_median_absw[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_absw[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], lwd=3, lty=type[k])
+  lines(cumulative_median_absw[11:40] ~ plot_aw_all_imputed$age[11:40], col=palette_a[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_aw_all_imputed$age[11:40], rev(plot_aw_all_imputed$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.25), border=NA)
+  polygon(c(plot_absw_real$age[11:40], rev(plot_absw_real$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_a[k], 0.1), border=alpha(palette_a[k],0.25))
 }
 
 ###### Short-term wealth variability ----
@@ -3263,33 +3388,47 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_b<-palette[4:(length(deciles_sc_all_imputed)+3)]
 palette_b
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:6)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_all_imputed$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Short-term variability\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_b,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col = NA,title = "Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_b,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+     type="n",
+     xaxt="n")
+
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_all_imputed$mu), by = 5), 
+     labels = seq(10, ncol(post_all_imputed$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(42,1,  # or specify x/y coordinates
+       legend = c("Estimated","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_b,NA,NA,NA,palette_b),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minsc)[11:40]~c(11:40),col=palette_b[1],lty=2,lwd=3)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_b[2],lty=2,lwd=3)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=type[6],lwd=2)
-
+lines(cumsum(std_ageprobs_maxsc)[11:40]~c(11:40),col=palette_b[3],lty=2,lwd=3)
 
 #add lines
 for(k in 1:(length(deciles_sc_all_imputed))){
@@ -3320,31 +3459,31 @@ for(k in 1:(length(deciles_sc_all_imputed))){
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_absw <- numeric(length(plot_sc_all_imputed$median))
-  cumulative_low_absw <- numeric(length(plot_sc_all_imputed$low))
-  cumulative_upp_absw <- numeric(length(plot_sc_all_imputed$upp))
+  cumulative_median_diffw <- numeric(length(plot_sc_all_imputed$median))
+  cumulative_low_diffw <- numeric(length(plot_sc_all_imputed$low))
+  cumulative_upp_diffw <- numeric(length(plot_sc_all_imputed$upp))
   #set the first probability
-  cumulative_median_absw[1] <- plot_sc_all_imputed$median[1]
-  cumulative_low_absw[1] <- plot_sc_all_imputed$low[1]
-  cumulative_upp_absw[1] <- plot_sc_all_imputed$upp[1]
+  cumulative_median_diffw[1] <- plot_sc_all_imputed$median[1]
+  cumulative_low_diffw[1] <- plot_sc_all_imputed$low[1]
+  cumulative_upp_diffw[1] <- plot_sc_all_imputed$upp[1]
   #calculate the cumulative probabilities for the other ages
   for (a in 2:length(plot_sc_all_imputed$median)) {
-    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_sc_all_imputed$median[a]
-    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_sc_all_imputed$low[a]
-    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_sc_all_imputed$upp[a]
+    cumulative_median_diffw[a] <- cumulative_median_diffw[a-1] + (1 - cumulative_median_diffw[a-1]) * plot_sc_all_imputed$median[a]
+    cumulative_low_diffw[a] <- cumulative_low_diffw[a-1] + (1 - cumulative_low_diffw[a-1]) * plot_sc_all_imputed$low[a]
+    cumulative_upp_diffw[a] <- cumulative_upp_diffw[a-1] + (1 - cumulative_upp_diffw[a-1]) * plot_sc_all_imputed$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
-  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
-  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
+  assign(paste0("cumulative_median_diffw_",k),cumulative_median_diffw)
+  assign(paste0("cumulative_low_diffw_",k),cumulative_low_diffw)
+  assign(paste0("cumulative_upp_diffw_",k),cumulative_upp_diffw)
   
   #add median
   #add points
-  points(cumulative_median_absw[11:40] ~ plot_sc_all_imputed$age[11:40], col=palette_b[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_diffw[11:40] ~ plot_sc_all_imputed$age[11:40], col=palette_b[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:40] ~ plot_sc_all_imputed$age[11:40], col=palette_b[k], lwd=3, lty=type[k])
+  lines(cumulative_median_diffw[11:40] ~ plot_sc_all_imputed$age[11:40], col=palette_b[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_sc_all_imputed$age[11:40], rev(plot_sc_all_imputed$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_b[k], 0.25), border=NA)
+  polygon(c(plot_sc_all_imputed$age[11:40], rev(plot_sc_all_imputed$age[11:40])), c(cumulative_low_diffw[11:40], rev(cumulative_upp_diffw[11:40])), col=alpha(palette_b[k], 0.1), border=alpha(palette_b[k],0.25))
 }
 
 ###### Long-term variability of wealth ----
@@ -3365,32 +3504,46 @@ palette <- palette.colors(9,"Okabe-Ito")
 palette_c<-palette[7:(length(deciles_lv_all_imputed)+6)]
 palette_c
 
-#shape of points
-shape <- c(15:17)
-#line type
-type <- c(1:6)
-
 #set parameters for a legend outside of the plot
-par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,12))
+par(mfrow=c(1,1),xpd=T,mar=c(5,5,4,15))
 
 #plot empty plot
 plot(c(0,1)~c(10,ncol(post_all_imputed$mu)),
      ylab="Cumulative probability of first birth",
      xlab="Age",
      main="Long-term variability\nof material wealth",
-     cex.axis=1.2,
+     cex.axis=1.5,
      cex.lab=1.5,
      cex.main=1.5,
-     type="n")
-legend(43,1,c("Min.","Med.", "Max."),col=palette_c,lwd=3,pch=shape,lty=type,pt.cex = 1.5,cex=1.2,box.col=NA,title="Estimated")
-legend(43,0.5,c("Min.","Med.", "Max."),col=palette_c,lwd=3,lty=type[4:6],pt.cex = 1.5,cex=1.2,box.col = NA,title = "Simulated")
+     type="n",
+     xaxt="n")
+#x-axis should follow biological ages
+axis(1,
+     at = seq(11, ncol(post_all_imputed$mu), by = 5), 
+     labels = seq(10, ncol(post_all_imputed$mu)-1, by = 5),
+     cex.axis=1.5
+)
+# Combined legend
+legend(42,1,  # or specify x/y coordinates
+       legend = c("Estimated","", "Min.", "Med.", "Max.",  # First group
+                  "",
+                  "Simulated","", "Min.", "Med.", "Max."), # Second group
+       col = c(NA,NA, palette_c,NA,NA,NA,palette_c),  # NA for section headers
+       lwd = 3,
+       lty = c(NA,NA, c(1,1,1),NA,NA, NA, c(2,2,2)),  # NA for headers
+       pch = c(NA,NA, rep(16, 3),NA,NA, NA, rep(NA, 3)),    # Symbols for Estimated only
+       pt.cex = 1.5,
+       cex = 1.2,
+       box.col = NA,
+       ncol = 1,  # Optional: arrange in 2 columns
+       title = NULL)
 
 #add simulated cumulative probabilities
-lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=type[4],lwd=2)
+lines(cumsum(std_ageprobs_minlv)[11:40]~c(11:40),col=palette_c[1],lty=2,lwd=3)
 #medium wealth
-lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=type[5],lwd=2)
+lines(cumsum(std_afr_age_baseline)[11:40]~c(11:40),col=palette_c[2],lty=2,lwd=3)
 #maximum wealth
-lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=type[6],lwd=2)
+lines(cumsum(std_ageprobs_maxlv)[11:40]~c(11:40),col=palette_c[3],lty=2,lwd=3)
 
 #add lines
 for(k in 1:(length(deciles_lv_all_imputed))){
@@ -3421,30 +3574,31 @@ for(k in 1:(length(deciles_lv_all_imputed))){
   
   # Calculate cumulative probabilities
   #create vectors
-  cumulative_median_absw <- numeric(length(plot_lv_all_imputed$median))
-  cumulative_low_absw <- numeric(length(plot_lv_all_imputed$low))
-  cumulative_upp_absw <- numeric(length(plot_lv_all_imputed$upp))
+  cumulative_median_msdw <- numeric(length(plot_lv_all_imputed$median))
+  cumulative_low_msdw <- numeric(length(plot_lv_all_imputed$low))
+  cumulative_upp_msdw <- numeric(length(plot_lv_all_imputed$upp))
   #set the first probability
-  cumulative_median_absw[1] <- plot_lv_all_imputed$median[1]
-  cumulative_low_absw[1] <- plot_lv_all_imputed$low[1]
-  cumulative_upp_absw[1] <- plot_lv_all_imputed$upp[1]
+  cumulative_median_msdw[1] <- plot_lv_all_imputed$median[1]
+  cumulative_low_msdw[1] <- plot_lv_all_imputed$low[1]
+  cumulative_upp_msdw[1] <- plot_lv_all_imputed$upp[1]
   #calculate the cumulative probabilities for the other ages
   for (a in 2:length(plot_lv_all_imputed$median)) {
-    cumulative_median_absw[a] <- cumulative_median_absw[a-1] + (1 - cumulative_median_absw[a-1]) * plot_lv_all_imputed$median[a]
-    cumulative_low_absw[a] <- cumulative_low_absw[a-1] + (1 - cumulative_low_absw[a-1]) * plot_lv_all_imputed$low[a]
-    cumulative_upp_absw[a] <- cumulative_upp_absw[a-1] + (1 - cumulative_upp_absw[a-1]) * plot_lv_all_imputed$upp[a]
+    cumulative_median_msdw[a] <- cumulative_median_msdw[a-1] + (1 - cumulative_median_msdw[a-1]) * plot_lv_all_imputed$median[a]
+    cumulative_low_msdw[a] <- cumulative_low_msdw[a-1] + (1 - cumulative_low_msdw[a-1]) * plot_lv_all_imputed$low[a]
+    cumulative_upp_msdw[a] <- cumulative_upp_msdw[a-1] + (1 - cumulative_upp_msdw[a-1]) * plot_lv_all_imputed$upp[a]
   }
   #store data per decile
-  assign(paste0("cumulative_median_absw_",k),cumulative_median_absw)
-  assign(paste0("cumulative_low_absw_",k),cumulative_low_absw)
-  assign(paste0("cumulative_upp_absw_",k),cumulative_upp_absw)
+  assign(paste0("cumulative_median_msdw_",k),cumulative_median_msdw)
+  assign(paste0("cumulative_low_msdw_",k),cumulative_low_msdw)
+  assign(paste0("cumulative_upp_msdw_",k),cumulative_upp_msdw)
   
   #add median
   #add points
-  points(cumulative_median_absw[11:40] ~ plot_lv_all_imputed$age[11:40], col=palette_c[k], pch=shape[k], cex=1.5)
+  points(cumulative_median_msdw[11:40] ~ plot_lv_all_imputed$age[11:40], col=palette_c[k], pch=16, cex=1.5)
   #add lines
-  lines(cumulative_median_absw[11:40] ~ plot_lv_all_imputed$age[11:40], col=palette_c[k], lwd=3, lty=type[k])
+  lines(cumulative_median_msdw[11:40] ~ plot_lv_all_imputed$age[11:40], col=palette_c[k], lwd=3, lty=1)
   #add confidence intervals
-  polygon(c(plot_lv_all_imputed$age[11:40], rev(plot_lv_all_imputed$age[11:40])), c(cumulative_low_absw[11:40], rev(cumulative_upp_absw[11:40])), col=alpha(palette_c[k], 0.25), border=NA)
+  polygon(c(plot_lv_all_imputed$age[11:40], rev(plot_lv_all_imputed$age[11:40])), c(cumulative_low_msdw[11:40], rev(cumulative_upp_msdw[11:40])), col=alpha(palette_c[k], 0.1), border=alpha(palette_c[k],0.25))
 }
+
 
